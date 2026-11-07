@@ -16,10 +16,21 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final GlobalKey _moreButtonKey = GlobalKey();
   int _selectedIndex = 0;
   int _selectedDay = 0;
   bool _quickActionsOpen = false;
+  Rect? _quickActionOrigin;
   bool _menuOpen = false;
+
+  void _openQuickActions() {
+    final box = _moreButtonKey.currentContext?.findRenderObject();
+    if (box is! RenderBox || !box.hasSize) return;
+    setState(() {
+      _quickActionOrigin = box.localToGlobal(Offset.zero) & box.size;
+      _quickActionsOpen = true;
+    });
+  }
 
   Future<void> _openSettings() async {
     final delay = AppMotion.enabled(context) ? AppMotion.drawer : Duration.zero;
@@ -144,14 +155,17 @@ class _HomePageState extends State<HomePage> {
           ),
           bottomNavigationBar: AppBottomNav(
             selectedIndex: _selectedIndex,
+            moreButtonKey: _moreButtonKey,
+            moreOpen: _quickActionsOpen,
             onDestinationSelected: (index) =>
                 setState(() => _selectedIndex = index),
-            onMorePressed: () => setState(() => _quickActionsOpen = true),
+            onMorePressed: _openQuickActions,
           ),
         ),
         if (_quickActionsOpen)
           Positioned.fill(
             child: AppQuickActionsOverlay(
+              origin: _quickActionOrigin!,
               onClose: () => setState(() => _quickActionsOpen = false),
               onActionSelected: _handleQuickAction,
             ),

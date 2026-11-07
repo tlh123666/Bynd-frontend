@@ -12,6 +12,8 @@ class AppBottomNav extends StatelessWidget {
     required this.selectedIndex,
     required this.onDestinationSelected,
     required this.onMorePressed,
+    this.moreButtonKey,
+    this.moreOpen = false,
     super.key,
   }) : assert(
          selectedIndex == null || (selectedIndex >= 0 && selectedIndex < 4),
@@ -21,6 +23,8 @@ class AppBottomNav extends StatelessWidget {
   final int? selectedIndex;
   final ValueChanged<int> onDestinationSelected;
   final VoidCallback onMorePressed;
+  final Key? moreButtonKey;
+  final bool moreOpen;
 
   static const _icons = [
     AppSvgAssets.home,
@@ -34,13 +38,13 @@ class AppBottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       top: false,
-      minimum: const EdgeInsets.only(bottom: AppSpacing.sm),
+      minimum: const EdgeInsets.only(bottom: AppSizes.navBottomInset),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
         child: Center(
           heightFactor: 1,
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 360),
+            constraints: const BoxConstraints(maxWidth: AppSizes.navMaxWidth),
             child: Row(
               children: [
                 Expanded(
@@ -97,29 +101,39 @@ class AppBottomNav extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: AppSpacing.sm),
-                ClipOval(
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(
-                      sigmaX: AppSizes.glassBlur,
-                      sigmaY: AppSizes.glassBlur,
-                    ),
-                    child: Material(
-                      color: AppColors.navGlass,
-                      shape: const CircleBorder(side: AppBorders.nav),
-                      child: Tooltip(
-                        message: 'Ações rápidas',
-                        child: Semantics(
-                          label: 'Ações rápidas',
-                          button: true,
-                          child: InkWell(
-                            onTap: onMorePressed,
-                            customBorder: const CircleBorder(),
-                            child: const SizedBox(
-                              width: 56,
-                              height: 56,
-                              child: Center(
-                                child: AppSvgIcon(AppSvgAssets.more, size: 22),
+                const SizedBox(width: AppSizes.navGap),
+                IgnorePointer(
+                  ignoring: moreOpen,
+                  child: Opacity(
+                    opacity: moreOpen ? 0 : 1,
+                    child: ClipOval(
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(
+                          sigmaX: AppSizes.glassBlur,
+                          sigmaY: AppSizes.glassBlur,
+                        ),
+                        child: Material(
+                          color: AppColors.navGlass,
+                          shape: const CircleBorder(side: AppBorders.nav),
+                          child: Tooltip(
+                            message: 'Ações rápidas',
+                            child: Semantics(
+                              label: 'Ações rápidas',
+                              button: true,
+                              child: InkWell(
+                                onTap: onMorePressed,
+                                customBorder: const CircleBorder(),
+                                child: SizedBox(
+                                  key: moreButtonKey,
+                                  width: 56,
+                                  height: 56,
+                                  child: const Center(
+                                    child: AppSvgIcon(
+                                      AppSvgAssets.more,
+                                      size: 22,
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
                           ),
