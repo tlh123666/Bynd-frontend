@@ -7,6 +7,7 @@ BYND 的 Flutter 客户端。参考 [线上原型](https://bynd-app.vercel.app/)
 ```text
 assets/icons/site/                   # 从线上页面提取的 139 个 SVG 与 manifest.json
 assets/images/avatar.webp           # 原型中的个人头像
+assets/fonts/                       # Geist、Urbanist、Newsreader TTF 与 OFL 许可
 lib/
 ├── main.dart                         # 应用入口，安装统一主题
 ├── design_system/
@@ -34,6 +35,7 @@ lib/
 │   └── app_side_menu.dart            # 多页面可复用的侧边菜单
 └── features/
     ├── home/home_page.dart           # 主页外壳与导航选中状态
+    ├── home/home_sky_background.dart # 首页夜间 CSS 天空渐变与云层
     └── profile/profile_page.dart     # 设置入口对应的个人资料页
 ```
 
@@ -58,7 +60,7 @@ AppCard(
 
 菜单从左侧滑入，带背景遮罩；点击“Ajustes”后先收起菜单，再从右侧进入“Perfil”，返回时反向过渡。全局页面过渡在主题里设置，`AppLoadingIndicator` 和 `AppLoadingOverlay` 可供异步页面复用；按钮的 `loading` 状态也使用同一标记。系统要求减少动画时，菜单和 loading 会停止动效。
 
-目前底栏只切换选中态，快捷操作和未接入的菜单项点击后显示“即将提供”提示；业务页入口留给后续阶段连接。顶部背景颜色按原型截图近似；获得正式设计稿与字体资源后，可集中调整 `tokens/` 下的值。SVG 通过 `flutter_svg` 渲染。开发期组件预览仍在 `lib/design_system/preview/`，可通过 `MaterialPageRoute` 从调试入口打开。
+目前底栏只切换选中态，快捷操作和未接入的菜单项点击后显示“即将提供”提示；业务页入口留给后续阶段连接。配色与字体已按原站 CSS 核对，详见 [CSS 配色对照](docs/reference-css-colors.md)和[字体对照](docs/reference-css-typography.md)。首页目前使用参考截图的夜间配色；原站随时段变化的实时天空画布尚未接入。SVG 通过 `flutter_svg` 渲染。开发期组件预览仍在 `lib/design_system/preview/`，可通过 `MaterialPageRoute` 从调试入口打开。
 
 ## 运行
 
