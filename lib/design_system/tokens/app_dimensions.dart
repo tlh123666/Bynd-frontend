@@ -47,4 +47,7 @@ abstract final class AppSizes {
   static const buttonSmall = 40.0;
   static const buttonRegular = 52.0;
   static const glassBlur = 24.0;
+  static const navMaxWidth = 332.0;
+  static const navGap = 10.0;
+  static const navBottomInset = 10.0;
 }

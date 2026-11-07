@@ -48,6 +48,27 @@ void main() {
 
     expect(find.byType(AppQuickActionsOverlay), findsOneWidget);
     expect(find.text('AÇÕES RÁPIDAS'), findsOneWidget);
+    expect(
+      tester
+          .widget<Opacity>(find.byKey(const Key('quick-backdrop-opacity')))
+          .opacity,
+      0,
+    );
+    await tester.pump(const Duration(milliseconds: 120));
+    final backdropOpacity = tester
+        .widget<Opacity>(find.byKey(const Key('quick-backdrop-opacity')))
+        .opacity;
+    expect(backdropOpacity, greaterThan(0));
+    expect(backdropOpacity, lessThan(1));
+    final firstBubble = tester
+        .widget<Opacity>(find.byKey(const Key('quick-bubble-breathe')))
+        .opacity;
+    final lastBubble = tester
+        .widget<Opacity>(find.byKey(const Key('quick-bubble-ecg')))
+        .opacity;
+    expect(firstBubble, greaterThan(lastBubble));
+
+    await tester.pumpAndSettle();
     for (final action in AppQuickAction.values) {
       expect(find.text(action.label), findsOneWidget);
       expect(
@@ -57,9 +78,26 @@ void main() {
         findsOneWidget,
       );
     }
+    expect(
+      tester.getRect(find.byKey(const Key('quick-close-button'))),
+      tester.getRect(
+        find.byKey(
+          tester.widget<AppBottomNav>(find.byType(AppBottomNav)).moreButtonKey!,
+        ),
+      ),
+    );
 
-    await tester.tap(find.byTooltip('Fechar'));
+    await tester.tap(find.byKey(const Key('quick-close-button')));
     await tester.pump();
+    expect(find.byType(AppQuickActionsOverlay), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(
+      tester
+          .widget<Opacity>(find.byKey(const Key('quick-backdrop-opacity')))
+          .opacity,
+      lessThan(1),
+    );
+    await tester.pumpAndSettle();
     expect(find.byType(AppQuickActionsOverlay), findsNothing);
   });
 
@@ -92,13 +130,29 @@ void main() {
   testWidgets('快捷入口触发对应反馈并关闭菜单', (tester) async {
     await tester.pumpWidget(const ByndApp());
     await tester.tap(find.byTooltip('Ações rápidas'));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     await tester.tap(find.text(AppQuickAction.breathe.label));
     await tester.pump();
 
+    expect(find.byType(AppQuickActionsOverlay), findsOneWidget);
+    await tester.pumpAndSettle();
     expect(find.byType(AppQuickActionsOverlay), findsNothing);
     expect(find.text('Respirar 5 min: em breve.'), findsOneWidget);
+  });
+
+  testWidgets('系统返回键收起快捷菜单并保留当前页面', (tester) async {
+    await tester.pumpWidget(const ByndApp());
+    await tester.tap(find.byTooltip('Ações rápidas'));
+    await tester.pumpAndSettle();
+
+    await tester.binding.handlePopRoute();
+    await tester.pump();
+    expect(find.byType(AppQuickActionsOverlay), findsOneWidget);
+
+    await tester.pumpAndSettle();
+    expect(find.byType(AppQuickActionsOverlay), findsNothing);
+    expect(find.byType(AppBottomNav), findsOneWidget);
   });
 
   testWidgets('侧边菜单滑入，设置关闭菜单后从右侧进入资料页', (tester) async {

@@ -56,7 +56,7 @@ AppCard(
 
 按钮可用 `variant` 选择 `primary / secondary / ghost / danger`，用 `loading` 和 `expanded` 控制状态与宽度，`iconAsset` 接入 SVG。圆形图标按钮用 `AppIconButton(asset: AppSvgAssets.home, ...)`。卡片可用 `variant` 选择 `glass / solid`。提醒可以直接嵌入页面，也可以用 `AppNotice.show`、`AppNotice.success` 或 `AppNotice.error` 临时显示。文案由调用方提供，公共组件不固定语言。
 
-底栏使用原站的“Hoje / Atlas / Comunidade / Saúde”SVG，右侧按钮展开原站六项快捷操作。提取的图标存放在 `assets/icons/site/`，其中常用图标有语义文件名，其余按内容哈希命名；`manifest.json` 记录了每个文件在原站的首次使用位置。资源覆盖检查当时可见的主页、快捷菜单、Atlas、侧边栏及其主要一级页面。网页里的一个 Lottie 动画 SVG 使用了 Flutter 不支持的 CSS 变换，因此同名资源改为同形的静态 BYND 标记。
+底栏使用原站的“Hoje / Atlas / Comunidade / Saúde”SVG，右侧按钮在当前页面展开六项快捷操作。展开时遮罩渐显、入口错峰上浮，关闭时一起淡出；点击遮罩或系统返回键也会收起。动效时长集中在 `AppMotion`，系统要求减少动画时直接切换。提取的图标存放在 `assets/icons/site/`，其中常用图标有语义文件名，其余按内容哈希命名；`manifest.json` 记录了每个文件在原站的首次使用位置。资源覆盖检查当时可见的主页、快捷菜单、Atlas、侧边栏及其主要一级页面。网页里的一个 Lottie 动画 SVG 使用了 Flutter 不支持的 CSS 变换，因此同名资源改为同形的静态 BYND 标记。
 
 菜单从左侧滑入，带背景遮罩；点击“Ajustes”后先收起菜单，再从右侧进入“Perfil”，返回时反向过渡。全局页面过渡在主题里设置，`AppLoadingIndicator` 和 `AppLoadingOverlay` 可供异步页面复用；按钮的 `loading` 状态也使用同一标记。系统要求减少动画时，菜单和 loading 会停止动效。
 
