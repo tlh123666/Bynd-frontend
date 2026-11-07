@@ -1,0 +1,563 @@
+{
+  "source": "https://bynd-app.vercel.app/",
+  "capturedDate": "2026-11-07",
+  "scope": "Home, quick actions, Atlas, side menu and top-level menu pages",
+  "icons": [
+    {
+      "file": "status-bar.svg",
+      "context": "statusbar"
+    },
+    {
+      "file": "menu.svg",
+      "context": "Menu"
+    },
+    {
+      "file": "icon-d9747aeac80a.svg",
+      "context": "Mostrar mais"
+    },
+    {
+      "file": "icon-96373d7163af.svg",
+      "context": "Ver direção completa"
+    },
+    {
+      "file": "icon-36a7eed44c38.svg",
+      "context": "Ver direção completa"
+    },
+    {
+      "file": "icon-d670f15d7a12.svg",
+      "context": "Personalizar a Home"
+    },
+    {
+      "file": "icon-80737c83255b.svg",
+      "context": "Sono"
+    },
+    {
+      "file": "icon-89d6d8bce3f2.svg",
+      "context": "Sono"
+    },
+    {
+      "file": "icon-bc74bfd91d6e.svg",
+      "context": "Passos"
+    },
+    {
+      "file": "icon-7baa6da964bd.svg",
+      "context": "FC repouso"
+    },
+    {
+      "file": "icon-1ca3a0d5509c.svg",
+      "context": "VFC"
+    },
+    {
+      "file": "icon-f6f5f2dbf8d5.svg",
+      "context": "Oxigênio"
+    },
+    {
+      "file": "icon-e318559e0e05.svg",
+      "context": "VO₂ máx."
+    },
+    {
+      "file": "icon-54df64a8f665.svg",
+      "context": "MAPA"
+    },
+    {
+      "file": "icon-4f95126079ad.svg",
+      "context": "Hoje"
+    },
+    {
+      "file": "icon-32e194353dac.svg",
+      "context": "BYND Labs"
+    },
+    {
+      "file": "icon-561e17f76b96.svg",
+      "context": "tile-ok"
+    },
+    {
+      "file": "icon-160169d283a4.svg",
+      "context": "tile-box"
+    },
+    {
+      "file": "icon-7d17cd8fb69c.svg",
+      "context": "tile-box"
+    },
+    {
+      "file": "icon-565d5542aeba.svg",
+      "context": "tile-box"
+    },
+    {
+      "file": "icon-df30a2c90b6b.svg",
+      "context": "tile-box"
+    },
+    {
+      "file": "icon-adb9e2065c98.svg",
+      "context": "tile-box"
+    },
+    {
+      "file": "icon-5b0f5064ced8.svg",
+      "context": "tile-box"
+    },
+    {
+      "file": "icon-f4cb412d0a10.svg",
+      "context": "tile-box"
+    },
+    {
+      "file": "icon-92a24429c322.svg",
+      "context": "tile-box"
+    },
+    {
+      "file": "icon-1df28b463949.svg",
+      "context": "tile-box"
+    },
+    {
+      "file": "icon-91f9b2a4b0f0.svg",
+      "context": "tile-box"
+    },
+    {
+      "file": "icon-b811a237c4db.svg",
+      "context": "tile-box"
+    },
+    {
+      "file": "icon-62b66ddf0970.svg",
+      "context": "tile-box"
+    },
+    {
+      "file": "icon-ce5450c68e4e.svg",
+      "context": "tile-box"
+    },
+    {
+      "file": "icon-230af71368fe.svg",
+      "context": "tile-box"
+    },
+    {
+      "file": "icon-40511f97e0bd.svg",
+      "context": "tile-box"
+    },
+    {
+      "file": "icon-d2b3456cdad9.svg",
+      "context": "tile-box"
+    },
+    {
+      "file": "icon-0a655d1375a5.svg",
+      "context": "tile-box"
+    },
+    {
+      "file": "icon-8ce54e0767ad.svg",
+      "context": "atlas-ic"
+    },
+    {
+      "file": "icon-5678bf53441e.svg",
+      "context": "Falar"
+    },
+    {
+      "file": "icon-97558a246f89.svg",
+      "context": "Enviar"
+    },
+    {
+      "file": "nav-home.svg",
+      "context": "Hoje"
+    },
+    {
+      "file": "nav-atlas.svg",
+      "context": "Atlas"
+    },
+    {
+      "file": "nav-community.svg",
+      "context": "Comunidade"
+    },
+    {
+      "file": "nav-health.svg",
+      "context": "Saúde"
+    },
+    {
+      "file": "nav-more.svg",
+      "context": "Ações rápidas"
+    },
+    {
+      "file": "icon-35ce240a3651.svg",
+      "context": "ptr"
+    },
+    {
+      "file": "icon-fa88f2891fa0.svg",
+      "context": "Hoje"
+    },
+    {
+      "file": "icon-acd01ccb19fa.svg",
+      "context": "Trocar a foto do topo"
+    },
+    {
+      "file": "quick-arc.svg",
+      "context": "ar"
+    },
+    {
+      "file": "quick-breathe.svg",
+      "context": "Respirar"
+    },
+    {
+      "file": "quick-meal.svg",
+      "context": "Registrar"
+    },
+    {
+      "file": "quick-start-activity.svg",
+      "context": "Iniciar"
+    },
+    {
+      "file": "quick-day-review.svg",
+      "context": "Como foi"
+    },
+    {
+      "file": "quick-log-activity.svg",
+      "context": "Registrar"
+    },
+    {
+      "file": "quick-ecg.svg",
+      "context": "Fazer"
+    },
+    {
+      "file": "quick-close.svg",
+      "context": "Fechar"
+    },
+    {
+      "file": "icon-866cba2decca.svg",
+      "context": "Memória"
+    },
+    {
+      "file": "icon-f9e545772fb1.svg",
+      "context": "Ir para o fim"
+    },
+    {
+      "file": "icon-9126038f1561.svg",
+      "context": "Nova conversa"
+    },
+    {
+      "file": "icon-cdceb0d2eb4f.svg",
+      "context": "Conversas anteriores"
+    },
+    {
+      "file": "icon-3060494bdc1b.svg",
+      "context": "Enviar imagem"
+    },
+    {
+      "file": "icon-58f3f853725b.svg",
+      "context": "Tirar foto"
+    },
+    {
+      "file": "icon-7bafb8d5ee06.svg",
+      "context": "Enviar exame (PDF)"
+    },
+    {
+      "file": "icon-868043c354f6.svg",
+      "context": "Anexar"
+    },
+    {
+      "file": "icon-4246971d2c89.svg",
+      "context": "Pensar mais fundo"
+    },
+    {
+      "file": "icon-fdcacd7691d5.svg",
+      "context": "Voltar"
+    },
+    {
+      "file": "icon-7e42b9eaa93c.svg",
+      "context": "Apagar"
+    },
+    {
+      "file": "icon-8d50dbe20571.svg",
+      "context": "Gostei"
+    },
+    {
+      "file": "icon-77f11113385e.svg",
+      "context": "Não gostei"
+    },
+    {
+      "file": "icon-b42c373d6078.svg",
+      "context": "Copiar"
+    },
+    {
+      "file": "icon-899fcc06875b.svg",
+      "context": "Pulseira BYND ONE conectada, bateria 82%, plano Premium"
+    },
+    {
+      "file": "icon-938b4b6c110d.svg",
+      "context": "Diário"
+    },
+    {
+      "file": "icon-d3ee07882b2c.svg",
+      "context": "Jornada"
+    },
+    {
+      "file": "icon-9e3e5c900961.svg",
+      "context": "Atividades"
+    },
+    {
+      "file": "icon-96edb8ec6e0a.svg",
+      "context": "Comunidade"
+    },
+    {
+      "file": "icon-ef05fc70748c.svg",
+      "context": "Objetivos"
+    },
+    {
+      "file": "icon-87bf058e6cda.svg",
+      "context": "Ajustes"
+    },
+    {
+      "file": "icon-9c42d2ebba19.svg",
+      "context": "Integrações"
+    },
+    {
+      "file": "icon-ed0289e483bf.svg",
+      "context": "Privacidade"
+    },
+    {
+      "file": "icon-66baba9c54c2.svg",
+      "context": "Ajuda"
+    },
+    {
+      "file": "icon-ac0131c026ae.svg",
+      "context": "lt-simb"
+    },
+    {
+      "file": "icon-65490ddc824b.svg",
+      "context": "Voltar"
+    },
+    {
+      "file": "icon-5d2a70302c66.svg",
+      "context": "Seus capítulos"
+    },
+    {
+      "file": "icon-4087b61ad255.svg",
+      "context": "sn-h ax-h jn-hoje"
+    },
+    {
+      "file": "icon-9edd3344e3e6.svg",
+      "context": "jn-no"
+    },
+    {
+      "file": "icon-d0354434f8fa.svg",
+      "context": "jn-no"
+    },
+    {
+      "file": "icon-49545b4ee1e5.svg",
+      "context": "jn-no"
+    },
+    {
+      "file": "icon-3978e1fd92ad.svg",
+      "context": "Treino leve · mobilidade e força leve"
+    },
+    {
+      "file": "icon-e761447342fe.svg",
+      "context": "Treino leve · mobilidade e força leve"
+    },
+    {
+      "file": "icon-547e3c9a64bc.svg",
+      "context": "jn-no"
+    },
+    {
+      "file": "icon-8e4e7eda6a7a.svg",
+      "context": "Acordou"
+    },
+    {
+      "file": "icon-5312c4914f2a.svg",
+      "context": "Acordou"
+    },
+    {
+      "file": "icon-914fea327646.svg",
+      "context": "Acordou"
+    },
+    {
+      "file": "icon-d3eec930cc53.svg",
+      "context": "jn-no"
+    },
+    {
+      "file": "icon-a07f2781375f.svg",
+      "context": "jn-no"
+    },
+    {
+      "file": "icon-2b0fee4d984f.svg",
+      "context": "jn-no"
+    },
+    {
+      "file": "icon-23ad728ebf75.svg",
+      "context": "jn-no"
+    },
+    {
+      "file": "icon-bb3df0129b08.svg",
+      "context": "Corrida longa"
+    },
+    {
+      "file": "icon-8137ea0f94c4.svg",
+      "context": "Fechamento de outubro"
+    },
+    {
+      "file": "icon-c7a22dee9ee9.svg",
+      "context": "jn-no"
+    },
+    {
+      "file": "icon-62bb64498423.svg",
+      "context": "jn-no"
+    },
+    {
+      "file": "icon-f625ba09b499.svg",
+      "context": "jn-no"
+    },
+    {
+      "file": "icon-211e2afffff8.svg",
+      "context": "jn-no"
+    },
+    {
+      "file": "icon-0c2ec1c7b8b6.svg",
+      "context": "jn-no"
+    },
+    {
+      "file": "icon-9b74d4fa7dd2.svg",
+      "context": "jn-no"
+    },
+    {
+      "file": "icon-98ee5a93ab44.svg",
+      "context": "jn-no"
+    },
+    {
+      "file": "icon-08bc2aa5e712.svg",
+      "context": "Histórico"
+    },
+    {
+      "file": "icon-d7909997ccaa.svg",
+      "context": "sn-h ax-h ax-h-foto"
+    },
+    {
+      "file": "icon-2713cca80efb.svg",
+      "context": "Iniciar atividade"
+    },
+    {
+      "file": "icon-7b4e0c2a437e.svg",
+      "context": "Registrar"
+    },
+    {
+      "file": "icon-8da64d1bfc01.svg",
+      "context": "sn-h ax-h"
+    },
+    {
+      "file": "icon-297ada914ffd.svg",
+      "context": "Calorias ativas"
+    },
+    {
+      "file": "icon-ea79ed6c7525.svg",
+      "context": "Calorias ativas"
+    },
+    {
+      "file": "icon-56aeb7c01e82.svg",
+      "context": "Minutos ativos"
+    },
+    {
+      "file": "icon-9d156a19f223.svg",
+      "context": "Tempo parado"
+    },
+    {
+      "file": "icon-fe8dba6a2f6f.svg",
+      "context": "sn-h ax-h"
+    },
+    {
+      "file": "icon-3f8610b430b5.svg",
+      "context": "Musculação"
+    },
+    {
+      "file": "icon-6615996066cb.svg",
+      "context": "Corrida"
+    },
+    {
+      "file": "icon-c7226c0ce9e0.svg",
+      "context": "Caminhada"
+    },
+    {
+      "file": "icon-a743ca12f452.svg",
+      "context": "Sauna"
+    },
+    {
+      "file": "icon-5fdcae66134f.svg",
+      "context": "Yoga"
+    },
+    {
+      "file": "icon-44d33c03a9f8.svg",
+      "context": "Funcional"
+    },
+    {
+      "file": "icon-b1f6f8398ba3.svg",
+      "context": "Beach tennis"
+    },
+    {
+      "file": "icon-d63b5f0aa6d7.svg",
+      "context": "sn-h ax-h"
+    },
+    {
+      "file": "icon-b0e6c146e949.svg",
+      "context": "Musculação"
+    },
+    {
+      "file": "icon-39b735095ad7.svg",
+      "context": "Musculação"
+    },
+    {
+      "file": "icon-687cb6fad3c5.svg",
+      "context": "Musculação"
+    },
+    {
+      "file": "icon-56cec946c259.svg",
+      "context": "Novo"
+    },
+    {
+      "file": "icon-3e63cc3db09d.svg",
+      "context": "cmb-ic"
+    },
+    {
+      "file": "icon-c4affe05948c.svg",
+      "context": "cmb-ic"
+    },
+    {
+      "file": "icon-d02f597b93a4.svg",
+      "context": "cmb-lg"
+    },
+    {
+      "file": "icon-b74ac3fc3cfb.svg",
+      "context": "Dar força"
+    },
+    {
+      "file": "icon-52feee6b5b7e.svg",
+      "context": "Responder"
+    },
+    {
+      "file": "icon-1d575d6362d9.svg",
+      "context": "Abrir a conversa do grupo"
+    },
+    {
+      "file": "icon-7194a65f77d5.svg",
+      "context": "Movimento & Performance"
+    },
+    {
+      "file": "icon-58011f04f253.svg",
+      "context": "Movimento & Performance"
+    },
+    {
+      "file": "icon-3c32904fc0ab.svg",
+      "context": "Metabolismo & Longevidade"
+    },
+    {
+      "file": "icon-ea7f814c28fa.svg",
+      "context": "Sono & Recuperação"
+    },
+    {
+      "file": "icon-8a2e4240b449.svg",
+      "context": "Mente & Equilíbrio"
+    },
+    {
+      "file": "icon-2b122eb57f8b.svg",
+      "context": "GLP-1"
+    },
+    {
+      "file": "favicon.svg",
+      "context": "Site favicon"
+    },
+    {
+      "file": "logo-bynd.svg",
+      "context": "BYND logo"
+    }
+  ]
+}
