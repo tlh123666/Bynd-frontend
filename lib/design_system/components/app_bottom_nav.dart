@@ -15,9 +15,12 @@ class AppBottomNav extends StatelessWidget {
     this.moreButtonKey,
     this.moreOpen = false,
     super.key,
-  }) : assert(selectedIndex >= 0 && selectedIndex < 4);
+  }) : assert(
+         selectedIndex == null || (selectedIndex >= 0 && selectedIndex < 4),
+       );
 
-  final int selectedIndex;
+  /// 为推入式页面（例如活动详情）保留“无选中主标签”的状态。
+  final int? selectedIndex;
   final ValueChanged<int> onDestinationSelected;
   final VoidCallback onMorePressed;
   final Key? moreButtonKey;
