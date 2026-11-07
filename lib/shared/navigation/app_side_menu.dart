@@ -222,14 +222,31 @@ class _DeviceTile extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 3),
-                      Text(
-                        '● Conectada · há 5 min',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTypography.caption.copyWith(
-                          color: AppColors.textMuted,
-                          fontSize: 10,
-                        ),
+                      Row(
+                        children: [
+                          const SizedBox(
+                            width: 6,
+                            height: 6,
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: AppColors.success,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              'Conectada · há 5 min',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTypography.caption.copyWith(
+                                color: AppColors.textMuted,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),

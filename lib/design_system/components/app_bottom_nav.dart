@@ -80,7 +80,7 @@ class AppBottomNav extends StatelessWidget {
                                           size: 26,
                                           color: selected
                                               ? AppColors.textPrimary
-                                              : AppColors.textSecondary,
+                                              : AppColors.menuIcon,
                                         ),
                                       ),
                                     ),
