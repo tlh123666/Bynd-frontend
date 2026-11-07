@@ -67,9 +67,8 @@ class AppQuickActionsOverlay extends StatelessWidget {
                         children: [
                           Text(
                             'AÇÕES RÁPIDAS',
-                            style: AppTypography.label.copyWith(
-                              color: AppColors.textMuted,
-                              letterSpacing: 2.2,
+                            style: AppTypography.kicker.copyWith(
+                              color: AppColors.textKicker,
                             ),
                           ),
                           const SizedBox(height: AppSpacing.xs),
@@ -77,10 +76,12 @@ class AppQuickActionsOverlay extends StatelessWidget {
                             constraints: const BoxConstraints(maxWidth: 250),
                             child: Text(
                               'Para esta manhã, a BYND sugere 15 minutos de sol antes do trabalho.',
-                              style: AppTypography.body.copyWith(
+                              style: const TextStyle(
+                                fontFamily: AppFontFamilies.geist,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w400,
+                                height: 1.4,
                                 color: AppColors.textPrimary,
-                                fontSize: 16,
-                                height: 1.45,
                               ),
                             ),
                           ),
@@ -189,10 +190,12 @@ class _QuickActionTile extends StatelessWidget {
             Text(
               action.label,
               textAlign: TextAlign.center,
-              style: AppTypography.label.copyWith(
-                fontSize: 14,
-                height: 1.15,
-                color: AppColors.textPrimary,
+              style: const TextStyle(
+                fontFamily: AppFontFamilies.geist,
+                fontSize: 12.5,
+                fontWeight: FontWeight.w500,
+                height: 1.25,
+                color: AppColors.textOnVeil,
               ),
             ),
           ],
