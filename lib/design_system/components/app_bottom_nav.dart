@@ -54,7 +54,7 @@ class AppBottomNav extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: AppColors.navGlass,
                           borderRadius: AppRadii.pillBorder,
-                          border: Border.fromBorderSide(AppBorders.glass),
+                          border: Border.fromBorderSide(AppBorders.nav),
                         ),
                         child: Row(
                           children: List.generate(_icons.length, (index) {
@@ -103,7 +103,7 @@ class AppBottomNav extends StatelessWidget {
                     ),
                     child: Material(
                       color: AppColors.navGlass,
-                      shape: const CircleBorder(side: AppBorders.glass),
+                      shape: const CircleBorder(side: AppBorders.nav),
                       child: Tooltip(
                         message: 'Ações rápidas',
                         child: Semantics(

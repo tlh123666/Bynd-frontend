@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../design_system/design_system.dart';
 import '../../shared/navigation/app_side_menu.dart';
+import 'home_sky_background.dart';
 import '../profile/profile_page.dart';
 
 /// 当前只实现参考图中的主页外壳与底部导航，内容页后续接入。
@@ -45,100 +46,94 @@ class _HomePageState extends State<HomePage> {
         Scaffold(
           extendBody: true,
           backgroundColor: Colors.transparent,
-          body: DecoratedBox(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  AppColors.referenceCanvasTop,
-                  AppColors.referenceCanvasBottom,
-                ],
-              ),
-            ),
-            child: SafeArea(
-              bottom: false,
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      AppSpacing.lg,
-                      AppSpacing.md,
-                      AppSpacing.lg,
-                      0,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        IconButton(
-                          onPressed: () => setState(() => _menuOpen = true),
-                          tooltip: 'Menu',
-                          icon: const AppSvgIcon(AppSvgAssets.menu, size: 22),
-                        ),
-                        const CircleAvatar(
-                          radius: 18,
-                          backgroundImage: AssetImage(
-                            'assets/images/avatar.webp',
+          body: Stack(
+            children: [
+              const Positioned.fill(child: HomeSkyBackground()),
+              SafeArea(
+                bottom: false,
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.lg,
+                        AppSpacing.md,
+                        AppSpacing.lg,
+                        0,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          IconButton(
+                            onPressed: () => setState(() => _menuOpen = true),
+                            tooltip: 'Menu',
+                            icon: const AppSvgIcon(AppSvgAssets.menu, size: 22),
                           ),
+                          const CircleAvatar(
+                            radius: 18,
+                            backgroundImage: AssetImage(
+                              'assets/images/avatar.webp',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _DayTab(
+                          label: 'Ontem',
+                          selected: _selectedDay == 0,
+                          onTap: () => setState(() => _selectedDay = 0),
+                        ),
+                        const SizedBox(width: AppSpacing.lg),
+                        _DayTab(
+                          label: 'Hoje',
+                          selected: _selectedDay == 1,
+                          onTap: () => setState(() => _selectedDay = 1),
                         ),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _DayTab(
-                        label: 'Ontem',
-                        selected: _selectedDay == 0,
-                        onTap: () => setState(() => _selectedDay = 0),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        top: AppSpacing.md,
+                        right: AppSpacing.md,
                       ),
-                      const SizedBox(width: AppSpacing.lg),
-                      _DayTab(
-                        label: 'Hoje',
-                        selected: _selectedDay == 1,
-                        onTap: () => setState(() => _selectedDay = 1),
-                      ),
-                    ],
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      top: AppSpacing.md,
-                      right: AppSpacing.md,
-                    ),
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.sm,
-                          vertical: AppSpacing.xs,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.navGlass,
-                          borderRadius: AppRadii.pillBorder,
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const AppSvgIcon(
-                              AppSvgAssets.photoCounter,
-                              size: 15,
-                            ),
-                            const SizedBox(width: AppSpacing.xxs),
-                            Text(
-                              '0/24',
-                              style: AppTypography.caption.copyWith(
-                                color: AppColors.textPrimary,
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.sm,
+                            vertical: AppSpacing.xs,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.homeCounter,
+                            borderRadius: AppRadii.pillBorder,
+                            border: Border.all(color: AppColors.navBorder),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const AppSvgIcon(
+                                AppSvgAssets.photoCounter,
+                                size: 15,
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: AppSpacing.xxs),
+                              Text(
+                                '0/24',
+                                style: AppTypography.caption.copyWith(
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
+            ],
           ),
           bottomNavigationBar: AppBottomNav(
             selectedIndex: _selectedIndex,

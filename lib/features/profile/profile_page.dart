@@ -25,8 +25,13 @@ class _ProfilePageState extends State<ProfilePage> {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Color(0xFF202A36), Color(0xFF101318)],
-                stops: [0, 0.5],
+                colors: [
+                  AppColors.profileTop,
+                  AppColors.profileMiddle,
+                  AppColors.profileBottom,
+                  AppColors.profileBottom,
+                ],
+                stops: [0, 0.32, 0.69, 1],
               ),
             ),
             child: SafeArea(
