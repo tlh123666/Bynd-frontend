@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../design_system/design_system.dart';
 import '../../shared/navigation/app_side_menu.dart';
+import '../../shared/widgets/day_strip.dart';
 import 'home_sky_background.dart';
 import '../profile/profile_page.dart';
+import '../activity/presentation/pages/activity_overview_page.dart';
 
 /// 当前只实现参考图中的主页外壳与底部导航，内容页后续接入。
 class HomePage extends StatefulWidget {
@@ -15,7 +17,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
-  int _selectedDay = 1;
+  int _selectedDay = 0;
   bool _quickActionsOpen = false;
   bool _menuOpen = false;
 
@@ -36,6 +38,23 @@ class _HomePageState extends State<HomePage> {
       context,
       kind: AppNoticeKind.info,
       message: '$label: em breve.',
+    );
+  }
+
+  Future<void> _handleQuickAction(AppQuickAction action) async {
+    setState(() => _quickActionsOpen = false);
+    if (action == AppQuickAction.startActivity) {
+      await Navigator.of(context).push<void>(
+        MaterialPageRoute<void>(
+          builder: (_) => const ActivityOverviewPage(openSelectorOnEnter: true),
+        ),
+      );
+      return;
+    }
+    AppNotice.show(
+      context,
+      kind: AppNoticeKind.info,
+      message: '${action.label.replaceAll('\n', ' ')}: em breve.',
     );
   }
 
@@ -78,21 +97,9 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xs),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _DayTab(
-                          label: 'Ontem',
-                          selected: _selectedDay == 0,
-                          onTap: () => setState(() => _selectedDay = 0),
-                        ),
-                        const SizedBox(width: AppSpacing.lg),
-                        _DayTab(
-                          label: 'Hoje',
-                          selected: _selectedDay == 1,
-                          onTap: () => setState(() => _selectedDay = 1),
-                        ),
-                      ],
+                    DayStrip(
+                      day: _selectedDay,
+                      onDayChanged: (day) => setState(() => _selectedDay = day),
                     ),
                     Padding(
                       padding: const EdgeInsets.only(
@@ -146,14 +153,7 @@ class _HomePageState extends State<HomePage> {
           Positioned.fill(
             child: AppQuickActionsOverlay(
               onClose: () => setState(() => _quickActionsOpen = false),
-              onActionSelected: (action) {
-                setState(() => _quickActionsOpen = false);
-                AppNotice.show(
-                  context,
-                  kind: AppNoticeKind.info,
-                  message: '${action.label.replaceAll('\n', ' ')}: em breve.',
-                );
-              },
+              onActionSelected: _handleQuickAction,
             ),
           ),
         AppSideMenu(
@@ -163,49 +163,6 @@ class _HomePageState extends State<HomePage> {
           onOtherSelected: _otherMenuItem,
         ),
       ],
-    );
-  }
-}
-
-class _DayTab extends StatelessWidget {
-  const _DayTab({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: AppRadii.controlBorder,
-      child: Container(
-        width: 96,
-        padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-        decoration: BoxDecoration(
-          border: Border(
-            bottom: BorderSide(
-              color: selected ? AppColors.textPrimary : Colors.transparent,
-              width: AppBorders.focused,
-            ),
-          ),
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: TextStyle(
-              fontFamily: AppFontFamilies.geist,
-              fontSize: 15,
-              fontWeight: FontWeight.w400,
-              color: selected ? AppColors.textPrimary : AppColors.textInactive,
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
