@@ -37,7 +37,7 @@ class AppSideMenu extends StatelessWidget {
                   child: AnimatedOpacity(
                     duration: animate ? AppMotion.veil : Duration.zero,
                     opacity: visible ? 1 : 0,
-                    child: const ColoredBox(color: Color(0x66000000)),
+                    child: const ColoredBox(color: AppColors.menuVeil),
                   ),
                 ),
               ),
@@ -61,7 +61,7 @@ class AppSideMenu extends StatelessWidget {
                           filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
                           child: DecoratedBox(
                             decoration: const BoxDecoration(
-                              color: Color(0xE6161A20),
+                              color: AppColors.menuPanel,
                               border: Border(right: AppBorders.glass),
                             ),
                             child: SafeArea(
@@ -156,7 +156,9 @@ class AppSideMenu extends StatelessWidget {
                                           child: Text(
                                             'Sair',
                                             style: AppTypography.label.copyWith(
-                                              color: AppColors.warning,
+                                              color: AppColors.menuExit,
+                                              fontSize: 15.5,
+                                              fontWeight: FontWeight.w400,
                                             ),
                                           ),
                                         ),
@@ -189,46 +191,56 @@ class _DeviceTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.glass,
+      color: Colors.transparent,
       borderRadius: AppRadii.controlBorder,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: AppRadii.controlBorder,
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              const AppSvgIcon(AppSvgAssets.device, size: 36),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'BYND ONE  82%',
-                      style: AppTypography.caption.copyWith(
-                        color: Colors.white,
+      child: Ink(
+        decoration: const BoxDecoration(
+          borderRadius: AppRadii.controlBorder,
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [AppColors.glass, AppColors.glassLow],
+          ),
+        ),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: AppRadii.controlBorder,
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                const AppSvgIcon(AppSvgAssets.device, size: 36),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'BYND ONE  82%',
+                        style: AppTypography.caption.copyWith(
+                          color: AppColors.textPrimary,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      '● Conectada · há 5 min',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTypography.caption.copyWith(
-                        color: AppColors.textMuted,
-                        fontSize: 10,
+                      const SizedBox(height: 3),
+                      Text(
+                        '● Conectada · há 5 min',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.caption.copyWith(
+                          color: AppColors.textMuted,
+                          fontSize: 10,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              const Icon(
-                Icons.chevron_right,
-                size: 16,
-                color: AppColors.textMuted,
-              ),
-            ],
+                const Icon(
+                  Icons.chevron_right,
+                  size: 16,
+                  color: AppColors.menuChevron,
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -245,9 +257,9 @@ class _GroupTitle extends StatelessWidget {
     title,
     style: AppTypography.caption.copyWith(
       color: AppColors.textMuted,
-      fontSize: 10,
-      fontWeight: FontWeight.w700,
-      letterSpacing: 1.4,
+      fontSize: 10.5,
+      fontWeight: FontWeight.w600,
+      letterSpacing: 1.7,
     ),
   );
 }
@@ -258,8 +270,12 @@ class _MenuGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
-    decoration: BoxDecoration(
-      color: AppColors.glass,
+    decoration: const BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [AppColors.glass, AppColors.glassLow],
+      ),
       borderRadius: AppRadii.controlBorder,
     ),
     child: Column(
@@ -293,20 +309,22 @@ class _MenuItem extends StatelessWidget {
         child: Row(
           children: [
             const SizedBox(width: 14),
-            AppSvgIcon(iconAsset, size: 18, color: AppColors.textSecondary),
+            AppSvgIcon(iconAsset, size: 20, color: AppColors.menuIcon),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 label,
                 style: AppTypography.label.copyWith(
                   color: AppColors.textPrimary,
+                  fontSize: 15.5,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
             ),
             const Icon(
               Icons.chevron_right,
               size: 16,
-              color: AppColors.textMuted,
+              color: AppColors.menuChevron,
             ),
             const SizedBox(width: 12),
           ],

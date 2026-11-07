@@ -31,6 +31,7 @@ abstract final class AppBorders {
     color: AppColors.glassBorder,
     width: hairline,
   );
+  static const nav = BorderSide(color: AppColors.navBorder, width: hairline);
   static const divider = BorderSide(color: AppColors.divider, width: hairline);
   static const selected = BorderSide(
     color: AppColors.textPrimary,
@@ -45,5 +46,5 @@ abstract final class AppSizes {
   static const touchTarget = 48.0;
   static const buttonSmall = 40.0;
   static const buttonRegular = 52.0;
-  static const glassBlur = 16.0;
+  static const glassBlur = 24.0;
 }
