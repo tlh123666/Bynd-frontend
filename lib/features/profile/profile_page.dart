@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../design_system/design_system.dart';
+import '../activity/presentation/pages/activity_overview_page.dart';
 
 /// Profile page reached from the side menu's Ajustes entry.
 class ProfilePage extends StatefulWidget {
@@ -12,6 +13,19 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   bool _quickActionsOpen = false;
+
+  Future<void> _handleQuickAction(AppQuickAction action) async {
+    setState(() => _quickActionsOpen = false);
+    if (action == AppQuickAction.startActivity) {
+      await Navigator.of(context).push<void>(
+        MaterialPageRoute<void>(
+          builder: (_) => const ActivityOverviewPage(openSelectorOnEnter: true),
+        ),
+      );
+      return;
+    }
+    _showComingSoon(action.label.replaceAll('\n', ' '));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -140,10 +154,7 @@ class _ProfilePageState extends State<ProfilePage> {
           Positioned.fill(
             child: AppQuickActionsOverlay(
               onClose: () => setState(() => _quickActionsOpen = false),
-              onActionSelected: (action) {
-                setState(() => _quickActionsOpen = false);
-                _showComingSoon(action.label.replaceAll('\n', ' '));
-              },
+              onActionSelected: _handleQuickAction,
             ),
           ),
       ],
