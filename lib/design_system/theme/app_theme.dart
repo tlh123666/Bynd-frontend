@@ -8,6 +8,7 @@ import '../navigation/app_page_transitions.dart';
 abstract final class AppTheme {
   static final dark = ThemeData(
     useMaterial3: true,
+    fontFamily: AppFontFamilies.geist,
     pageTransitionsTheme: const PageTransitionsTheme(
       builders: {
         TargetPlatform.android: AppPageTransitionsBuilder(),

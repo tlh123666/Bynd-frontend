@@ -197,8 +197,11 @@ class _DayTab extends StatelessWidget {
         child: Center(
           child: Text(
             label,
-            style: AppTypography.body.copyWith(
-              color: selected ? AppColors.textPrimary : AppColors.textSecondary,
+            style: TextStyle(
+              fontFamily: AppFontFamilies.geist,
+              fontSize: 15,
+              fontWeight: FontWeight.w400,
+              color: selected ? AppColors.textPrimary : AppColors.textInactive,
             ),
           ),
         ),

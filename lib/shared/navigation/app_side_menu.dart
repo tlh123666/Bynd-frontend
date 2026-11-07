@@ -155,11 +155,10 @@ class AppSideMenu extends StatelessWidget {
                                               onOtherSelected('Sair'),
                                           child: Text(
                                             'Sair',
-                                            style: AppTypography.label.copyWith(
-                                              color: AppColors.menuExit,
-                                              fontSize: 15.5,
-                                              fontWeight: FontWeight.w400,
-                                            ),
+                                            style: AppTypography.listItem
+                                                .copyWith(
+                                                  color: AppColors.menuExit,
+                                                ),
                                           ),
                                         ),
                                       ),
@@ -217,7 +216,10 @@ class _DeviceTile extends StatelessWidget {
                     children: [
                       Text(
                         'BYND ONE  82%',
-                        style: AppTypography.caption.copyWith(
+                        style: const TextStyle(
+                          fontFamily: AppFontFamilies.geist,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
                           color: AppColors.textPrimary,
                         ),
                       ),
@@ -240,9 +242,11 @@ class _DeviceTile extends StatelessWidget {
                               'Conectada · há 5 min',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: AppTypography.caption.copyWith(
-                                color: AppColors.textMuted,
-                                fontSize: 10,
+                              style: const TextStyle(
+                                fontFamily: AppFontFamilies.geist,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w400,
+                                color: AppColors.textKicker,
                               ),
                             ),
                           ),
@@ -272,12 +276,7 @@ class _GroupTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(
     title,
-    style: AppTypography.caption.copyWith(
-      color: AppColors.textMuted,
-      fontSize: 10.5,
-      fontWeight: FontWeight.w600,
-      letterSpacing: 1.7,
-    ),
+    style: AppTypography.kicker.copyWith(color: AppColors.textDim),
   );
 }
 
@@ -331,10 +330,8 @@ class _MenuItem extends StatelessWidget {
             Expanded(
               child: Text(
                 label,
-                style: AppTypography.label.copyWith(
+                style: AppTypography.listItem.copyWith(
                   color: AppColors.textPrimary,
-                  fontSize: 15.5,
-                  fontWeight: FontWeight.w400,
                 ),
               ),
             ),

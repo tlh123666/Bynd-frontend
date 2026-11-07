@@ -51,8 +51,9 @@ class _ProfilePageState extends State<ProfilePage> {
                           'Perfil',
                           textAlign: TextAlign.center,
                           style: TextStyle(
+                            fontFamily: AppFontFamilies.geist,
                             fontSize: 17,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
@@ -78,14 +79,22 @@ class _ProfilePageState extends State<ProfilePage> {
                   const Text(
                     'Clara Nunes',
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 23, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                      fontFamily: AppFontFamilies.geist,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w400,
+                      letterSpacing: -0.48,
+                    ),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     'Brasília · com a BYND há 2 meses',
                     textAlign: TextAlign.center,
-                    style: AppTypography.caption.copyWith(
-                      color: AppColors.textMuted,
+                    style: const TextStyle(
+                      fontFamily: AppFontFamilies.geist,
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w400,
+                      color: AppColors.textHalf,
                     ),
                   ),
                   const SizedBox(height: 68),
@@ -168,20 +177,32 @@ class _Stat extends StatelessWidget {
     children: [
       Text(
         label,
-        style: AppTypography.caption.copyWith(
-          color: AppColors.textMuted,
-          fontSize: 11,
+        style: const TextStyle(
+          fontFamily: AppFontFamilies.geist,
+          fontSize: 11.5,
+          fontWeight: FontWeight.w400,
+          color: AppColors.textHalf,
         ),
       ),
       const SizedBox(height: 3),
       Text.rich(
         TextSpan(
           text: value,
-          style: const TextStyle(fontSize: 22, color: AppColors.textPrimary),
+          style: const TextStyle(
+            fontFamily: AppFontFamilies.urbanist,
+            fontSize: 24,
+            fontWeight: FontWeight.w300,
+            color: AppColors.textPrimary,
+          ),
           children: [
             TextSpan(
               text: ' $unit',
-              style: AppTypography.caption.copyWith(color: AppColors.textMuted),
+              style: const TextStyle(
+                fontFamily: AppFontFamilies.urbanist,
+                fontSize: 13,
+                fontWeight: FontWeight.w300,
+                color: AppColors.textHalf,
+              ),
             ),
           ],
         ),
@@ -205,12 +226,7 @@ class _SectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(
     title,
-    style: AppTypography.caption.copyWith(
-      color: AppColors.textMuted,
-      fontSize: 11,
-      letterSpacing: 1.3,
-      fontWeight: FontWeight.w700,
-    ),
+    style: AppTypography.kicker.copyWith(color: AppColors.textDim),
   );
 }
 
@@ -240,16 +256,20 @@ class _InfoRow extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: AppTypography.label.copyWith(
-                      fontWeight: FontWeight.w500,
+                    style: AppTypography.listItem.copyWith(
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   if (subtitle != null) ...[
                     const SizedBox(height: 4),
                     Text(
                       subtitle!,
-                      style: AppTypography.caption.copyWith(
-                        color: AppColors.textMuted,
+                      style: const TextStyle(
+                        fontFamily: AppFontFamilies.geist,
+                        fontSize: 12.5,
+                        height: 1.4,
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.textDim,
                       ),
                     ),
                   ],
@@ -259,15 +279,18 @@ class _InfoRow extends StatelessWidget {
             if (value.isNotEmpty)
               Text(
                 value,
-                style: AppTypography.caption.copyWith(
-                  color: AppColors.textMuted,
+                style: const TextStyle(
+                  fontFamily: AppFontFamilies.geist,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.textHalf,
                 ),
               ),
             if (onTap != null)
               const Icon(
                 Icons.chevron_right,
                 size: 17,
-                color: AppColors.textMuted,
+                color: AppColors.menuChevron,
               ),
           ],
         ),

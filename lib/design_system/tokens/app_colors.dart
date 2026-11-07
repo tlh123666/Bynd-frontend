@@ -20,6 +20,11 @@ abstract final class AppColors {
   static const textPrimary = Color(0xFFF4F5F7); // --text
   static const textSecondary = Color(0xB8F4F5F7); // --text-2, .72
   static const textMuted = Color(0x8AF4F5F7); // --text-3, .54
+  static const textKicker = Color(0x8CF4F5F7); // #f4f5f78c, .55
+  static const textHalf = Color(0x80F4F5F7); // #f4f5f780, .50
+  static const textInactive = Color(0x73F4F5F7); // .45
+  static const textDim = Color(0x6BF4F5F7); // #f4f5f76b, .42
+  static const textOnVeil = Color(0xE6F4F5F7); // .90
   static const glassBorder = Color(0x14FFFFFF); // --stroke, .08
   static const glassBorderStrong = Color(0x24FFFFFF); // --stroke-strong, .14
 
