@@ -1,0 +1,7 @@
+{
+  "APP_ENV": "development",
+  "API_BASE_URL": "http://10.0.2.2:8081",
+  "DEVICE_DEMO": false,
+  "MAPA_USE_DEMO_DATA": false,
+  "ENABLE_NETWORK_LOGS": true
+}

@@ -1,0 +1,9 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {"name": "BYND · 开发（原后端）", "type": "dart", "request": "launch", "program": "lib/main.dart", "cwd": "${workspaceFolder}", "toolArgs": ["--dart-define-from-file=config/dev.json"]},
+    {"name": "BYND · 测试（原后端）", "type": "dart", "request": "launch", "program": "lib/main.dart", "cwd": "${workspaceFolder}", "toolArgs": ["--dart-define-from-file=config/test.json"]},
+    {"name": "BYND · 生产", "type": "dart", "request": "launch", "program": "lib/main.dart", "cwd": "${workspaceFolder}", "flutterMode": "release", "toolArgs": ["--dart-define-from-file=config/prod.json"]},
+    {"name": "BYND · 页面演示", "type": "dart", "request": "launch", "program": "lib/main.dart", "cwd": "${workspaceFolder}", "toolArgs": ["--dart-define-from-file=config/demo.json"]}
+  ]
+}

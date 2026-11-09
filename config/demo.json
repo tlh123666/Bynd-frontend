@@ -1,0 +1,7 @@
+{
+  "APP_ENV": "development",
+  "API_BASE_URL": "https://api.byndhealth.com.br",
+  "DEVICE_DEMO": true,
+  "MAPA_USE_DEMO_DATA": true,
+  "ENABLE_NETWORK_LOGS": false
+}

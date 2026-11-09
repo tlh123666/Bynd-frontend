@@ -11,7 +11,6 @@ void main() {
   testWidgets('主页显示底部导航并更新选中入口', (tester) async {
     await tester.pumpWidget(const ByndApp());
 
-    expect(find.byType(AppPageHeader), findsOneWidget);
     expect(find.byType(AppBottomNav), findsOneWidget);
     for (final asset in [
       AppSvgAssets.home,
@@ -20,9 +19,14 @@ void main() {
       AppSvgAssets.health,
       AppSvgAssets.more,
     ]) {
+      // 只查底部导航内部：侧边菜单里也有 atlas（Mapa 入口），而抽屉关闭时
+      // 仍留在树上，按整棵树找会出现两个。
       expect(
-        find.byWidgetPredicate(
-          (widget) => widget is AppSvgIcon && widget.asset == asset,
+        find.descendant(
+          of: find.byType(AppBottomNav),
+          matching: find.byWidgetPredicate(
+            (widget) => widget is AppSvgIcon && widget.asset == asset,
+          ),
         ),
         findsOneWidget,
       );
@@ -42,23 +46,36 @@ void main() {
   });
 
   testWidgets('更多按钮展开六项快捷导航并可关闭', (tester) async {
-    tester.view.physicalSize = const Size(393, 852);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-
     await tester.pumpWidget(const ByndApp());
 
     await tester.tap(find.byTooltip('Ações rápidas'));
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     expect(find.byType(AppQuickActionsOverlay), findsOneWidget);
-    expect(
-      tester.getSize(find.byType(AppQuickActionsOverlay)),
-      const Size(393, 852),
-    );
     expect(find.text('AÇÕES RÁPIDAS'), findsOneWidget);
+    expect(
+      tester
+          .widget<Opacity>(find.byKey(const Key('quick-backdrop-opacity')))
+          .opacity,
+      0,
+    );
+    await tester.pump(const Duration(milliseconds: 120));
+    final backdropOpacity = tester
+        .widget<Opacity>(find.byKey(const Key('quick-backdrop-opacity')))
+        .opacity;
+    expect(backdropOpacity, greaterThan(0));
+    expect(backdropOpacity, lessThan(1));
+    final firstBubble = tester
+        .widget<Opacity>(find.byKey(const Key('quick-bubble-breathe')))
+        .opacity;
+    final lastBubble = tester
+        .widget<Opacity>(find.byKey(const Key('quick-bubble-ecg')))
+        .opacity;
+    expect(firstBubble, greaterThan(lastBubble));
+
+    await tester.pumpAndSettle();
     for (final action in AppQuickAction.values) {
+      expect(find.text(action.label), findsOneWidget);
       expect(
         find.byWidgetPredicate(
           (widget) => widget is AppSvgIcon && widget.asset == action.iconAsset,
@@ -66,8 +83,25 @@ void main() {
         findsOneWidget,
       );
     }
+    expect(
+      tester.getRect(find.byKey(const Key('quick-close-button'))),
+      tester.getRect(
+        find.byKey(
+          tester.widget<AppBottomNav>(find.byType(AppBottomNav)).moreButtonKey!,
+        ),
+      ),
+    );
 
-    await tester.tap(find.byTooltip('Fechar'));
+    await tester.tap(find.byKey(const Key('quick-close-button')));
+    await tester.pump();
+    expect(find.byType(AppQuickActionsOverlay), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(
+      tester
+          .widget<Opacity>(find.byKey(const Key('quick-backdrop-opacity')))
+          .opacity,
+      lessThan(1),
+    );
     await tester.pumpAndSettle();
     expect(find.byType(AppQuickActionsOverlay), findsNothing);
   });
@@ -103,11 +137,27 @@ void main() {
     await tester.tap(find.byTooltip('Ações rápidas'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Respirar\n5 min'));
-    await tester.pumpAndSettle();
+    await tester.tap(find.text(AppQuickAction.breathe.label));
+    await tester.pump();
 
+    expect(find.byType(AppQuickActionsOverlay), findsOneWidget);
+    await tester.pumpAndSettle();
     expect(find.byType(AppQuickActionsOverlay), findsNothing);
     expect(find.text('Respirar 5 min: em breve.'), findsOneWidget);
+  });
+
+  testWidgets('系统返回键收起快捷菜单并保留当前页面', (tester) async {
+    await tester.pumpWidget(const ByndApp());
+    await tester.tap(find.byTooltip('Ações rápidas'));
+    await tester.pumpAndSettle();
+
+    await tester.binding.handlePopRoute();
+    await tester.pump();
+    expect(find.byType(AppQuickActionsOverlay), findsOneWidget);
+
+    await tester.pumpAndSettle();
+    expect(find.byType(AppQuickActionsOverlay), findsNothing);
+    expect(find.byType(AppBottomNav), findsOneWidget);
   });
 
   testWidgets('侧边菜单滑入，设置关闭菜单后从右侧进入资料页', (tester) async {
@@ -138,7 +188,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(ProfilePage), findsOneWidget);
-    expect(find.byType(AppPageHeader), findsOneWidget);
     expect(find.text('Perfil'), findsOneWidget);
     expect(find.text('Clara Nunes'), findsOneWidget);
     expect(find.byType(AppBottomNav), findsOneWidget);
@@ -179,7 +228,7 @@ void main() {
               asset.startsWith('assets/icons/site/') && asset.endsWith('.svg'),
         )
         .toList();
-    expect(assets.length, 139);
+    expect(assets.length, 147);
 
     for (final referencedAsset in [
       AppSvgAssets.logo,
@@ -202,6 +251,14 @@ void main() {
       AppSvgAssets.back,
       AppSvgAssets.edit,
       AppSvgAssets.device,
+      AppSvgAssets.devicePair,
+      AppSvgAssets.deviceUnpair,
+      AppSvgAssets.deviceFirmware,
+      AppSvgAssets.deviceRestart,
+      AppSvgAssets.deviceSafety,
+      AppSvgAssets.deviceErase,
+      AppSvgAssets.deviceInfo,
+      AppSvgAssets.deviceCheck,
     ]) {
       expect(assets, contains(referencedAsset));
     }

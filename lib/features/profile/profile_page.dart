@@ -13,7 +13,18 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  final GlobalKey _moreButtonKey = GlobalKey();
   bool _quickActionsOpen = false;
+  Rect? _quickActionOrigin;
+
+  void _openQuickActions() {
+    final box = _moreButtonKey.currentContext?.findRenderObject();
+    if (box is! RenderBox || !box.hasSize) return;
+    setState(() {
+      _quickActionOrigin = box.localToGlobal(Offset.zero) & box.size;
+      _quickActionsOpen = true;
+    });
+  }
 
   Future<void> _handleQuickAction(AppQuickAction action) async {
     setState(() => _quickActionsOpen = false);
@@ -165,13 +176,16 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
           bottomNavigationBar: AppBottomNav(
             selectedIndex: 0,
+            moreButtonKey: _moreButtonKey,
+            moreOpen: _quickActionsOpen,
             onDestinationSelected: (index) => Navigator.of(context).pop(index),
-            onMorePressed: () => setState(() => _quickActionsOpen = true),
+            onMorePressed: _openQuickActions,
           ),
         ),
         if (_quickActionsOpen)
           Positioned.fill(
             child: AppQuickActionsOverlay(
+              origin: _quickActionOrigin!,
               onClose: () => setState(() => _quickActionsOpen = false),
               onActionSelected: _handleQuickAction,
             ),

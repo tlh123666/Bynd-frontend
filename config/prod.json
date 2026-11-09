@@ -1,0 +1,9 @@
+{
+  "APP_ENV": "production",
+  "API_BASE_URL": "https://api.byndhealth.com.br",
+  "DEVICE_DEMO": false,
+  "MAPA_USE_DEMO_DATA": false,
+  "ENABLE_NETWORK_LOGS": false,
+  "API_CONNECT_TIMEOUT_SECONDS": 15,
+  "API_RECEIVE_TIMEOUT_SECONDS": 30
+}

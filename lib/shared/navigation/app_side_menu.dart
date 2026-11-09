@@ -3,6 +3,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import '../../design_system/design_system.dart';
+import '../../features/device/application/device_scope.dart';
+import '../../features/device/presentation/widgets/device_menu_tile.dart';
 import '../../l10n/app_localizations_context.dart';
 
 /// Reusable app navigation drawer. Its contents belong to the app shell,
@@ -14,6 +16,7 @@ class AppSideMenu extends StatelessWidget {
     required this.onSettings,
     required this.onLanguage,
     required this.onOtherSelected,
+    this.onDevice,
     super.key,
   });
 
@@ -22,6 +25,7 @@ class AppSideMenu extends StatelessWidget {
   final VoidCallback onSettings;
   final VoidCallback onLanguage;
   final ValueChanged<String> onOtherSelected;
+  final VoidCallback? onDevice;
 
   @override
   Widget build(BuildContext context) {
@@ -84,9 +88,19 @@ class AppSideMenu extends StatelessWidget {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          _DeviceTile(
-                                            onTap: () =>
-                                                onOtherSelected('BYND ONE'),
+                                          DeviceMenuTile(
+                                            device: DeviceScope.maybeOf(
+                                              context,
+                                            )?.device,
+                                            loading:
+                                                DeviceScope.maybeOf(
+                                                  context,
+                                                )?.loading ??
+                                                false,
+                                            onTap:
+                                                onDevice ??
+                                                () =>
+                                                    onOtherSelected('BYND ONE'),
                                           ),
                                           const SizedBox(height: 24),
                                           _GroupTitle(strings.youGroup),
@@ -96,6 +110,11 @@ class AppSideMenu extends StatelessWidget {
                                               _MenuItem(
                                                 strings.diary,
                                                 AppSvgAssets.diary,
+                                                onOtherSelected,
+                                              ),
+                                              _MenuItem(
+                                                strings.atlas,
+                                                AppSvgAssets.atlas,
                                                 onOtherSelected,
                                               ),
                                               _MenuItem(
@@ -134,7 +153,6 @@ class AppSideMenu extends StatelessWidget {
                                                 strings.languageMenu,
                                                 AppSvgAssets.settings,
                                                 (_) => onLanguage(),
-                                                isLanguage: true,
                                               ),
                                               _MenuItem(
                                                 strings.integrations,
@@ -192,93 +210,6 @@ class AppSideMenu extends StatelessWidget {
   }
 }
 
-class _DeviceTile extends StatelessWidget {
-  const _DeviceTile({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      borderRadius: AppRadii.controlBorder,
-      child: Ink(
-        decoration: const BoxDecoration(
-          borderRadius: AppRadii.controlBorder,
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [AppColors.glass, AppColors.glassLow],
-          ),
-        ),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: AppRadii.controlBorder,
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              children: [
-                const AppSvgIcon(AppSvgAssets.device, size: 36),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'BYND ONE  82%',
-                        style: const TextStyle(
-                          fontFamily: AppFontFamilies.geist,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 3),
-                      Row(
-                        children: [
-                          const SizedBox(
-                            width: 6,
-                            height: 6,
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                color: AppColors.success,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          Expanded(
-                            child: Text(
-                              context.l10n.deviceConnected,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontFamily: AppFontFamilies.geist,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w400,
-                                color: AppColors.textKicker,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                const Icon(
-                  Icons.chevron_right,
-                  size: 16,
-                  color: AppColors.menuChevron,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _GroupTitle extends StatelessWidget {
   const _GroupTitle(this.title);
   final String title;
@@ -320,16 +251,10 @@ class _MenuGroup extends StatelessWidget {
 }
 
 class _MenuItem extends StatelessWidget {
-  const _MenuItem(
-    this.label,
-    this.iconAsset,
-    this.onSelected, {
-    this.isLanguage = false,
-  });
+  const _MenuItem(this.label, this.iconAsset, this.onSelected);
   final String label;
   final String iconAsset;
   final ValueChanged<String> onSelected;
-  final bool isLanguage;
 
   @override
   Widget build(BuildContext context) => Material(
@@ -341,10 +266,7 @@ class _MenuItem extends StatelessWidget {
         child: Row(
           children: [
             const SizedBox(width: 14),
-            if (isLanguage)
-              const Icon(Icons.language, size: 20, color: AppColors.menuIcon)
-            else
-              AppSvgIcon(iconAsset, size: 20, color: AppColors.menuIcon),
+            AppSvgIcon(iconAsset, size: 20, color: AppColors.menuIcon),
             const SizedBox(width: 12),
             Expanded(
               child: Text(

@@ -20,9 +20,20 @@ class ActivityOverviewPage extends StatefulWidget {
 }
 
 class _ActivityOverviewPageState extends State<ActivityOverviewPage> {
+  final GlobalKey _moreButtonKey = GlobalKey();
   bool _didOpenInitialSelector = false;
   bool _quickActionsOpen = false;
+  Rect? _quickActionOrigin;
   int _selectedDay = 0;
+
+  void _openQuickActions() {
+    final box = _moreButtonKey.currentContext?.findRenderObject();
+    if (box is! RenderBox || !box.hasSize) return;
+    setState(() {
+      _quickActionOrigin = box.localToGlobal(Offset.zero) & box.size;
+      _quickActionsOpen = true;
+    });
+  }
 
   @override
   void didChangeDependencies() {
@@ -85,14 +96,17 @@ class _ActivityOverviewPageState extends State<ActivityOverviewPage> {
             top: false,
             child: AppBottomNav(
               selectedIndex: null,
+              moreButtonKey: _moreButtonKey,
+              moreOpen: _quickActionsOpen,
               onDestinationSelected: _selectTab,
-              onMorePressed: () => setState(() => _quickActionsOpen = true),
+              onMorePressed: _openQuickActions,
             ),
           ),
         ),
         if (_quickActionsOpen)
           Positioned.fill(
             child: AppQuickActionsOverlay(
+              origin: _quickActionOrigin!,
               onClose: () => setState(() => _quickActionsOpen = false),
               onActionSelected: (action) {
                 setState(() => _quickActionsOpen = false);

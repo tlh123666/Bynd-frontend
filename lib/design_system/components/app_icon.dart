@@ -34,6 +34,14 @@ abstract final class AppSvgAssets {
   static const integrations = 'assets/icons/site/icon-9c42d2ebba19.svg';
   static const privacy = 'assets/icons/site/icon-ed0289e483bf.svg';
   static const help = 'assets/icons/site/icon-66baba9c54c2.svg';
+  static const devicePair = 'assets/icons/site/device-pair.svg';
+  static const deviceUnpair = 'assets/icons/site/device-unpair.svg';
+  static const deviceFirmware = 'assets/icons/site/device-firmware.svg';
+  static const deviceRestart = 'assets/icons/site/device-restart.svg';
+  static const deviceSafety = 'assets/icons/site/device-safety.svg';
+  static const deviceErase = 'assets/icons/site/device-erase.svg';
+  static const deviceInfo = 'assets/icons/site/device-info.svg';
+  static const deviceCheck = 'assets/icons/site/device-check.svg';
 }
 
 class AppSvgIcon extends StatelessWidget {

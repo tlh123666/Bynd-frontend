@@ -3,24 +3,25 @@ import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 
-import '../../l10n/app_localizations_context.dart';
-import '../../l10n/generated/app_localizations.dart';
 import '../tokens/app_colors.dart';
 import '../tokens/app_dimensions.dart';
 import '../tokens/app_motion.dart';
 import '../tokens/app_typography.dart';
 import 'app_icon.dart';
+import '../../l10n/generated/app_localizations.dart';
+import '../../l10n/app_localizations_context.dart';
 
 enum AppQuickAction {
-  breathe(AppSvgAssets.breathe),
-  meal(AppSvgAssets.meal),
-  startActivity(AppSvgAssets.startActivity),
-  dayReview(AppSvgAssets.dayReview),
-  logActivity(AppSvgAssets.logActivity),
-  ecg(AppSvgAssets.ecg);
+  breathe('Respirar\n5 min', AppSvgAssets.breathe),
+  meal('Registrar\nrefeição', AppSvgAssets.meal),
+  startActivity('Iniciar\natividade', AppSvgAssets.startActivity),
+  dayReview('Como foi\no dia', AppSvgAssets.dayReview),
+  logActivity('Registrar\natividade', AppSvgAssets.logActivity),
+  ecg('Fazer\nECG', AppSvgAssets.ecg);
 
-  const AppQuickAction(this.iconAsset);
+  const AppQuickAction(this.label, this.iconAsset);
 
+  final String label;
   final String iconAsset;
 
   String localizedLabel(AppLocalizations strings) => switch (this) {
@@ -33,14 +34,17 @@ enum AppQuickAction {
   };
 }
 
-/// 复现网页原型中覆盖在当前页面上的全屏快捷操作层。
+/// The quick actions expand over the current route; no page is pushed.
+/// [origin] is the visible bottom bar button's rectangle in screen coordinates.
 class AppQuickActionsOverlay extends StatefulWidget {
   const AppQuickActionsOverlay({
+    required this.origin,
     required this.onClose,
     required this.onActionSelected,
     super.key,
   });
 
+  final Rect origin;
   final VoidCallback onClose;
   final ValueChanged<AppQuickAction> onActionSelected;
 
@@ -49,312 +53,326 @@ class AppQuickActionsOverlay extends StatefulWidget {
 }
 
 class _AppQuickActionsOverlayState extends State<AppQuickActionsOverlay>
-    with SingleTickerProviderStateMixin {
-  static const _entryDuration = Duration(milliseconds: 520);
-  static const _exitDuration = Duration(milliseconds: 220);
-  static const _placements = <(AppQuickAction, double, double)>[
-    (AppQuickAction.breathe, -5, -232),
-    (AppQuickAction.meal, -111, -198),
-    (AppQuickAction.startActivity, -37, -110),
-    (AppQuickAction.dayReview, -193, -118),
-    (AppQuickAction.logActivity, -103, -44),
-    (AppQuickAction.ecg, -225, -10),
-  ];
+    with TickerProviderStateMixin {
+  late final AnimationController _enter = AnimationController(
+    vsync: this,
+    duration: AppMotion.quickEnter,
+  );
+  late final AnimationController _exit = AnimationController(
+    vsync: this,
+    duration: AppMotion.quickExit,
+  );
 
-  late final AnimationController _controller;
-  bool _animationsEnabled = true;
+  bool _started = false;
   bool _closing = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: _entryDuration,
-      reverseDuration: _exitDuration,
-    );
-  }
+  late List<double> _bubbleAtClose;
+  double _backdropAtClose = 0;
+  double _headlineAtClose = 0;
+  double _closeOpacityAtClose = 0;
+  double _closeAngleAtClose = -math.pi / 2;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _animationsEnabled = AppMotion.enabled(context);
-    if (_controller.status == AnimationStatus.dismissed) {
-      if (_animationsEnabled) {
-        _controller.forward();
-      } else {
-        _controller.value = 1;
-      }
+    if (_started) return;
+    _started = true;
+    if (AppMotion.enabled(context)) {
+      _enter.forward();
+    } else {
+      _enter.value = 1;
     }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _enter.dispose();
+    _exit.dispose();
     super.dispose();
   }
 
-  Future<void> _close({VoidCallback? afterClose}) async {
-    if (_closing) return;
-    _closing = true;
-    if (_animationsEnabled) {
-      await _controller.reverse();
-    }
-    if (!mounted) return;
-    (afterClose ?? widget.onClose)();
+  double _enterProgress(Duration delay, Duration duration, Curve curve) {
+    final elapsed = _enter.value * AppMotion.quickEnter.inMilliseconds;
+    final fraction =
+        ((elapsed - delay.inMilliseconds) / duration.inMilliseconds).clamp(
+          0.0,
+          1.0,
+        );
+    return curve.transform(fraction);
   }
 
-  Animation<double> _actionAnimation(int index, {required Curve curve}) {
-    final start = index * .055;
-    final end = math.min(1.0, start + .68);
-    return CurvedAnimation(
-      parent: _controller,
-      curve: Interval(start, end, curve: curve),
+  double _bubbleEnter(int index) => _enterProgress(
+    AppMotion.quickBubbleStagger * index,
+    AppMotion.quickBubble,
+    AppMotion.quickBubbleCurve,
+  );
+
+  double get _bubbleExitProgress {
+    final elapsed = _exit.value * AppMotion.quickExit.inMilliseconds;
+    final fraction = (elapsed / AppMotion.quickBubbleExit.inMilliseconds).clamp(
+      0.0,
+      1.0,
     );
+    return AppMotion.quickExitCurve.transform(fraction);
+  }
+
+  ({double opacity, double dy, double scale}) _bubbleState(int index) {
+    final before = _closing ? _bubbleAtClose[index] : _bubbleEnter(index);
+    final startDy = 26 * (1 - before);
+    final startScale = 0.92 + 0.08 * before;
+    if (!_closing) {
+      return (opacity: before, dy: startDy, scale: startScale);
+    }
+    final exit = _bubbleExitProgress;
+    return (
+      opacity: before * (1 - exit),
+      dy: startDy * (1 - exit) + 18 * exit,
+      scale: startScale * (1 - exit) + 0.95 * exit,
+    );
+  }
+
+  double get _backdropProgress => _closing
+      ? _backdropAtClose * (1 - Curves.ease.transform(_exit.value))
+      : _enterProgress(Duration.zero, AppMotion.quickBackdrop, Curves.ease);
+
+  double get _headlineProgress => _closing
+      ? _headlineAtClose * (1 - Curves.ease.transform(_exit.value))
+      : _enterProgress(
+          AppMotion.quickHeadlineDelay,
+          AppMotion.quickHeadline,
+          Curves.ease,
+        );
+
+  double get _closeEnterProgress => _enterProgress(
+    Duration.zero,
+    AppMotion.quickCloseButton,
+    Curves.easeOutBack,
+  );
+
+  double get _closeOpacity => _closing
+      ? _closeOpacityAtClose * (1 - _bubbleExitProgress)
+      : _closeEnterProgress.clamp(0.0, 1.0);
+
+  double get _closeAngle => _closing
+      ? _closeAngleAtClose +
+            (-math.pi / 2 - _closeAngleAtClose) * _bubbleExitProgress
+      : -math.pi / 2 * (1 - _closeEnterProgress);
+
+  String get _suggestion {
+    final hour = DateTime.now().hour;
+    if (hour >= 5 && hour < 12) {
+      return 'Para esta manhã, a BYND sugere 15 minutos de sol antes do trabalho.';
+    }
+    if (hour >= 12 && hour < 18) {
+      return 'Para esta tarde, a BYND sugere uma pausa para respirar.';
+    }
+    return 'Para esta noite, a BYND sugere respirar antes de dormir.';
+  }
+
+  Future<void> _close([AppQuickAction? selected]) async {
+    if (_closing) return;
+    _bubbleAtClose = List.generate(AppQuickAction.values.length, _bubbleEnter);
+    _backdropAtClose = _backdropProgress;
+    _headlineAtClose = _headlineProgress;
+    _closeOpacityAtClose = _closeOpacity;
+    _closeAngleAtClose = _closeAngle;
+    setState(() => _closing = true);
+
+    if (AppMotion.enabled(context)) await _exit.forward();
+    if (!mounted) return;
+    if (selected == null) {
+      widget.onClose();
+    } else {
+      widget.onActionSelected(selected);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final strings = context.l10n;
-    return Material(
-      color: Colors.transparent,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          Positioned.fill(
-            child: FadeTransition(
-              opacity: CurvedAnimation(
-                parent: _controller,
-                curve: const Interval(0, .55, curve: Curves.easeOut),
-              ),
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: _closing ? null : _close,
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-                  child: const ColoredBox(color: AppColors.quickActionsVeil),
-                ),
-              ),
-            ),
-          ),
-          SafeArea(
-            minimum: const EdgeInsets.only(bottom: AppSpacing.sm),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                // X 与原型中的关闭按钮一样，固定在底部导航“+”按钮的位置。
-                final anchor = Offset(
-                  constraints.maxWidth - AppSpacing.md - 28,
-                  constraints.maxHeight - 28,
-                );
-                final headlineTop = math.min(
-                  110.0,
-                  math.max(24.0, constraints.maxHeight - 390),
-                );
-                return Stack(
-                  fit: StackFit.expand,
-                  clipBehavior: Clip.none,
-                  children: [
-                    Positioned(
-                      top: headlineTop,
-                      left: 22,
-                      right: 120,
-                      child: FadeTransition(
-                        opacity: CurvedAnimation(
-                          parent: _controller,
-                          curve: const Interval(
-                            .08,
-                            .68,
-                            curve: Curves.easeOut,
-                          ),
-                        ),
-                        child: SlideTransition(
-                          position:
-                              Tween<Offset>(
-                                begin: const Offset(0, .08),
-                                end: Offset.zero,
-                              ).animate(
-                                CurvedAnimation(
-                                  parent: _controller,
-                                  curve: const Interval(
-                                    .08,
-                                    .68,
-                                    curve: Curves.easeOutCubic,
-                                  ),
-                                ),
-                              ),
-                          child: _QuickActionsHeadline(
-                            strings: strings,
-                            suggestion: _suggestionForNow(strings),
-                          ),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _close();
+      },
+      child: Material(
+        color: Colors.transparent,
+        child: AnimatedBuilder(
+          animation: Listenable.merge([_enter, _exit]),
+          builder: (context, _) {
+            final center = widget.origin.center;
+            final headlineTop =
+                math.max(20.0, MediaQuery.paddingOf(context).top) + 110;
+            final positions = <AppQuickAction, Offset>{
+              AppQuickAction.breathe: center + const Offset(-5, -278),
+              AppQuickAction.meal: center + const Offset(-111, -244),
+              AppQuickAction.startActivity: center + const Offset(-37, -156),
+              AppQuickAction.dayReview: center + const Offset(-193, -164),
+              AppQuickAction.logActivity: center + const Offset(-103, -90),
+              AppQuickAction.ecg: center + const Offset(-225, -56),
+            };
+
+            return Stack(
+              children: [
+                Positioned.fill(
+                  child: Opacity(
+                    key: const Key('quick-backdrop-opacity'),
+                    opacity: _backdropProgress,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: _close,
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+                        child: const ColoredBox(
+                          color: AppColors.quickActionsVeil,
                         ),
                       ),
                     ),
-                    for (var index = 0; index < _placements.length; index++)
-                      _buildAction(index, anchor, constraints, strings),
-                    Positioned(
-                      left: anchor.dx - 28,
-                      top: anchor.dy - 28,
-                      width: 56,
-                      height: 56,
-                      child: FadeTransition(
-                        opacity: CurvedAnimation(
-                          parent: _controller,
-                          curve: const Interval(
-                            .16,
-                            .72,
-                            curve: Curves.easeOut,
+                  ),
+                ),
+                Positioned(
+                  top: headlineTop,
+                  left: 22,
+                  right: 120,
+                  child: IgnorePointer(
+                    child: Opacity(
+                      opacity: _headlineProgress,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'AÇÕES RÁPIDAS',
+                            style: AppTypography.kicker.copyWith(
+                              color: AppColors.textKicker,
+                            ),
                           ),
-                        ),
-                        child: RotationTransition(
-                          turns: Tween<double>(begin: -.25, end: 0).animate(
-                            CurvedAnimation(
-                              parent: _controller,
-                              curve: const Interval(
-                                .16,
-                                .72,
-                                curve: Curves.easeOutBack,
+                          const SizedBox(height: 8),
+                          Text(
+                            _suggestion,
+                            style: const TextStyle(
+                              fontFamily: AppFontFamilies.geist,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w400,
+                              height: 1.4,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                for (final action in AppQuickAction.values)
+                  _bubble(action, positions[action]!),
+                Positioned.fromRect(
+                  rect: widget.origin,
+                  child: IgnorePointer(
+                    ignoring: _closing || _closeOpacity < 0.3,
+                    child: Opacity(
+                      opacity: _closeOpacity,
+                      child: Transform.rotate(
+                        angle: _closeAngle,
+                        child: Semantics(
+                          label: 'Fechar',
+                          button: true,
+                          child: Material(
+                            color: AppColors.textPrimary,
+                            shape: const CircleBorder(),
+                            child: InkWell(
+                              key: const Key('quick-close-button'),
+                              onTap: _close,
+                              customBorder: const CircleBorder(),
+                              child: Center(
+                                child: AppSvgIcon(
+                                  AppSvgAssets.close,
+                                  size: 22,
+                                  color: AppColors.background,
+                                ),
                               ),
                             ),
                           ),
-                          child: _CloseButton(
-                            label: strings.close,
-                            onPressed: _closing ? null : _close,
-                          ),
                         ),
                       ),
                     ),
-                  ],
-                );
-              },
-            ),
-          ),
-        ],
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
 
-  Widget _buildAction(
-    int index,
-    Offset anchor,
-    BoxConstraints constraints,
-    AppLocalizations strings,
-  ) {
-    const tileWidth = 92.0;
-    const tileHeight = 106.0;
-    final (action, offsetX, offsetY) = _placements[index];
-    final target = Offset(anchor.dx + offsetX, anchor.dy + offsetY - 46);
-    final left = (target.dx - tileWidth / 2)
-        .clamp(0.0, math.max(0.0, constraints.maxWidth - tileWidth))
-        .toDouble();
-    final top = (target.dy - 13)
-        .clamp(0.0, math.max(0.0, constraints.maxHeight - tileHeight))
-        .toDouble();
-    final fadeAnimation = _actionAnimation(index, curve: Curves.easeOut);
-    final popAnimation = _actionAnimation(index, curve: Curves.easeOutBack);
-
+  Widget _bubble(AppQuickAction action, Offset center) {
+    final iconSize = action == AppQuickAction.logActivity ? 52.0 : 46.0;
+    final state = _bubbleState(action.index);
     return Positioned(
-      left: left,
-      top: top,
-      width: tileWidth,
-      height: tileHeight,
-      child: FadeTransition(
-        opacity: fadeAnimation,
-        child: SlideTransition(
-          position: Tween<Offset>(
-            begin: const Offset(0, .22),
-            end: Offset.zero,
-          ).animate(popAnimation),
-          child: ScaleTransition(
-            scale: Tween<double>(begin: .92, end: 1).animate(popAnimation),
-            child: _QuickActionTile(
-              action: action,
-              strings: strings,
-              onTap: _closing
-                  ? null
-                  : () => _close(
-                      afterClose: () => widget.onActionSelected(action),
-                    ),
+      left: center.dx - 52,
+      top: center.dy - iconSize / 2,
+      width: 104,
+      child: IgnorePointer(
+        ignoring: _closing || state.opacity < 0.8,
+        child: Opacity(
+          key: Key('quick-bubble-${action.name}'),
+          opacity: state.opacity,
+          child: Transform.translate(
+            offset: Offset(0, state.dy),
+            child: Transform.scale(
+              scale: state.scale,
+              alignment: Alignment.topCenter,
+              child: _QuickActionTile(
+                action: action,
+                iconSize: iconSize,
+                onTap: () => _close(action),
+              ),
             ),
           ),
         ),
       ),
     );
   }
-}
-
-class _QuickActionsHeadline extends StatelessWidget {
-  const _QuickActionsHeadline({
-    required this.strings,
-    required this.suggestion,
-  });
-
-  final AppLocalizations strings;
-  final String suggestion;
-
-  @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        strings.quickActionsHeading,
-        style: AppTypography.kicker.copyWith(color: AppColors.textKicker),
-      ),
-      const SizedBox(height: AppSpacing.xs),
-      ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 250),
-        child: Text(
-          suggestion,
-          style: const TextStyle(
-            fontFamily: AppFontFamilies.geist,
-            fontSize: 15,
-            fontWeight: FontWeight.w400,
-            height: 1.4,
-            color: AppColors.textPrimary,
-          ),
-        ),
-      ),
-    ],
-  );
-}
-
-String _suggestionForNow(AppLocalizations strings) {
-  final hour = DateTime.now().hour;
-  if (hour >= 5 && hour < 12) return strings.quickActionsSuggestion;
-  if (hour >= 12 && hour < 18) return strings.quickActionsSuggestionAfternoon;
-  return strings.quickActionsSuggestionEvening;
 }
 
 class _QuickActionTile extends StatelessWidget {
   const _QuickActionTile({
     required this.action,
-    required this.strings,
+    required this.iconSize,
     required this.onTap,
   });
 
   final AppQuickAction action;
-  final AppLocalizations strings;
-  final VoidCallback? onTap;
+  final double iconSize;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final label = action.localizedLabel(strings);
     return Semantics(
-      label: label.replaceAll('\n', ' '),
+      label: action.localizedLabel(context.l10n).replaceAll('\n', ' '),
       button: true,
       child: InkWell(
         onTap: onTap,
         borderRadius: AppRadii.controlBorder,
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            AppSvgIcon(action.iconAsset, size: 26),
-            const SizedBox(height: AppSpacing.xs),
+            SizedBox(
+              width: iconSize,
+              height: iconSize,
+              child: Center(
+                child: AppSvgIcon(
+                  action.iconAsset,
+                  size: 27,
+                  color: action == AppQuickAction.breathe
+                      ? AppColors.sky
+                      : AppColors.textPrimary,
+                ),
+              ),
+            ),
+            const SizedBox(height: 7),
             Text(
-              label,
+              action.localizedLabel(context.l10n),
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontFamily: AppFontFamilies.geist,
-                fontSize: 12.5,
+                fontSize: 11.5,
                 fontWeight: FontWeight.w500,
                 height: 1.25,
                 color: AppColors.textOnVeil,
@@ -365,39 +383,4 @@ class _QuickActionTile extends StatelessWidget {
       ),
     );
   }
-}
-
-class _CloseButton extends StatelessWidget {
-  const _CloseButton({required this.label, required this.onPressed});
-
-  final String label;
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) => Tooltip(
-    message: label,
-    child: Semantics(
-      label: label,
-      button: true,
-      child: Material(
-        color: AppColors.textPrimary,
-        shape: const CircleBorder(),
-        child: InkWell(
-          onTap: onPressed,
-          customBorder: const CircleBorder(),
-          child: const SizedBox(
-            width: 56,
-            height: 56,
-            child: Center(
-              child: AppSvgIcon(
-                AppSvgAssets.close,
-                size: 22,
-                color: AppColors.background,
-              ),
-            ),
-          ),
-        ),
-      ),
-    ),
-  );
 }

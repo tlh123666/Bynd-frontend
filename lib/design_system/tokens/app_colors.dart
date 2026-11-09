@@ -46,6 +46,14 @@ abstract final class AppColors {
   static const menuExit = Color(0xFFFF7A6E); // .ml-sair2
   static const homeCounter = Color(0x5914181E); // #14181e59
   static const quickActionsVeil = Color(0xB80C0F14); // #0c0f14b8
+  static const deviceDivider = Color(0x12FFFFFF); // .pl-* rgba(255,255,255,.07)
+  static const deviceIcon = Color(0xB3F4F5F7); // .pl-acao-t svg
+  static const deviceLink = Color(0x4DF4F5F7); // dashed connection
+  static const devicePhoneBorder = Color(0x2EF4F5F7);
+  static const devicePhoneTop = Color(0xFF232A33);
+  static const devicePhoneBottom = Color(0xFF171B21);
+  static const deviceGlow = Color(0x4086D4A3);
+  static const detailTop = Color(0xFF222C38); // .screen, escuro background
 
   // .hn-noite .hn-ceu and .pf, scoped to their respective pages.
   static const homeNightSky = <Color>[
