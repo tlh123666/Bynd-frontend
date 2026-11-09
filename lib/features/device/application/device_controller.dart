@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import '../../../core/network/api_client.dart';
 import '../domain/device_gateway.dart';
@@ -103,6 +104,13 @@ class DeviceController extends ChangeNotifier {
             .toList();
       });
 
+  Future<void> stopScan() async {
+    final driver = gateway;
+    if (driver is ManagedDeviceGateway) {
+      await (driver as ManagedDeviceGateway).stopScan();
+    }
+  }
+
   Future<void> pair(
     DiscoveredBand band,
   ) => _run('Conectando pulseira…', () async {
@@ -121,6 +129,14 @@ class DeviceController extends ChangeNotifier {
         await gateway.disconnect(connected);
       } catch (_) {}
       device = previous;
+      if (!isDemo && previous != null) {
+        device = previous.copyWith(connected: false);
+        try {
+          device = await gateway.read(previous);
+        } catch (_) {
+          /* Keep truthful disconnected state. */
+        }
+      }
       rethrow;
     }
     // A previous physical link can be closed after the account swap commits.
@@ -180,6 +196,16 @@ class DeviceController extends ChangeNotifier {
         throw const DeviceFailure(
           'Conecte a pulseira antes de continuar.',
           code: 'device_disconnected',
+        );
+      }
+      final driver = gateway;
+      if (driver is DeviceOperationCapabilities &&
+          !await (driver as DeviceOperationCapabilities).supportsOperation(
+            type,
+          )) {
+        throw const DeviceFailure(
+          'Esta operação ainda não é compatível com o SDK desta pulseira.',
+          code: 'unsupported_operation',
         );
       }
       final current = await gateway.read(before);
@@ -258,6 +284,10 @@ class DeviceController extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
+    final driver = gateway;
+    if (driver is ManagedDeviceGateway) {
+      unawaited((driver as ManagedDeviceGateway).close());
+    }
     repository.close();
     super.dispose();
   }

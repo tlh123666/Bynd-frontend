@@ -47,7 +47,7 @@ lib/
 
 设备管理已接入左上角菜单顶部的 BYND ONE 卡片，包含状态/高级页、重新配对、解绑、固件检查与升级流程、重启、设备本地数据清除、安全说明和设备信息。公共页头、标签、渐变操作卡片、确认面板放在 `design_system/components/`；设备状态、账号接口、持久化与蓝牙适配分别放在 `features/device/application/`、`data/` 和 `domain/`。目录规划、原站 CSS 依据、环境配置和真实设备接口见 [设备管理文档](docs/device-management.md)。后端新增迁移与 API 见 `BYND-backend/doc/device-management.md`。
 
-环境与基础设施已按 `JCVital` 对齐：默认后端 `https://api.byndhealth.com.br`、应用ID `com.byndhealth.app`、原安全令牌键和语言键保持一致。使用 `config/dev.json / test.json / prod.json` 运行真实接口模式，页面演示使用 `config/demo.json`。会话在启动时从安全存储恢复。完整的环境优先级、运行命令、本地后端、签名及平台说明见 [环境配置](docs/environments.md)。真实手环通信仍需接入厂商驱动。
+环境与基础设施已按 `JCVital` 对齐：默认后端 `https://api.byndhealth.com.br`、应用ID `com.byndhealth.app`、原安全令牌键和语言键保持一致。使用 `config/dev.json / test.json / prod.json` 运行真实接口模式，页面演示使用 `config/demo.json`。会话在启动时从安全存储恢复。完整的环境优先级、运行命令、本地后端、签名及平台说明见 [环境配置](docs/environments.md)。Android 已从 JCVital 迁入 V8 蓝牙驱动，支持权限、扫描、连接和状态读取；完整健康同步、写操作和 iOS 接入边界见 [Android 蓝牙说明](docs/android-ble.md)。
 
 ## 使用方式
 

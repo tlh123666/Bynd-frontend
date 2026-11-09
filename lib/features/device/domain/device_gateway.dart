@@ -13,3 +13,14 @@ abstract interface class DeviceGateway {
     void Function(double) onProgress,
   );
 }
+
+/// Optional lifecycle for native drivers. Demo and existing test gateways do
+/// not need to implement an Android platform lifecycle.
+abstract interface class ManagedDeviceGateway {
+  Future<void> stopScan();
+  Future<void> close();
+}
+
+abstract interface class DeviceOperationCapabilities {
+  Future<bool> supportsOperation(DeviceOperationType type);
+}
