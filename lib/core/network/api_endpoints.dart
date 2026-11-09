@@ -288,6 +288,10 @@ class ApiEndpoints {
 
   // 权益、来源状态与记忆管理。这些接口都不计主动互动。
   static const String assistantCapabilities = '/api/v1/me/ai/capabilities';
+  /// ATLAS 可展示洞察列表（internal/module/aiinsight/route/routes.go）。
+  /// 后端已在服务端过滤候选态与过期条目并隐藏读取窗口参数，客户端不要再传
+  /// windowDays —— 传了也会被忽略。
+  static const String insights = '/api/v1/me/insights';
   static const String assistantSettings = '/api/v1/me/ai/settings';
   static const String assistantConsents = '/api/v1/me/ai/consents';
   static const String assistantMemories = '/api/v1/me/ai/memories';

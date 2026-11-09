@@ -6,6 +6,7 @@ import '../../shared/widgets/day_strip.dart';
 import 'home_sky_background.dart';
 import '../profile/profile_page.dart';
 import '../activity/presentation/pages/activity_overview_page.dart';
+import '../atlas/presentation/pages/mapa_page.dart';
 import '../device/presentation/pages/device_management_page.dart';
 
 /// 当前只实现参考图中的主页外壳与底部导航，内容页后续接入。
@@ -54,8 +55,23 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Future<void> _openMapa() async {
+    final delay = AppMotion.enabled(context) ? AppMotion.drawer : Duration.zero;
+    setState(() => _menuOpen = false);
+    await Future<void>.delayed(delay);
+    if (!mounted) return;
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(builder: (_) => const MapaPage()),
+    );
+  }
+
   void _otherMenuItem(String label) {
     setState(() => _menuOpen = false);
+    if (label == 'Mapa') {
+      // 抽屉收起有动画，直接 push 会和收起动作叠在一起；与设备页保持同一步调。
+      _openMapa();
+      return;
+    }
     AppNotice.show(
       context,
       kind: AppNoticeKind.info,

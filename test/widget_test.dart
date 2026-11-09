@@ -19,9 +19,14 @@ void main() {
       AppSvgAssets.health,
       AppSvgAssets.more,
     ]) {
+      // 只查底部导航内部：侧边菜单里也有 atlas（Mapa 入口），而抽屉关闭时
+      // 仍留在树上，按整棵树找会出现两个。
       expect(
-        find.byWidgetPredicate(
-          (widget) => widget is AppSvgIcon && widget.asset == asset,
+        find.descendant(
+          of: find.byType(AppBottomNav),
+          matching: find.byWidgetPredicate(
+            (widget) => widget is AppSvgIcon && widget.asset == asset,
+          ),
         ),
         findsOneWidget,
       );
