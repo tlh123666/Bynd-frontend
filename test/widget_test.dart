@@ -52,6 +52,15 @@ void main() {
     await tester.pump();
 
     expect(find.byType(AppQuickActionsOverlay), findsOneWidget);
+    final closedControl = find.byWidgetPredicate(
+      (widget) => widget is AppQuickActionsButton && !widget.isOpen,
+    );
+    final openControl = find.byWidgetPredicate(
+      (widget) => widget is AppQuickActionsButton && widget.isOpen,
+    );
+    expect(closedControl, findsOneWidget);
+    expect(openControl, findsOneWidget);
+    expect(tester.getRect(closedControl), tester.getRect(openControl));
     expect(find.text('AÇÕES RÁPIDAS'), findsOneWidget);
     expect(
       tester

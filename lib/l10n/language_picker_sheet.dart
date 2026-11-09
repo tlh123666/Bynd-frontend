@@ -17,34 +17,32 @@ class LanguagePickerSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final strings = context.l10n;
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.lg,
-          AppSpacing.md,
-          AppSpacing.lg,
-          AppSpacing.xl,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(strings.chooseLanguage, style: AppTypography.title),
-            const SizedBox(height: AppSpacing.sm),
-            _LanguageOption(
-              locale: const Locale('pt', 'BR'),
-              selectedLocale: selectedLocale,
-              label: strings.languagePortugueseBrazil,
-              onSelected: onSelected,
-            ),
-            _LanguageOption(
-              locale: const Locale('en'),
-              selectedLocale: selectedLocale,
-              label: strings.languageEnglish,
-              onSelected: onSelected,
-            ),
-          ],
-        ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        0,
+        AppSpacing.lg,
+        AppSpacing.xl,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(strings.chooseLanguage, style: AppTypography.title),
+          const SizedBox(height: AppSpacing.sm),
+          _LanguageOption(
+            locale: const Locale('pt', 'BR'),
+            selectedLocale: selectedLocale,
+            label: strings.languagePortugueseBrazil,
+            onSelected: onSelected,
+          ),
+          _LanguageOption(
+            locale: const Locale('en'),
+            selectedLocale: selectedLocale,
+            label: strings.languageEnglish,
+            onSelected: onSelected,
+          ),
+        ],
       ),
     );
   }
