@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "537472521708",
+    "project_id": "bynd-health-ec0be",
+    "storage_bucket": "bynd-health-ec0be.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:537472521708:android:aad893a42f50e5b9afdcc9",
+        "android_client_info": {
+          "package_name": "com.byndhealth.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyANp-R0ZWA1Dr8CCJ00fnP9kjBmwhieF_k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -34,7 +34,7 @@ Flutter 项目使用 `AppColors/AppSizes/AppTypography` 承接 CSS 变量，不�
 
 ## 环境与真实设备边界
 
-默认运行原型演示模式；演示操作与对话框明确标注“Demonstração”。演示数据只保存在当前安装/浏览器，和账号云端分开。生产模式通过 `DEVICE_DEMO=false`、`API_BASE_URL` 与登录模块提供的 bearer token 接入 API。测试可注入 controller/repository/gateway，无需网络或手环。
+默认沿用 JCVital 的原后端与非演示配置；页面演示使用 `--dart-define-from-file=config/demo.json`。演示操作与对话框明确标注“Demonstração”，数据只保存在当前安装/浏览器。真实模式从统一 AppConfig 和 AuthSession 读取服务地址及 bearer token；测试可注入 controller/repository/gateway。详见 [环境配置](environments.md)。
 
 真实设备使用 `com.bynd/device_management` MethodChannel；扫描、连接、遥测、重启、清除未同步记录、签名固件升级分别有明确契约。当前项目还没有厂商 Android/iOS 驱动，平台缺失时显示“不支持”，不会用演示结果冒充硬件应答。接入驱动时必须返回稳定序列号，BLE 地址只保存本机。固件版本只有硬件确认成功后才更新；不向厂商写入未经核验的自造命令。真实 BLE/OTA 需要对应手环和厂商 SDK 实机验收。
 

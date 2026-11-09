@@ -1,11 +1,21 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+    id("com.google.gms.google-services")
 }
 
+val releasePropertiesFile = rootProject.file("key.properties")
+val releaseProperties = Properties().apply {
+    if (releasePropertiesFile.exists()) releasePropertiesFile.inputStream().use { load(it) }
+}
+val signingKeys = listOf("storeFile", "storePassword", "keyAlias", "keyPassword")
+val releaseSigningReady = signingKeys.all { !releaseProperties.getProperty(it).isNullOrBlank() }
+
 android {
-    namespace = "com.example.new_jcvital"
+    namespace = "com.bynd.bynd"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -15,23 +25,46 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.new_jcvital"
+        // Existing Google Play/Firebase identity, retained from JCVital.
+        applicationId = "com.byndhealth.app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        minSdk = maxOf(flutter.minSdkVersion, 23)
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
 
-    buildTypes {
-        release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+    signingConfigs {
+        create("release") {
+            if (releaseSigningReady) {
+                storeFile = file(releaseProperties.getProperty("storeFile"))
+                storePassword = releaseProperties.getProperty("storePassword")
+                keyAlias = releaseProperties.getProperty("keyAlias")
+                keyPassword = releaseProperties.getProperty("keyPassword")
+            }
         }
     }
+
+    buildTypes {
+        release {
+            signingConfig = signingConfigs.getByName("release")
+        }
+    }
+}
+
+val verifyReleaseSigning = tasks.register("verifyReleaseSigning") {
+    doLast {
+        check(releaseSigningReady) {
+            "Release signing is missing. Create android/key.properties from key.properties.example and use the ORIGINAL JCVital upload keystore."
+        }
+        check(file(releaseProperties.getProperty("storeFile")).isFile) {
+            "The original release keystore referenced by android/key.properties does not exist."
+        }
+    }
+}
+tasks.configureEach {
+    if (name == "preReleaseBuild") dependsOn(verifyReleaseSigning)
 }
 
 kotlin {

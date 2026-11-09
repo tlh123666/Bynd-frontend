@@ -2,12 +2,14 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>io.flutter.embedded_views_preview</key>
+	<true/>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>New Jcvital</string>
+	<string>ByndHealth</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -15,7 +17,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>new_jcvital</string>
+	<string>ByndHealth</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -26,6 +28,27 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>BYND needs Bluetooth access to scan and connect to your wristband.</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>BYND uses Bluetooth to sync steps, heart rate, sleep, and blood oxygen from your wristband.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>BYND uses your location to track outdoor workouts, record routes, and calculate distance and pace.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>BYND needs background location access to continue tracking your workout when the screen is locked.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>BYND uses the microphone while you hold the voice input button.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>BYND converts your spoken question into text so you can send it to ATLAS.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>bluetooth-central</string>
+		<string>location</string>
+	</array>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>BYND needs access to your photo library to set your profile avatar.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>BYND saves your workout card to your photo library when you tap Save image.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
