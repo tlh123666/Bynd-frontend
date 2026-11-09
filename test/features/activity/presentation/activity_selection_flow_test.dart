@@ -2,8 +2,35 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:new_jcvital/features/home/home_page.dart';
+import 'package:new_jcvital/features/home/home_sky_background.dart';
 
 void main() {
+  testWidgets('首页背景覆盖完整手机视口且没有渲染异常', (tester) async {
+    tester.view.physicalSize = const Size(456, 990);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(const MaterialApp(home: HomePage()));
+
+    expect(
+      tester.getSize(find.byType(HomeSkyBackground)),
+      const Size(456, 990),
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('首页容忍浏览器初始化时的 1×1 临时视口', (tester) async {
+    tester.view.physicalSize = const Size(1, 1);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(const MaterialApp(home: HomePage()));
+
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('首页快捷入口先进入活动页，再自动打开选择面板', (tester) async {
     await tester.pumpWidget(const MaterialApp(home: HomePage()));
 

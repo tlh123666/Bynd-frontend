@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../design_system/design_system.dart';
 import '../../features/device/application/device_scope.dart';
 import '../../features/device/presentation/widgets/device_menu_tile.dart';
+import '../../l10n/app_localizations_context.dart';
 
 /// Reusable app navigation drawer. Its contents belong to the app shell,
 /// while timing and easing come from the global motion tokens.
@@ -13,6 +14,7 @@ class AppSideMenu extends StatelessWidget {
     required this.visible,
     required this.onClose,
     required this.onSettings,
+    required this.onLanguage,
     required this.onOtherSelected,
     this.onDevice,
     super.key,
@@ -21,12 +23,14 @@ class AppSideMenu extends StatelessWidget {
   final bool visible;
   final VoidCallback onClose;
   final VoidCallback onSettings;
+  final VoidCallback onLanguage;
   final ValueChanged<String> onOtherSelected;
   final VoidCallback? onDevice;
 
   @override
   Widget build(BuildContext context) {
     final animate = AppMotion.enabled(context);
+    final strings = context.l10n;
     return Positioned.fill(
       child: IgnorePointer(
         ignoring: !visible,
@@ -99,64 +103,69 @@ class AppSideMenu extends StatelessWidget {
                                                     onOtherSelected('BYND ONE'),
                                           ),
                                           const SizedBox(height: 24),
-                                          const _GroupTitle('VOCÊ'),
+                                          _GroupTitle(strings.youGroup),
                                           const SizedBox(height: 8),
                                           _MenuGroup(
                                             children: [
                                               _MenuItem(
-                                                'Diário',
+                                                strings.diary,
                                                 AppSvgAssets.diary,
                                                 onOtherSelected,
                                               ),
                                               _MenuItem(
-                                                'Mapa',
+                                                strings.atlas,
                                                 AppSvgAssets.atlas,
                                                 onOtherSelected,
                                               ),
                                               _MenuItem(
-                                                'Jornada',
+                                                strings.journey,
                                                 AppSvgAssets.journey,
                                                 onOtherSelected,
                                               ),
                                               _MenuItem(
-                                                'Atividades',
+                                                strings.activities,
                                                 AppSvgAssets.activities,
                                                 onOtherSelected,
                                               ),
                                               _MenuItem(
-                                                'Comunidade',
+                                                strings.community,
                                                 AppSvgAssets.menuCommunity,
                                                 onOtherSelected,
                                               ),
                                               _MenuItem(
-                                                'Objetivos',
+                                                strings.goals,
                                                 AppSvgAssets.goals,
                                                 onOtherSelected,
                                               ),
                                             ],
                                           ),
                                           const SizedBox(height: 22),
-                                          const _GroupTitle('APP'),
+                                          _GroupTitle(strings.appGroup),
                                           const SizedBox(height: 8),
                                           _MenuGroup(
                                             children: [
                                               _MenuItem(
-                                                'Ajustes',
+                                                strings.settings,
                                                 AppSvgAssets.settings,
                                                 (_) => onSettings(),
                                               ),
                                               _MenuItem(
-                                                'Integrações',
+                                                strings.languageMenu,
+                                                AppSvgAssets.settings,
+                                                (_) => onLanguage(),
+                                              ),
+                                              _MenuItem(
+                                                strings.integrations,
                                                 AppSvgAssets.integrations,
                                                 onOtherSelected,
                                               ),
                                               _MenuItem(
-                                                'Privacidade',
+                                                strings.privacy,
                                                 AppSvgAssets.privacy,
                                                 onOtherSelected,
                                               ),
                                               _MenuItem(
-                                                'Ajuda',
+                                                strings.help,
                                                 AppSvgAssets.help,
                                                 onOtherSelected,
                                               ),
@@ -171,9 +180,9 @@ class AppSideMenu extends StatelessWidget {
                                         alignment: Alignment.bottomLeft,
                                         child: TextButton(
                                           onPressed: () =>
-                                              onOtherSelected('Sair'),
+                                              onOtherSelected(strings.signOut),
                                           child: Text(
-                                            'Sair',
+                                            strings.signOut,
                                             style: AppTypography.listItem
                                                 .copyWith(
                                                   color: AppColors.menuExit,

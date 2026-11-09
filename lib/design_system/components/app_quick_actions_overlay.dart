@@ -8,6 +8,8 @@ import '../tokens/app_dimensions.dart';
 import '../tokens/app_motion.dart';
 import '../tokens/app_typography.dart';
 import 'app_icon.dart';
+import '../../l10n/generated/app_localizations.dart';
+import '../../l10n/app_localizations_context.dart';
 
 enum AppQuickAction {
   breathe('Respirar\n5 min', AppSvgAssets.breathe),
@@ -21,6 +23,15 @@ enum AppQuickAction {
 
   final String label;
   final String iconAsset;
+
+  String localizedLabel(AppLocalizations strings) => switch (this) {
+    AppQuickAction.breathe => strings.breatheFiveMinutes,
+    AppQuickAction.meal => strings.logMeal,
+    AppQuickAction.startActivity => strings.startActivity,
+    AppQuickAction.dayReview => strings.reviewDay,
+    AppQuickAction.logActivity => strings.logActivity,
+    AppQuickAction.ecg => strings.doEcg,
+  };
 }
 
 /// The quick actions expand over the current route; no page is pushed.
@@ -335,7 +346,7 @@ class _QuickActionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: action.label.replaceAll('\n', ' '),
+      label: action.localizedLabel(context.l10n).replaceAll('\n', ' '),
       button: true,
       child: InkWell(
         onTap: onTap,
@@ -357,7 +368,7 @@ class _QuickActionTile extends StatelessWidget {
             ),
             const SizedBox(height: 7),
             Text(
-              action.label,
+              action.localizedLabel(context.l10n),
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontFamily: AppFontFamilies.geist,

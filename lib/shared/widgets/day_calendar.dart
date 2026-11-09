@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../design_system/tokens/app_colors.dart';
 import '../../design_system/tokens/app_dimensions.dart';
 import '../../design_system/tokens/app_typography.dart';
+import '../../l10n/app_localizations_context.dart';
 
 /// 日期带上方日历的配色；活动页使用原型中的暖色顶部光晕。
 enum DayStripTone { neutral, ember }
@@ -19,7 +20,7 @@ Future<int?> showDayCalendar({
   return showGeneralDialog<int>(
     context: context,
     barrierDismissible: false,
-    barrierLabel: 'Calendário de dias',
+    barrierLabel: context.l10n.closeCalendar,
     barrierColor: Colors.transparent,
     transitionDuration: Duration.zero,
     pageBuilder: (context, _, _) => _DayCalendarOverlay(
@@ -47,22 +48,6 @@ class _DayCalendarOverlay extends StatefulWidget {
 
 class _DayCalendarOverlayState extends State<_DayCalendarOverlay>
     with SingleTickerProviderStateMixin {
-  static const _monthNames = [
-    'Janeiro',
-    'Fevereiro',
-    'Março',
-    'Abril',
-    'Maio',
-    'Junho',
-    'Julho',
-    'Agosto',
-    'Setembro',
-    'Outubro',
-    'Novembro',
-    'Dezembro',
-  ];
-  static const _weekdays = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
-
   late final DateTime _today = DateUtils.dateOnly(DateTime.now());
   late DateTime _month = _monthForDay(widget.selectedDay);
   late final AnimationController _controller = AnimationController(
@@ -158,8 +143,8 @@ class _DayCalendarOverlayState extends State<_DayCalendarOverlay>
                         today: _today,
                         firstAvailableDay: _firstAvailableDay,
                         selectedDay: widget.selectedDay,
-                        monthNames: _monthNames,
-                        weekdays: _weekdays,
+                        monthNames: _monthNames(context),
+                        weekdays: _weekdays(context),
                         canGoBack: _month.isAfter(
                           DateTime(
                             _firstAvailableDay.year,
@@ -185,7 +170,7 @@ class _DayCalendarOverlayState extends State<_DayCalendarOverlay>
                     top: topInset + 12,
                     left: 10,
                     child: IconButton(
-                      tooltip: 'Fechar calendário',
+                      tooltip: context.l10n.closeCalendar,
                       onPressed: () => _close(null),
                       icon: const Icon(Icons.close, size: 23),
                       color: AppColors.textPrimary,
@@ -210,6 +195,47 @@ class _DayCalendarOverlayState extends State<_DayCalendarOverlay>
     await _controller.reverse();
     if (mounted) Navigator.of(context).pop(day);
   }
+
+  List<String> _monthNames(BuildContext context) =>
+      context.l10n.localeName == 'en'
+      ? const [
+          'January',
+          'February',
+          'March',
+          'April',
+          'May',
+          'June',
+          'July',
+          'August',
+          'September',
+          'October',
+          'November',
+          'December',
+        ]
+      : const [
+          'Janeiro',
+          'Fevereiro',
+          'Março',
+          'Abril',
+          'Maio',
+          'Junho',
+          'Julho',
+          'Agosto',
+          'Setembro',
+          'Outubro',
+          'Novembro',
+          'Dezembro',
+        ];
+
+  List<String> _weekdays(BuildContext context) => [
+    context.l10n.calendarWeekdayMon,
+    context.l10n.calendarWeekdayTue,
+    context.l10n.calendarWeekdayWed,
+    context.l10n.calendarWeekdayThu,
+    context.l10n.calendarWeekdayFri,
+    context.l10n.calendarWeekdaySat,
+    context.l10n.calendarWeekdaySun,
+  ];
 }
 
 class _CalendarBackdrop extends StatelessWidget {
@@ -286,7 +312,7 @@ class _CalendarContent extends StatelessWidget {
         Row(
           children: [
             _MonthButton(
-              tooltip: 'Mês anterior',
+              tooltip: context.l10n.previousMonth,
               icon: Icons.chevron_left,
               enabled: canGoBack,
               onPressed: onPreviousMonth,
@@ -302,7 +328,7 @@ class _CalendarContent extends StatelessWidget {
               ),
             ),
             _MonthButton(
-              tooltip: 'Próximo mês',
+              tooltip: context.l10n.nextMonth,
               icon: Icons.chevron_right,
               enabled: canGoForward,
               onPressed: onNextMonth,
@@ -371,7 +397,7 @@ class _CalendarContent extends StatelessWidget {
           },
         ),
         const SizedBox(height: 20),
-        const _RecoveryLegend(),
+        _RecoveryLegend(),
       ],
     );
   }
@@ -387,14 +413,17 @@ class _RecoveryLegend extends StatelessWidget {
       alignment: WrapAlignment.center,
       spacing: 16,
       runSpacing: 6,
-      children: const [
-        _RecoveryLegendItem(label: 'recuperação boa', color: Color(0xFF86D4A3)),
+      children: [
         _RecoveryLegendItem(
-          label: 'recuperação média',
+          label: context.l10n.goodRecovery,
+          color: Color(0xFF86D4A3),
+        ),
+        _RecoveryLegendItem(
+          label: context.l10n.mediumRecovery,
           color: Color(0xFFECD27C),
         ),
         _RecoveryLegendItem(
-          label: 'recuperação baixa',
+          label: context.l10n.lowRecovery,
           color: Color(0xFFEE9A94),
         ),
       ],

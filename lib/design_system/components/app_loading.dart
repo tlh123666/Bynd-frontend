@@ -7,18 +7,19 @@ import '../tokens/app_dimensions.dart';
 import '../tokens/app_motion.dart';
 import '../tokens/app_typography.dart';
 import 'app_icon.dart';
+import '../../l10n/app_localizations_context.dart';
 
 /// BYND symbol loader for asynchronous content and navigation work.
 class AppLoadingIndicator extends StatefulWidget {
   const AppLoadingIndicator({
-    this.label = 'Carregando',
+    this.label,
     this.size = 44,
     this.color = AppColors.textPrimary,
     this.showLabel = true,
     super.key,
   });
 
-  final String label;
+  final String? label;
   final double size;
   final Color color;
   final bool showLabel;
@@ -52,8 +53,9 @@ class _AppLoadingIndicatorState extends State<AppLoadingIndicator>
 
   @override
   Widget build(BuildContext context) {
+    final label = widget.label ?? context.l10n.loading;
     return Semantics(
-      label: widget.label,
+      label: label,
       liveRegion: true,
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -76,7 +78,7 @@ class _AppLoadingIndicatorState extends State<AppLoadingIndicator>
           if (widget.showLabel) ...[
             const SizedBox(height: AppSpacing.md),
             Text(
-              widget.label,
+              label,
               style: AppTypography.caption.copyWith(color: AppColors.textMuted),
             ),
           ],
@@ -91,13 +93,13 @@ class AppLoadingOverlay extends StatelessWidget {
   const AppLoadingOverlay({
     required this.loading,
     required this.child,
-    this.label = 'Carregando',
+    this.label,
     super.key,
   });
 
   final bool loading;
   final Widget child;
-  final String label;
+  final String? label;
 
   @override
   Widget build(BuildContext context) {

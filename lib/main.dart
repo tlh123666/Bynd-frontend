@@ -7,6 +7,8 @@ import 'core/auth/auth_scope.dart';
 import 'core/bootstrap/app_bootstrap.dart';
 import 'core/config/app_config.dart';
 import 'core/localization/app_locale_controller.dart';
+import 'l10n/app_locale_controller.dart' as legacy_l10n;
+import 'l10n/generated/app_localizations.dart';
 
 import 'design_system/theme/app_theme.dart';
 import 'features/atlas/application/atlas_scope.dart';
@@ -42,6 +44,7 @@ class _ByndAppState extends State<ByndApp> {
   late final DeviceController _devices;
   late final AtlasRepository _atlas;
   late final AuthController _auth;
+  late final legacy_l10n.AppLocaleController _legacyLocale;
   @override
   void initState() {
     super.initState();
@@ -59,6 +62,7 @@ class _ByndAppState extends State<ByndApp> {
         );
     _auth =
         widget.authController ?? AuthRuntime.create(config: widget.config);
+    _legacyLocale = legacy_l10n.AppLocaleController()..load();
     unawaited(_devices.initialize());
     // 恢复会话元数据；不阻塞首帧，进程被杀后重进也能带回登录态。
     unawaited(_auth.restore());
@@ -69,6 +73,7 @@ class _ByndAppState extends State<ByndApp> {
     if (widget.deviceController == null) _devices.dispose();
     if (widget.atlasRepository == null) _atlas.dispose();
     if (widget.authController == null) _auth.dispose();
+    _legacyLocale.dispose();
     super.dispose();
   }
 
@@ -80,17 +85,23 @@ class _ByndAppState extends State<ByndApp> {
         repository: _atlas,
         child: AuthScope(
           controller: _auth,
-          child: ValueListenableBuilder<Locale>(
-            valueListenable:
-                widget.localeController ?? AppLocaleController.instance,
-            builder: (context, locale, _) => MaterialApp(
+          child: ListenableBuilder(
+            listenable: _legacyLocale,
+            builder: (context, _) => MaterialApp(
               title: AppConfig.applicationName,
               debugShowCheckedModeBanner: false,
-              locale: locale,
-              supportedLocales: AppLocaleController.supportedLocales,
-              localizationsDelegates: GlobalMaterialLocalizations.delegates,
+              locale: _legacyLocale.locale,
+              supportedLocales: const [Locale('pt', 'BR'), Locale('en')],
+              localizationsDelegates: const [
+                AppLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+                ...GlobalMaterialLocalizations.delegates,
+              ],
               theme: AppTheme.dark,
-              home: const HomePage(),
+              home: legacy_l10n.AppLocaleScope(
+                controller: _legacyLocale,
+                child: const HomePage(),
+              ),
             ),
           ),
         ),

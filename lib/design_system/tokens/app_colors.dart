@@ -24,6 +24,7 @@ abstract final class AppColors {
   static const textHalf = Color(0x80F4F5F7); // #f4f5f780, .50
   static const textInactive = Color(0x73F4F5F7); // .45
   static const textDim = Color(0x6BF4F5F7); // #f4f5f76b, .42
+  static const textPlaceholder = Color(0x5CF4F5F7); // rgba(244,245,247,.36)
   static const textOnVeil = Color(0xE6F4F5F7); // .90
   static const glassBorder = Color(0x14FFFFFF); // --stroke, .08
   static const glassBorderStrong = Color(0x24FFFFFF); // --stroke-strong, .14
@@ -32,6 +33,8 @@ abstract final class AppColors {
   static const surfaceRaised = Color(0xFF282C34);
   static const glass = Color(0x0DFFFFFF); // #ffffff0d
   static const glassLow = Color(0x05FFFFFF); // #ffffff05
+  static const sheetGlassTint = Color(0x5714181E); // rgba(20,24,30,.34)
+  static const sheetGlassBorder = Color(0x1AFFFFFF); // rgba(255,255,255,.10)
   static const divider = Color(0x0FFFFFFF); // rgba(255,255,255,.06)
   static const navGlass = Color(0x8C282C34); // #282c348c
   static const navSelected = Color(0x1FFFFFFF); // #ffffff1f

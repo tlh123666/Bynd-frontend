@@ -1,12 +1,13 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
-import '../../../../design_system/tokens/app_colors.dart';
-import '../../../../design_system/tokens/app_dimensions.dart';
-import '../../../../design_system/tokens/app_typography.dart';
+import '../../../../design_system/design_system.dart';
+import '../../../../l10n/app_localizations_context.dart';
 import '../../domain/models/activity_type.dart';
 import '../../domain/models/activity_type_catalog.dart';
-import '../localization/activity_type_hints_pt_br.dart';
-import '../localization/activity_type_names_pt_br.dart';
+import '../localization/activity_type_localizations.dart';
+import 'activity_type_icon.dart';
 
 /// 活动选择面板，对应网页原型的 Modalidades 底部面板。
 class ActivitySelectionSheet extends StatefulWidget {
@@ -14,13 +15,12 @@ class ActivitySelectionSheet extends StatefulWidget {
 
   /// 展示可拖动的全高活动面板，选中后将稳定活动类型返回调用方。
   static Future<ActivityType?> show(BuildContext context) {
-    return showModalBottomSheet<ActivityType>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      backgroundColor: Colors.transparent,
-      barrierColor: AppColors.menuVeil,
-      builder: (_) => const ActivitySelectionSheet(),
+    return Navigator.of(context).push<ActivityType>(
+      _ActivitySelectionRoute(
+        routeBarrierLabel: MaterialLocalizations.of(
+          context,
+        ).modalBarrierDismissLabel,
+      ),
     );
   }
 
@@ -38,6 +38,8 @@ class _ActivitySelectionSheetState extends State<ActivitySelectionSheet> {
 
   final _searchController = TextEditingController();
   String _query = '';
+  double _dragOffset = 0;
+  bool _isDragging = false;
 
   @override
   void dispose() {
@@ -47,63 +49,94 @@ class _ActivitySelectionSheetState extends State<ActivitySelectionSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final height = MediaQuery.sizeOf(context).height * .9;
+    // 原型最小安全区为 20px，叶片再下移 34px；不能按屏幕比例缩放顶部留白。
+    final media = MediaQuery.of(context);
+    final safeTop = media.viewPadding.top < 20 ? 20.0 : media.viewPadding.top;
+    final topInset = safeTop + 34;
+    final height = (media.size.height - topInset).clamp(0.0, media.size.height);
+    final dragProgress = height == 0 ? 0.0 : _dragOffset / height;
     final normalizedQuery = _normalize(_query.trim());
+    final strings = context.l10n;
     final filtered = ActivityTypeCatalog.all
         .where((type) {
           return _normalize(
-            activityTypeNamesPtBr[type.id] ?? type.id,
+            activityTypeLocalizedName(type, strings),
           ).contains(normalizedQuery);
         })
         .toList(growable: false);
 
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
-      child: Container(
-        height: height,
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(AppRadii.sheet),
-          ),
-          border: Border.fromBorderSide(AppBorders.glass),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: SafeArea(
-          top: false,
-          child: Column(
-            children: [
-              _SheetHandle(onClose: () => Navigator.of(context).pop()),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.lg,
-                  AppSpacing.xs,
-                  AppSpacing.lg,
-                  AppSpacing.md,
-                ),
+      child: AnimatedSlide(
+        offset: Offset(0, dragProgress),
+        duration: _isDragging
+            ? Duration.zero
+            : const Duration(milliseconds: 260),
+        curve: const Cubic(.32, .72, 0, 1),
+        child: SizedBox(
+          height: height,
+          child: AppFrostedSurface(
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(AppRadii.sheet),
+            ),
+            blurSigma: 14,
+            saturation: 1.5,
+            tintColor: AppColors.sheetGlassTint,
+            borderColor: AppColors.sheetGlassBorder,
+            borderFadeHeight: 240,
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x59000000),
+                blurRadius: 60,
+                offset: Offset(0, 24),
+              ),
+            ],
+            child: Material(
+              type: MaterialType.transparency,
+              child: SafeArea(
+                top: false,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Iniciar atividade',
-                      style: AppTypography.title.copyWith(
-                        color: AppColors.textPrimary,
+                    _SheetHandle(
+                      title: strings.startActivityTitle,
+                      onClose: () => Navigator.of(context).pop(),
+                      onDragStart: () => setState(() => _isDragging = true),
+                      onDragUpdate: (delta) => setState(() {
+                        _dragOffset = (_dragOffset + delta).clamp(
+                          0.0,
+                          height * 1.05,
+                        );
+                      }),
+                      onDragEnd: (velocity) {
+                        final projectedOffset = _dragOffset + velocity * .18;
+                        if (projectedOffset > height * .35 ||
+                            (velocity > 500 && _dragOffset > 0)) {
+                          Navigator.of(context).pop();
+                        } else {
+                          setState(() {
+                            _dragOffset = 0;
+                            _isDragging = false;
+                          });
+                        }
+                      },
+                    ),
+                    Padding(
+                      // 原型固定搜索区为上下 4/8px，搜索框另有 8px 顶间距。
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                      child: _ActivitySearchField(
+                        controller: _searchController,
+                        onChanged: (value) => setState(() => _query = value),
                       ),
                     ),
-                    const SizedBox(height: AppSpacing.md),
-                    _ActivitySearchField(
-                      controller: _searchController,
-                      onChanged: (value) => setState(() => _query = value),
+                    Expanded(
+                      child: normalizedQuery.isEmpty
+                          ? _buildGroupedList()
+                          : _buildSearchResults(filtered, _query.trim()),
                     ),
                   ],
                 ),
               ),
-              Expanded(
-                child: normalizedQuery.isEmpty
-                    ? _buildGroupedList()
-                    : _buildSearchResults(filtered, _query.trim()),
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -113,38 +146,46 @@ class _ActivitySelectionSheetState extends State<ActivitySelectionSheet> {
   Widget _buildGroupedList() {
     return ListView(
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        0,
-        AppSpacing.lg,
-        AppSpacing.xl,
-      ),
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, AppSpacing.xl),
       children: [
-        _SectionHeading(label: 'Recentes'),
-        for (final id in _recentActivityIds)
-          if (ActivityTypeCatalog.findById(id) case final type?)
+        _SectionHeading(label: context.l10n.recent, topSpacing: 10),
+        const SizedBox(height: 4),
+        for (var index = 0; index < _recentActivityIds.length; index++)
+          if (ActivityTypeCatalog.findById(_recentActivityIds[index])
+              case final type?)
             _ActivityOption(
               type: type,
-              subtitle: activityTypeHintPtBr(type),
+              subtitle: activityTypeLocalizedHint(type, context.l10n),
+              showTopDivider: index > 0,
               onTap: () => Navigator.of(context).pop(type),
             ),
-        for (final category in ActivityCategory.values) ...[
-          _SectionHeading(
-            label: activityCategoryNamesPtBr[category.name] ?? category.name,
-            count: ActivityTypeCatalog.all
-                .where((type) => type.category == category)
-                .length,
-          ),
-          for (final type in ActivityTypeCatalog.all)
-            if (type.category == category)
-              _ActivityOption(
-                type: type,
-                subtitle: activityTypeHintPtBr(type),
-                onTap: () => Navigator.of(context).pop(type),
-              ),
-        ],
+        ..._buildCategorySections(),
       ],
     );
+  }
+
+  Iterable<Widget> _buildCategorySections() sync* {
+    for (final category in ActivityCategory.values) {
+      final activities = ActivityTypeCatalog.all
+          .where((type) => type.category == category)
+          .toList(growable: false);
+      if (activities.isEmpty) continue;
+
+      yield _SectionHeading(
+        label: activityCategoryLocalizedName(category, context.l10n),
+        count: activities.length,
+      );
+      yield const SizedBox(height: 2);
+      for (var index = 0; index < activities.length; index++) {
+        final type = activities[index];
+        yield _ActivityOption(
+          type: type,
+          subtitle: activityTypeLocalizedHint(type, context.l10n),
+          showTopDivider: index > 0,
+          onTap: () => Navigator.of(context).pop(type),
+        );
+      }
+    }
   }
 
   Widget _buildSearchResults(List<ActivityType> results, String query) {
@@ -153,7 +194,7 @@ class _ActivitySelectionSheetState extends State<ActivitySelectionSheet> {
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.xl),
           child: Text(
-            'Nenhuma modalidade com “$query”. Use “Outro”.',
+            context.l10n.noActivityMatches(query),
             textAlign: TextAlign.center,
             style: AppTypography.body.copyWith(color: AppColors.textMuted),
           ),
@@ -163,16 +204,11 @@ class _ActivitySelectionSheetState extends State<ActivitySelectionSheet> {
 
     return ListView.builder(
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        0,
-        AppSpacing.lg,
-        AppSpacing.xl,
-      ),
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, AppSpacing.xl),
       itemCount: results.length,
       itemBuilder: (context, index) => _ActivityOption(
         type: results[index],
-        subtitle: activityTypeHintPtBr(results[index]),
+        subtitle: activityTypeLocalizedHint(results[index], context.l10n),
         onTap: () => Navigator.of(context).pop(results[index]),
       ),
     );
@@ -202,29 +238,154 @@ class _ActivitySelectionSheetState extends State<ActivitySelectionSheet> {
   }
 }
 
-class _SheetHandle extends StatelessWidget {
-  const _SheetHandle({required this.onClose});
+class _ActivitySelectionRoute extends PopupRoute<ActivityType> {
+  _ActivitySelectionRoute({required this.routeBarrierLabel});
 
+  final String routeBarrierLabel;
+
+  static const _sheetCurve = Cubic(.32, .72, 0, 1);
+
+  @override
+  bool get barrierDismissible => true;
+
+  @override
+  Color get barrierColor => Colors.transparent;
+
+  @override
+  String get barrierLabel => routeBarrierLabel;
+
+  @override
+  Duration get transitionDuration => const Duration(milliseconds: 450);
+
+  @override
+  Duration get reverseTransitionDuration => const Duration(milliseconds: 420);
+
+  @override
+  Widget buildPage(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+  ) {
+    final sheetAnimation = CurvedAnimation(
+      parent: animation,
+      curve: _sheetCurve,
+      reverseCurve: _sheetCurve,
+    );
+
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: SlideTransition(
+        // 原型移动的是叶片本身，位移距离应等于叶片高度，而不是整屏高度。
+        position: Tween<Offset>(
+          begin: const Offset(0, 1),
+          end: Offset.zero,
+        ).animate(sheetAnimation),
+        child: const ActivitySelectionSheet(),
+      ),
+    );
+  }
+
+  @override
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    final veilAnimation = CurvedAnimation(
+      parent: animation,
+      curve: const Interval(0, .67, curve: Curves.easeInOut),
+      // 原型遮罩淡出为 350ms；反向路由为 420ms，因此占其约 5/6。
+      reverseCurve: const Interval(0, .833, curve: Curves.easeInOut),
+    );
+
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Positioned.fill(
+          child: IgnorePointer(
+            child: FadeTransition(
+              opacity: veilAnimation,
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+                child: const ColoredBox(color: Color(0x59080A0E)),
+              ),
+            ),
+          ),
+        ),
+        child,
+      ],
+    );
+  }
+}
+
+class _SheetHandle extends StatelessWidget {
+  const _SheetHandle({
+    required this.title,
+    required this.onClose,
+    required this.onDragStart,
+    required this.onDragUpdate,
+    required this.onDragEnd,
+  });
+
+  final String title;
   final VoidCallback onClose;
+  final VoidCallback onDragStart;
+  final ValueChanged<double> onDragUpdate;
+  final ValueChanged<double> onDragEnd;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        AppSpacing.sm,
-        AppSpacing.md,
-        0,
-      ),
-      child: Row(
-        children: [
-          const Expanded(child: Center(child: _HandlePill())),
-          IconButton(
-            tooltip: 'Fechar',
-            onPressed: onClose,
-            icon: const Icon(Icons.close, color: AppColors.textSecondary),
-          ),
-        ],
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onVerticalDragStart: (_) => onDragStart(),
+      onVerticalDragUpdate: (details) => onDragUpdate(details.delta.dy),
+      onVerticalDragEnd: (details) => onDragEnd(details.primaryVelocity ?? 0),
+      child: SizedBox(
+        height: 62,
+        child: Stack(
+          children: [
+            const Positioned(
+              top: 8,
+              left: 0,
+              right: 0,
+              child: Center(child: _HandlePill()),
+            ),
+            Positioned(
+              top: 12,
+              left: 6,
+              right: 6,
+              height: 50,
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 44,
+                    child: IconButton(
+                      tooltip: context.l10n.close,
+                      onPressed: onClose,
+                      icon: const Icon(
+                        Icons.close,
+                        size: 22,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      title,
+                      textAlign: TextAlign.center,
+                      style: AppTypography.title.copyWith(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 44),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -236,9 +397,9 @@ class _HandlePill extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     width: 38,
-    height: 4,
+    height: 5,
     decoration: BoxDecoration(
-      color: AppColors.textMuted,
+      color: const Color(0x47FFFFFF),
       borderRadius: AppRadii.pillBorder,
     ),
   );
@@ -259,24 +420,31 @@ class _ActivitySearchField extends StatelessWidget {
       controller: controller,
       onChanged: onChanged,
       textInputAction: TextInputAction.search,
-      style: AppTypography.body.copyWith(color: AppColors.textPrimary),
+      style: AppTypography.body.copyWith(
+        fontSize: 15,
+        color: AppColors.textPrimary,
+      ),
       decoration: InputDecoration(
-        hintText: 'Buscar entre ${ActivityTypeCatalog.all.length} modalidades',
-        hintStyle: AppTypography.body.copyWith(color: AppColors.textMuted),
-        prefixIcon: const Icon(Icons.search, color: AppColors.textMuted),
+        constraints: const BoxConstraints(minHeight: 44, maxHeight: 44),
+        hintText: context.l10n.searchActivities(ActivityTypeCatalog.all.length),
+        hintStyle: AppTypography.body.copyWith(
+          fontSize: 15,
+          color: AppColors.textPlaceholder,
+        ),
+        prefixIcon: const Icon(
+          Icons.search,
+          size: 18,
+          color: AppColors.textHalf,
+        ),
+        // CSS 搜索框的布局为 14px 内边距 + 18px 图标 + 10px 间隔。
+        prefixIconConstraints: const BoxConstraints(minWidth: 38),
         filled: true,
-        fillColor: AppColors.glass,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.sm,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: AppRadii.controlBorder,
-          borderSide: AppBorders.glass,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: AppRadii.controlBorder,
-          borderSide: AppBorders.selected,
+        fillColor: const Color(0x12FFFFFF),
+        isDense: true,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
+        border: OutlineInputBorder(
+          borderRadius: const BorderRadius.all(Radius.circular(14)),
+          borderSide: BorderSide.none,
         ),
       ),
     );
@@ -284,30 +452,39 @@ class _ActivitySearchField extends StatelessWidget {
 }
 
 class _SectionHeading extends StatelessWidget {
-  const _SectionHeading({required this.label, this.count});
+  const _SectionHeading({
+    required this.label,
+    this.count,
+    this.topSpacing = 24,
+  });
 
   final String label;
   final int? count;
+  final double topSpacing;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: AppSpacing.md, bottom: AppSpacing.xs),
+      padding: EdgeInsets.fromLTRB(6, topSpacing, 6, 10),
       child: Row(
         children: [
           Expanded(
             child: Text(
               label.toUpperCase(),
-              style: AppTypography.caption.copyWith(
-                color: AppColors.textMuted,
-                letterSpacing: 1.5,
+              style: AppTypography.kicker.copyWith(
+                color: AppColors.textHalf,
+                fontSize: 11,
+                letterSpacing: 1.54,
               ),
             ),
           ),
           if (count != null)
             Text(
               '$count',
-              style: AppTypography.caption.copyWith(color: AppColors.textMuted),
+              style: AppTypography.caption.copyWith(
+                color: AppColors.textInactive,
+                fontSize: 12,
+              ),
             ),
         ],
       ),
@@ -319,53 +496,61 @@ class _ActivityOption extends StatelessWidget {
   const _ActivityOption({
     required this.type,
     required this.subtitle,
+    this.showTopDivider = false,
     required this.onTap,
   });
 
   final ActivityType type;
   final String subtitle;
+  final bool showTopDivider;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
-      label: activityTypeNamesPtBr[type.id] ?? type.id,
+      label: activityTypeLocalizedName(type, context.l10n),
       child: InkWell(
         onTap: onTap,
         borderRadius: AppRadii.controlBorder,
-        child: ConstrainedBox(
+        // 原型仅在按下时显示极轻反馈，不保留桌面鼠标悬停底色。
+        overlayColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.pressed)) {
+            return const Color(0x08FFFFFF);
+          }
+          return Colors.transparent;
+        }),
+        child: Container(
           constraints: const BoxConstraints(minHeight: 72),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+          decoration: showTopDivider
+              ? const BoxDecoration(
+                  border: Border(top: BorderSide(color: Color(0x12FFFFFF))),
+                )
+              : null,
+          child: SizedBox(
+            height: showTopDivider ? 71 : 72,
             child: Row(
               children: [
                 SizedBox(
-                  width: 42,
-                  height: 42,
-                  child: DecoratedBox(
-                    decoration: const BoxDecoration(
-                      color: AppColors.glass,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      _iconForType(type),
-                      size: 19,
-                      color: AppColors.textSecondary,
-                    ),
+                  width: 24,
+                  child: ActivityTypeIcon(
+                    type: type,
+                    fallback: _iconForType(type),
+                    size: 20,
                   ),
                 ),
-                const SizedBox(width: AppSpacing.md),
+                const SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        activityTypeNamesPtBr[type.id] ?? type.id,
+                        activityTypeLocalizedName(type, context.l10n),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: AppTypography.body.copyWith(
+                        style: AppTypography.listItem.copyWith(
+                          fontSize: 15,
                           color: AppColors.textPrimary,
                         ),
                       ),
@@ -375,7 +560,8 @@ class _ActivityOption extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: AppTypography.caption.copyWith(
-                          color: AppColors.textMuted,
+                          fontSize: 13,
+                          color: AppColors.textHalf,
                         ),
                       ),
                     ],
@@ -384,7 +570,7 @@ class _ActivityOption extends StatelessWidget {
                 const Icon(
                   Icons.chevron_right,
                   color: AppColors.textMuted,
-                  size: 20,
+                  size: 16,
                 ),
               ],
             ),

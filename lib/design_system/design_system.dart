@@ -1,6 +1,7 @@
 export 'components/app_bottom_nav.dart';
 export 'components/app_button.dart';
 export 'components/app_card.dart';
+export 'components/app_frosted_surface.dart';
 export 'components/app_detail_header.dart';
 export 'components/app_detail_background.dart';
 export 'components/app_gradient_card.dart';
@@ -9,6 +10,7 @@ export 'components/app_confirmation_sheet.dart';
 export 'components/app_icon.dart';
 export 'components/app_loading.dart';
 export 'components/app_notice.dart';
+export 'components/app_page_header.dart';
 export 'components/app_quick_actions_overlay.dart';
 export 'theme/app_theme.dart';
 export 'navigation/app_page_transitions.dart';

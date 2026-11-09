@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../design_system/design_system.dart';
+import '../../l10n/app_localizations_context.dart';
 import '../activity/presentation/pages/activity_overview_page.dart';
 
 /// Profile page reached from the side menu's Ajustes entry.
@@ -35,11 +36,12 @@ class _ProfilePageState extends State<ProfilePage> {
       );
       return;
     }
-    _showComingSoon(action.label.replaceAll('\n', ' '));
+    _showComingSoon(action.localizedLabel(context.l10n).replaceAll('\n', ' '));
   }
 
   @override
   Widget build(BuildContext context) {
+    final strings = context.l10n;
     return Stack(
       children: [
         Scaffold(
@@ -64,34 +66,30 @@ class _ProfilePageState extends State<ProfilePage> {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(22, 10, 22, 110),
                 children: [
-                  Row(
-                    children: [
-                      IconButton(
-                        tooltip: 'Voltar',
-                        onPressed: () => Navigator.of(context).pop(),
-                        icon: const AppSvgIcon(AppSvgAssets.back, size: 21),
+                  AppPageHeader(
+                    height: 48,
+                    title: Text(
+                      strings.profile,
+                      style: const TextStyle(
+                        fontFamily: AppFontFamilies.geist,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w500,
                       ),
-                      const Expanded(
-                        child: Text(
-                          'Perfil',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: AppFontFamilies.geist,
-                            fontSize: 17,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
+                    ),
+                    leading: IconButton(
+                      tooltip: strings.back,
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const AppSvgIcon(AppSvgAssets.back, size: 21),
+                    ),
+                    trailing: IconButton(
+                      tooltip: strings.editProfile,
+                      onPressed: () => AppNotice.show(
+                        context,
+                        kind: AppNoticeKind.info,
+                        message: strings.profileEditComingSoon,
                       ),
-                      IconButton(
-                        tooltip: 'Editar perfil',
-                        onPressed: () => AppNotice.show(
-                          context,
-                          kind: AppNoticeKind.info,
-                          message: 'Edição de perfil em breve.',
-                        ),
-                        icon: const AppSvgIcon(AppSvgAssets.edit, size: 21),
-                      ),
-                    ],
+                      icon: const AppSvgIcon(AppSvgAssets.edit, size: 21),
+                    ),
                   ),
                   const SizedBox(height: 28),
                   const Center(
@@ -113,7 +111,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Brasília · com a BYND há 2 meses',
+                    strings.profileMembership,
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       fontFamily: AppFontFamilies.geist,
@@ -123,42 +121,54 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
                   const SizedBox(height: 68),
-                  const Row(
+                  Row(
                     children: [
                       Expanded(
-                        child: _Stat(label: 'Idade', value: '34', unit: 'anos'),
+                        child: _Stat(
+                          label: strings.age,
+                          value: '34',
+                          unit: strings.years,
+                        ),
                       ),
                       _StatDivider(),
                       Expanded(
-                        child: _Stat(label: 'Altura', value: '1,68', unit: 'm'),
+                        child: _Stat(
+                          label: strings.height,
+                          value: strings.localeName == 'en' ? '5′6″' : '1,68',
+                          unit: strings.localeName == 'en' ? '' : 'm',
+                        ),
                       ),
                       _StatDivider(),
                       Expanded(
-                        child: _Stat(label: 'Peso', value: '62', unit: 'kg'),
+                        child: _Stat(
+                          label: strings.weight,
+                          value: '62',
+                          unit: 'kg',
+                        ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 65),
-                  const _SectionTitle('SEUS DADOS'),
+                  _SectionTitle(strings.yourData),
                   const SizedBox(height: 8),
-                  const _InfoRow('Data de nascimento', '17 abr 1992'),
-                  const _InfoRow('Sexo biológico', 'Feminino'),
-                  const _InfoRow('Cidade', 'Brasília (Asa Sul)'),
+                  _InfoRow(strings.birthDate, strings.birthDateValue),
+                  _InfoRow(strings.biologicalSex, strings.female),
+                  _InfoRow(strings.city, 'Brasília (Asa Sul)'),
                   _InfoRow(
-                    'Objetivo',
+                    strings.goal,
                     '',
-                    subtitle: 'Perder gordura sem perder massa magra',
-                    onTap: () => _showComingSoon('Objetivo'),
+                    subtitle: strings.loseFatKeepMuscle,
+                    onTap: () => _showComingSoon(strings.goal),
                   ),
-                  const _InfoRow('Unidades', 'Métrico'),
+                  _InfoRow(strings.units, strings.metric),
                   const SizedBox(height: 36),
-                  const _SectionTitle('CONTA'),
+                  _SectionTitle(strings.account),
                   const SizedBox(height: 8),
                   _InfoRow(
-                    'Pulseira',
+                    strings.wristband,
                     '',
-                    subtitle: 'BYND ONE · conectada desde 9 set 2026',
-                    onTap: () => _showComingSoon('Pulseira'),
+                    subtitle: strings.wristbandConnectedSince,
+                    onTap: () => _showComingSoon(strings.wristband),
                   ),
                 ],
               ),
@@ -187,7 +197,7 @@ class _ProfilePageState extends State<ProfilePage> {
   void _showComingSoon(String label) => AppNotice.show(
     context,
     kind: AppNoticeKind.info,
-    message: '$label: em breve.',
+    message: context.l10n.connectedDeviceComingSoon(label),
   );
 }
 
