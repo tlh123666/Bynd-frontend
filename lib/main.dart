@@ -16,6 +16,7 @@ import 'features/atlas/data/atlas_repository.dart';
 import 'features/device/application/device_controller.dart';
 import 'features/device/application/device_scope.dart';
 import 'features/home/home_page.dart';
+import 'features/home/application/home_controller.dart';
 
 Future<void> main() async {
   final config = await AppBootstrap.initialize();
@@ -25,6 +26,7 @@ Future<void> main() async {
 class ByndApp extends StatefulWidget {
   const ByndApp({
     this.deviceController,
+    this.homeController,
     this.atlasRepository,
     this.authController,
     this.config,
@@ -32,6 +34,7 @@ class ByndApp extends StatefulWidget {
     super.key,
   });
   final DeviceController? deviceController;
+  final HomeController? homeController;
   final AtlasRepository? atlasRepository;
   final AuthController? authController;
   final AppConfig? config;
@@ -60,8 +63,7 @@ class _ByndAppState extends State<ByndApp> {
           config: widget.config,
           locale: widget.localeController,
         );
-    _auth =
-        widget.authController ?? AuthRuntime.create(config: widget.config);
+    _auth = widget.authController ?? AuthRuntime.create(config: widget.config);
     _legacyLocale = legacy_l10n.AppLocaleController()..load();
     unawaited(_devices.initialize());
     // 恢复会话元数据；不阻塞首帧，进程被杀后重进也能带回登录态。
@@ -90,6 +92,9 @@ class _ByndAppState extends State<ByndApp> {
             builder: (context, _) => MaterialApp(
               title: AppConfig.applicationName,
               debugShowCheckedModeBanner: false,
+              scrollBehavior: const MaterialScrollBehavior().copyWith(
+                scrollbars: false,
+              ),
               locale: _legacyLocale.locale,
               supportedLocales: const [Locale('pt', 'BR'), Locale('en')],
               localizationsDelegates: const [
@@ -100,7 +105,10 @@ class _ByndAppState extends State<ByndApp> {
               theme: AppTheme.dark,
               home: legacy_l10n.AppLocaleScope(
                 controller: _legacyLocale,
-                child: const HomePage(),
+                child: HomePage(
+                  controller: widget.homeController,
+                  config: widget.config,
+                ),
               ),
             ),
           ),

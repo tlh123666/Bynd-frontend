@@ -1,29 +1,68 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import '../../core/config/app_config.dart';
 
 import '../../design_system/design_system.dart';
 import '../../shared/navigation/app_side_menu.dart';
 import '../../l10n/app_locale_controller.dart';
 import '../../l10n/app_localizations_context.dart';
 import '../../l10n/language_picker_sheet.dart';
-import '../../shared/widgets/day_strip.dart';
-import 'home_sky_background.dart';
+import 'application/home_controller.dart';
+import 'presentation/widgets/home_content.dart';
+import 'presentation/pages/home_diary_page.dart';
+import 'presentation/widgets/home_account_guard.dart';
 import '../profile/profile_page.dart';
 import '../activity/presentation/pages/activity_overview_page.dart';
 import '../atlas/presentation/pages/mapa_page.dart';
 import '../device/presentation/pages/device_management_page.dart';
 
-/// 当前只实现参考图中的主页外壳与底部导航，内容页后续接入。
+/// Home owns navigation; content and data live in the home feature layers.
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  const HomePage({this.controller, this.config, super.key});
+  final HomeController? controller;
+  final AppConfig? config;
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   final GlobalKey _moreButtonKey = GlobalKey();
   int _selectedIndex = 0;
-  int _selectedDay = 0;
+  late final HomeController _home;
+  String? _homeLocale;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _home = widget.controller ?? HomeRuntime.create(config: widget.config);
+    unawaited(_home.initialize());
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final locale = context.l10n.localeName;
+    if (_homeLocale == locale) return;
+    _homeLocale = locale;
+    scheduleMicrotask(() {
+      if (mounted) unawaited(_home.setLocale(locale));
+    });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    if (widget.controller == null) _home.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) unawaited(_home.reload());
+  }
+
   bool _quickActionsOpen = false;
   Rect? _quickActionOrigin;
   bool _menuOpen = false;
@@ -75,6 +114,17 @@ class _HomePageState extends State<HomePage> {
       _openMapa();
       return;
     }
+    if (label == context.l10n.diary || label == 'Diário') {
+      Navigator.of(context).push<void>(
+        MaterialPageRoute(
+          builder: (_) => HomeAccountGuard(
+            controller: _home,
+            child: HomeDiaryPage(controller: _home),
+          ),
+        ),
+      );
+      return;
+    }
     AppNotice.show(
       context,
       kind: AppNoticeKind.info,
@@ -122,103 +172,12 @@ class _HomePageState extends State<HomePage> {
         Scaffold(
           extendBody: true,
           backgroundColor: Colors.transparent,
-          body: Stack(
-            fit: StackFit.expand,
-            children: [
-              const Positioned.fill(child: HomeSkyBackground()),
-              SafeArea(
-                bottom: false,
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final headerContent = Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                            AppSpacing.lg,
-                            AppSpacing.md,
-                            AppSpacing.lg,
-                            0,
-                          ),
-                          child: AppPageHeader(
-                            height: 48,
-                            padding: EdgeInsets.zero,
-                            leading: IconButton(
-                              onPressed: () => setState(() => _menuOpen = true),
-                              tooltip: context.l10n.menu,
-                              icon: const AppSvgIcon(
-                                AppSvgAssets.menu,
-                                size: 22,
-                              ),
-                            ),
-                            title: const AppSvgIcon(
-                              AppSvgAssets.logo,
-                              label: 'BYND',
-                              width: 72,
-                              height: 16,
-                            ),
-                            trailing: const CircleAvatar(
-                              radius: 18,
-                              backgroundImage: AssetImage(
-                                'assets/images/avatar.webp',
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.xs),
-                        DayStrip(
-                          day: _selectedDay,
-                          onDayChanged: (day) =>
-                              setState(() => _selectedDay = day),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(
-                            top: AppSpacing.md,
-                            right: AppSpacing.md,
-                          ),
-                          child: Align(
-                            alignment: Alignment.centerRight,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: AppSpacing.sm,
-                                vertical: AppSpacing.xs,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColors.homeCounter,
-                                borderRadius: AppRadii.pillBorder,
-                                border: Border.all(color: AppColors.navBorder),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const AppSvgIcon(
-                                    AppSvgAssets.photoCounter,
-                                    size: 15,
-                                  ),
-                                  const SizedBox(width: AppSpacing.xxs),
-                                  Text(
-                                    '0/24',
-                                    style: AppTypography.caption.copyWith(
-                                      color: AppColors.textPrimary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-
-                    // 浏览器初始化或极小窗口下，顶部内容允许滚动，避免短暂溢出。
-                    if (constraints.maxHeight < 180) {
-                      return SingleChildScrollView(child: headerContent);
-                    }
-                    return headerContent;
-                  },
-                ),
-              ),
-            ],
+          body: HomeContent(
+            controller: _home,
+            onMenu: () => setState(() => _menuOpen = true),
+            onProfile: _openSettings,
+            onDevice: _openDevice,
+            onMapa: _openMapa,
           ),
           bottomNavigationBar: AppBottomNav(
             selectedIndex: _selectedIndex,

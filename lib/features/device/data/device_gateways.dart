@@ -64,7 +64,11 @@ class DemoDeviceGateway implements DeviceGateway {
   }
 }
 
-class MethodChannelDeviceGateway implements DeviceGateway {
+class MethodChannelDeviceGateway
+    implements
+        DeviceGateway,
+        ManagedDeviceGateway,
+        DeviceOperationCapabilities {
   const MethodChannelDeviceGateway({
     this.channel = const MethodChannel('com.bynd/device_management'),
     this.events = const EventChannel('com.bynd/device_management_events'),
@@ -76,7 +80,16 @@ class MethodChannelDeviceGateway implements DeviceGateway {
     try {
       return await channel
           .invokeMethod<T>(method, arguments)
-          .timeout(const Duration(seconds: 30));
+          .timeout(
+            Duration(
+              seconds:
+                  method == 'scanDevices' ||
+                      method == 'connect' ||
+                      method == 'readStatus'
+                  ? 120
+                  : 30,
+            ),
+          );
     } on MissingPluginException {
       throw const DeviceFailure(
         'O Bluetooth da pulseira ainda não está disponível nesta versão do app.',
@@ -94,9 +107,57 @@ class MethodChannelDeviceGateway implements DeviceGateway {
         'bluetooth_off' => 'Ative o Bluetooth para conectar sua pulseira.',
         'device_disconnected' =>
           'A pulseira desconectou. Aproxime-a do celular.',
+        'disconnected' => 'A pulseira desconectou. Aproxime-a do celular.',
+        'location_disabled' =>
+          'Ative a localização do celular para procurar pulseiras nesta versão do Android.',
+        'bluetooth_unavailable' =>
+          'Este aparelho não tem Bluetooth compatível.',
+        'identity_missing' =>
+          'A pulseira não informou sua identificação. Aproxime-a e tente novamente.',
+        'identity_mismatch' =>
+          'Esta pulseira não é a que está vinculada à sua conta. Procure a pulseira correta.',
+        'unsupported_device' =>
+          'Este dispositivo Bluetooth não é uma pulseira BYND compatível.',
+        'unsupported_operation' =>
+          'Esta operação ainda não é compatível com o SDK desta pulseira.',
+        'connection_timeout' =>
+          'A conexão demorou demais. Aproxime a pulseira e tente novamente.',
         _ => 'Não foi possível comunicar com a pulseira. Tente novamente.',
       }, code: error.code);
     }
+  }
+
+  @override
+  Future<void> stopScan() => _lifecycle('stopScan');
+
+  Future<void> _lifecycle(String method) async {
+    // Both native handlers finish synchronously. Do not create a new timeout
+    // timer while Flutter is disposing the widget tree / engine.
+    try {
+      await channel.invokeMethod<void>(method);
+    } on MissingPluginException {
+      /* Other platforms have no native driver. */
+    } on PlatformException {
+      /* Native Activity teardown is authoritative. */
+    }
+  }
+
+  @override
+  Future<void> close() async {
+    // The native Activity owns the driver. Teardown disconnects only this
+    // installation's physical transport, never a cloud binding.
+    await _lifecycle('close');
+  }
+
+  @override
+  Future<bool> supportsOperation(DeviceOperationType type) async {
+    final supported = await _call<Map>('capabilities');
+    return supported?[switch (type) {
+          DeviceOperationType.restart => 'restart',
+          DeviceOperationType.eraseData => 'eraseUnsyncedData',
+          DeviceOperationType.firmwareUpdate => 'installFirmware',
+        }] ==
+        true;
   }
 
   Map<String, dynamic> _args(DeviceSnapshot device) {
@@ -159,6 +220,16 @@ class MethodChannelDeviceGateway implements DeviceGateway {
     ))?.cast<String, dynamic>();
     if (data == null) {
       throw const DeviceFailure('Não foi possível ler o estado da pulseira.');
+    }
+    final actualSerial = data['serialNumber'] as String?;
+    String identity(String value) =>
+        value.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '').toUpperCase();
+    if (actualSerial == null ||
+        identity(actualSerial) != identity(device.serialNumber)) {
+      throw const DeviceFailure(
+        'Esta pulseira não é a que está vinculada à sua conta.',
+        code: 'identity_mismatch',
+      );
     }
     return DeviceSnapshot.fromJson({
       ...device.toJson(),

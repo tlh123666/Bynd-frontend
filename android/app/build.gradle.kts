@@ -20,6 +20,7 @@ android {
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -75,4 +76,11 @@ kotlin {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    // Same vendor binary used by JCVital; no replacement BLE protocol.
+    implementation(files("libs/v8sdk1.0.jar"))
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
+    testImplementation("junit:junit:4.13.2")
 }

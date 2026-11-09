@@ -7,6 +7,8 @@ abstract final class AppMotion {
   static const drawer = Duration(milliseconds: 300);
   static const page = Duration(milliseconds: 380);
   static const loadingCycle = Duration(milliseconds: 900);
+  static const homeEnter = Duration(milliseconds: 700); // hd-surge
+  static const homeExpand = Duration(milliseconds: 550); // hd-dobra2
   static const quickEnter = Duration(milliseconds: 540);
   static const quickBackdrop = Duration(milliseconds: 250);
   static const quickHeadlineDelay = Duration(milliseconds: 50);

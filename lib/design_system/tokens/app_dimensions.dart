@@ -54,4 +54,8 @@ abstract final class AppSizes {
   static const detailGutter = 22.0;
   static const detailHeaderHeight = 52.0;
   static const detailTouchTarget = 44.0;
+  static const homeGutter = 22.0;
+  static const signalHeight = 150.0;
+  static const signalRadius = 12.0;
+  static const signalGap = 6.0;
 }

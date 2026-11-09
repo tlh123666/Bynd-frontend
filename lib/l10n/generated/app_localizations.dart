@@ -896,6 +896,384 @@ abstract class AppLocalizations {
   /// In pt_BR, this message translates to:
   /// **'Dom'**
   String get calendarWeekdaySun;
+
+  /// No description provided for @homeMorning.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Bom dia'**
+  String get homeMorning;
+
+  /// No description provided for @homeAfternoon.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Boa tarde'**
+  String get homeAfternoon;
+
+  /// No description provided for @homeEvening.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Boa noite'**
+  String get homeEvening;
+
+  /// No description provided for @homePastGreeting.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Como foi o seu dia'**
+  String get homePastGreeting;
+
+  /// No description provided for @homeDirection.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Ver direção completa'**
+  String get homeDirection;
+
+  /// No description provided for @homeSignals.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Seus sinais'**
+  String get homeSignals;
+
+  /// No description provided for @homeAllSignals.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Ver todos ›'**
+  String get homeAllSignals;
+
+  /// No description provided for @homeCustomize.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Personalizar a Home'**
+  String get homeCustomize;
+
+  /// No description provided for @homeCustomizeHelp.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Escolha os 6 sinais que ficam na sua Home e arraste pela alça ≡ para mudar a ordem.'**
+  String get homeCustomizeHelp;
+
+  /// No description provided for @homeOnHome.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'NA HOME'**
+  String get homeOnHome;
+
+  /// No description provided for @homeOtherSignals.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'OUTROS SINAIS'**
+  String get homeOtherSignals;
+
+  /// No description provided for @homeSixSlots.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'A Home tem 6 lugares. Desmarque um antes de escolher outro.'**
+  String get homeSixSlots;
+
+  /// No description provided for @homeSave.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Salvar'**
+  String get homeSave;
+
+  /// No description provided for @homePreferenceFailed.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Não foi possível salvar sua preferência. Tente novamente.'**
+  String get homePreferenceFailed;
+
+  /// No description provided for @homePhoto.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Trocar a foto do topo'**
+  String get homePhoto;
+
+  /// No description provided for @homeShowMore.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Mostrar mais'**
+  String get homeShowMore;
+
+  /// No description provided for @homeShowLess.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Mostrar menos'**
+  String get homeShowLess;
+
+  /// No description provided for @homeRetry.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Tentar novamente'**
+  String get homeRetry;
+
+  /// No description provided for @homeUnavailable.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Não foi possível carregar a Home.'**
+  String get homeUnavailable;
+
+  /// No description provided for @homeSignIn.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Entre na sua conta para ver seus dados.'**
+  String get homeSignIn;
+
+  /// No description provided for @homeSignInAction.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Entrar na conta'**
+  String get homeSignInAction;
+
+  /// No description provided for @homeNoMeasurement.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Sem dados neste dia'**
+  String get homeNoMeasurement;
+
+  /// No description provided for @homeSync.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Conecte e sincronize sua pulseira para ver seus sinais.'**
+  String get homeSync;
+
+  /// No description provided for @homePartial.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Algumas informações não foram atualizadas.'**
+  String get homePartial;
+
+  /// No description provided for @homeMapaTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'O que o seu corpo está revelando?'**
+  String get homeMapaTitle;
+
+  /// No description provided for @homeMapaBody.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Uma relação entre seus hábitos, sono, atividade e recuperação começou a aparecer.'**
+  String get homeMapaBody;
+
+  /// No description provided for @homeMapaWaiting.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Seu Mapa está se formando. Continue usando a pulseira para descobrir relações entre seus hábitos e seus sinais.'**
+  String get homeMapaWaiting;
+
+  /// No description provided for @homeExploreMapa.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Explorar meu Mapa →'**
+  String get homeExploreMapa;
+
+  /// No description provided for @homeDiaryKicker.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'SEU DIÁRIO'**
+  String get homeDiaryKicker;
+
+  /// No description provided for @homeDiaryTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Como foi o seu dia?'**
+  String get homeDiaryTitle;
+
+  /// No description provided for @homeDiaryBody.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Registre alimentação, treino, humor, café e o que mais aconteceu.'**
+  String get homeDiaryBody;
+
+  /// No description provided for @homeAddEntry.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Adicionar registro +'**
+  String get homeAddEntry;
+
+  /// No description provided for @homePatterns.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'padrões'**
+  String get homePatterns;
+
+  /// No description provided for @homeWaitingPatterns.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Em formação'**
+  String get homeWaitingPatterns;
+
+  /// No description provided for @homeNumbers.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Seus números'**
+  String get homeNumbers;
+
+  /// No description provided for @homeWeek.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'SEMANA · UM PONTO POR DIA'**
+  String get homeWeek;
+
+  /// No description provided for @homeMinimum.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Mínima'**
+  String get homeMinimum;
+
+  /// No description provided for @homeAverage.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Média'**
+  String get homeAverage;
+
+  /// No description provided for @homeMaximum.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Máxima'**
+  String get homeMaximum;
+
+  /// No description provided for @homeHistoryError.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Não foi possível carregar o histórico.'**
+  String get homeHistoryError;
+
+  /// No description provided for @homeHistoryEmpty.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Ainda não há medições nesta semana.'**
+  String get homeHistoryEmpty;
+
+  /// No description provided for @homeRecommendation.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Para hoje'**
+  String get homeRecommendation;
+
+  /// No description provided for @homeDiary.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Diário'**
+  String get homeDiary;
+
+  /// No description provided for @homeDiaryEmpty.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Seu dia, do seu jeito. Adicione o primeiro registro.'**
+  String get homeDiaryEmpty;
+
+  /// No description provided for @homeNewEntry.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Novo registro'**
+  String get homeNewEntry;
+
+  /// No description provided for @homeEntryLabel.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'O que aconteceu?'**
+  String get homeEntryLabel;
+
+  /// No description provided for @homeEntryNote.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Mais detalhes (opcional)'**
+  String get homeEntryNote;
+
+  /// No description provided for @homeEntryRequired.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Descreva o registro antes de salvar.'**
+  String get homeEntryRequired;
+
+  /// No description provided for @homeEntrySaved.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Registro salvo.'**
+  String get homeEntrySaved;
+
+  /// No description provided for @homeEntryFailed.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Não foi possível salvar. Tente novamente.'**
+  String get homeEntryFailed;
+
+  /// No description provided for @homeMeal.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Alimentação'**
+  String get homeMeal;
+
+  /// No description provided for @homeTraining.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Treino'**
+  String get homeTraining;
+
+  /// No description provided for @homeMood.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Humor'**
+  String get homeMood;
+
+  /// No description provided for @homeCaffeine.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Café'**
+  String get homeCaffeine;
+
+  /// No description provided for @homeOther.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Outro'**
+  String get homeOther;
+
+  /// No description provided for @homeUnknownDirection.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Aguardando seus sinais.'**
+  String get homeUnknownDirection;
+
+  /// No description provided for @homeDataOnly.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Medições da sua pulseira. Os dados ausentes não são estimados.'**
+  String get homeDataOnly;
+
+  /// No description provided for @homeSelectedCount.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'de 6'**
+  String get homeSelectedCount;
+
+  /// No description provided for @homeOpenDevice.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Conectar pulseira'**
+  String get homeOpenDevice;
+
+  /// No description provided for @homeRefresh.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Atualizar'**
+  String get homeRefresh;
+
+  /// No description provided for @homeDrag.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Arrastar para mudar a ordem'**
+  String get homeDrag;
+
+  /// No description provided for @homeNoDirection.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Sincronize a pulseira para acompanhar a direção do seu dia.'**
+  String get homeNoDirection;
+
+  /// No description provided for @homeAccountChanged.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Sua conta mudou. Feche esta tela e abra novamente para ver os dados atuais.'**
+  String get homeAccountChanged;
 }
 
 class _AppLocalizationsDelegate

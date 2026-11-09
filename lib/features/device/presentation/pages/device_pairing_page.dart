@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import '../../../../design_system/design_system.dart';
 import '../../application/device_controller.dart';
 import '../../application/device_scope.dart';
@@ -16,14 +17,27 @@ class _DevicePairingPageState extends State<DevicePairingPage> {
   bool _pairing = false;
   String? _error;
   bool _started = false;
+  DeviceController? _controller;
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_started) return;
     _started = true;
+    _controller = DeviceScope.of(context);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _scan();
     });
+  }
+
+  @override
+  void dispose() {
+    if (_scanning) {
+      unawaited(
+        _controller?.stopScan().catchError((Object _) {}) ??
+            Future<void>.value(),
+      );
+    }
+    super.dispose();
   }
 
   Future<void> _scan() async {

@@ -42,6 +42,9 @@ abstract final class AppSvgAssets {
   static const deviceErase = 'assets/icons/site/device-erase.svg';
   static const deviceInfo = 'assets/icons/site/device-info.svg';
   static const deviceCheck = 'assets/icons/site/device-check.svg';
+  static const homeDirection = 'assets/icons/site/home-direction.svg';
+  static const homeCustomize = 'assets/icons/site/home-customize.svg';
+  static const homeBrain = 'assets/icons/site/home-brain.svg';
 }
 
 class AppSvgIcon extends StatelessWidget {

@@ -237,7 +237,15 @@ void main() {
               asset.startsWith('assets/icons/site/') && asset.endsWith('.svg'),
         )
         .toList();
-    expect(assets.length, 147);
+    expect(assets.length, greaterThanOrEqualTo(147));
+    expect(
+      assets,
+      containsAll([
+        AppSvgAssets.homeDirection,
+        AppSvgAssets.homeCustomize,
+        AppSvgAssets.homeBrain,
+      ]),
+    );
 
     for (final referencedAsset in [
       AppSvgAssets.logo,

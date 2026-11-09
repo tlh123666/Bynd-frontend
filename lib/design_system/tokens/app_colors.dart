@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// 以 bynd-app.vercel.app 的 main-BSoQRcP6.css 为准。
+/// 首页增量依据 2026-11-09 main-CRUZ18wL.css 的最终计算样式。
 /// 透明色保持 CSS 的 alpha，叠在背景上时才会得到原站的视觉颜色。
 abstract final class AppColors {
   static const brandSlate = Color(0xFF2C3A4E);
@@ -45,6 +46,24 @@ abstract final class AppColors {
   static const menuChevron = Color(0x4DF4F5F7); // #f4f5f74d
   static const menuExit = Color(0xFFFF7A6E); // .ml-sair2
   static const homeCounter = Color(0x5914181E); // #14181e59
+  static const homeCanvas = Color(0xFF121418);
+  static const signalSurface = Color(0xFF1C1F24); // .ss-gr .ss-c
+  static const signalAttention = Color(0xFFECD27C); // .ss-e.fora
+  static const homeBody = Color(0xDBF4F5F7); // .hd-texto, .86
+  static const homeDate = Color(0xBFFFFFFF); // .hd-data, .75
+  static const homeGreeting = Color(0xEBFFFFFF); // .hd-ola, .92
+  static const homePhotoChip = Color(0x73121418);
+  static const homePhotoBorder = Color(0x2EFFFFFF);
+  static const contentSheetVeil = Color(0x59080A0E); // .fl-veu, .35
+  static const homePatternTag = Color(0x248FBCF0);
+  static const homePatternText = Color(0xFFCFE2FB);
+  static const homePhotoShade = <Color>[
+    Color(0x610A0C10),
+    Color(0x0F0A0C10),
+    Color(0x290A0C10),
+    Color(0x800C0E12),
+    Color(0xEB121418),
+  ];
   static const quickActionsVeil = Color(0xB80C0F14); // #0c0f14b8
   static const deviceDivider = Color(0x12FFFFFF); // .pl-* rgba(255,255,255,.07)
   static const deviceIcon = Color(0xB3F4F5F7); // .pl-acao-t svg
