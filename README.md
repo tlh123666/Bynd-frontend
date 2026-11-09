@@ -5,7 +5,7 @@ BYND 的 Flutter 客户端。参考 [线上原型](https://bynd-app.vercel.app/)
 ## 目录规划
 
 ```text
-assets/icons/site/                   # 从线上页面提取的 139 个 SVG 与 manifest.json
+assets/icons/site/                   # 从线上页面提取的 147 个 SVG 与 manifest.json
 assets/images/avatar.webp           # 原型中的个人头像
 assets/fonts/                       # Geist、Urbanist、Newsreader TTF 与 OFL 许可
 lib/
@@ -38,6 +38,10 @@ lib/
     ├── home/home_sky_background.dart # 首页夜间 CSS 天空渐变与云层
     └── profile/profile_page.dart     # 设置入口对应的个人资料页
 ```
+
+设备管理已接入左上角菜单顶部的 BYND ONE 卡片，包含状态/高级页、重新配对、解绑、固件检查与升级流程、重启、设备本地数据清除、安全说明和设备信息。公共页头、标签、渐变操作卡片、确认面板放在 `design_system/components/`；设备状态、账号接口、持久化与蓝牙适配分别放在 `features/device/application/`、`data/` 和 `domain/`。目录规划、原站 CSS 依据、环境配置和真实设备接口见 [设备管理文档](docs/device-management.md)。后端新增迁移与 API 见 `BYND-backend/doc/device-management.md`。
+
+默认运行可持久化的演示模式。真实环境使用 `--dart-define=DEVICE_DEMO=false --dart-define=API_BASE_URL=https://your-host/api/v1`，并通过 `DeviceRuntime.create(tokenProvider: () async => session.accessToken)` 注入现有登录会话，然后传给 `ByndApp(deviceController: controller)`。不把访问令牌写入源码或编译参数。当前新项目尚未安装厂商 Android/iOS 蓝牙驱动，真实硬件操作会明确显示不支持，不会退回演示成功。
 
 ## 使用方式
 

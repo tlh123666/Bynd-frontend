@@ -1,0 +1,44 @@
+{
+  "source": "https://bynd-app.vercel.app/",
+  "image": {
+    "path": "device-band.png",
+    "url": "https://bynd-app.vercel.app/img/pulseira-ecg.png",
+    "sha256": "c54d0f9c1eab70e45632fdb3c062e1e991bcb6975603001991028258bb0398e3",
+    "bytes": 315053
+  },
+  "icons": [
+    {
+      "path": "../icons/site/device-pair.svg",
+      "source": "https://bynd-app.vercel.app/assets/main-ClJ891p2.js"
+    },
+    {
+      "path": "../icons/site/device-unpair.svg",
+      "source": "https://bynd-app.vercel.app/assets/main-ClJ891p2.js"
+    },
+    {
+      "path": "../icons/site/device-firmware.svg",
+      "source": "https://bynd-app.vercel.app/assets/main-ClJ891p2.js"
+    },
+    {
+      "path": "../icons/site/device-restart.svg",
+      "source": "https://bynd-app.vercel.app/assets/main-ClJ891p2.js"
+    },
+    {
+      "path": "../icons/site/device-safety.svg",
+      "source": "https://bynd-app.vercel.app/assets/main-ClJ891p2.js"
+    },
+    {
+      "path": "../icons/site/device-erase.svg",
+      "source": "https://bynd-app.vercel.app/assets/main-ClJ891p2.js"
+    },
+    {
+      "path": "../icons/site/device-info.svg",
+      "source": "https://bynd-app.vercel.app/assets/main-ClJ891p2.js"
+    },
+    {
+      "path": "../icons/site/device-check.svg",
+      "source": "https://bynd-app.vercel.app/assets/main-ClJ891p2.js"
+    }
+  ],
+  "capturedAt": "2026-11-08T13:56:31.091Z"
+}

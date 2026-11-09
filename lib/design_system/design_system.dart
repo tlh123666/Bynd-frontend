@@ -1,6 +1,11 @@
 export 'components/app_bottom_nav.dart';
 export 'components/app_button.dart';
 export 'components/app_card.dart';
+export 'components/app_detail_header.dart';
+export 'components/app_detail_background.dart';
+export 'components/app_gradient_card.dart';
+export 'components/app_underline_tabs.dart';
+export 'components/app_confirmation_sheet.dart';
 export 'components/app_icon.dart';
 export 'components/app_loading.dart';
 export 'components/app_notice.dart';
