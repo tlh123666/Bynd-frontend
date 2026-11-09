@@ -223,7 +223,7 @@ void main() {
               asset.startsWith('assets/icons/site/') && asset.endsWith('.svg'),
         )
         .toList();
-    expect(assets.length, 139);
+    expect(assets.length, 147);
 
     for (final referencedAsset in [
       AppSvgAssets.logo,
@@ -246,6 +246,14 @@ void main() {
       AppSvgAssets.back,
       AppSvgAssets.edit,
       AppSvgAssets.device,
+      AppSvgAssets.devicePair,
+      AppSvgAssets.deviceUnpair,
+      AppSvgAssets.deviceFirmware,
+      AppSvgAssets.deviceRestart,
+      AppSvgAssets.deviceSafety,
+      AppSvgAssets.deviceErase,
+      AppSvgAssets.deviceInfo,
+      AppSvgAssets.deviceCheck,
     ]) {
       expect(assets, contains(referencedAsset));
     }

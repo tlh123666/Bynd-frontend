@@ -20,6 +20,7 @@ abstract final class AppRadii {
   static const pill = 999.0;
 
   static const cardBorder = BorderRadius.all(Radius.circular(card));
+  static const detailCardBorder = BorderRadius.all(Radius.circular(20));
   static const controlBorder = BorderRadius.all(Radius.circular(control));
   static const pillBorder = BorderRadius.all(Radius.circular(pill));
 }
@@ -50,4 +51,7 @@ abstract final class AppSizes {
   static const navMaxWidth = 332.0;
   static const navGap = 10.0;
   static const navBottomInset = 10.0;
+  static const detailGutter = 22.0;
+  static const detailHeaderHeight = 52.0;
+  static const detailTouchTarget = 44.0;
 }

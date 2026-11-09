@@ -6,6 +6,7 @@ import '../../shared/widgets/day_strip.dart';
 import 'home_sky_background.dart';
 import '../profile/profile_page.dart';
 import '../activity/presentation/pages/activity_overview_page.dart';
+import '../device/presentation/pages/device_management_page.dart';
 
 /// 当前只实现参考图中的主页外壳与底部导航，内容页后续接入。
 class HomePage extends StatefulWidget {
@@ -41,6 +42,16 @@ class _HomePageState extends State<HomePage> {
       context,
     ).push<int>(MaterialPageRoute(builder: (_) => const ProfilePage()));
     if (mounted && selected != null) setState(() => _selectedIndex = selected);
+  }
+
+  Future<void> _openDevice() async {
+    final delay = AppMotion.enabled(context) ? AppMotion.drawer : Duration.zero;
+    setState(() => _menuOpen = false);
+    await Future<void>.delayed(delay);
+    if (!mounted) return;
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(builder: (_) => const DeviceManagementPage()),
+    );
   }
 
   void _otherMenuItem(String label) {
@@ -174,6 +185,7 @@ class _HomePageState extends State<HomePage> {
           visible: _menuOpen,
           onClose: () => setState(() => _menuOpen = false),
           onSettings: _openSettings,
+          onDevice: _openDevice,
           onOtherSelected: _otherMenuItem,
         ),
       ],

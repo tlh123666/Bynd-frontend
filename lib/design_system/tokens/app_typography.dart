@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'app_colors.dart';
 
 /// 原站 CSS 使用 Geist 正文、Urbanist 大标题、Newsreader 衬线文字。
 abstract final class AppFontFamilies {
@@ -28,6 +29,14 @@ abstract final class AppFontSizes {
 }
 
 abstract final class AppTypography {
+  static const detailBody = TextStyle(
+    fontFamily: AppFontFamilies.geist,
+    fontSize: 16,
+    fontWeight: FontWeight.w400,
+    letterSpacing: 0,
+    height: 1.2,
+    color: AppColors.textPrimary,
+  );
   static const listItem = TextStyle(
     fontFamily: AppFontFamilies.geist,
     fontSize: 15.5,
