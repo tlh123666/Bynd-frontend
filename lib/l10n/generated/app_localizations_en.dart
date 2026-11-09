@@ -426,4 +426,202 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get calendarWeekdaySun => 'Sun';
+
+  @override
+  String get homeMorning => 'Good morning';
+
+  @override
+  String get homeAfternoon => 'Good afternoon';
+
+  @override
+  String get homeEvening => 'Good evening';
+
+  @override
+  String get homePastGreeting => 'How was your day';
+
+  @override
+  String get homeDirection => 'See full direction';
+
+  @override
+  String get homeSignals => 'Your signals';
+
+  @override
+  String get homeAllSignals => 'View all ›';
+
+  @override
+  String get homeCustomize => 'Customize Home';
+
+  @override
+  String get homeCustomizeHelp =>
+      'Choose the 6 signals on your Home and drag the ≡ handle to reorder them.';
+
+  @override
+  String get homeOnHome => 'ON HOME';
+
+  @override
+  String get homeOtherSignals => 'OTHER SIGNALS';
+
+  @override
+  String get homeSixSlots =>
+      'Home has 6 slots. Deselect one before choosing another.';
+
+  @override
+  String get homeSave => 'Save';
+
+  @override
+  String get homePreferenceFailed =>
+      'Could not save your preference. Try again.';
+
+  @override
+  String get homePhoto => 'Change the header photo';
+
+  @override
+  String get homeShowMore => 'Show more';
+
+  @override
+  String get homeShowLess => 'Show less';
+
+  @override
+  String get homeRetry => 'Try again';
+
+  @override
+  String get homeUnavailable => 'Could not load Home.';
+
+  @override
+  String get homeSignIn => 'Sign in to see your data.';
+
+  @override
+  String get homeSignInAction => 'Sign in';
+
+  @override
+  String get homeNoMeasurement => 'No data for this day';
+
+  @override
+  String get homeSync => 'Connect and sync your band to see your signals.';
+
+  @override
+  String get homePartial => 'Some information could not be updated.';
+
+  @override
+  String get homeMapaTitle => 'What is your body revealing?';
+
+  @override
+  String get homeMapaBody =>
+      'A relationship between your habits, sleep, activity and recovery has started to emerge.';
+
+  @override
+  String get homeMapaWaiting =>
+      'Your Map is taking shape. Keep wearing your band to discover relationships between your habits and signals.';
+
+  @override
+  String get homeExploreMapa => 'Explore my Map →';
+
+  @override
+  String get homeDiaryKicker => 'YOUR DIARY';
+
+  @override
+  String get homeDiaryTitle => 'How was your day?';
+
+  @override
+  String get homeDiaryBody =>
+      'Log meals, training, mood, coffee and anything else that happened.';
+
+  @override
+  String get homeAddEntry => 'Add an entry +';
+
+  @override
+  String get homePatterns => 'patterns';
+
+  @override
+  String get homeWaitingPatterns => 'Taking shape';
+
+  @override
+  String get homeNumbers => 'Your numbers';
+
+  @override
+  String get homeWeek => 'WEEK · ONE POINT PER DAY';
+
+  @override
+  String get homeMinimum => 'Minimum';
+
+  @override
+  String get homeAverage => 'Average';
+
+  @override
+  String get homeMaximum => 'Maximum';
+
+  @override
+  String get homeHistoryError => 'Could not load history.';
+
+  @override
+  String get homeHistoryEmpty => 'No measurements for this week yet.';
+
+  @override
+  String get homeRecommendation => 'For today';
+
+  @override
+  String get homeDiary => 'Diary';
+
+  @override
+  String get homeDiaryEmpty => 'Your day, your way. Add your first entry.';
+
+  @override
+  String get homeNewEntry => 'New entry';
+
+  @override
+  String get homeEntryLabel => 'What happened?';
+
+  @override
+  String get homeEntryNote => 'More details (optional)';
+
+  @override
+  String get homeEntryRequired => 'Describe the entry before saving.';
+
+  @override
+  String get homeEntrySaved => 'Entry saved.';
+
+  @override
+  String get homeEntryFailed => 'Could not save. Try again.';
+
+  @override
+  String get homeMeal => 'Meals';
+
+  @override
+  String get homeTraining => 'Training';
+
+  @override
+  String get homeMood => 'Mood';
+
+  @override
+  String get homeCaffeine => 'Coffee';
+
+  @override
+  String get homeOther => 'Other';
+
+  @override
+  String get homeUnknownDirection => 'Waiting for your signals.';
+
+  @override
+  String get homeDataOnly =>
+      'Measurements from your band. Missing data is not estimated.';
+
+  @override
+  String get homeSelectedCount => 'of 6';
+
+  @override
+  String get homeOpenDevice => 'Connect band';
+
+  @override
+  String get homeRefresh => 'Refresh';
+
+  @override
+  String get homeDrag => 'Drag to reorder';
+
+  @override
+  String get homeNoDirection =>
+      'Sync your band to follow your daily direction.';
+
+  @override
+  String get homeAccountChanged =>
+      'Your account changed. Close this screen and reopen it to see current data.';
 }

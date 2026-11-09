@@ -29,6 +29,38 @@ abstract final class AppFontSizes {
 }
 
 abstract final class AppTypography {
+  static const homeTitle = TextStyle(
+    fontFamily: AppFontFamilies.urbanist,
+    fontSize: 36,
+    fontWeight: FontWeight.w300,
+    height: 1.18,
+    letterSpacing: -.36,
+    color: AppColors.textPrimary,
+  );
+  static const homeBody = TextStyle(
+    fontFamily: AppFontFamilies.geist,
+    fontSize: 17,
+    fontWeight: FontWeight.w400,
+    height: 1.55,
+    letterSpacing: 0,
+    color: AppColors.homeBody,
+  );
+  static const signalValue = TextStyle(
+    fontFamily: AppFontFamilies.urbanist,
+    fontSize: 40,
+    fontWeight: FontWeight.w300,
+    height: 1,
+    letterSpacing: -.6,
+    color: AppColors.textPrimary,
+  );
+  static const signalLabel = TextStyle(
+    fontFamily: AppFontFamilies.geist,
+    fontSize: 14.5,
+    fontWeight: FontWeight.w400,
+    height: 1.25,
+    letterSpacing: 0,
+    color: AppColors.textSecondary,
+  );
   static const detailBody = TextStyle(
     fontFamily: AppFontFamilies.geist,
     fontSize: 16,

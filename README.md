@@ -1,11 +1,13 @@
 # new_jcvital
 
-BYND 的 Flutter 客户端。参考 [线上原型](https://bynd-app.vercel.app/) 实现主页外壳、底部导航、“更多”快捷菜单、左侧导航和“设置”进入的个人资料页。
+BYND 的 Flutter 客户端。参考 [线上原型](https://bynd-app.vercel.app/) 实现首页（到“了解更多”之前）、底部导航、“更多”快捷菜单、左侧导航和个人资料页。
+
+首页已包含原图切换、每日方向、六项健康信号、自定义选择与拖动排序、全部信号、周历史及日记记录入口。结构、原站 CSS、数据合同和范围说明见 [首页实现文档](docs/home.md)。
 
 ## 目录规划
 
 ```text
-assets/icons/site/                   # 从线上页面提取的 147 个 SVG 与 manifest.json
+assets/icons/site/                   # 原站 SVG 与来源清单，含首页信号图标
 assets/images/avatar.webp           # 原型中的个人头像
 assets/fonts/                       # Geist、Urbanist、Newsreader TTF 与 OFL 许可
 lib/
@@ -34,8 +36,12 @@ lib/
 ├── shared/navigation/
 │   └── app_side_menu.dart            # 多页面可复用的侧边菜单
 └── features/
-    ├── home/home_page.dart           # 主页外壳与导航选中状态
-    ├── home/home_sky_background.dart # 首页夜间 CSS 天空渐变与云层
+    ├── home/home_page.dart           # 首页导航与依赖装配
+    ├── home/home_sky_background.dart # 原站照片、遮罩、时段天空及切换
+    ├── home/application/            # 日期、加载、账号隔离和偏好状态
+    ├── home/domain/                 # 首页数据与仓储合同
+    ├── home/data/                   # 真实接口、显式演示、资源及本地偏好
+    ├── home/presentation/           # 每日方向、信号、自定义、历史与日记
     └── profile/profile_page.dart     # 设置入口对应的个人资料页
 ```
 
@@ -64,7 +70,7 @@ AppCard(
 
 菜单从左侧滑入，带背景遮罩；点击“Ajustes”后先收起菜单，再从右侧进入“Perfil”，返回时反向过渡。全局页面过渡在主题里设置，`AppLoadingIndicator` 和 `AppLoadingOverlay` 可供异步页面复用；按钮的 `loading` 状态也使用同一标记。系统要求减少动画时，菜单和 loading 会停止动效。
 
-目前底栏只切换选中态，快捷操作和未接入的菜单项点击后显示“即将提供”提示；业务页入口留给后续阶段连接。配色与字体已按原站 CSS 核对，详见 [CSS 配色对照](docs/reference-css-colors.md)和[字体对照](docs/reference-css-typography.md)。首页目前使用参考截图的夜间配色；原站随时段变化的实时天空画布尚未接入。SVG 通过 `flutter_svg` 渲染。开发期组件预览仍在 `lib/design_system/preview/`，可通过 `MaterialPageRoute` 从调试入口打开。
+首页读取现有后端的方向、健康汇总、资料、Mapa 与日记接口，缺失的读数显示空态。后端新增五个可选健康指标，部署时需要执行 `000060_home_signal_measurements` 迁移；不自动填入演示数据。首页照片与信号偏好可保存，演示预览使用 `config/demo.json`。底栏的其他主标签仍只切换选中态；未接入的快捷操作保留“即将提供”提示。配色与字体依据见 [CSS 配色对照](docs/reference-css-colors.md)、[字体对照](docs/reference-css-typography.md)和[首页文档](docs/home.md)。SVG 通过 `flutter_svg` 渲染。
 
 ## 运行
 

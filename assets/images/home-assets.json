@@ -1,0 +1,266 @@
+{
+  "source": "https://bynd-app.vercel.app/",
+  "retrieved": "2026-11-09",
+  "script": "main-DN5h_XhA.js",
+  "stylesheet": "main-CRUZ18wL.css",
+  "assets": [
+    {
+      "url": "https://bynd-app.vercel.app/img/home-canion.webp",
+      "path": "assets/images/home-canion.webp",
+      "bytes": 80158,
+      "sha256": "aaaafb4fcd2b3f623f8f1294e63a83d58cc73c66d531bd35cef55deaf4263beb"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/img/home-o-tarde-duna.webp",
+      "path": "assets/images/home-o-tarde-duna.webp",
+      "bytes": 20298,
+      "sha256": "18518bb874ffc27fb3d087bc03b0daacfbe4354ae1be0b9c1e02f0208bb0f4e5"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/img/home-o-textura-areia.webp",
+      "path": "assets/images/home-o-textura-areia.webp",
+      "bytes": 24826,
+      "sha256": "eef30a93e2e3eff8cd0774f38be033dc5bfa0f507da68362936700c3fccee7c8"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/img/home-n-manha-campo.webp",
+      "path": "assets/images/home-n-manha-campo.webp",
+      "bytes": 66716,
+      "sha256": "e94b7b165b2de3eabdea691761d76237b9c62cd18613f404c1317d114d868ac5"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/img/home-n-manha-picos.webp",
+      "path": "assets/images/home-n-manha-picos.webp",
+      "bytes": 51228,
+      "sha256": "cc415db714604e41e3889dba0e3c18085375299a4034472d1d4cd386a9f0d4b7"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/img/home-n-noite-deserto.webp",
+      "path": "assets/images/home-n-noite-deserto.webp",
+      "bytes": 91262,
+      "sha256": "3e85c8d54adfc7539ca3b9479d9c4acecb5047fbfec848a490f9fdd4f91695a0"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/img/home-n-noite-hora-azul.webp",
+      "path": "assets/images/home-n-noite-hora-azul.webp",
+      "bytes": 43224,
+      "sha256": "6c97878806d7ecc5553ed057886f53a16a0cb59daf57cecd314f9183ad1006d7"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/img/home-n-manha-glaciar.webp",
+      "path": "assets/images/home-n-manha-glaciar.webp",
+      "bytes": 38244,
+      "sha256": "ef85fa2202a016ff5f97c40d64942dea271c1cc5cb1bdc977389585a0f5fee85"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/img/home-a-ambar-coral.webp",
+      "path": "assets/images/home-a-ambar-coral.webp",
+      "bytes": 34454,
+      "sha256": "a3e2e4f6d18ca7b16f1bb8c78737e8654735102d86c57723edc894ac2318535f"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/img/home-a-fios-ouro.webp",
+      "path": "assets/images/home-a-fios-ouro.webp",
+      "bytes": 33576,
+      "sha256": "5413e8696f213f5618d6c3e5af4ad9d2accc4066bf55e02ee157d4aff74a003f"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/img/home-a-aneis-respiro.webp",
+      "path": "assets/images/home-a-aneis-respiro.webp",
+      "bytes": 16522,
+      "sha256": "bbfd7f2d708ff968511b9e26f23a131e01bf300618b113b396f5f81491a953ac"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/img/home-n-tarde-mesas.webp",
+      "path": "assets/images/home-n-tarde-mesas.webp",
+      "bytes": 70576,
+      "sha256": "f62cc3e846b3b224330ce99779d559dfacac658569966974f5a25c158ed6358c"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/img/home-a-ondas-agua.webp",
+      "path": "assets/images/home-a-ondas-agua.webp",
+      "bytes": 24846,
+      "sha256": "98c913833eb103099644b71fcc1489a22c9b9b397d93cbdd20f44ec211d1aaa9"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/img/home-a-halo-safira.webp",
+      "path": "assets/images/home-a-halo-safira.webp",
+      "bytes": 15128,
+      "sha256": "b3e95f7991495132f1f2942a64ea6e9ebe59c32a31bb45459afd21f8365ba032"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/img/home-abs-duna-lua.webp",
+      "path": "assets/images/home-abs-duna-lua.webp",
+      "bytes": 28474,
+      "sha256": "991375907de0ec8642d5be77b7b312494259ef0e8ab73e9405c4ba6976b7a88f"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/img/home-a-veu-violeta.webp",
+      "path": "assets/images/home-a-veu-violeta.webp",
+      "bytes": 17040,
+      "sha256": "841584ab365748cb347fad27316cd7333c26f655529dea54dc22b54e461ea041"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/img/home-abs-tinta.webp",
+      "path": "assets/images/home-abs-tinta.webp",
+      "bytes": 49538,
+      "sha256": "d8252ca8b05e2957e39fd4d2cb9a1b86d6ad2c02ee6775c65d980c62649cddc4"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/img/home-abs-seda.webp",
+      "path": "assets/images/home-abs-seda.webp",
+      "bytes": 47806,
+      "sha256": "50be4b276ece7bdf8246f43ebf19e1495bb28797bb190dbe33077cfd4018b10a"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/img/home-manha-lago.webp",
+      "path": "assets/images/home-manha-lago.webp",
+      "bytes": 82712,
+      "sha256": "24a4173fe08571363fa2f1856bce452c88734d2a92c02b7bdaf39091835b925b"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/img/home-manha-floresta.webp",
+      "path": "assets/images/home-manha-floresta.webp",
+      "bytes": 175074,
+      "sha256": "0f4ec7d9c15c20630cbbef5653ebc49555cdf626b73bd4b4c5ab225b16abffac"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/img/home-noite-aurora.webp",
+      "path": "assets/images/home-noite-aurora.webp",
+      "bytes": 57868,
+      "sha256": "0ec2c12cef336d73a259b09a3c00a8bb4739849f4dfb2787caae3985d0413074"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/img/home-noite-lua.webp",
+      "path": "assets/images/home-noite-lua.webp",
+      "bytes": 23806,
+      "sha256": "f4c056a2c61661a9854e0dff344cae940bb33b0f97fba950e6dd65f62f0b4fe3"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/img/home-noite-estrelas.webp",
+      "path": "assets/images/home-noite-estrelas.webp",
+      "bytes": 91722,
+      "sha256": "e27edd53558015d991382028fef28a9c583a9a1b2c79fb7360b0132dbff1300f"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/img/home-tarde-dunas.webp",
+      "path": "assets/images/home-tarde-dunas.webp",
+      "bytes": 38308,
+      "sha256": "a9965592cd6ff1ab3306aae35a478380aab13b9e668317f255bb786d5e8a351b"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/img/fundo-noite.jpg",
+      "path": "assets/images/fundo-noite.jpg",
+      "bytes": 68027,
+      "sha256": "317873d7ee29c14290b10d0c84f2465206507bc4d3577bca133e1ae5973c4267"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/img/home-tarde-praia.webp",
+      "path": "assets/images/home-tarde-praia.webp",
+      "bytes": 86714,
+      "sha256": "86dc0c190fc43b7b00b70b2b7ae743fcfdebeb3e8cee0e4f4ff10c3e6fa5b748"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/img/fundo-manha.jpg",
+      "path": "assets/images/fundo-manha.jpg",
+      "bytes": 196371,
+      "sha256": "a585aa286b7c0e69286219716dc76fba3950abc033b588795ca7d2f470bf55f9"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/",
+      "path": "assets/icons/site/home-sleep.svg",
+      "sha256": "a66e8d78952f12c6e8cf832169685a150e2dbdef2ace87d23387dc94c932d25d",
+      "bytes": 277
+    },
+    {
+      "url": "https://bynd-app.vercel.app/",
+      "path": "assets/icons/site/home-steps.svg",
+      "sha256": "930f8064de361ecdc94c58a658f55ca8860d1bd9828a81e01d0dac87697ad5f0",
+      "bytes": 344
+    },
+    {
+      "url": "https://bynd-app.vercel.app/",
+      "path": "assets/icons/site/home-rhr.svg",
+      "sha256": "83f8e3b66406c74947c0a22b7181ccd5dd2ac6c21f7389071eb79d243a732b77",
+      "bytes": 312
+    },
+    {
+      "url": "https://bynd-app.vercel.app/",
+      "path": "assets/icons/site/home-hrv.svg",
+      "sha256": "ae1cb47a8401ea37c156c406c8d2b7bd246c1cae0434505f98b471c4322caaa2",
+      "bytes": 251
+    },
+    {
+      "url": "https://bynd-app.vercel.app/",
+      "path": "assets/icons/site/home-spo2.svg",
+      "sha256": "79b0d653d74af6459dd45767c55731ea1074826b12d78ba76dd681344e93d2a3",
+      "bytes": 303
+    },
+    {
+      "url": "https://bynd-app.vercel.app/",
+      "path": "assets/icons/site/home-vo2.svg",
+      "sha256": "2214afc2166aad4571f4ca11822b7d299e8bfe2855dfc5a01d4ad22dc2d3477d",
+      "bytes": 258
+    },
+    {
+      "url": "https://bynd-app.vercel.app/",
+      "path": "assets/icons/site/home-direction.svg",
+      "sha256": "605116ab92204080e14753ba836eaa39b31b94fbf54ff8045462e23e06f82324",
+      "bytes": 268
+    },
+    {
+      "url": "https://bynd-app.vercel.app/",
+      "path": "assets/icons/site/home-brain.svg",
+      "sha256": "ffc8939eb3e158498ebfae83401da41d3a479ca925e618dfef4e5b81afdbfc23",
+      "bytes": 386
+    },
+    {
+      "url": "https://bynd-app.vercel.app/",
+      "path": "assets/icons/site/home-customize.svg",
+      "sha256": "2b4870654752677b9111f2948326d0c22358f45405b74ca35aa445e14aa1c0d6",
+      "bytes": 258
+    },
+    {
+      "url": "https://bynd-app.vercel.app/",
+      "path": "assets/icons/site/home-basal.svg",
+      "sha256": "b65adcbc05ab2f97ec87d0ab1c275a19e3510a8fb962c3107208f75364f246d7",
+      "bytes": 278
+    },
+    {
+      "url": "https://bynd-app.vercel.app/",
+      "path": "assets/icons/site/home-respiration.svg",
+      "sha256": "3acfba33116b2ad3208d6f7c5e59165c1cd3d093e62906af3d7677bcbd1578ec",
+      "bytes": 328
+    },
+    {
+      "url": "https://bynd-app.vercel.app/",
+      "path": "assets/icons/site/home-temperature.svg",
+      "sha256": "49866718b6556002c20d2a7fa92c528097ea5254d60d2c4321624aa85b6b7f94",
+      "bytes": 269
+    },
+    {
+      "url": "https://bynd-app.vercel.app/",
+      "path": "assets/icons/site/home-distance.svg",
+      "sha256": "5ee1c63249bd7f314b4889bdb9a57035b0859c60a68393f38a70b269d6747949",
+      "bytes": 329
+    },
+    {
+      "url": "https://bynd-app.vercel.app/",
+      "path": "assets/icons/site/home-calories.svg",
+      "sha256": "587cb76df5cbbc35b4db744c68cf4612cc7be96eb27125c3917533316a2d5547",
+      "bytes": 277
+    },
+    {
+      "url": "https://bynd-app.vercel.app/",
+      "path": "assets/icons/site/home-activeMinutes.svg",
+      "sha256": "1fb2af00e83467848810423370f1cd92b83012df82ca9d7218665a3511944cf7",
+      "bytes": 252
+    },
+    {
+      "url": "https://bynd-app.vercel.app/",
+      "path": "assets/icons/site/home-activeCalories.svg",
+      "sha256": "1fb2af00e83467848810423370f1cd92b83012df82ca9d7218665a3511944cf7",
+      "bytes": 252
+    }
+  ]
+}

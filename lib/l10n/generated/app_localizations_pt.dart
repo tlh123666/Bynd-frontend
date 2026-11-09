@@ -427,6 +427,206 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get calendarWeekdaySun => 'Dom';
+
+  @override
+  String get homeMorning => 'Bom dia';
+
+  @override
+  String get homeAfternoon => 'Boa tarde';
+
+  @override
+  String get homeEvening => 'Boa noite';
+
+  @override
+  String get homePastGreeting => 'Como foi o seu dia';
+
+  @override
+  String get homeDirection => 'Ver direção completa';
+
+  @override
+  String get homeSignals => 'Seus sinais';
+
+  @override
+  String get homeAllSignals => 'Ver todos ›';
+
+  @override
+  String get homeCustomize => 'Personalizar a Home';
+
+  @override
+  String get homeCustomizeHelp =>
+      'Escolha os 6 sinais que ficam na sua Home e arraste pela alça ≡ para mudar a ordem.';
+
+  @override
+  String get homeOnHome => 'NA HOME';
+
+  @override
+  String get homeOtherSignals => 'OUTROS SINAIS';
+
+  @override
+  String get homeSixSlots =>
+      'A Home tem 6 lugares. Desmarque um antes de escolher outro.';
+
+  @override
+  String get homeSave => 'Salvar';
+
+  @override
+  String get homePreferenceFailed =>
+      'Não foi possível salvar sua preferência. Tente novamente.';
+
+  @override
+  String get homePhoto => 'Trocar a foto do topo';
+
+  @override
+  String get homeShowMore => 'Mostrar mais';
+
+  @override
+  String get homeShowLess => 'Mostrar menos';
+
+  @override
+  String get homeRetry => 'Tentar novamente';
+
+  @override
+  String get homeUnavailable => 'Não foi possível carregar a Home.';
+
+  @override
+  String get homeSignIn => 'Entre na sua conta para ver seus dados.';
+
+  @override
+  String get homeSignInAction => 'Entrar na conta';
+
+  @override
+  String get homeNoMeasurement => 'Sem dados neste dia';
+
+  @override
+  String get homeSync =>
+      'Conecte e sincronize sua pulseira para ver seus sinais.';
+
+  @override
+  String get homePartial => 'Algumas informações não foram atualizadas.';
+
+  @override
+  String get homeMapaTitle => 'O que o seu corpo está revelando?';
+
+  @override
+  String get homeMapaBody =>
+      'Uma relação entre seus hábitos, sono, atividade e recuperação começou a aparecer.';
+
+  @override
+  String get homeMapaWaiting =>
+      'Seu Mapa está se formando. Continue usando a pulseira para descobrir relações entre seus hábitos e seus sinais.';
+
+  @override
+  String get homeExploreMapa => 'Explorar meu Mapa →';
+
+  @override
+  String get homeDiaryKicker => 'SEU DIÁRIO';
+
+  @override
+  String get homeDiaryTitle => 'Como foi o seu dia?';
+
+  @override
+  String get homeDiaryBody =>
+      'Registre alimentação, treino, humor, café e o que mais aconteceu.';
+
+  @override
+  String get homeAddEntry => 'Adicionar registro +';
+
+  @override
+  String get homePatterns => 'padrões';
+
+  @override
+  String get homeWaitingPatterns => 'Em formação';
+
+  @override
+  String get homeNumbers => 'Seus números';
+
+  @override
+  String get homeWeek => 'SEMANA · UM PONTO POR DIA';
+
+  @override
+  String get homeMinimum => 'Mínima';
+
+  @override
+  String get homeAverage => 'Média';
+
+  @override
+  String get homeMaximum => 'Máxima';
+
+  @override
+  String get homeHistoryError => 'Não foi possível carregar o histórico.';
+
+  @override
+  String get homeHistoryEmpty => 'Ainda não há medições nesta semana.';
+
+  @override
+  String get homeRecommendation => 'Para hoje';
+
+  @override
+  String get homeDiary => 'Diário';
+
+  @override
+  String get homeDiaryEmpty =>
+      'Seu dia, do seu jeito. Adicione o primeiro registro.';
+
+  @override
+  String get homeNewEntry => 'Novo registro';
+
+  @override
+  String get homeEntryLabel => 'O que aconteceu?';
+
+  @override
+  String get homeEntryNote => 'Mais detalhes (opcional)';
+
+  @override
+  String get homeEntryRequired => 'Descreva o registro antes de salvar.';
+
+  @override
+  String get homeEntrySaved => 'Registro salvo.';
+
+  @override
+  String get homeEntryFailed => 'Não foi possível salvar. Tente novamente.';
+
+  @override
+  String get homeMeal => 'Alimentação';
+
+  @override
+  String get homeTraining => 'Treino';
+
+  @override
+  String get homeMood => 'Humor';
+
+  @override
+  String get homeCaffeine => 'Café';
+
+  @override
+  String get homeOther => 'Outro';
+
+  @override
+  String get homeUnknownDirection => 'Aguardando seus sinais.';
+
+  @override
+  String get homeDataOnly =>
+      'Medições da sua pulseira. Os dados ausentes não são estimados.';
+
+  @override
+  String get homeSelectedCount => 'de 6';
+
+  @override
+  String get homeOpenDevice => 'Conectar pulseira';
+
+  @override
+  String get homeRefresh => 'Atualizar';
+
+  @override
+  String get homeDrag => 'Arrastar para mudar a ordem';
+
+  @override
+  String get homeNoDirection =>
+      'Sincronize a pulseira para acompanhar a direção do seu dia.';
+
+  @override
+  String get homeAccountChanged =>
+      'Sua conta mudou. Feche esta tela e abra novamente para ver os dados atuais.';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -852,4 +1052,204 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get calendarWeekdaySun => 'Dom';
+
+  @override
+  String get homeMorning => 'Bom dia';
+
+  @override
+  String get homeAfternoon => 'Boa tarde';
+
+  @override
+  String get homeEvening => 'Boa noite';
+
+  @override
+  String get homePastGreeting => 'Como foi o seu dia';
+
+  @override
+  String get homeDirection => 'Ver direção completa';
+
+  @override
+  String get homeSignals => 'Seus sinais';
+
+  @override
+  String get homeAllSignals => 'Ver todos ›';
+
+  @override
+  String get homeCustomize => 'Personalizar a Home';
+
+  @override
+  String get homeCustomizeHelp =>
+      'Escolha os 6 sinais que ficam na sua Home e arraste pela alça ≡ para mudar a ordem.';
+
+  @override
+  String get homeOnHome => 'NA HOME';
+
+  @override
+  String get homeOtherSignals => 'OUTROS SINAIS';
+
+  @override
+  String get homeSixSlots =>
+      'A Home tem 6 lugares. Desmarque um antes de escolher outro.';
+
+  @override
+  String get homeSave => 'Salvar';
+
+  @override
+  String get homePreferenceFailed =>
+      'Não foi possível salvar sua preferência. Tente novamente.';
+
+  @override
+  String get homePhoto => 'Trocar a foto do topo';
+
+  @override
+  String get homeShowMore => 'Mostrar mais';
+
+  @override
+  String get homeShowLess => 'Mostrar menos';
+
+  @override
+  String get homeRetry => 'Tentar novamente';
+
+  @override
+  String get homeUnavailable => 'Não foi possível carregar a Home.';
+
+  @override
+  String get homeSignIn => 'Entre na sua conta para ver seus dados.';
+
+  @override
+  String get homeSignInAction => 'Entrar na conta';
+
+  @override
+  String get homeNoMeasurement => 'Sem dados neste dia';
+
+  @override
+  String get homeSync =>
+      'Conecte e sincronize sua pulseira para ver seus sinais.';
+
+  @override
+  String get homePartial => 'Algumas informações não foram atualizadas.';
+
+  @override
+  String get homeMapaTitle => 'O que o seu corpo está revelando?';
+
+  @override
+  String get homeMapaBody =>
+      'Uma relação entre seus hábitos, sono, atividade e recuperação começou a aparecer.';
+
+  @override
+  String get homeMapaWaiting =>
+      'Seu Mapa está se formando. Continue usando a pulseira para descobrir relações entre seus hábitos e seus sinais.';
+
+  @override
+  String get homeExploreMapa => 'Explorar meu Mapa →';
+
+  @override
+  String get homeDiaryKicker => 'SEU DIÁRIO';
+
+  @override
+  String get homeDiaryTitle => 'Como foi o seu dia?';
+
+  @override
+  String get homeDiaryBody =>
+      'Registre alimentação, treino, humor, café e o que mais aconteceu.';
+
+  @override
+  String get homeAddEntry => 'Adicionar registro +';
+
+  @override
+  String get homePatterns => 'padrões';
+
+  @override
+  String get homeWaitingPatterns => 'Em formação';
+
+  @override
+  String get homeNumbers => 'Seus números';
+
+  @override
+  String get homeWeek => 'SEMANA · UM PONTO POR DIA';
+
+  @override
+  String get homeMinimum => 'Mínima';
+
+  @override
+  String get homeAverage => 'Média';
+
+  @override
+  String get homeMaximum => 'Máxima';
+
+  @override
+  String get homeHistoryError => 'Não foi possível carregar o histórico.';
+
+  @override
+  String get homeHistoryEmpty => 'Ainda não há medições nesta semana.';
+
+  @override
+  String get homeRecommendation => 'Para hoje';
+
+  @override
+  String get homeDiary => 'Diário';
+
+  @override
+  String get homeDiaryEmpty =>
+      'Seu dia, do seu jeito. Adicione o primeiro registro.';
+
+  @override
+  String get homeNewEntry => 'Novo registro';
+
+  @override
+  String get homeEntryLabel => 'O que aconteceu?';
+
+  @override
+  String get homeEntryNote => 'Mais detalhes (opcional)';
+
+  @override
+  String get homeEntryRequired => 'Descreva o registro antes de salvar.';
+
+  @override
+  String get homeEntrySaved => 'Registro salvo.';
+
+  @override
+  String get homeEntryFailed => 'Não foi possível salvar. Tente novamente.';
+
+  @override
+  String get homeMeal => 'Alimentação';
+
+  @override
+  String get homeTraining => 'Treino';
+
+  @override
+  String get homeMood => 'Humor';
+
+  @override
+  String get homeCaffeine => 'Café';
+
+  @override
+  String get homeOther => 'Outro';
+
+  @override
+  String get homeUnknownDirection => 'Aguardando seus sinais.';
+
+  @override
+  String get homeDataOnly =>
+      'Medições da sua pulseira. Os dados ausentes não são estimados.';
+
+  @override
+  String get homeSelectedCount => 'de 6';
+
+  @override
+  String get homeOpenDevice => 'Conectar pulseira';
+
+  @override
+  String get homeRefresh => 'Atualizar';
+
+  @override
+  String get homeDrag => 'Arrastar para mudar a ordem';
+
+  @override
+  String get homeNoDirection =>
+      'Sincronize a pulseira para acompanhar a direção do seu dia.';
+
+  @override
+  String get homeAccountChanged =>
+      'Sua conta mudou. Feche esta tela e abra novamente para ver os dados atuais.';
 }
