@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
 import '../../../core/network/api_client.dart';
+import '../../../core/config/app_config.dart';
+import '../../../core/localization/app_locale_controller.dart';
 import '../data/demo_device_repository.dart';
 import '../data/device_gateways.dart';
 import '../data/device_store.dart';
@@ -19,22 +21,23 @@ class DeviceScope extends InheritedNotifier<DeviceController> {
 }
 
 abstract final class DeviceRuntime {
-  static DeviceController create({Future<String?> Function()? tokenProvider}) {
-    const demo = bool.fromEnvironment('DEVICE_DEMO', defaultValue: true);
+  static DeviceController create({
+    AppConfig? config,
+    AppLocaleController? locale,
+    Future<String?> Function()? tokenProvider,
+  }) {
+    final settings = config ?? AppConfig.current;
+    final demo = settings.deviceDemo;
     final store = PreferenceDeviceStore();
     return DeviceController(
       isDemo: demo,
       repository: demo
           ? DemoDeviceRepository(store)
           : RemoteDeviceRepository(
-              ApiClient(
-                baseUrl: Uri.parse(
-                  const String.fromEnvironment(
-                    'API_BASE_URL',
-                    defaultValue: 'http://localhost:8080/api/v1',
-                  ),
-                ),
-                tokenProvider: tokenProvider ?? () async => null,
+              ApiClient.configured(
+                config: settings,
+                locale: locale,
+                tokenProvider: tokenProvider,
               ),
               store,
             ),

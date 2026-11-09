@@ -1,0 +1,6 @@
+# Copy to key.properties (ignored by Git). Use JCVital's existing upload key.
+# Relative paths are resolved from android/app, exactly as in JCVital.
+storeFile=/absolute/path/to/original-bynd-upload.jks
+storePassword=REPLACE_LOCALLY
+keyAlias=REPLACE_WITH_ORIGINAL_ALIAS
+keyPassword=REPLACE_LOCALLY
