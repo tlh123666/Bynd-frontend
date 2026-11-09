@@ -151,8 +151,9 @@ class AppSideMenu extends StatelessWidget {
                                               ),
                                               _MenuItem(
                                                 strings.languageMenu,
-                                                AppSvgAssets.settings,
+                                                null,
                                                 (_) => onLanguage(),
+                                                materialIcon: Icons.language,
                                               ),
                                               _MenuItem(
                                                 strings.integrations,
@@ -251,40 +252,52 @@ class _MenuGroup extends StatelessWidget {
 }
 
 class _MenuItem extends StatelessWidget {
-  const _MenuItem(this.label, this.iconAsset, this.onSelected);
+  const _MenuItem(
+    this.label,
+    this.iconAsset,
+    this.onSelected, {
+    this.materialIcon,
+  }) : assert(iconAsset != null || materialIcon != null);
   final String label;
-  final String iconAsset;
+  final String? iconAsset;
   final ValueChanged<String> onSelected;
+  final IconData? materialIcon;
 
   @override
-  Widget build(BuildContext context) => Material(
-    color: Colors.transparent,
-    child: InkWell(
-      onTap: () => onSelected(label),
-      child: SizedBox(
-        height: 46,
-        child: Row(
-          children: [
-            const SizedBox(width: 14),
-            AppSvgIcon(iconAsset, size: 20, color: AppColors.menuIcon),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                label,
-                style: AppTypography.listItem.copyWith(
-                  color: AppColors.textPrimary,
+  Widget build(BuildContext context) {
+    final iconData = materialIcon;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => onSelected(label),
+        child: SizedBox(
+          height: 46,
+          child: Row(
+            children: [
+              const SizedBox(width: 14),
+              if (iconData != null)
+                Icon(iconData, size: 20, color: AppColors.menuIcon)
+              else
+                AppSvgIcon(iconAsset!, size: 20, color: AppColors.menuIcon),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  label,
+                  style: AppTypography.listItem.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
                 ),
               ),
-            ),
-            const Icon(
-              Icons.chevron_right,
-              size: 16,
-              color: AppColors.menuChevron,
-            ),
-            const SizedBox(width: 12),
-          ],
+              const Icon(
+                Icons.chevron_right,
+                size: 16,
+                color: AppColors.menuChevron,
+              ),
+              const SizedBox(width: 12),
+            ],
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }

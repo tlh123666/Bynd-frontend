@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../tokens/app_colors.dart';
 import '../tokens/app_dimensions.dart';
 import 'app_icon.dart';
+import 'app_quick_actions_button.dart';
 import '../../l10n/app_localizations_context.dart';
 
 /// 对照网页版底部导航：四个胶囊内入口 + 独立的圆形新增操作。
@@ -37,7 +38,12 @@ class AppBottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final strings = context.l10n;
-    final labels = [strings.today, strings.atlas, strings.community, strings.health];
+    final labels = [
+      strings.today,
+      strings.atlas,
+      strings.community,
+      strings.health,
+    ];
     return SafeArea(
       top: false,
       minimum: const EdgeInsets.only(bottom: AppSizes.navBottomInset),
@@ -108,39 +114,11 @@ class AppBottomNav extends StatelessWidget {
                   ignoring: moreOpen,
                   child: Opacity(
                     opacity: moreOpen ? 0 : 1,
-                    child: ClipOval(
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(
-                          sigmaX: AppSizes.glassBlur,
-                          sigmaY: AppSizes.glassBlur,
-                        ),
-                        child: Material(
-                          color: AppColors.navGlass,
-                          shape: const CircleBorder(side: AppBorders.nav),
-                          child: Tooltip(
-                            message: strings.quickActions,
-                            child: Semantics(
-                              label: strings.quickActions,
-                              button: true,
-                              child: InkWell(
-                                onTap: onMorePressed,
-                                customBorder: const CircleBorder(),
-                                child: SizedBox(
-                                  key: moreButtonKey,
-                                  width: 56,
-                                  height: 56,
-                                  child: const Center(
-                                    child: AppSvgIcon(
-                                      AppSvgAssets.more,
-                                      size: 22,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
+                    child: AppQuickActionsButton(
+                      key: moreButtonKey,
+                      isOpen: false,
+                      label: strings.quickActions,
+                      onPressed: onMorePressed,
                     ),
                   ),
                 ),

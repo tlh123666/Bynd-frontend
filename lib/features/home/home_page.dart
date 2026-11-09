@@ -63,9 +63,9 @@ class _HomePageState extends State<HomePage> {
     setState(() => _menuOpen = false);
     await Future<void>.delayed(delay);
     if (!mounted) return;
-    await Navigator.of(context).push<void>(
-      MaterialPageRoute(builder: (_) => const MapaPage()),
-    );
+    await Navigator.of(
+      context,
+    ).push<void>(MaterialPageRoute(builder: (_) => const MapaPage()));
   }
 
   void _otherMenuItem(String label) {
@@ -86,10 +86,8 @@ class _HomePageState extends State<HomePage> {
     final localeController = AppLocaleScope.maybeOf(context);
     if (localeController == null) return;
     setState(() => _menuOpen = false);
-    await showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: AppColors.menuPanel,
-      showDragHandle: true,
+    await AppFrostedModalSheet.show<void>(
+      context,
       builder: (_) => LanguagePickerSheet(
         selectedLocale: localeController.locale,
         onSelected: localeController.setLocale,

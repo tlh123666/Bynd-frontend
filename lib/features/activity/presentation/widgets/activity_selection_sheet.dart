@@ -75,15 +75,10 @@ class _ActivitySelectionSheetState extends State<ActivitySelectionSheet> {
         curve: const Cubic(.32, .72, 0, 1),
         child: SizedBox(
           height: height,
-          child: AppFrostedSurface(
+          child: AppFrostedSurface.modalSheet(
             borderRadius: const BorderRadius.vertical(
               top: Radius.circular(AppRadii.sheet),
             ),
-            blurSigma: 14,
-            saturation: 1.5,
-            tintColor: AppColors.sheetGlassTint,
-            borderColor: AppColors.sheetGlassBorder,
-            borderFadeHeight: 240,
             boxShadow: const [
               BoxShadow(
                 color: Color(0x59000000),
