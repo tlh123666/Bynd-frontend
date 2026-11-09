@@ -3,10 +3,10 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import '../../../../design_system/design_system.dart';
+import '../../../../l10n/app_localizations_context.dart';
 import '../../domain/models/activity_type.dart';
 import '../../domain/models/activity_type_catalog.dart';
-import '../localization/activity_type_hints_pt_br.dart';
-import '../localization/activity_type_names_pt_br.dart';
+import '../localization/activity_type_localizations.dart';
 import 'activity_type_icon.dart';
 
 /// 活动选择面板，对应网页原型的 Modalidades 底部面板。
@@ -56,10 +56,11 @@ class _ActivitySelectionSheetState extends State<ActivitySelectionSheet> {
     final height = (media.size.height - topInset).clamp(0.0, media.size.height);
     final dragProgress = height == 0 ? 0.0 : _dragOffset / height;
     final normalizedQuery = _normalize(_query.trim());
+    final strings = context.l10n;
     final filtered = ActivityTypeCatalog.all
         .where((type) {
           return _normalize(
-            activityTypeNamesPtBr[type.id] ?? type.id,
+            activityTypeLocalizedName(type, strings),
           ).contains(normalizedQuery);
         })
         .toList(growable: false);
@@ -97,7 +98,7 @@ class _ActivitySelectionSheetState extends State<ActivitySelectionSheet> {
                 child: Column(
                   children: [
                     _SheetHandle(
-                      title: 'Iniciar atividade',
+                      title: strings.startActivityTitle,
                       onClose: () => Navigator.of(context).pop(),
                       onDragStart: () => setState(() => _isDragging = true),
                       onDragUpdate: (delta) => setState(() {
@@ -147,14 +148,14 @@ class _ActivitySelectionSheetState extends State<ActivitySelectionSheet> {
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: const EdgeInsets.fromLTRB(20, 0, 20, AppSpacing.xl),
       children: [
-        const _SectionHeading(label: 'Recentes', topSpacing: 10),
+        _SectionHeading(label: context.l10n.recent, topSpacing: 10),
         const SizedBox(height: 4),
         for (var index = 0; index < _recentActivityIds.length; index++)
           if (ActivityTypeCatalog.findById(_recentActivityIds[index])
               case final type?)
             _ActivityOption(
               type: type,
-              subtitle: activityTypeHintPtBr(type),
+              subtitle: activityTypeLocalizedHint(type, context.l10n),
               showTopDivider: index > 0,
               onTap: () => Navigator.of(context).pop(type),
             ),
@@ -171,7 +172,7 @@ class _ActivitySelectionSheetState extends State<ActivitySelectionSheet> {
       if (activities.isEmpty) continue;
 
       yield _SectionHeading(
-        label: activityCategoryNamesPtBr[category.name] ?? category.name,
+        label: activityCategoryLocalizedName(category, context.l10n),
         count: activities.length,
       );
       yield const SizedBox(height: 2);
@@ -179,7 +180,7 @@ class _ActivitySelectionSheetState extends State<ActivitySelectionSheet> {
         final type = activities[index];
         yield _ActivityOption(
           type: type,
-          subtitle: activityTypeHintPtBr(type),
+          subtitle: activityTypeLocalizedHint(type, context.l10n),
           showTopDivider: index > 0,
           onTap: () => Navigator.of(context).pop(type),
         );
@@ -193,7 +194,7 @@ class _ActivitySelectionSheetState extends State<ActivitySelectionSheet> {
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.xl),
           child: Text(
-            'Nenhuma modalidade com “$query”. Use “Outro”.',
+            context.l10n.noActivityMatches(query),
             textAlign: TextAlign.center,
             style: AppTypography.body.copyWith(color: AppColors.textMuted),
           ),
@@ -207,7 +208,7 @@ class _ActivitySelectionSheetState extends State<ActivitySelectionSheet> {
       itemCount: results.length,
       itemBuilder: (context, index) => _ActivityOption(
         type: results[index],
-        subtitle: activityTypeHintPtBr(results[index]),
+        subtitle: activityTypeLocalizedHint(results[index], context.l10n),
         onTap: () => Navigator.of(context).pop(results[index]),
       ),
     );
@@ -360,7 +361,7 @@ class _SheetHandle extends StatelessWidget {
                   SizedBox(
                     width: 44,
                     child: IconButton(
-                      tooltip: 'Fechar',
+                      tooltip: context.l10n.close,
                       onPressed: onClose,
                       icon: const Icon(
                         Icons.close,
@@ -425,7 +426,7 @@ class _ActivitySearchField extends StatelessWidget {
       ),
       decoration: InputDecoration(
         constraints: const BoxConstraints(minHeight: 44, maxHeight: 44),
-        hintText: 'Buscar entre ${ActivityTypeCatalog.all.length} modalidades',
+        hintText: context.l10n.searchActivities(ActivityTypeCatalog.all.length),
         hintStyle: AppTypography.body.copyWith(
           fontSize: 15,
           color: AppColors.textPlaceholder,
@@ -508,7 +509,7 @@ class _ActivityOption extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
-      label: activityTypeNamesPtBr[type.id] ?? type.id,
+      label: activityTypeLocalizedName(type, context.l10n),
       child: InkWell(
         onTap: onTap,
         borderRadius: AppRadii.controlBorder,
@@ -545,7 +546,7 @@ class _ActivityOption extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        activityTypeNamesPtBr[type.id] ?? type.id,
+                        activityTypeLocalizedName(type, context.l10n),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: AppTypography.listItem.copyWith(

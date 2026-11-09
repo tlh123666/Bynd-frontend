@@ -2,11 +2,14 @@ import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/app_localizations_context.dart';
+
 import '../../../../design_system/tokens/app_colors.dart';
 import '../../../../design_system/tokens/app_dimensions.dart';
 import '../../../../design_system/tokens/app_typography.dart';
+import '../../../../design_system/components/app_page_header.dart';
 import '../../domain/models/activity_type.dart';
-import '../localization/activity_type_names_pt_br.dart';
+import '../localization/activity_type_localizations.dart';
 import '../widgets/activity_selection_sheet.dart';
 
 /// 活动准备页的安全基础版：先复现主布局，不生成演示指标或会话。
@@ -45,15 +48,16 @@ class _ActivityPreparationPageState extends State<ActivityPreparationPage> {
 
   @override
   Widget build(BuildContext context) {
-    final activityName = activityTypeNamesPtBr[_activity.id] ?? _activity.id;
+    final strings = context.l10n;
+    final activityName = activityTypeLocalizedName(_activity, strings);
     final hero = Center(
       child: _StatusLine(
         icon: Icons.watch_outlined,
-        title: 'Pulseira não integrada',
-        detail: 'Frequência cardíaca e bateria indisponíveis',
+        title: strings.watchNotIntegrated,
+        detail: strings.heartRateBatteryUnavailable,
       ),
     );
-    final controls = const _PreparationControls();
+    final controls = _PreparationControls();
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -133,7 +137,7 @@ class _PreparationHeader extends StatelessWidget {
     child: Row(
       children: [
         IconButton(
-          tooltip: 'Fechar preparação',
+          tooltip: context.l10n.preparationClose,
           onPressed: onClose,
           icon: const Icon(Icons.close, color: AppColors.textPrimary),
         ),
@@ -195,19 +199,19 @@ class _PreparationControls extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.md),
             _WeatherStatusCard(),
-            const _LoadTargetStatus(),
+            _LoadTargetStatus(),
             const SizedBox(height: AppSpacing.md),
             SizedBox(
               width: double.infinity,
               child: FilledButton(
                 onPressed: null,
-                child: const Text('Iniciar atividade'),
+                child: Text(context.l10n.startActivityButton),
               ),
             ),
             const SizedBox(height: AppSpacing.xs),
             Center(
               child: Text(
-                'A sessão de atividade ainda não está disponível',
+                context.l10n.waitingForSensors,
                 textAlign: TextAlign.center,
                 style: AppTypography.caption.copyWith(
                   color: AppColors.textMuted,
@@ -242,13 +246,13 @@ class _RouteRecordingToggle extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Registrar o percurso',
+                context.l10n.routeRecording,
                 style: AppTypography.body.copyWith(
                   color: AppColors.textSecondary,
                 ),
               ),
               Text(
-                'GPS indisponível; nenhum percurso será gravado',
+                context.l10n.gpsUnavailable,
                 style: AppTypography.caption.copyWith(
                   color: AppColors.textMuted,
                 ),
@@ -280,10 +284,10 @@ class _WeatherStatusCard extends StatelessWidget {
       borderRadius: AppRadii.cardBorder,
       border: Border.fromBorderSide(AppBorders.glass),
     ),
-    child: const _StatusLine(
+    child: _StatusLine(
       icon: Icons.cloud_outlined,
-      title: 'Clima indisponível',
-      detail: 'Localização e serviço meteorológico não integrados',
+      title: context.l10n.weatherUnavailable,
+      detail: context.l10n.weatherNotIntegrated,
     ),
   );
 }
@@ -313,19 +317,19 @@ class _LoadTargetStatus extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Carga sugerida indisponível',
+              context.l10n.suggestedLoadUnavailable,
               style: AppTypography.body.copyWith(color: AppColors.textPrimary),
             ),
             const SizedBox(height: AppSpacing.xxs),
             Text(
-              'Dados e cálculo da carga ainda não integrados',
+              context.l10n.loadNotIntegrated,
               style: AppTypography.caption.copyWith(color: AppColors.textMuted),
             ),
           ],
         ),
       ),
       Semantics(
-        label: 'Carga sugerida indisponível',
+        label: context.l10n.suggestedLoadUnavailable,
         child: Switch.adaptive(value: false, onChanged: null),
       ),
     ],
@@ -377,65 +381,77 @@ class StrengthStartPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final activityName = activityTypeNamesPtBr[activity.id] ?? activity.id;
+    final strings = context.l10n;
+    final activityName = activityTypeLocalizedName(activity, strings);
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        foregroundColor: AppColors.textPrimary,
-        centerTitle: true,
-        leading: IconButton(
-          tooltip: 'Fechar',
-          onPressed: () => Navigator.of(context).pop(),
-          icon: const Icon(Icons.close),
-        ),
-        title: Text(activityName),
-      ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.lg,
-            AppSpacing.sm,
-            AppSpacing.lg,
-            AppSpacing.xl,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Como deseja começar?',
-                style: AppTypography.title.copyWith(
-                  color: AppColors.textPrimary,
+        child: Column(
+          children: [
+            AppPageHeader(
+              title: Text(
+                activityName,
+                style: const TextStyle(
+                  fontFamily: AppFontFamilies.geist,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(height: AppSpacing.md),
-              _StrengthOption(
-                icon: Icons.play_arrow,
-                title: 'Começar sem plano',
-                detail: 'Os exercícios podem entrar depois',
-                onTap: () => Navigator.of(context).push<void>(
-                  MaterialPageRoute<void>(
-                    builder: (_) =>
-                        ActivityPreparationPage(initialActivity: activity),
-                  ),
+              leading: IconButton(
+                tooltip: strings.close,
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(Icons.close),
+              ),
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg,
+                  AppSpacing.sm,
+                  AppSpacing.lg,
+                  AppSpacing.xl,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      strings.howToStart,
+                      style: AppTypography.title.copyWith(
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    _StrengthOption(
+                      icon: Icons.play_arrow,
+                      title: strings.startWithoutPlan,
+                      detail: strings.exercisesCanBeAddedLater,
+                      onTap: () => Navigator.of(context).push<void>(
+                        MaterialPageRoute<void>(
+                          builder: (_) => ActivityPreparationPage(
+                            initialActivity: activity,
+                          ),
+                        ),
+                      ),
+                    ),
+                    _StrengthSectionHeading(title: strings.yourWorkouts),
+                    _StatusLine(
+                      icon: Icons.fitness_center,
+                      title: strings.savedWorkoutsUnavailable,
+                      detail: strings.savedWorkoutsNotConnected,
+                    ),
+                    _StrengthSectionHeading(title: strings.otherWays),
+                    _StrengthOption(
+                      icon: Icons.add,
+                      title: strings.buildWorkout,
+                      detail: strings.workoutEditorNotIntegrated,
+                      onTap: null,
+                    ),
+                  ],
                 ),
               ),
-              const _StrengthSectionHeading(title: 'Seus treinos'),
-              const _StatusLine(
-                icon: Icons.fitness_center,
-                title: 'Treinos salvos ainda não disponíveis',
-                detail: 'Os treinos salvos não estão conectados neste app',
-              ),
-              const _StrengthSectionHeading(title: 'Outras formas'),
-              const _StrengthOption(
-                icon: Icons.add,
-                title: 'Montar treino novo',
-                detail: 'Editor de exercícios, séries e carga não integrado',
-                onTap: null,
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

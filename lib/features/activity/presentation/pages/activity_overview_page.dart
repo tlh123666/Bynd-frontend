@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../design_system/design_system.dart';
 import '../../../../shared/widgets/day_calendar.dart';
 import '../../../../shared/widgets/day_strip.dart';
+import '../../../../l10n/app_localizations_context.dart';
 import '../activity_selection_flow.dart';
 
 /// 活动总览页：对应网页原型的 `exercicio` 页面。
@@ -59,7 +60,7 @@ class _ActivityOverviewPageState extends State<ActivityOverviewPage> {
                     Expanded(
                       child: SingleChildScrollView(
                         padding: const EdgeInsets.fromLTRB(24, 74, 24, 210),
-                        child: const _DailySummary(),
+                        child: _DailySummary(),
                       ),
                     ),
                   ],
@@ -74,7 +75,7 @@ class _ActivityOverviewPageState extends State<ActivityOverviewPage> {
                   onRegister: () => AppNotice.show(
                     context,
                     kind: AppNoticeKind.info,
-                    message: 'Registro de atividade: em breve.',
+                    message: context.l10n.activityRegisterComingSoon,
                   ),
                 ),
               ),
@@ -101,7 +102,9 @@ class _ActivityOverviewPageState extends State<ActivityOverviewPage> {
                   AppNotice.show(
                     context,
                     kind: AppNoticeKind.info,
-                    message: '${action.label.replaceAll('\n', ' ')}: em breve.',
+                    message: context.l10n.comingSoon(
+                      action.localizedLabel(context.l10n).replaceAll('\n', ' '),
+                    ),
                   );
                 }
               },
@@ -119,7 +122,7 @@ class _ActivityOverviewPageState extends State<ActivityOverviewPage> {
     AppNotice.show(
       context,
       kind: AppNoticeKind.info,
-      message: 'Esta seção estará disponível em breve.',
+      message: context.l10n.sectionComingSoon,
     );
   }
 }
@@ -160,32 +163,21 @@ class _ActivityHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 56,
-      child: Row(
-        children: [
-          IconButton(
-            tooltip: 'Voltar',
-            onPressed: onBack,
-            icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
-          ),
-          const Expanded(
-            child: Text(
-              'Atividades',
-              textAlign: TextAlign.center,
-              style: AppTypography.title,
-            ),
-          ),
-          IconButton(
-            tooltip: 'Histórico',
-            onPressed: () => AppNotice.show(
-              context,
-              kind: AppNoticeKind.info,
-              message: 'Histórico de atividades: em breve.',
-            ),
-            icon: const Icon(Icons.history, color: AppColors.textPrimary),
-          ),
-        ],
+    return AppPageHeader(
+      title: Text(context.l10n.activities, style: AppTypography.title),
+      leading: IconButton(
+        tooltip: context.l10n.back,
+        onPressed: onBack,
+        icon: const AppSvgIcon(AppSvgAssets.back, size: 21),
+      ),
+      trailing: IconButton(
+        tooltip: context.l10n.history,
+        onPressed: () => AppNotice.show(
+          context,
+          kind: AppNoticeKind.info,
+          message: context.l10n.activityHistoryComingSoon,
+        ),
+        icon: const Icon(Icons.history, color: AppColors.textPrimary),
       ),
     );
   }
@@ -205,7 +197,7 @@ class _DailySummary extends StatelessWidget {
           children: [
             Text('—', style: AppTypography.hero.copyWith(fontSize: 48)),
             Text(
-              'DADOS INDISPONÍVEIS',
+              context.l10n.activityUnavailableHeading,
               style: AppTypography.caption.copyWith(
                 color: AppColors.textMuted,
                 letterSpacing: 1.5,
@@ -215,7 +207,7 @@ class _DailySummary extends StatelessWidget {
         ),
         const SizedBox(height: 20),
         Text(
-          'Seus dados de atividade aparecerão aqui.',
+          context.l10n.activityUnavailableTitle,
           style: AppTypography.page.copyWith(
             fontWeight: FontWeight.w400,
             height: 1.2,
@@ -223,25 +215,21 @@ class _DailySummary extends StatelessWidget {
         ),
         const SizedBox(height: 14),
         Text(
-          'A integração de dados e o cálculo da carga ainda não estão disponíveis.',
+          context.l10n.activityUnavailableDescription,
           style: AppTypography.body.copyWith(
             color: AppColors.textSecondary,
             height: 1.65,
           ),
         ),
         const SizedBox(height: 88),
-        const _OverviewSectionTitle('O dia em números'),
-        const _UnavailableSection(
-          message: 'Métricas diárias ainda não integradas.',
-        ),
+        _OverviewSectionTitle(context.l10n.dayInNumbers),
+        _UnavailableSection(message: context.l10n.dailyMetricsUnavailable),
         const SizedBox(height: 30),
-        const _OverviewSectionTitle('Modalidades'),
-        const _UnavailableSection(
-          message: 'As modalidades recentes aparecerão aqui.',
-        ),
+        _OverviewSectionTitle(context.l10n.modalities),
+        _UnavailableSection(message: context.l10n.recentModalitiesUnavailable),
         const SizedBox(height: 30),
-        const _OverviewSectionTitle('Atividades de hoje'),
-        const _UnavailableSection(message: 'Nenhuma atividade sincronizada.'),
+        _OverviewSectionTitle(context.l10n.todayActivities),
+        _UnavailableSection(message: context.l10n.noSyncedActivity),
       ],
     );
   }
@@ -301,7 +289,7 @@ class _ActivityActions extends StatelessWidget {
             const SizedBox(width: 12),
             Flexible(
               child: Text(
-                'O que vamos fazer hoje?',
+                context.l10n.todayPlanPrompt,
                 style: AppTypography.section.copyWith(
                   fontSize: 21,
                   fontWeight: FontWeight.w400,
@@ -322,7 +310,7 @@ class _ActivityActions extends StatelessWidget {
                   minimumSize: const Size.fromHeight(52),
                   shape: const StadiumBorder(),
                 ),
-                child: const Text('Registrar'),
+                child: Text(context.l10n.register),
               ),
             ),
             const SizedBox(width: 12),
@@ -335,7 +323,7 @@ class _ActivityActions extends StatelessWidget {
                   minimumSize: const Size.fromHeight(52),
                   shape: const StadiumBorder(),
                 ),
-                child: const Text('Iniciar atividade'),
+                child: Text(context.l10n.startActivityTitle),
               ),
             ),
           ],

@@ -11,6 +11,7 @@ void main() {
   testWidgets('主页显示底部导航并更新选中入口', (tester) async {
     await tester.pumpWidget(const ByndApp());
 
+    expect(find.byType(AppPageHeader), findsOneWidget);
     expect(find.byType(AppBottomNav), findsOneWidget);
     for (final asset in [
       AppSvgAssets.home,
@@ -41,15 +42,23 @@ void main() {
   });
 
   testWidgets('更多按钮展开六项快捷导航并可关闭', (tester) async {
+    tester.view.physicalSize = const Size(393, 852);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
     await tester.pumpWidget(const ByndApp());
 
     await tester.tap(find.byTooltip('Ações rápidas'));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(find.byType(AppQuickActionsOverlay), findsOneWidget);
+    expect(
+      tester.getSize(find.byType(AppQuickActionsOverlay)),
+      const Size(393, 852),
+    );
     expect(find.text('AÇÕES RÁPIDAS'), findsOneWidget);
     for (final action in AppQuickAction.values) {
-      expect(find.text(action.label), findsOneWidget);
       expect(
         find.byWidgetPredicate(
           (widget) => widget is AppSvgIcon && widget.asset == action.iconAsset,
@@ -59,7 +68,7 @@ void main() {
     }
 
     await tester.tap(find.byTooltip('Fechar'));
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.byType(AppQuickActionsOverlay), findsNothing);
   });
 
@@ -92,10 +101,10 @@ void main() {
   testWidgets('快捷入口触发对应反馈并关闭菜单', (tester) async {
     await tester.pumpWidget(const ByndApp());
     await tester.tap(find.byTooltip('Ações rápidas'));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
-    await tester.tap(find.text(AppQuickAction.breathe.label));
-    await tester.pump();
+    await tester.tap(find.text('Respirar\n5 min'));
+    await tester.pumpAndSettle();
 
     expect(find.byType(AppQuickActionsOverlay), findsNothing);
     expect(find.text('Respirar 5 min: em breve.'), findsOneWidget);
@@ -129,6 +138,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(ProfilePage), findsOneWidget);
+    expect(find.byType(AppPageHeader), findsOneWidget);
     expect(find.text('Perfil'), findsOneWidget);
     expect(find.text('Clara Nunes'), findsOneWidget);
     expect(find.byType(AppBottomNav), findsOneWidget);

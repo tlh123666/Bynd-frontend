@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../tokens/app_colors.dart';
 import '../tokens/app_dimensions.dart';
 import 'app_icon.dart';
+import '../../l10n/app_localizations_context.dart';
 
 /// 对照网页版底部导航：四个胶囊内入口 + 独立的圆形新增操作。
 class AppBottomNav extends StatelessWidget {
@@ -28,10 +29,15 @@ class AppBottomNav extends StatelessWidget {
     AppSvgAssets.community,
     AppSvgAssets.health,
   ];
-  static const _labels = ['Hoje', 'Atlas', 'Comunidade', 'Saúde'];
-
   @override
   Widget build(BuildContext context) {
+    final strings = context.l10n;
+    final labels = [
+      strings.today,
+      strings.atlas,
+      strings.community,
+      strings.health,
+    ];
     return SafeArea(
       top: false,
       minimum: const EdgeInsets.only(bottom: AppSpacing.sm),
@@ -64,9 +70,9 @@ class AppBottomNav extends StatelessWidget {
                             final selected = selectedIndex == index;
                             return Expanded(
                               child: Tooltip(
-                                message: _labels[index],
+                                message: labels[index],
                                 child: Semantics(
-                                  label: _labels[index],
+                                  label: labels[index],
                                   selected: selected,
                                   button: true,
                                   child: Material(
@@ -108,9 +114,9 @@ class AppBottomNav extends StatelessWidget {
                       color: AppColors.navGlass,
                       shape: const CircleBorder(side: AppBorders.nav),
                       child: Tooltip(
-                        message: 'Ações rápidas',
+                        message: strings.quickActions,
                         child: Semantics(
-                          label: 'Ações rápidas',
+                          label: strings.quickActions,
                           button: true,
                           child: InkWell(
                             onTap: onMorePressed,

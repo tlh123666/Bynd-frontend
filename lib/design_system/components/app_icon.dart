@@ -42,6 +42,8 @@ class AppSvgIcon extends StatelessWidget {
     this.size = AppSizes.icon,
     this.color,
     this.label,
+    this.width,
+    this.height,
     super.key,
   });
 
@@ -49,13 +51,15 @@ class AppSvgIcon extends StatelessWidget {
   final double size;
   final Color? color;
   final String? label;
+  final double? width;
+  final double? height;
 
   @override
   Widget build(BuildContext context) {
     return SvgPicture.asset(
       asset,
-      width: size,
-      height: size,
+      width: width ?? size,
+      height: height ?? size,
       fit: BoxFit.contain,
       colorFilter: ColorFilter.mode(
         color ?? AppColors.textPrimary,

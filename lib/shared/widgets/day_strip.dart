@@ -4,6 +4,7 @@ import '../../design_system/tokens/app_colors.dart';
 import '../../design_system/tokens/app_typography.dart';
 import 'centered_tab_strip.dart';
 import 'day_calendar.dart';
+import '../../l10n/app_localizations_context.dart';
 
 /// 全站共用的日期带：当前日固定在中央标记处，支持横向切换最近 30 天。
 ///
@@ -82,8 +83,27 @@ class _DayOption extends StatelessWidget {
   final int day;
   final bool selected;
 
-  static const _weekdays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-  static const _months = [
+  String label(BuildContext context) {
+    final strings = context.l10n;
+    if (day == 0) return strings.today;
+    if (day == 1) return strings.yesterday;
+    final date = DateTime.now().subtract(Duration(days: day));
+    final weekday = switch (date.weekday % 7) {
+      0 => strings.calendarWeekdaySun,
+      1 => strings.calendarWeekdayMon,
+      2 => strings.calendarWeekdayTue,
+      3 => strings.calendarWeekdayWed,
+      4 => strings.calendarWeekdayThu,
+      5 => strings.calendarWeekdayFri,
+      _ => strings.calendarWeekdaySat,
+    };
+    if (strings.localeName == 'en') {
+      return '$weekday, ${_monthsEn[date.month - 1]} ${date.day}';
+    }
+    return '$weekday, ${date.day} de ${_monthsPt[date.month - 1]}';
+  }
+
+  static const _monthsPt = [
     'jan',
     'fev',
     'mar',
@@ -97,13 +117,20 @@ class _DayOption extends StatelessWidget {
     'nov',
     'dez',
   ];
-
-  String get label {
-    if (day == 0) return 'Hoje';
-    if (day == 1) return 'Ontem';
-    final date = DateTime.now().subtract(Duration(days: day));
-    return '${_weekdays[date.weekday % 7]}, ${date.day} de ${_months[date.month - 1]}';
-  }
+  static const _monthsEn = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -113,7 +140,7 @@ class _DayOption extends StatelessWidget {
         padding: const EdgeInsets.only(top: 4, bottom: 14),
         child: Center(
           child: Text(
-            label,
+            label(context),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: AppTypography.body.copyWith(
