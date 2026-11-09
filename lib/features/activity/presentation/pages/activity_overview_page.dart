@@ -199,11 +199,11 @@ class _DailySummary extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
+        Wrap(
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 14,
           children: [
             Text('—', style: AppTypography.hero.copyWith(fontSize: 48)),
-            const SizedBox(width: 14),
             Text(
               'DADOS INDISPONÍVEIS',
               style: AppTypography.caption.copyWith(
@@ -299,11 +299,13 @@ class _ActivityActions extends StatelessWidget {
               color: AppColors.textMuted,
             ),
             const SizedBox(width: 12),
-            Text(
-              'O que vamos fazer hoje?',
-              style: AppTypography.section.copyWith(
-                fontSize: 21,
-                fontWeight: FontWeight.w400,
+            Flexible(
+              child: Text(
+                'O que vamos fazer hoje?',
+                style: AppTypography.section.copyWith(
+                  fontSize: 21,
+                  fontWeight: FontWeight.w400,
+                ),
               ),
             ),
           ],

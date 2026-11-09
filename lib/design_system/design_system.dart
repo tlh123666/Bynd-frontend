@@ -1,6 +1,7 @@
 export 'components/app_bottom_nav.dart';
 export 'components/app_button.dart';
 export 'components/app_card.dart';
+export 'components/app_frosted_surface.dart';
 export 'components/app_icon.dart';
 export 'components/app_loading.dart';
 export 'components/app_notice.dart';
