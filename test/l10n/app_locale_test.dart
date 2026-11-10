@@ -1,3 +1,4 @@
+import 'package:new_jcvital/core/config/app_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:new_jcvital/design_system/design_system.dart';
@@ -57,7 +58,13 @@ void main() {
       tester.view.resetDevicePixelRatio();
     });
 
-    await tester.pumpWidget(const ByndApp());
+    await tester.pumpWidget(
+      ByndApp(
+        config: AppConfig.resolve(
+          defines: const {'MAPA_USE_DEMO_DATA': 'true'},
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Menu'));
     await tester.pumpAndSettle();
@@ -72,7 +79,13 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(AppFrostedModalSheet), findsOneWidget);
-    expect(find.byType(AppFrostedSurface), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(AppFrostedModalSheet),
+        matching: find.byType(AppFrostedSurface),
+      ),
+      findsOneWidget,
+    );
     expect(
       tester.getSize(find.byType(AppFrostedModalSheet)).height,
       lessThan(tester.view.physicalSize.height),
@@ -102,7 +115,13 @@ void main() {
       tester.view.resetDevicePixelRatio();
     });
 
-    await tester.pumpWidget(const ByndApp());
+    await tester.pumpWidget(
+      ByndApp(
+        config: AppConfig.resolve(
+          defines: const {'MAPA_USE_DEMO_DATA': 'true'},
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Quick actions'));
     await tester.pumpAndSettle();

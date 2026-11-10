@@ -44,6 +44,21 @@ class AuthApi {
     );
   }
 
+  Future<AuthTokens> loginWithGoogle({
+    required String idToken,
+    required bool consent,
+  }) async {
+    final data = await _client.request(
+      'POST',
+      ApiEndpoints.authGoogle,
+      body: {'idToken': idToken, 'consent': consent},
+      requiresAuth: false,
+    );
+    return AuthTokens.fromLoginData(data);
+  }
+
+  void close() => _client.close();
+
   Future<AuthTokens> loginWithEmailCode({
     required String email,
     required String code,

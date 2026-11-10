@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../core/config/app_config.dart';
+import '../../core/auth/auth_scope.dart';
 
 import '../../design_system/design_system.dart';
 import '../../shared/navigation/app_side_menu.dart';
@@ -109,6 +110,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   void _otherMenuItem(String label) {
     setState(() => _menuOpen = false);
+    if (label == context.l10n.signOut) {
+      unawaited(_signOut());
+      return;
+    }
     if (label == 'Mapa' || label == context.l10n.atlas) {
       // 抽屉收起有动画，直接 push 会和收起动作叠在一起；与设备页保持同一步调。
       _openMapa();
@@ -130,6 +135,25 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       kind: AppNoticeKind.info,
       message: context.l10n.comingSoon(label),
     );
+  }
+
+  Future<void> _signOut() async {
+    await Future<void>.delayed(
+      AppMotion.enabled(context) ? AppMotion.drawer : Duration.zero,
+    );
+    if (!mounted) return;
+    final auth = AuthScope.maybeOf(context);
+    if (auth == null) return;
+    final s = context.l10n;
+    final confirmed = await AppConfirmationSheet.show(
+      context,
+      title: s.authSignOutTitle,
+      message: s.authSignOutBody,
+      confirmLabel: s.authSignOutConfirm,
+      cancelLabel: s.authCancel,
+    );
+    if (!mounted || !confirmed) return;
+    await auth.logout();
   }
 
   Future<void> _openLanguagePicker() async {
