@@ -69,6 +69,13 @@ void main() {
       findsOneWidget,
     );
     await tester.tap(find.text('Idioma'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 60));
+    final scrimOpacity = tester
+        .widget<FadeTransition>(find.byKey(const Key('frosted-modal-scrim')))
+        .opacity
+        .value;
+    expect(scrimOpacity, greaterThan(.6));
     await tester.pumpAndSettle();
 
     expect(find.byType(AppFrostedModalSheet), findsOneWidget);
@@ -91,6 +98,38 @@ void main() {
       (await SharedPreferences.getInstance()).getString('bynd_locale'),
       'en',
     );
+  });
+
+  testWidgets('磨砂弹窗使用较短的收起时长', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) => Scaffold(
+            body: Center(
+              child: TextButton(
+                onPressed: () => AppFrostedModalSheet.show<void>(
+                  context,
+                  builder: (_) => const SizedBox(
+                    height: 120,
+                    child: Center(child: Text('Sheet content')),
+                  ),
+                ),
+                child: const Text('Open sheet'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open sheet'));
+    await tester.pumpAndSettle();
+    expect(find.byType(AppFrostedModalSheet), findsOneWidget);
+
+    await tester.tapAt(const Offset(10, 10));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 230));
+    expect(find.byType(AppFrostedModalSheet), findsNothing);
   });
 
   testWidgets('英文模式下活动入口和运动目录完整使用英文文案', (tester) async {
