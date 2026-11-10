@@ -1,5 +1,15 @@
 # BYND 原站 CSS 配色对照
 
+## 默认按钮规则（2026-11-10）
+
+本次重新读取了原站当前 [main-CRUZ18wL.css](https://bynd-app.vercel.app/assets/main-CRUZ18wL.css)。原站常用按钮采用 `#f4f5f7` 浅色底、深色文字，或透明／灰色玻璃样式；`#ff6900` 出现在 `.hd-trilho em` 小圆点及其脉冲阴影中，不能用作项目的通用按钮色。
+
+- `AppColors.action` 改为 `brandLight`，`onAction` 为深色。
+- `AppButtonStyles` 集中定义主按钮、次按钮、文字按钮、危险按钮及禁用／交互状态。`AppButton` 和 Flutter 默认按钮主题共用这些规则。
+- 普通 `FilledButton`／`ElevatedButton` 使用浅色底、深色字；`FilledButton.tonal` 使用中性灰底、浅色字；`OutlinedButton` 使用灰色玻璃底；`TextButton` 使用透明底、浅色字。
+- 新增按钮沿用公共组件或主题，不自行指定橙色。原站退出／危险操作的珊瑚红、提醒和图表状态色保留各自语义。
+- 主题定义在静态 `AppTheme.dark` 中，修改后使用 Hot Restart（热重启）使整棵应用树重新读取主题。
+
 来源：[原站 CSS](https://bynd-app.vercel.app/assets/main-BSoQRcP6.css)（2026-11-07 核对）。Flutter 的全局色值集中在 `lib/design_system/tokens/app_colors.dart`；页面只组合这些色值。
 
 | 原站规则 | CSS 原值 | Flutter 变量或使用位置 |
