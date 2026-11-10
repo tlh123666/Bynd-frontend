@@ -104,7 +104,7 @@ void main() {
 
     await tester.pumpWidget(const ByndApp());
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Quick actions'));
+    await tester.tap(find.bySemanticsLabel('Quick actions'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Start\nactivity'));
     await tester.pumpAndSettle();

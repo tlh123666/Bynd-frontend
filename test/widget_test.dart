@@ -86,7 +86,7 @@ void main() {
   testWidgets('更多按钮展开六项快捷导航并可关闭', (tester) async {
     await tester.pumpWidget(const ByndApp());
 
-    await tester.tap(find.byTooltip('Ações rápidas'));
+    await tester.tap(find.bySemanticsLabel('Ações rápidas'));
     await tester.pump();
 
     expect(find.byType(AppQuickActionsOverlay), findsOneWidget);
@@ -181,7 +181,7 @@ void main() {
 
   testWidgets('快捷入口触发对应反馈并关闭菜单', (tester) async {
     await tester.pumpWidget(const ByndApp());
-    await tester.tap(find.byTooltip('Ações rápidas'));
+    await tester.tap(find.bySemanticsLabel('Ações rápidas'));
     await tester.pumpAndSettle();
 
     await tester.tap(find.text(AppQuickAction.breathe.label));
@@ -195,7 +195,7 @@ void main() {
 
   testWidgets('系统返回键收起快捷菜单并保留当前页面', (tester) async {
     await tester.pumpWidget(const ByndApp());
-    await tester.tap(find.byTooltip('Ações rápidas'));
+    await tester.tap(find.bySemanticsLabel('Ações rápidas'));
     await tester.pumpAndSettle();
 
     await tester.binding.handlePopRoute();

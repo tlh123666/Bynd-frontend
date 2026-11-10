@@ -34,7 +34,7 @@ void main() {
   testWidgets('首页快捷入口先进入活动页，再自动打开选择面板', (tester) async {
     await tester.pumpWidget(const MaterialApp(home: HomePage()));
 
-    await tester.tap(find.byTooltip('Ações rápidas'));
+    await tester.tap(find.bySemanticsLabel('Ações rápidas'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Iniciar\natividade'));
     await tester.pumpAndSettle();
@@ -53,7 +53,7 @@ void main() {
   testWidgets('首页选择普通活动后进入准备页', (tester) async {
     await tester.pumpWidget(const MaterialApp(home: HomePage()));
 
-    await tester.tap(find.byTooltip('Ações rápidas'));
+    await tester.tap(find.bySemanticsLabel('Ações rápidas'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Iniciar\natividade'));
     await tester.pumpAndSettle();
@@ -74,7 +74,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Ajustes'));
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Ações rápidas'));
+    await tester.tap(find.bySemanticsLabel('Ações rápidas'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Iniciar\natividade'));
     await tester.pumpAndSettle();
@@ -90,7 +90,7 @@ void main() {
   testWidgets('选择肌肉训练先进入无计划/计划入口', (tester) async {
     await tester.pumpWidget(const MaterialApp(home: HomePage()));
 
-    await tester.tap(find.byTooltip('Ações rápidas'));
+    await tester.tap(find.bySemanticsLabel('Ações rápidas'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Iniciar\natividade'));
     await tester.pumpAndSettle();
