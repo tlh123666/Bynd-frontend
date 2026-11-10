@@ -7,6 +7,19 @@ import '../tokens/app_dimensions.dart';
 
 /// 可复用的磨砂玻璃表面：统一背景模糊、饱和度、着色和渐隐描边。
 class AppFrostedSurface extends StatelessWidget {
+  /// 页面底部磨砂叶片使用的统一材质参数。
+  const AppFrostedSurface.modalSheet({
+    required this.child,
+    required this.borderRadius,
+    this.borderFadeHeight = 240,
+    this.boxShadow = const [],
+    super.key,
+  }) : blurSigma = 14,
+       saturation = 1.5,
+       tintColor = AppColors.sheetGlassTint,
+       borderColor = AppColors.sheetGlassBorder,
+       fit = StackFit.loose;
+
   const AppFrostedSurface({
     required this.child,
     required this.borderRadius,
@@ -16,6 +29,7 @@ class AppFrostedSurface extends StatelessWidget {
     this.borderColor = AppColors.glassBorder,
     this.borderFadeHeight = 0,
     this.boxShadow = const [],
+    this.fit = StackFit.expand,
     super.key,
   });
 
@@ -29,6 +43,7 @@ class AppFrostedSurface extends StatelessWidget {
   /// 大于 0 时，描边从顶部向下渐隐，适用于原型中的底部面板。
   final double borderFadeHeight;
   final List<BoxShadow> boxShadow;
+  final StackFit fit;
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +55,7 @@ class AppFrostedSurface extends StatelessWidget {
       child: ClipRRect(
         borderRadius: borderRadius,
         child: Stack(
-          fit: StackFit.expand,
+          fit: fit,
           children: [
             Positioned.fill(
               child: ColorFiltered(

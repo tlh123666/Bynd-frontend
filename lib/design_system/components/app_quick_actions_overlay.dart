@@ -8,6 +8,7 @@ import '../tokens/app_dimensions.dart';
 import '../tokens/app_motion.dart';
 import '../tokens/app_typography.dart';
 import 'app_icon.dart';
+import 'app_quick_actions_button.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../l10n/app_localizations_context.dart';
 
@@ -270,25 +271,11 @@ class _AppQuickActionsOverlayState extends State<AppQuickActionsOverlay>
                       opacity: _closeOpacity,
                       child: Transform.rotate(
                         angle: _closeAngle,
-                        child: Semantics(
-                          label: 'Fechar',
-                          button: true,
-                          child: Material(
-                            color: AppColors.textPrimary,
-                            shape: const CircleBorder(),
-                            child: InkWell(
-                              key: const Key('quick-close-button'),
-                              onTap: _close,
-                              customBorder: const CircleBorder(),
-                              child: Center(
-                                child: AppSvgIcon(
-                                  AppSvgAssets.close,
-                                  size: 22,
-                                  color: AppColors.background,
-                                ),
-                              ),
-                            ),
-                          ),
+                        child: AppQuickActionsButton(
+                          key: const Key('quick-close-button'),
+                          isOpen: true,
+                          label: context.l10n.close,
+                          onPressed: _close,
                         ),
                       ),
                     ),

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:new_jcvital/design_system/design_system.dart';
 import 'package:new_jcvital/l10n/app_locale_controller.dart';
 import 'package:new_jcvital/l10n/generated/app_localizations.dart';
 import 'package:new_jcvital/main.dart';
 import 'package:new_jcvital/features/activity/domain/models/activity_type_catalog.dart';
 import 'package:new_jcvital/features/activity/domain/models/activity_type.dart';
 import 'package:new_jcvital/features/activity/presentation/localization/activity_type_localizations.dart';
+import 'package:new_jcvital/shared/navigation/app_side_menu.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -59,9 +61,23 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Menu'));
     await tester.pumpAndSettle();
+    expect(
+      find.descendant(
+        of: find.byType(AppSideMenu),
+        matching: find.byIcon(Icons.language),
+      ),
+      findsOneWidget,
+    );
     await tester.tap(find.text('Idioma'));
     await tester.pumpAndSettle();
 
+    expect(find.byType(AppFrostedModalSheet), findsOneWidget);
+    expect(find.byType(AppFrostedSurface), findsOneWidget);
+    expect(
+      tester.getSize(find.byType(AppFrostedModalSheet)).height,
+      lessThan(tester.view.physicalSize.height),
+    );
+    expect(find.byType(BackdropFilter), findsAtLeastNWidgets(2));
     expect(find.text('Escolha o idioma'), findsOneWidget);
     await tester.tap(find.text('English'));
     await tester.pumpAndSettle();

@@ -136,10 +136,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     final localeController = AppLocaleScope.maybeOf(context);
     if (localeController == null) return;
     setState(() => _menuOpen = false);
-    await showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: AppColors.menuPanel,
-      showDragHandle: true,
+    await AppFrostedModalSheet.show<void>(
+      context,
       builder: (_) => LanguagePickerSheet(
         selectedLocale: localeController.locale,
         onSelected: localeController.setLocale,
