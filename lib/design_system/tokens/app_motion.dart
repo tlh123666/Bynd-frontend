@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 /// Timings shared by navigation and reusable controls.
 abstract final class AppMotion {
   static const feedback = Duration(milliseconds: 140);
+  // 原型统一触控反馈：按下约 120ms，松开由短弹性回弹收尾。
+  static const touchPress = Duration(milliseconds: 120);
+  static const touchRelease = Duration(milliseconds: 220);
   static const veil = Duration(milliseconds: 260);
   static const drawer = Duration(milliseconds: 300);
   static const page = Duration(milliseconds: 380);
@@ -23,6 +26,7 @@ abstract final class AppMotion {
   static const pageCurve = Cubic(0.2, 0.8, 0.2, 1);
   static const quickBubbleCurve = Cubic(0.34, 0.27, 0.05, 1);
   static const quickExitCurve = Cubic(0.4, 0, 1, 1);
+  static const touchPressCurve = Cubic(0.2, 0.8, 0.2, 1);
 
   static bool enabled(BuildContext context) =>
       !MediaQuery.disableAnimationsOf(context);
