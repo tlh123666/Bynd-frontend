@@ -1,0 +1,94 @@
+{
+  "0": [
+    {
+      "h": "06:58",
+      "ic": "sol",
+      "k": "Acordou",
+      "v": "7h42",
+      "u": "de sono",
+      "n": "nota 82 · medido pela pulseira"
+    },
+    {
+      "h": "07:50",
+      "ic": "peso",
+      "k": "Treino leve · mobilidade e força",
+      "v": "35",
+      "u": "min",
+      "n": "carga 28 · medido pela pulseira"
+    },
+    {
+      "h": "10:15",
+      "ic": "rec",
+      "k": "Recuperação",
+      "v": "74",
+      "u": "de 100",
+      "n": "boa para treinar · medido pela pulseira"
+    },
+    {
+      "h": "11:40",
+      "ic": "pes",
+      "k": "Metade da meta de passos",
+      "v": "5.000",
+      "u": "passos",
+      "n": "medido pela pulseira"
+    },
+    {
+      "h": "14:02",
+      "ic": "grafo",
+      "k": "Pico de estresse",
+      "v": "57",
+      "u": "de 100",
+      "n": "depois de 2 h sentado · medido pela pulseira"
+    },
+    {
+      "h": "15:30",
+      "ic": "resp",
+      "k": "Momento de calma",
+      "v": "12",
+      "u": "min",
+      "n": "estresse baixo · medido pela pulseira"
+    },
+    {
+      "h": "18:20",
+      "ic": "corre",
+      "k": "Caminhada",
+      "v": "24",
+      "u": "min",
+      "n": "2,1 km · medido pela pulseira"
+    },
+    {
+      "h": "21:45",
+      "ic": "termo",
+      "k": "Corpo pronto para dormir",
+      "v": "36,4",
+      "u": "°C",
+      "n": "temperatura caindo · medido pela pulseira"
+    }
+  ],
+  "-1": [
+    {
+      "h": "06:55",
+      "ic": "sol",
+      "k": "Acordou",
+      "v": "6h10",
+      "u": "de sono",
+      "n": "nota 64 · medido pela pulseira"
+    },
+    {
+      "h": "18:30",
+      "ic": "corre",
+      "k": "Corrida",
+      "v": "42",
+      "u": "min",
+      "n": "carga 61 · medido pela pulseira"
+    },
+    {
+      "h": "22:40",
+      "ic": "lua",
+      "k": "Foi dormir",
+      "v": "22:40",
+      "u": "",
+      "n": "medido pela pulseira"
+    }
+  ]
+}

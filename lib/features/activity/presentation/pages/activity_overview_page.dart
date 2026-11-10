@@ -1,3 +1,4 @@
+import '../../../diary/presentation/diary_page.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../design_system/design_system.dart';
@@ -112,6 +113,19 @@ class _ActivityOverviewPageState extends State<ActivityOverviewPage> {
                 setState(() => _quickActionsOpen = false);
                 if (action == AppQuickAction.startActivity) {
                   openActivitySelection(context);
+                } else if (action == AppQuickAction.dayReview ||
+                    action == AppQuickAction.meal) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (_) => DiaryPage(
+                        openRecord: true,
+                        initialTracker: action == AppQuickAction.meal
+                            ? 'almoco'
+                            : null,
+                      ),
+                    ),
+                  );
                 } else {
                   AppNotice.show(
                     context,

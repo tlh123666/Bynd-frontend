@@ -155,6 +155,21 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       );
       return;
     }
+    if (action == AppQuickAction.dayReview || action == AppQuickAction.meal) {
+      await Navigator.of(context).push<void>(
+        MaterialPageRoute(
+          builder: (_) => HomeAccountGuard(
+            controller: _home,
+            child: HomeDiaryPage(
+              controller: _home,
+              openRecord: true,
+              initialTracker: action == AppQuickAction.meal ? 'almoco' : null,
+            ),
+          ),
+        ),
+      );
+      return;
+    }
     AppNotice.show(
       context,
       kind: AppNoticeKind.info,

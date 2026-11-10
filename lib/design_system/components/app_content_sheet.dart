@@ -2,6 +2,7 @@ import 'dart:ui' show ImageFilter;
 import 'package:flutter/material.dart';
 import '../tokens/app_colors.dart';
 import '../tokens/app_motion.dart';
+import '../tokens/app_typography.dart';
 import 'app_detail_background.dart';
 
 /// Native modal sheet gestures, focus, safe area and keyboard handling, with
@@ -10,14 +11,32 @@ Future<T?> showAppContentSheet<T>(
   BuildContext context,
   WidgetBuilder builder, {
   double heightFactor = .936,
+  bool glass = false,
 }) {
   final navigator = Navigator.of(context);
+  Widget surface(Widget child) => glass
+      ? BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+          child: DecoratedBox(
+            decoration: const BoxDecoration(
+              color: AppColors.contentSheetGlass,
+              border: Border(
+                top: BorderSide(color: AppColors.sheetGlassBorder),
+              ),
+            ),
+            child: DefaultTextStyle(
+              style: AppTypography.detailBody,
+              child: child,
+            ),
+          ),
+        )
+      : AppDetailBackground(child: child);
   return navigator.push<T>(
     _BlurredContentSheetRoute<T>(
       builder: (context) => FractionallySizedBox(
         heightFactor: heightFactor,
-        child: AppDetailBackground(
-          child: Column(
+        child: surface(
+          Column(
             children: [
               SizedBox(
                 height: 16,
@@ -32,7 +51,12 @@ Future<T?> showAppContentSheet<T>(
                   ),
                 ),
               ),
-              Expanded(child: builder(context)),
+              Expanded(
+                child: Material(
+                  color: Colors.transparent,
+                  child: builder(context),
+                ),
+              ),
             ],
           ),
         ),
@@ -45,7 +69,7 @@ Future<T?> showAppContentSheet<T>(
       isScrollControlled: true,
       useSafeArea: true,
       showDragHandle: false,
-      backgroundColor: AppColors.homeCanvas,
+      backgroundColor: glass ? Colors.transparent : AppColors.homeCanvas,
       modalBarrierColor: AppColors.contentSheetVeil,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(26)),

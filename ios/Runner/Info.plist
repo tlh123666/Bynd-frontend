@@ -37,16 +37,16 @@
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>BYND needs background location access to continue tracking your workout when the screen is locked.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>BYND uses the microphone while you hold the voice input button.</string>
+	<string>BYND uses the microphone when you choose voice input.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>BYND converts your spoken question into text so you can send it to ATLAS.</string>
+	<string>BYND converts your speech into text for ATLAS and your diary.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>bluetooth-central</string>
 		<string>location</string>
 	</array>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>BYND needs access to your photo library to set your profile avatar.</string>
+	<string>BYND uses selected photos for your profile and diary meals.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>BYND saves your workout card to your photo library when you tap Save image.</string>
 	<key>UIApplicationSceneManifest</key>
@@ -89,5 +89,7 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Take a photo to attach to a meal in your diary.</string>
 </dict>
 </plist>

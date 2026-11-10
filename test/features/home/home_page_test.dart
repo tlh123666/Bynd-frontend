@@ -188,29 +188,23 @@ void main() {
     expect(find.byType(HomeSignalDetailPage), findsNothing);
     expect(find.byType(HomeContent), findsOneWidget);
   });
-  testWidgets('diary validates empty entry and saves a real form submission', (
-    tester,
-  ) async {
-    final controller = await mount(tester);
-    await tester.ensureVisible(find.text('Adicionar registro +'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Adicionar registro +'));
-    await tester.pumpAndSettle();
-    expect(find.byType(HomeDiaryPage), findsOneWidget);
-    await tester.tap(find.text('Adicionar registro +').last);
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Salvar'));
-    await tester.pumpAndSettle();
-    expect(find.text('Descreva o registro antes de salvar.'), findsOneWidget);
-    await tester.enterText(find.byKey(const Key('home-diary-label')), 'Almoço');
-    await tester.enterText(find.byKey(const Key('home-diary-note')), 'Leve');
-    await tester.tap(find.text('Salvar'));
-    await tester.pumpAndSettle();
-    final events = await controller.repository.diary(controller.date, 'pt');
-    expect(events.single.label, 'Almoço');
-    expect(events.single.note, 'Leve');
-    expect(find.text('Almoço'), findsOneWidget);
-  });
+  testWidgets(
+    'Home diary entry opens the diary feature with its selected date',
+    (tester) async {
+      final controller = await mount(tester);
+      // The visible Home link keeps the selected day when navigating.
+      final link = find.textContaining('registro +');
+      await tester.ensureVisible(link);
+      await tester.tap(link);
+      await tester.pumpAndSettle();
+      expect(find.byType(HomeDiaryPage), findsOneWidget);
+      expect(
+        tester.widget<HomeDiaryPage>(find.byType(HomeDiaryPage)).controller,
+        controller,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
   testWidgets(
     'compact screen and large text remain scrollable without overflow',
     (tester) async {

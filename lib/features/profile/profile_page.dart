@@ -1,3 +1,4 @@
+import '../diary/presentation/diary_page.dart';
 import 'package:flutter/material.dart';
 
 import '../../design_system/design_system.dart';
@@ -32,6 +33,18 @@ class _ProfilePageState extends State<ProfilePage> {
       await Navigator.of(context).push<void>(
         MaterialPageRoute<void>(
           builder: (_) => const ActivityOverviewPage(openSelectorOnEnter: true),
+        ),
+      );
+      return;
+    }
+    if (action == AppQuickAction.dayReview || action == AppQuickAction.meal) {
+      await Navigator.push(
+        context,
+        MaterialPageRoute<void>(
+          builder: (_) => DiaryPage(
+            openRecord: true,
+            initialTracker: action == AppQuickAction.meal ? 'almoco' : null,
+          ),
         ),
       );
       return;
