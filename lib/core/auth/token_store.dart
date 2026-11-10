@@ -1,8 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'auth_tokens.dart';
+import 'auth_token_store.dart';
 
 /// 凭据的持久化。
 ///
@@ -23,7 +25,7 @@ abstract interface class TokenStore {
 /// 有效期 7 天的访问令牌。健康类应用拿它当存储方案过不了 LGPD 的数据安全要求。
 class SecureTokenStore implements TokenStore {
   SecureTokenStore({FlutterSecureStorage? storage})
-      : _storage = storage ?? const FlutterSecureStorage();
+    : _storage = storage ?? const FlutterSecureStorage();
 
   final FlutterSecureStorage _storage;
 
@@ -33,17 +35,26 @@ class SecureTokenStore implements TokenStore {
   @override
   Future<AuthTokens?> read() async {
     final raw = await _storage.read(key: storageKey);
-    if (raw == null || raw.isEmpty) return null;
-    try {
-      final decoded = jsonDecode(raw);
-      if (decoded is! Map) return null;
-      return AuthTokens.fromJson(decoded.cast<String, dynamic>());
-    } on FormatException {
-      // 旧版本写入的结构可能缺字段。宁可当成未登录，也不要把半份凭据
-      // 拿去发请求——那会得到一串 401，用户看到的是「莫名被登出」。
-      await clear();
-      return null;
+    if (raw != null && raw.isNotEmpty) {
+      try {
+        final decoded = jsonDecode(raw);
+        if (decoded is! Map) {
+          throw const FormatException('Invalid token metadata');
+        }
+        return AuthTokens.fromJson(decoded.cast<String, dynamic>());
+      } on FormatException {
+        // 旧版本写入的结构可能缺字段。宁可当成未登录，也不要把半份凭据
+        // 拿去发请求——那会得到一串 401，用户看到的是「莫名被登出」。
+        await _storage.delete(key: storageKey);
+      }
     }
+    final legacy = await _storage.read(key: AuthStorageKeys.accessToken);
+    if (legacy == null || legacy.isEmpty) return null;
+    final preferences = await SharedPreferences.getInstance();
+    return AuthTokens.fromLegacyToken(
+      legacy,
+      email: preferences.getString(AuthStorageKeys.userEmail) ?? '',
+    );
   }
 
   @override
@@ -52,5 +63,17 @@ class SecureTokenStore implements TokenStore {
   }
 
   @override
-  Future<void> clear() => _storage.delete(key: storageKey);
+  Future<void> clear() async {
+    await _storage.delete(key: storageKey);
+    final prefs = await SharedPreferences.getInstance();
+    for (final key in [
+      AuthStorageKeys.userId,
+      AuthStorageKeys.userEmail,
+      AuthStorageKeys.userPhone,
+      AuthStorageKeys.userNickname,
+      AuthStorageKeys.userAvatar,
+    ]) {
+      await prefs.remove(key);
+    }
+  }
 }

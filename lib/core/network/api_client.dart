@@ -7,9 +7,17 @@ import '../config/app_config.dart';
 import '../localization/app_locale_controller.dart';
 
 class ApiException implements Exception {
-  const ApiException(this.message, {this.code = 'api_error'});
+  const ApiException(
+    this.message, {
+    this.code = 'api_error',
+    this.statusCode,
+    this.serverCode,
+    this.retryAfter,
+  });
   final String message;
   final String code;
+  final int? statusCode, serverCode;
+  final Duration? retryAfter;
   @override
   String toString() => message;
 }
@@ -108,7 +116,7 @@ class ApiClient {
       if (kDebugMode && enableLogging) {
         debugPrint('[BYND HTTP] $method ${url.path} -> ${response.statusCode}');
       }
-      if (response.statusCode == 401) {
+      if (response.statusCode == 401 && requiresAuth) {
         if (token != null && onUnauthorized != null) {
           try {
             await onUnauthorized!(token);
@@ -119,6 +127,7 @@ class ApiClient {
         throw const ApiException(
           'Sua sessão expirou. Entre novamente.',
           code: 'authentication_required',
+          statusCode: 401,
         );
       }
       final envelope =
@@ -135,6 +144,9 @@ class ApiClient {
               ? 'Este recurso não está mais disponível.'
               : 'Não foi possível concluir. Tente novamente.',
           code: 'http_${response.statusCode}',
+          statusCode: response.statusCode,
+          serverCode: int.tryParse('${envelope['code']}'),
+          retryAfter: _retryAfter(response.headers['retry-after']),
         );
       }
       return (envelope['data'] as Map?)?.cast<String, dynamic>() ??
@@ -160,4 +172,11 @@ class ApiClient {
   }
 
   void close() => _client.close();
+
+  static Duration? _retryAfter(String? value) {
+    final seconds = int.tryParse(value ?? '');
+    return seconds == null || seconds < 0
+        ? null
+        : Duration(seconds: seconds.clamp(0, 3600));
+  }
 }

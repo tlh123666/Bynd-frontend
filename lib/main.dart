@@ -11,12 +11,10 @@ import 'l10n/app_locale_controller.dart' as legacy_l10n;
 import 'l10n/generated/app_localizations.dart';
 
 import 'design_system/theme/app_theme.dart';
-import 'features/atlas/application/atlas_scope.dart';
 import 'features/atlas/data/atlas_repository.dart';
 import 'features/device/application/device_controller.dart';
-import 'features/device/application/device_scope.dart';
-import 'features/home/home_page.dart';
 import 'features/home/application/home_controller.dart';
+import 'features/auth/presentation/auth_gate.dart';
 
 Future<void> main() async {
   final config = await AppBootstrap.initialize();
@@ -44,72 +42,63 @@ class ByndApp extends StatefulWidget {
 }
 
 class _ByndAppState extends State<ByndApp> {
-  late final DeviceController _devices;
-  late final AtlasRepository _atlas;
   late final AuthController _auth;
   late final legacy_l10n.AppLocaleController _legacyLocale;
   @override
   void initState() {
     super.initState();
-    _devices =
-        widget.deviceController ??
-        DeviceRuntime.create(
-          config: widget.config,
-          locale: widget.localeController,
-        );
-    _atlas =
-        widget.atlasRepository ??
-        AtlasRuntime.create(
-          config: widget.config,
-          locale: widget.localeController,
-        );
     _auth = widget.authController ?? AuthRuntime.create(config: widget.config);
-    _legacyLocale = legacy_l10n.AppLocaleController()..load();
-    unawaited(_devices.initialize());
+    _legacyLocale = legacy_l10n.AppLocaleController(
+      initialLocale:
+          (widget.localeController ?? AppLocaleController.instance).value,
+    )..load();
+    _legacyLocale.addListener(_syncApiLocale);
+    _syncApiLocale();
     // 恢复会话元数据；不阻塞首帧，进程被杀后重进也能带回登录态。
     unawaited(_auth.restore());
   }
 
   @override
   void dispose() {
-    if (widget.deviceController == null) _devices.dispose();
-    if (widget.atlasRepository == null) _atlas.dispose();
     if (widget.authController == null) _auth.dispose();
+    _legacyLocale.removeListener(_syncApiLocale);
     _legacyLocale.dispose();
     super.dispose();
   }
 
+  void _syncApiLocale() {
+    (widget.localeController ?? AppLocaleController.instance).value =
+        _legacyLocale.locale;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return DeviceScope(
-      controller: _devices,
-      child: AtlasScope(
-        repository: _atlas,
-        child: AuthScope(
-          controller: _auth,
-          child: ListenableBuilder(
-            listenable: _legacyLocale,
-            builder: (context, _) => MaterialApp(
-              title: AppConfig.applicationName,
-              debugShowCheckedModeBanner: false,
-              scrollBehavior: const MaterialScrollBehavior().copyWith(
-                scrollbars: false,
-              ),
-              locale: _legacyLocale.locale,
-              supportedLocales: const [Locale('pt', 'BR'), Locale('en')],
-              localizationsDelegates: const [
-                AppLocalizations.delegate,
-                GlobalCupertinoLocalizations.delegate,
-                ...GlobalMaterialLocalizations.delegates,
-              ],
-              theme: AppTheme.dark,
-              home: legacy_l10n.AppLocaleScope(
-                controller: _legacyLocale,
-                child: HomePage(
-                  controller: widget.homeController,
-                  config: widget.config,
-                ),
-              ),
+    return AuthScope(
+      controller: _auth,
+      child: ListenableBuilder(
+        listenable: _legacyLocale,
+        builder: (context, _) => MaterialApp(
+          title: AppConfig.applicationName,
+          debugShowCheckedModeBanner: false,
+          scrollBehavior: const MaterialScrollBehavior().copyWith(
+            scrollbars: false,
+          ),
+          locale: _legacyLocale.locale,
+          supportedLocales: const [Locale('pt', 'BR'), Locale('en')],
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          theme: AppTheme.dark,
+          home: legacy_l10n.AppLocaleScope(
+            controller: _legacyLocale,
+            child: AuthGate(
+              homeController: widget.homeController,
+              deviceController: widget.deviceController,
+              atlasRepository: widget.atlasRepository,
+              localeController: widget.localeController,
+              config: widget.config ?? AppConfig.current,
             ),
           ),
         ),

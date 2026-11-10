@@ -1,177 +1,276 @@
 import 'dart:async';
-
 import 'package:flutter/foundation.dart';
-
+import '../network/api_client.dart';
 import 'auth_api.dart';
 import 'auth_session.dart';
 import 'auth_tokens.dart';
 import 'token_store.dart';
+import 'google_identity.dart';
 
-enum AuthStatus {
-  /// 还没读完本地凭据。首屏在这一状态下发请求会拿不到令牌，
-  /// 所以启动时应该等 [AuthController.restore] 完成再决定显示登录页还是主页。
-  restoring,
+enum AuthStatus { restoring, anonymous, authenticated }
 
-  anonymous,
-  authenticated,
-}
+enum AuthExitReason { none, signedOut, expired, unauthorized }
 
-/// 会话状态。
-///
-/// 令牌同时存在三个地方，职责不同：
-/// - 内存里的 [_tokens]：会话元数据（email / userId / 过期判断），同步读；
-/// - [TokenStore]：冷启动时恢复完整凭据；
-/// - [AuthSession]：全应用共享的 accessToken（ApiClient 与设备模块都读它）。
-///
-/// [AuthSession] 必须同步：远端 ApiClient 只认它，只写 TokenStore 的话
-/// 登录成功但所有请求仍然不带令牌，表现成「登录后立刻 401 被登出」。
-///
-/// 没有 refresh 流程可写：后端只签发不刷新（见 [AuthTokens.refreshToken] 注释）。
-/// 令牌过期唯一的出路是让用户重新走一次邮箱验证码，因此 [handleUnauthorized]
-/// 直接结束会话，而不是尝试续期。
+/// Owns session publication, secure persistence and navigation revision. A late
+/// restore, login or rejected request cannot restore a signed-out account.
 class AuthController extends ChangeNotifier {
-  /// 依赖保持私有：外部只该通过这个控制器读写会话，不该拿它内部的
-  /// api 去发请求（那会绕开会话失效处理）。
   AuthController({
     required AuthApi api,
     required TokenStore store,
     AuthSession? session,
     DateTime Function()? clock,
+    GoogleIdentity? google,
   }) : this._(
          api,
          store,
          session ?? AuthSession.instance,
          clock ?? DateTime.now,
+         google,
        );
 
-  AuthController._(this._api, this._store, this._session, this._clock);
-
+  AuthController._(
+    this._api,
+    this._store,
+    this._session,
+    this._clock,
+    this.google,
+  ) {
+    _observedToken = _session.accessToken;
+    _session.addListener(_sessionChanged);
+  }
   final AuthApi _api;
   final TokenStore _store;
   final AuthSession _session;
   final DateTime Function() _clock;
-
+  final GoogleIdentity? google;
   AuthTokens? _tokens;
   AuthStatus _status = AuthStatus.restoring;
-  bool _disposed = false;
-
+  AuthExitReason exitReason = AuthExitReason.none;
+  bool _disposed = false, _expectedClear = false;
+  String? _observedToken, _expectedToken;
+  int _epoch = 0, sessionRevision = 0;
+  Timer? _expiryTimer;
+  Future<void>? _restoring;
+  Future<void> _pending = Future.value();
   AuthStatus get status => _status;
   AuthTokens? get tokens => _tokens;
   String? get email => _tokens?.email;
   String? get userId => _tokens?.userId;
   bool get isAuthenticated => _status == AuthStatus.authenticated;
+  bool get supportsGoogle => google?.supported ?? false;
+  bool get didSignOut => exitReason != AuthExitReason.none;
+  String? get accessToken =>
+      _tokens == null || _tokens!.isAccessTokenExpired(_clock())
+      ? null
+      : _tokens!.accessToken;
 
-  /// 供 [ApiClient] 的拦截器同步读取。未登录或已过期时返回 null——
-  /// 过期后继续带旧令牌只会换来 401，不如不带头，让后端直接判未授权。
-  String? get accessToken {
-    final tokens = _tokens;
-    if (tokens == null) return null;
-    if (tokens.isAccessTokenExpired(_clock())) return null;
-    return tokens.accessToken;
+  Future<void> _serialize(Future<void> Function() work) {
+    final future = _pending.then((_) => work());
+    _pending = future.catchError((Object _) {});
+    return future;
   }
 
-  /// 从安全存储恢复会话。启动时调用一次。
-  Future<void> restore() async {
+  bool _current(int epoch) => !_disposed && epoch == _epoch;
+  Future<void> restore() => _restoring ??= _restore();
+  Future<void> _restore() async {
+    final epoch = _epoch;
     AuthTokens? stored;
     try {
       stored = await _store.read();
-    } catch (error, stack) {
-      // 钥匙串读不出来（设备无锁屏、系统升级后 keychain 失效等）不应该让
-      // 应用起不来。降级为未登录，用户重新登录即可。
-      _logRestoreFailure(error, stack);
+    } catch (_) {
       stored = null;
     }
-
-    if (stored != null && stored.isAccessTokenExpired(_clock())) {
-      // 已过期就直接清掉，别留一份用不了的凭据在设备上。
-      await _safeClear();
-      stored = null;
+    if (!_current(epoch)) return;
+    if (stored == null || stored.isAccessTokenExpired(_clock())) {
+      await _serialize(() async {
+        if (!_current(epoch)) return;
+        await _safeClear();
+        await _clearSession();
+      });
+      if (_current(epoch)) {
+        _tokens = null;
+        _setStatus(AuthStatus.anonymous);
+      }
+      return;
     }
-
-    _tokens = stored;
-    if (stored != null) {
-      // 同步给 AuthSession：ApiClient 只读它。不写的话冷启动后第一个请求
-      // 就不带 Authorization，用户会莫名被判未授权。
-      await _session.setAccessToken(stored.accessToken);
+    try {
+      await _commit(stored, epoch);
+    } catch (_) {
+      if (_current(epoch)) {
+        _tokens = null;
+        _setStatus(AuthStatus.anonymous);
+      }
     }
-    _setStatus(
-      stored == null ? AuthStatus.anonymous : AuthStatus.authenticated,
-    );
   }
 
-  Future<EmailCodeResult> requestEmailCode(String email) {
-    return _api.requestEmailCode(email.trim());
-  }
-
-  /// 验证码登录。成功后立即写入内存与安全存储，并广播状态变化。
-  ///
-  /// 失败时抛出 `ApiException`，且**不改变当前会话**：登录页的错误提示
-  /// 不该把已经登录的用户踢下线（例如设置页里重新验证邮箱的场景）。
+  Future<EmailCodeResult> requestEmailCode(String email) =>
+      _api.requestEmailCode(email.trim().toLowerCase());
   Future<void> loginWithEmailCode({
     required String email,
     required String code,
     required bool consent,
   }) async {
-    final tokens = await _api.loginWithEmailCode(
-      email: email.trim(),
+    final epoch = ++_epoch;
+    final result = await _api.loginWithEmailCode(
+      email: email.trim().toLowerCase(),
       code: code.trim(),
       consent: consent,
     );
-    _tokens = tokens;
-    await _store.write(tokens);
-    // 先落 AuthSession 再置状态：界面切到已登录后马上就会发请求，
-    // 那时令牌必须已经可读。
-    await _session.setAccessToken(tokens.accessToken);
-    _setStatus(AuthStatus.authenticated);
+    if (!_current(epoch)) {
+      throw const ApiException('Sign-in cancelled', code: 'request_cancelled');
+    }
+    await _commit(result, epoch);
   }
 
-  Future<void> logout() async {
+  Future<bool> loginWithGoogle({required bool consent}) async {
+    if (!supportsGoogle) {
+      throw const ApiException(
+        'Google unavailable',
+        code: 'google_unavailable',
+      );
+    }
+    final epoch = ++_epoch;
+    final idToken = await google!.getIdToken();
+    if (idToken == null) return false;
+    if (!_current(epoch)) {
+      throw const ApiException('Sign-in cancelled', code: 'request_cancelled');
+    }
+    final result = await _api.loginWithGoogle(
+      idToken: idToken,
+      consent: consent,
+    );
+    if (!_current(epoch)) {
+      throw const ApiException('Sign-in cancelled', code: 'request_cancelled');
+    }
+    await _commit(result, epoch);
+    return true;
+  }
+
+  Future<void> _commit(AuthTokens tokens, int epoch) => _serialize(() async {
+    if (!_current(epoch)) return;
+    if (tokens.isAccessTokenExpired(_clock())) {
+      throw const ApiException(
+        'Expired login response',
+        code: 'invalid_response',
+      );
+    }
+    final previous = _tokens;
+    try {
+      await _store.write(tokens);
+      if (!_current(epoch)) return;
+      _expectedToken = tokens.accessToken;
+      await _session.setAccessToken(tokens.accessToken);
+      if (!_current(epoch)) return;
+      _tokens = tokens;
+      exitReason = AuthExitReason.none;
+      _scheduleExpiry(tokens);
+      _setStatus(AuthStatus.authenticated, force: true);
+    } catch (_) {
+      if (_current(epoch)) {
+        try {
+          if (previous != null) {
+            await _store.write(previous);
+          } else {
+            await _safeClear();
+          }
+        } catch (_) {}
+      }
+      rethrow;
+    } finally {
+      _expectedToken = null;
+    }
+  });
+  void _scheduleExpiry(AuthTokens tokens) {
+    _expiryTimer?.cancel();
+    final remaining = DateTime.fromMillisecondsSinceEpoch(
+      tokens.accessTokenExpiresAt * 1000,
+      isUtc: true,
+    ).subtract(AuthTokens.expirySkew).difference(_clock().toUtc());
+    _expiryTimer = Timer(remaining.isNegative ? Duration.zero : remaining, () {
+      unawaited(_endSession(AuthExitReason.expired));
+    });
+  }
+
+  Future<void> logout() => _endSession(AuthExitReason.signedOut);
+  Future<void> _endSession(AuthExitReason reason) async {
+    final epoch = ++_epoch;
+    _expiryTimer?.cancel();
     _tokens = null;
-    _setStatus(AuthStatus.anonymous);
-    await _safeClear();
-    await _session.signOut();
+    exitReason = reason;
+    _setStatus(AuthStatus.anonymous, force: true);
+    await _serialize(() async {
+      if (!_current(epoch)) return;
+      await _safeClear();
+      await _clearSession();
+    });
+    try {
+      if (_current(epoch)) await google?.signOut();
+    } catch (_) {}
   }
 
-  /// 收到 401 时的处理入口，由拦截器调用。
-  ///
-  /// 必须同步、幂等：一次首屏并发会同时收到多个 401，若每个都触发跳转，
-  /// 用户会看到登录页被反复压栈。已经处于匿名状态时直接返回即可。
+  void _sessionChanged() {
+    final token = _session.accessToken;
+    final previous = _observedToken;
+    _observedToken = token;
+    if (token == previous ||
+        (_expectedClear && token == null) ||
+        (token != null && token == _expectedToken)) {
+      return;
+    }
+    if ((_status == AuthStatus.authenticated &&
+            token != _tokens?.accessToken) ||
+        (previous != null && token == null)) {
+      final epoch = ++_epoch;
+      _tokens = null;
+      _expiryTimer?.cancel();
+      exitReason = AuthExitReason.unauthorized;
+      _setStatus(AuthStatus.anonymous, force: true);
+      unawaited(
+        _serialize(() async {
+          if (_current(epoch)) await _safeClear();
+        }),
+      );
+    }
+  }
+
   void handleUnauthorized() {
-    if (_status == AuthStatus.anonymous) return;
-    // 启动恢复还没完成时收到的 401 不能算会话失效：那时还没有令牌，
-    // 发出去的请求本来就不会带 Authorization 头。
     if (_status == AuthStatus.restoring && _tokens == null) return;
-
-    _tokens = null;
-    _setStatus(AuthStatus.anonymous);
-    // 存储清理是异步的，但不该阻塞调用方（它在 ApiClient 的 401 分支里）。
-    _safeClear();
-    unawaited(_session.signOut());
+    unawaited(_endSession(AuthExitReason.unauthorized));
   }
 
-  void _setStatus(AuthStatus status) {
-    if (_status == status) return;
-    _status = status;
-    if (!_disposed) notifyListeners();
+  Future<void> _clearSession() async {
+    _expectedClear = true;
+    try {
+      await _session.signOut();
+    } catch (_) {
+      if (kDebugMode) debugPrint('BYND: secure session cleanup unavailable.');
+    } finally {
+      _expectedClear = false;
+    }
   }
 
   Future<void> _safeClear() async {
     try {
       await _store.clear();
-    } catch (error, stack) {
-      _logRestoreFailure(error, stack);
+    } catch (_) {
+      if (kDebugMode) debugPrint('BYND: secure session cleanup unavailable.');
     }
   }
 
-  void _logRestoreFailure(Object error, StackTrace stack) {
-    if (kDebugMode) {
-      debugPrint('AuthController: falha ao acessar o armazenamento seguro: $error');
-    }
+  void _setStatus(AuthStatus value, {bool force = false}) {
+    if (_disposed || (_status == value && !force)) return;
+    _status = value;
+    sessionRevision++;
+    notifyListeners();
   }
 
   @override
   void dispose() {
     _disposed = true;
+    _epoch++;
+    _expiryTimer?.cancel();
+    _session.removeListener(_sessionChanged);
+    _api.close();
     super.dispose();
   }
 }

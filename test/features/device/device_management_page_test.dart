@@ -1,3 +1,4 @@
+import 'package:new_jcvital/core/config/app_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:new_jcvital/main.dart';
@@ -5,8 +6,10 @@ import 'package:new_jcvital/features/device/application/device_controller.dart';
 import 'package:new_jcvital/features/device/data/demo_device_repository.dart';
 import 'package:new_jcvital/features/device/presentation/pages/device_management_page.dart';
 import 'device_test_support.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+  setUp(() => SharedPreferences.setMockInitialValues({}));
   testWidgets('侧栏进入状态页，高级操作取消不执行，确认解绑后可重新配对', (tester) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
@@ -22,7 +25,14 @@ void main() {
     );
     addTearDown(controller.dispose);
     await controller.initialize();
-    await tester.pumpWidget(ByndApp(deviceController: controller));
+    await tester.pumpWidget(
+      ByndApp(
+        deviceController: controller,
+        config: AppConfig.resolve(
+          defines: const {'MAPA_USE_DEMO_DATA': 'true'},
+        ),
+      ),
+    );
     await tester.tap(find.byTooltip('Menu'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('BYND ONE'));
@@ -72,7 +82,14 @@ void main() {
     );
     addTearDown(controller.dispose);
     await controller.initialize();
-    await tester.pumpWidget(ByndApp(deviceController: controller));
+    await tester.pumpWidget(
+      ByndApp(
+        deviceController: controller,
+        config: AppConfig.resolve(
+          defines: const {'MAPA_USE_DEMO_DATA': 'true'},
+        ),
+      ),
+    );
     await tester.tap(find.byTooltip('Menu'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('BYND ONE'));

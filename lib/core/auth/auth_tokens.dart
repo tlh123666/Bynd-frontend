@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 /// 登录后拿到的凭据集合。
 ///
 /// 字段与后端 `dto.LoginData` / `jwt.TokenPair` 一致。到期时间是**秒**级
@@ -35,6 +37,9 @@ class AuthTokens {
   static const Duration expirySkew = Duration(seconds: 60);
 
   bool isAccessTokenExpired(DateTime now) {
+    if (accessTokenExpiresAt <= 0 || accessTokenExpiresAt > 8640000000000) {
+      return true;
+    }
     final expiresAt = DateTime.fromMillisecondsSinceEpoch(
       accessTokenExpiresAt * 1000,
       isUtc: true,
@@ -55,17 +60,59 @@ class AuthTokens {
   }
 
   Map<String, dynamic> toJson() => {
-        'userId': userId,
-        'email': email,
-        'accessToken': accessToken,
-        'refreshToken': refreshToken,
-        'tokenType': tokenType,
-        'accessTokenExpiresAt': accessTokenExpiresAt,
-        'refreshTokenExpiresAt': refreshTokenExpiresAt,
-      };
+    'userId': userId,
+    'email': email,
+    'accessToken': accessToken,
+    'refreshToken': refreshToken,
+    'tokenType': tokenType,
+    'accessTokenExpiresAt': accessTokenExpiresAt,
+    'refreshTokenExpiresAt': refreshTokenExpiresAt,
+  };
 
-  factory AuthTokens.fromJson(Map<String, dynamic> json) =>
-      AuthTokens.fromLoginData(json);
+  factory AuthTokens.fromJson(Map<String, dynamic> json) => AuthTokens(
+    userId: _requireString(json, 'userId'),
+    email: _stringOrEmpty(json['email']),
+    accessToken: _requireString(json, 'accessToken'),
+    refreshToken: _stringOrEmpty(json['refreshToken']),
+    tokenType: _stringOrEmpty(json['tokenType'], fallback: 'Bearer'),
+    accessTokenExpiresAt: _requireInt(json, 'accessTokenExpiresAt'),
+    refreshTokenExpiresAt: _intOrZero(json['refreshTokenExpiresAt']),
+  );
+
+  /// Legacy JCVital stores only the JWT and profile hints. Decoding these claims
+  /// supplies routing metadata, never signature verification or authorization.
+  static AuthTokens? fromLegacyToken(String token, {String email = ''}) {
+    try {
+      final parts = token.split('.');
+      if (parts.length != 3) return null;
+      final payload =
+          jsonDecode(
+                utf8.decode(base64Url.decode(base64Url.normalize(parts[1]))),
+              )
+              as Map<String, dynamic>;
+      final id = payload['uid'];
+      final expiry = payload['exp'];
+      if (id is! String ||
+          id.isEmpty ||
+          expiry is! int ||
+          expiry <= 0 ||
+          payload['typ'] != 'access' ||
+          payload['sub'] != 'user:$id') {
+        return null;
+      }
+      return AuthTokens(
+        userId: id,
+        email: email,
+        accessToken: token,
+        refreshToken: '',
+        tokenType: 'Bearer',
+        accessTokenExpiresAt: expiry,
+        refreshTokenExpiresAt: 0,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
 
   static String _requireString(Map<String, dynamic> json, String key) {
     final value = json[key];

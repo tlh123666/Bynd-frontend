@@ -5,6 +5,7 @@ import '../network/api_client.dart';
 import 'auth_api.dart';
 import 'auth_controller.dart';
 import 'token_store.dart';
+import 'google_identity.dart';
 
 /// 把 [AuthController] 放进 widget 树（会随会话状态重建监听者）。
 ///
@@ -38,6 +39,7 @@ abstract final class AuthRuntime {
     return AuthController(
       api: AuthApi(ApiClient.configured(config: config)),
       store: store ?? SecureTokenStore(),
+      google: PlatformGoogleIdentity(config ?? AppConfig.current),
     );
   }
 }

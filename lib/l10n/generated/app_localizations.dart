@@ -1274,6 +1274,342 @@ abstract class AppLocalizations {
   /// In pt_BR, this message translates to:
   /// **'Sua conta mudou. Feche esta tela e abra novamente para ver os dados atuais.'**
   String get homeAccountChanged;
+
+  /// No description provided for @authWelcome.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'BEM-VINDO À BYND'**
+  String get authWelcome;
+
+  /// No description provided for @authHeadline.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Seu corpo.\nSua direção.'**
+  String get authHeadline;
+
+  /// No description provided for @authSubtitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Entenda seus sinais. Viva no seu ritmo.'**
+  String get authSubtitle;
+
+  /// No description provided for @authEmailContinue.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Continuar com e-mail'**
+  String get authEmailContinue;
+
+  /// No description provided for @authGoogleContinue.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Continuar com Google'**
+  String get authGoogleContinue;
+
+  /// No description provided for @authEmailTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Qual é o seu e-mail?'**
+  String get authEmailTitle;
+
+  /// No description provided for @authEmailBody.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Vamos enviar um código para você entrar. Sem senha.'**
+  String get authEmailBody;
+
+  /// No description provided for @authAccountHint.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'No primeiro acesso, você pode criar sua conta por aqui.'**
+  String get authAccountHint;
+
+  /// No description provided for @authEmailLabel.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'E-mail'**
+  String get authEmailLabel;
+
+  /// No description provided for @authEmailHint.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'voce@exemplo.com'**
+  String get authEmailHint;
+
+  /// No description provided for @authSendCode.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Enviar código'**
+  String get authSendCode;
+
+  /// No description provided for @authCodeTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Confira seu e-mail'**
+  String get authCodeTitle;
+
+  /// No description provided for @authCodeBody.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Enviamos um código de 6 dígitos para {email}.'**
+  String authCodeBody(String email);
+
+  /// No description provided for @authCodeLabel.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Código de verificação'**
+  String get authCodeLabel;
+
+  /// No description provided for @authCodeHint.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'000000'**
+  String get authCodeHint;
+
+  /// No description provided for @authEditEmail.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Alterar e-mail'**
+  String get authEditEmail;
+
+  /// No description provided for @authSignIn.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Entrar'**
+  String get authSignIn;
+
+  /// No description provided for @authCreateAccount.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Criar conta e entrar'**
+  String get authCreateAccount;
+
+  /// No description provided for @authResend.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Reenviar código'**
+  String get authResend;
+
+  /// No description provided for @authResendIn.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Reenviar em {seconds}s'**
+  String authResendIn(int seconds);
+
+  /// No description provided for @authSpamHint.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Não chegou? Confira a caixa de spam ou peça um novo código.'**
+  String get authSpamHint;
+
+  /// No description provided for @authCodeSent.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Código enviado. Confira também a caixa de spam.'**
+  String get authCodeSent;
+
+  /// No description provided for @authInvalidEmail.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Informe um e-mail válido.'**
+  String get authInvalidEmail;
+
+  /// No description provided for @authInvalidCode.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Digite os 6 números do código.'**
+  String get authInvalidCode;
+
+  /// No description provided for @authCodeRejected.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Não foi possível validar o código. Confira os números ou peça outro.'**
+  String get authCodeRejected;
+
+  /// No description provided for @authCodeExpired.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Esse código expirou. Peça um novo para continuar.'**
+  String get authCodeExpired;
+
+  /// No description provided for @authNetworkError.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Não foi possível conectar. Confira sua conexão e tente novamente.'**
+  String get authNetworkError;
+
+  /// No description provided for @authServerError.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Não foi possível entrar agora. Tente novamente em instantes.'**
+  String get authServerError;
+
+  /// No description provided for @authRateLimited.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Aguarde um pouco antes de tentar novamente.'**
+  String get authRateLimited;
+
+  /// No description provided for @authStorageError.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Não foi possível salvar seu acesso neste dispositivo. Tente novamente.'**
+  String get authStorageError;
+
+  /// No description provided for @authGoogleError.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Não foi possível entrar com Google. Tente novamente ou use seu e-mail.'**
+  String get authGoogleError;
+
+  /// No description provided for @authSessionExpired.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Seu acesso expirou. Entre novamente para continuar.'**
+  String get authSessionExpired;
+
+  /// No description provided for @authConsentTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Seus dados de saúde, sua escolha'**
+  String get authConsentTitle;
+
+  /// No description provided for @authConsentBody.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'A BYND usa os sinais de saúde coletados pela sua pulseira, como frequência cardíaca, VFC, sono e atividade, para gerar informações pessoais sobre o seu corpo. Para criar sua conta, precisamos do seu consentimento para esse tratamento.'**
+  String get authConsentBody;
+
+  /// No description provided for @authConsentLabel.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Concordo com o tratamento dos meus dados de saúde para gerar informações pessoais, conforme descrito em Privacidade.'**
+  String get authConsentLabel;
+
+  /// No description provided for @authConsentRequired.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Para criar sua conta, confirme sua escolha sobre os dados de saúde.'**
+  String get authConsentRequired;
+
+  /// No description provided for @authConsentAccept.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Concordar e continuar'**
+  String get authConsentAccept;
+
+  /// No description provided for @authConsentDecline.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Agora não'**
+  String get authConsentDecline;
+
+  /// No description provided for @authPrivacy.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Privacidade'**
+  String get authPrivacy;
+
+  /// No description provided for @authPrivacyLink.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Como usamos seus dados'**
+  String get authPrivacyLink;
+
+  /// No description provided for @authPrivacyTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Seus dados na BYND'**
+  String get authPrivacyTitle;
+
+  /// No description provided for @authPrivacyPurposeTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Para entender seus sinais'**
+  String get authPrivacyPurposeTitle;
+
+  /// No description provided for @authPrivacyPurpose.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Os dados de saúde da pulseira e os registros que você adiciona permitem apresentar informações sobre sono, atividade e outros sinais do seu corpo.'**
+  String get authPrivacyPurpose;
+
+  /// No description provided for @authPrivacyChoiceTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Uma escolha explícita'**
+  String get authPrivacyChoiceTitle;
+
+  /// No description provided for @authPrivacyChoice.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'A criação da conta exige seu consentimento para o tratamento dos dados de saúde. Você pode ler estas informações e voltar sem concordar; nesse caso, nenhuma conta será criada por esta etapa.'**
+  String get authPrivacyChoice;
+
+  /// No description provided for @authPrivacyAccessTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Seu acesso'**
+  String get authPrivacyAccessTitle;
+
+  /// No description provided for @authPrivacyAccess.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'O acesso por e-mail usa um código temporário. Guarde esse código só para você. A sessão permanece no dispositivo até você sair ou o acesso expirar.'**
+  String get authPrivacyAccess;
+
+  /// No description provided for @authLegalFootnote.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Conheça como a BYND utiliza seus dados antes de continuar.'**
+  String get authLegalFootnote;
+
+  /// No description provided for @authRestore.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Preparando seu acesso…'**
+  String get authRestore;
+
+  /// No description provided for @authSignOutTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Sair da sua conta?'**
+  String get authSignOutTitle;
+
+  /// No description provided for @authSignOutBody.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Você poderá entrar novamente com seu e-mail ou com Google.'**
+  String get authSignOutBody;
+
+  /// No description provided for @authSignOutConfirm.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Sair'**
+  String get authSignOutConfirm;
+
+  /// No description provided for @authCancel.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Cancelar'**
+  String get authCancel;
+
+  /// No description provided for @authSignOutFailed.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Você saiu, mas não foi possível limpar todos os dados locais. Tente reiniciar o app.'**
+  String get authSignOutFailed;
+
+  /// No description provided for @authBackground.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Paisagem {index} de {total}'**
+  String authBackground(int index, int total);
+
+  /// No description provided for @authChangeLanguage.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Alterar idioma'**
+  String get authChangeLanguage;
 }
 
 class _AppLocalizationsDelegate

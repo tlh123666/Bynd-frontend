@@ -1,0 +1,32 @@
+{
+  "reference": "https://bynd-app.vercel.app/",
+  "checkedAt": "2026-11-10",
+  "referenceHasAuthenticationPages": false,
+  "assets": [
+    {
+      "path": "assets/icons/site/google-sign-in.svg",
+      "source": "JCVital/lib/features/auth/presentation/pages/login_page.dart",
+      "sha256": "d44445d6bb3fc8aa22240c458610e690baf1afbbe55cec2a9da343ca8186dc6d"
+    },
+    {
+      "path": "assets/images/home-canion.webp",
+      "source": "https://bynd-app.vercel.app/",
+      "sha256": "aaaafb4fcd2b3f623f8f1294e63a83d58cc73c66d531bd35cef55deaf4263beb"
+    },
+    {
+      "path": "assets/images/home-manha-lago.webp",
+      "source": "https://bynd-app.vercel.app/",
+      "sha256": "24a4173fe08571363fa2f1856bce452c88734d2a92c02b7bdaf39091835b925b"
+    },
+    {
+      "path": "assets/images/home-noite-aurora.webp",
+      "source": "https://bynd-app.vercel.app/",
+      "sha256": "0ec2c12cef336d73a259b09a3c00a8bb4739849f4dfb2787caae3985d0413074"
+    },
+    {
+      "path": "assets/icons/site/logo-bynd.svg",
+      "source": "https://bynd-app.vercel.app/",
+      "sha256": "b6a4dda809ee7059a0d836b8c89d765ae3be02de0e91a20539309b362713679a"
+    }
+  ]
+}

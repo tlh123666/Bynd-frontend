@@ -627,6 +627,199 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get homeAccountChanged =>
       'Sua conta mudou. Feche esta tela e abra novamente para ver os dados atuais.';
+
+  @override
+  String get authWelcome => 'BEM-VINDO À BYND';
+
+  @override
+  String get authHeadline => 'Seu corpo.\nSua direção.';
+
+  @override
+  String get authSubtitle => 'Entenda seus sinais. Viva no seu ritmo.';
+
+  @override
+  String get authEmailContinue => 'Continuar com e-mail';
+
+  @override
+  String get authGoogleContinue => 'Continuar com Google';
+
+  @override
+  String get authEmailTitle => 'Qual é o seu e-mail?';
+
+  @override
+  String get authEmailBody =>
+      'Vamos enviar um código para você entrar. Sem senha.';
+
+  @override
+  String get authAccountHint =>
+      'No primeiro acesso, você pode criar sua conta por aqui.';
+
+  @override
+  String get authEmailLabel => 'E-mail';
+
+  @override
+  String get authEmailHint => 'voce@exemplo.com';
+
+  @override
+  String get authSendCode => 'Enviar código';
+
+  @override
+  String get authCodeTitle => 'Confira seu e-mail';
+
+  @override
+  String authCodeBody(String email) {
+    return 'Enviamos um código de 6 dígitos para $email.';
+  }
+
+  @override
+  String get authCodeLabel => 'Código de verificação';
+
+  @override
+  String get authCodeHint => '000000';
+
+  @override
+  String get authEditEmail => 'Alterar e-mail';
+
+  @override
+  String get authSignIn => 'Entrar';
+
+  @override
+  String get authCreateAccount => 'Criar conta e entrar';
+
+  @override
+  String get authResend => 'Reenviar código';
+
+  @override
+  String authResendIn(int seconds) {
+    return 'Reenviar em ${seconds}s';
+  }
+
+  @override
+  String get authSpamHint =>
+      'Não chegou? Confira a caixa de spam ou peça um novo código.';
+
+  @override
+  String get authCodeSent => 'Código enviado. Confira também a caixa de spam.';
+
+  @override
+  String get authInvalidEmail => 'Informe um e-mail válido.';
+
+  @override
+  String get authInvalidCode => 'Digite os 6 números do código.';
+
+  @override
+  String get authCodeRejected =>
+      'Não foi possível validar o código. Confira os números ou peça outro.';
+
+  @override
+  String get authCodeExpired =>
+      'Esse código expirou. Peça um novo para continuar.';
+
+  @override
+  String get authNetworkError =>
+      'Não foi possível conectar. Confira sua conexão e tente novamente.';
+
+  @override
+  String get authServerError =>
+      'Não foi possível entrar agora. Tente novamente em instantes.';
+
+  @override
+  String get authRateLimited => 'Aguarde um pouco antes de tentar novamente.';
+
+  @override
+  String get authStorageError =>
+      'Não foi possível salvar seu acesso neste dispositivo. Tente novamente.';
+
+  @override
+  String get authGoogleError =>
+      'Não foi possível entrar com Google. Tente novamente ou use seu e-mail.';
+
+  @override
+  String get authSessionExpired =>
+      'Seu acesso expirou. Entre novamente para continuar.';
+
+  @override
+  String get authConsentTitle => 'Seus dados de saúde, sua escolha';
+
+  @override
+  String get authConsentBody =>
+      'A BYND usa os sinais de saúde coletados pela sua pulseira, como frequência cardíaca, VFC, sono e atividade, para gerar informações pessoais sobre o seu corpo. Para criar sua conta, precisamos do seu consentimento para esse tratamento.';
+
+  @override
+  String get authConsentLabel =>
+      'Concordo com o tratamento dos meus dados de saúde para gerar informações pessoais, conforme descrito em Privacidade.';
+
+  @override
+  String get authConsentRequired =>
+      'Para criar sua conta, confirme sua escolha sobre os dados de saúde.';
+
+  @override
+  String get authConsentAccept => 'Concordar e continuar';
+
+  @override
+  String get authConsentDecline => 'Agora não';
+
+  @override
+  String get authPrivacy => 'Privacidade';
+
+  @override
+  String get authPrivacyLink => 'Como usamos seus dados';
+
+  @override
+  String get authPrivacyTitle => 'Seus dados na BYND';
+
+  @override
+  String get authPrivacyPurposeTitle => 'Para entender seus sinais';
+
+  @override
+  String get authPrivacyPurpose =>
+      'Os dados de saúde da pulseira e os registros que você adiciona permitem apresentar informações sobre sono, atividade e outros sinais do seu corpo.';
+
+  @override
+  String get authPrivacyChoiceTitle => 'Uma escolha explícita';
+
+  @override
+  String get authPrivacyChoice =>
+      'A criação da conta exige seu consentimento para o tratamento dos dados de saúde. Você pode ler estas informações e voltar sem concordar; nesse caso, nenhuma conta será criada por esta etapa.';
+
+  @override
+  String get authPrivacyAccessTitle => 'Seu acesso';
+
+  @override
+  String get authPrivacyAccess =>
+      'O acesso por e-mail usa um código temporário. Guarde esse código só para você. A sessão permanece no dispositivo até você sair ou o acesso expirar.';
+
+  @override
+  String get authLegalFootnote =>
+      'Conheça como a BYND utiliza seus dados antes de continuar.';
+
+  @override
+  String get authRestore => 'Preparando seu acesso…';
+
+  @override
+  String get authSignOutTitle => 'Sair da sua conta?';
+
+  @override
+  String get authSignOutBody =>
+      'Você poderá entrar novamente com seu e-mail ou com Google.';
+
+  @override
+  String get authSignOutConfirm => 'Sair';
+
+  @override
+  String get authCancel => 'Cancelar';
+
+  @override
+  String get authSignOutFailed =>
+      'Você saiu, mas não foi possível limpar todos os dados locais. Tente reiniciar o app.';
+
+  @override
+  String authBackground(int index, int total) {
+    return 'Paisagem $index de $total';
+  }
+
+  @override
+  String get authChangeLanguage => 'Alterar idioma';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -1252,4 +1445,197 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   @override
   String get homeAccountChanged =>
       'Sua conta mudou. Feche esta tela e abra novamente para ver os dados atuais.';
+
+  @override
+  String get authWelcome => 'BEM-VINDO À BYND';
+
+  @override
+  String get authHeadline => 'Seu corpo.\nSua direção.';
+
+  @override
+  String get authSubtitle => 'Entenda seus sinais. Viva no seu ritmo.';
+
+  @override
+  String get authEmailContinue => 'Continuar com e-mail';
+
+  @override
+  String get authGoogleContinue => 'Continuar com Google';
+
+  @override
+  String get authEmailTitle => 'Qual é o seu e-mail?';
+
+  @override
+  String get authEmailBody =>
+      'Vamos enviar um código para você entrar. Sem senha.';
+
+  @override
+  String get authAccountHint =>
+      'No primeiro acesso, você pode criar sua conta por aqui.';
+
+  @override
+  String get authEmailLabel => 'E-mail';
+
+  @override
+  String get authEmailHint => 'voce@exemplo.com';
+
+  @override
+  String get authSendCode => 'Enviar código';
+
+  @override
+  String get authCodeTitle => 'Confira seu e-mail';
+
+  @override
+  String authCodeBody(String email) {
+    return 'Enviamos um código de 6 dígitos para $email.';
+  }
+
+  @override
+  String get authCodeLabel => 'Código de verificação';
+
+  @override
+  String get authCodeHint => '000000';
+
+  @override
+  String get authEditEmail => 'Alterar e-mail';
+
+  @override
+  String get authSignIn => 'Entrar';
+
+  @override
+  String get authCreateAccount => 'Criar conta e entrar';
+
+  @override
+  String get authResend => 'Reenviar código';
+
+  @override
+  String authResendIn(int seconds) {
+    return 'Reenviar em ${seconds}s';
+  }
+
+  @override
+  String get authSpamHint =>
+      'Não chegou? Confira a caixa de spam ou peça um novo código.';
+
+  @override
+  String get authCodeSent => 'Código enviado. Confira também a caixa de spam.';
+
+  @override
+  String get authInvalidEmail => 'Informe um e-mail válido.';
+
+  @override
+  String get authInvalidCode => 'Digite os 6 números do código.';
+
+  @override
+  String get authCodeRejected =>
+      'Não foi possível validar o código. Confira os números ou peça outro.';
+
+  @override
+  String get authCodeExpired =>
+      'Esse código expirou. Peça um novo para continuar.';
+
+  @override
+  String get authNetworkError =>
+      'Não foi possível conectar. Confira sua conexão e tente novamente.';
+
+  @override
+  String get authServerError =>
+      'Não foi possível entrar agora. Tente novamente em instantes.';
+
+  @override
+  String get authRateLimited => 'Aguarde um pouco antes de tentar novamente.';
+
+  @override
+  String get authStorageError =>
+      'Não foi possível salvar seu acesso neste dispositivo. Tente novamente.';
+
+  @override
+  String get authGoogleError =>
+      'Não foi possível entrar com Google. Tente novamente ou use seu e-mail.';
+
+  @override
+  String get authSessionExpired =>
+      'Seu acesso expirou. Entre novamente para continuar.';
+
+  @override
+  String get authConsentTitle => 'Seus dados de saúde, sua escolha';
+
+  @override
+  String get authConsentBody =>
+      'A BYND usa os sinais de saúde coletados pela sua pulseira, como frequência cardíaca, VFC, sono e atividade, para gerar informações pessoais sobre o seu corpo. Para criar sua conta, precisamos do seu consentimento para esse tratamento.';
+
+  @override
+  String get authConsentLabel =>
+      'Concordo com o tratamento dos meus dados de saúde para gerar informações pessoais, conforme descrito em Privacidade.';
+
+  @override
+  String get authConsentRequired =>
+      'Para criar sua conta, confirme sua escolha sobre os dados de saúde.';
+
+  @override
+  String get authConsentAccept => 'Concordar e continuar';
+
+  @override
+  String get authConsentDecline => 'Agora não';
+
+  @override
+  String get authPrivacy => 'Privacidade';
+
+  @override
+  String get authPrivacyLink => 'Como usamos seus dados';
+
+  @override
+  String get authPrivacyTitle => 'Seus dados na BYND';
+
+  @override
+  String get authPrivacyPurposeTitle => 'Para entender seus sinais';
+
+  @override
+  String get authPrivacyPurpose =>
+      'Os dados de saúde da pulseira e os registros que você adiciona permitem apresentar informações sobre sono, atividade e outros sinais do seu corpo.';
+
+  @override
+  String get authPrivacyChoiceTitle => 'Uma escolha explícita';
+
+  @override
+  String get authPrivacyChoice =>
+      'A criação da conta exige seu consentimento para o tratamento dos dados de saúde. Você pode ler estas informações e voltar sem concordar; nesse caso, nenhuma conta será criada por esta etapa.';
+
+  @override
+  String get authPrivacyAccessTitle => 'Seu acesso';
+
+  @override
+  String get authPrivacyAccess =>
+      'O acesso por e-mail usa um código temporário. Guarde esse código só para você. A sessão permanece no dispositivo até você sair ou o acesso expirar.';
+
+  @override
+  String get authLegalFootnote =>
+      'Conheça como a BYND utiliza seus dados antes de continuar.';
+
+  @override
+  String get authRestore => 'Preparando seu acesso…';
+
+  @override
+  String get authSignOutTitle => 'Sair da sua conta?';
+
+  @override
+  String get authSignOutBody =>
+      'Você poderá entrar novamente com seu e-mail ou com Google.';
+
+  @override
+  String get authSignOutConfirm => 'Sair';
+
+  @override
+  String get authCancel => 'Cancelar';
+
+  @override
+  String get authSignOutFailed =>
+      'Você saiu, mas não foi possível limpar todos os dados locais. Tente reiniciar o app.';
+
+  @override
+  String authBackground(int index, int total) {
+    return 'Paisagem $index de $total';
+  }
+
+  @override
+  String get authChangeLanguage => 'Alterar idioma';
 }

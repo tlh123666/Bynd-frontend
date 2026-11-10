@@ -13,6 +13,7 @@ abstract final class AppConfirmationSheet {
     required String confirmLabel,
     bool danger = false,
     String? note,
+    String cancelLabel = 'Cancelar',
   }) async {
     return await AppFrostedModalSheet.show<bool>(
           context,
@@ -61,7 +62,7 @@ abstract final class AppConfirmationSheet {
                 ),
                 const SizedBox(height: 10),
                 AppButton(
-                  label: 'Cancelar',
+                  label: cancelLabel,
                   expanded: true,
                   variant: AppButtonVariant.ghost,
                   onPressed: () => Navigator.pop(context, false),

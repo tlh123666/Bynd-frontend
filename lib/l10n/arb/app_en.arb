@@ -40,7 +40,11 @@
   "logActivity": "Log\nactivity",
   "doEcg": "Take an\nECG",
   "comingSoon": "{feature}: coming soon.",
-  "@@comingSoon": { "placeholders": { "feature": {} } },
+  "@@comingSoon": {
+    "placeholders": {
+      "feature": {}
+    }
+  },
   "activityRegisterComingSoon": "Activity logging: coming soon.",
   "sectionComingSoon": "This section will be available soon.",
   "activityHistoryComingSoon": "Activity history: coming soon.",
@@ -57,7 +61,13 @@
   "register": "Log activity",
   "startActivityTitle": "Start activity",
   "searchActivities": "Search {count} activities",
-  "@@searchActivities": { "placeholders": { "count": { "type": "int" } } },
+  "@@searchActivities": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "recent": "Recent",
   "categoryCardio": "Cardio",
   "categoryStrength": "Strength",
@@ -80,7 +90,11 @@
   "activityHintMachineDistance": "machine distance",
   "activityHintTimeHeartRate": "time and heart rate",
   "noActivityMatches": "No activity matches “{query}”. Try “Other”.",
-  "@@noActivityMatches": { "placeholders": { "query": {} } },
+  "@@noActivityMatches": {
+    "placeholders": {
+      "query": {}
+    }
+  },
   "closeCalendar": "Close calendar",
   "previousMonth": "Previous month",
   "nextMonth": "Next month",
@@ -129,7 +143,11 @@
   "wristband": "Wristband",
   "wristbandConnectedSince": "BYND ONE · connected since Sep 9, 2026",
   "connectedDeviceComingSoon": "{device}: coming soon.",
-  "@@connectedDeviceComingSoon": { "placeholders": { "device": {} } },
+  "@@connectedDeviceComingSoon": {
+    "placeholders": {
+      "device": {}
+    }
+  },
   "calendarWeekdayMon": "Mon",
   "calendarWeekdayTue": "Tue",
   "calendarWeekdayWed": "Wed",
@@ -199,5 +217,85 @@
   "homeRefresh": "Refresh",
   "homeDrag": "Drag to reorder",
   "homeNoDirection": "Sync your band to follow your daily direction.",
-  "homeAccountChanged": "Your account changed. Close this screen and reopen it to see current data."
+  "homeAccountChanged": "Your account changed. Close this screen and reopen it to see current data.",
+  "authWelcome": "WELCOME TO BYND",
+  "authHeadline": "Your body.\nYour direction.",
+  "authSubtitle": "Understand your signals. Live at your own pace.",
+  "authEmailContinue": "Continue with email",
+  "authGoogleContinue": "Continue with Google",
+  "authEmailTitle": "What's your email?",
+  "authEmailBody": "We'll send you a code to sign in. No password needed.",
+  "authAccountHint": "First time here? You can create your account this way too.",
+  "authEmailLabel": "Email",
+  "authEmailHint": "you@example.com",
+  "authSendCode": "Send code",
+  "authCodeTitle": "Check your email",
+  "authCodeBody": "We sent a 6-digit code to {email}.",
+  "authCodeLabel": "Verification code",
+  "authCodeHint": "000000",
+  "authEditEmail": "Change email",
+  "authSignIn": "Sign in",
+  "authCreateAccount": "Create account and sign in",
+  "authResend": "Resend code",
+  "authResendIn": "Resend in {seconds}s",
+  "authSpamHint": "Didn't arrive? Check your spam folder or request another code.",
+  "authCodeSent": "Code sent. Please check your spam folder too.",
+  "authInvalidEmail": "Enter a valid email address.",
+  "authInvalidCode": "Enter all 6 digits of the code.",
+  "authCodeRejected": "We couldn't verify that code. Check the digits or request another one.",
+  "authCodeExpired": "That code has expired. Request a new one to continue.",
+  "authNetworkError": "Couldn't connect. Check your connection and try again.",
+  "authServerError": "Couldn't sign in right now. Please try again shortly.",
+  "authRateLimited": "Please wait a little before trying again.",
+  "authStorageError": "Couldn't save your access on this device. Please try again.",
+  "authGoogleError": "Couldn't sign in with Google. Try again or use your email.",
+  "authSessionExpired": "Your access expired. Sign in again to continue.",
+  "authConsentTitle": "Your health data, your choice",
+  "authConsentBody": "BYND uses health signals collected by your band, such as heart rate, HRV, sleep and activity, to generate personal information about your body. Creating your account requires your consent to this processing.",
+  "authConsentLabel": "I agree to the processing of my health data to generate personal information, as described in Privacy.",
+  "authConsentRequired": "To create your account, confirm your choice about health data.",
+  "authConsentAccept": "Agree and continue",
+  "authConsentDecline": "Not now",
+  "authPrivacy": "Privacy",
+  "authPrivacyLink": "How we use your data",
+  "authPrivacyTitle": "Your data at BYND",
+  "authPrivacyPurposeTitle": "To understand your signals",
+  "authPrivacyPurpose": "Your band's health data and the entries you add help present information about sleep, activity and other signals from your body.",
+  "authPrivacyChoiceTitle": "An explicit choice",
+  "authPrivacyChoice": "Creating an account requires your consent to health-data processing. You can read this information and return without agreeing; in that case, this step will not create an account.",
+  "authPrivacyAccessTitle": "Your access",
+  "authPrivacyAccess": "Email sign-in uses a temporary code. Keep that code to yourself. Your session stays on this device until you sign out or access expires.",
+  "authLegalFootnote": "Learn how BYND uses your data before continuing.",
+  "authRestore": "Preparing your access…",
+  "authSignOutTitle": "Sign out of your account?",
+  "authSignOutBody": "You can sign in again with your email or Google.",
+  "authSignOutConfirm": "Sign out",
+  "authCancel": "Cancel",
+  "authSignOutFailed": "You signed out, but some local data couldn't be cleared. Please restart the app.",
+  "authBackground": "Landscape {index} of {total}",
+  "authChangeLanguage": "Change language",
+  "@authCodeBody": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "@authResendIn": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "@authBackground": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  }
 }
