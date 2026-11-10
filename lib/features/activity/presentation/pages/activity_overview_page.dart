@@ -179,19 +179,25 @@ class _ActivityHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppPageHeader(
       title: Text(context.l10n.activities, style: AppTypography.title),
-      leading: IconButton(
-        tooltip: context.l10n.back,
-        onPressed: onBack,
-        icon: const AppSvgIcon(AppSvgAssets.back, size: 21),
-      ),
-      trailing: IconButton(
-        tooltip: context.l10n.history,
-        onPressed: () => AppNotice.show(
-          context,
-          kind: AppNoticeKind.info,
-          message: context.l10n.activityHistoryComingSoon,
+      leading: Semantics(
+        label: context.l10n.back,
+        button: true,
+        child: IconButton(
+          onPressed: onBack,
+          icon: const AppSvgIcon(AppSvgAssets.back, size: 21),
         ),
-        icon: const Icon(Icons.history, color: AppColors.textPrimary),
+      ),
+      trailing: Semantics(
+        label: context.l10n.history,
+        button: true,
+        child: IconButton(
+          onPressed: () => AppNotice.show(
+            context,
+            kind: AppNoticeKind.info,
+            message: context.l10n.activityHistoryComingSoon,
+          ),
+          icon: const Icon(Icons.history, color: AppColors.textPrimary),
+        ),
       ),
     );
   }

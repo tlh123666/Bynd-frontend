@@ -8,6 +8,10 @@ import '../navigation/app_page_transitions.dart';
 abstract final class AppTheme {
   static final dark = ThemeData(
     useMaterial3: true,
+    // 全应用不自动弹出悬浮气泡；Tooltip 文案仍保留给辅助技术读取。
+    tooltipTheme: const TooltipThemeData(
+      triggerMode: TooltipTriggerMode.manual,
+    ),
     fontFamily: AppFontFamilies.geist,
     pageTransitionsTheme: const PageTransitionsTheme(
       builders: {
