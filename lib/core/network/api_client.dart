@@ -88,7 +88,7 @@ class ApiClient {
     final token = requiresAuth ? await tokenProvider() : null;
     if (requiresAuth && (token == null || token.isEmpty)) {
       throw const ApiException(
-        'Entre na sua conta para gerenciar a pulseira.',
+        'Entre na sua conta para continuar.',
         code: 'authentication_required',
       );
     }
@@ -130,9 +130,9 @@ class ApiClient {
               envelope['code'] != 200)) {
         throw ApiException(
           response.statusCode == 409
-              ? 'A pulseira ou esta operação mudou. Atualize e tente novamente.'
+              ? 'Os dados mudaram. Atualize e tente novamente.'
               : response.statusCode == 404
-              ? 'Esta pulseira não está mais vinculada à sua conta.'
+              ? 'Este recurso não está mais disponível.'
               : 'Não foi possível concluir. Tente novamente.',
           code: 'http_${response.statusCode}',
         );

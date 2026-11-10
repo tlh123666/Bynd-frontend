@@ -55,6 +55,7 @@ abstract final class AppColors {
   static const homePhotoChip = Color(0x73121418);
   static const homePhotoBorder = Color(0x2EFFFFFF);
   static const contentSheetVeil = Color(0x59080A0E); // .fl-veu, .35
+  static const contentSheetGlass = Color.fromRGBO(20,24,30,.62); // base.css .fl
   static const homePatternTag = Color(0x248FBCF0);
   static const homePatternText = Color(0xFFCFE2FB);
   static const homePhotoShade = <Color>[
