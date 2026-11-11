@@ -419,5 +419,8 @@
       "count": {}
     }
   },
-  "communityCreateNote": "You can create it alone: right after, you can invite more people in the group settings."
+  "communityCreateNote": "You can create it alone: right after, you can invite more people in the group settings.",
+  "communityPublicGroup": "Public group",
+  "communityJoin": "Join",
+  "communityJoinedGroup": "Welcome to the group!"
 }

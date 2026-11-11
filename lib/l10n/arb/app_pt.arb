@@ -395,5 +395,8 @@
       "count": {}
     }
   },
-  "communityCreateNote": "Pode criar sem ninguém: depois de criar, você chama mais gente nos ajustes do grupo."
+  "communityCreateNote": "Pode criar sem ninguém: depois de criar, você chama mais gente nos ajustes do grupo.",
+  "communityPublicGroup": "Grupo público",
+  "communityJoin": "Entrar",
+  "communityJoinedGroup": "Boas-vindas ao grupo!"
 }
