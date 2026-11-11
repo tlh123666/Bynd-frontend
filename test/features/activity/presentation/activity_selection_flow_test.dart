@@ -1,10 +1,100 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:new_jcvital/design_system/components/app_bottom_nav.dart';
+import 'package:new_jcvital/features/activity/presentation/pages/activity_overview_page.dart';
 import 'package:new_jcvital/features/home/home_page.dart';
 import 'package:new_jcvital/features/home/home_sky_background.dart';
+import 'package:new_jcvital/features/profile/profile_page.dart';
 
 void main() {
+  testWidgets('活动页与首页复用同一个底部导航且只应用一次安全区', (tester) async {
+    await tester.pumpWidget(const MaterialApp(home: ActivityOverviewPage()));
+
+    expect(find.byType(AppBottomNav), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(AppBottomNav),
+        matching: find.byType(SafeArea),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.ancestor(
+        of: find.byType(AppBottomNav),
+        matching: find.byType(SafeArea),
+      ),
+      findsNothing,
+    );
+  });
+
+  testWidgets('活动页点首页后返回并同步首页选中标签', (tester) async {
+    await tester.pumpWidget(const MaterialApp(home: HomePage()));
+
+    await tester.tap(
+      find.descendant(
+        of: find.byType(AppBottomNav),
+        matching: find.bySemanticsLabel('Comunidade'),
+      ),
+    );
+    await tester.pump();
+    expect(
+      tester.widget<AppBottomNav>(find.byType(AppBottomNav)).selectedIndex,
+      2,
+    );
+
+    await tester.tap(find.bySemanticsLabel('Ações rápidas'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Iniciar\natividade'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Fechar'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(
+      find.descendant(
+        of: find.byType(AppBottomNav),
+        matching: find.bySemanticsLabel('Hoje'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ActivityOverviewPage), findsNothing);
+    expect(
+      tester.widget<AppBottomNav>(find.byType(AppBottomNav)).selectedIndex,
+      0,
+    );
+  });
+
+  testWidgets('从资料页进入活动后点首页会正确返回根页面', (tester) async {
+    await tester.pumpWidget(const MaterialApp(home: HomePage()));
+
+    await tester.tap(find.byTooltip('Menu'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Ajustes'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.bySemanticsLabel('Ações rápidas'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Iniciar\natividade'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Fechar'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(
+      find.descendant(
+        of: find.byType(AppBottomNav),
+        matching: find.bySemanticsLabel('Hoje'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ProfilePage), findsNothing);
+    expect(find.byType(ActivityOverviewPage), findsNothing);
+    expect(
+      tester.widget<AppBottomNav>(find.byType(AppBottomNav)).selectedIndex,
+      0,
+    );
+  });
+
   testWidgets('首页背景覆盖完整手机视口且没有渲染异常', (tester) async {
     tester.view.physicalSize = const Size(456, 990);
     tester.view.devicePixelRatio = 1;
@@ -59,7 +149,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Buscar entre 140 modalidades'), findsOneWidget);
-    await tester.tap(find.text('Corrida').first);
+    // 页面下方也会展示最近运动，选择目录中的最后一个可见同名项目。
+    await tester.tap(find.text('Corrida').last);
     await tester.pumpAndSettle();
 
     expect(find.text('Pulseira não integrada'), findsOneWidget);
@@ -80,7 +171,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Buscar entre 140 modalidades'), findsOneWidget);
-    await tester.tap(find.text('Caminhada').first);
+    await tester.tap(find.text('Caminhada').last);
     await tester.pumpAndSettle();
 
     expect(find.text('Pulseira não integrada'), findsOneWidget);
@@ -94,7 +185,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Iniciar\natividade'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Musculação').first);
+    await tester.tap(find.text('Musculação').last);
     await tester.pumpAndSettle();
 
     expect(find.text('Como deseja começar?'), findsOneWidget);

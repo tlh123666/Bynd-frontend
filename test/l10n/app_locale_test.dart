@@ -148,9 +148,18 @@ void main() {
     await tester.tap(find.text('Start\nactivity'));
     await tester.pumpAndSettle();
 
+    expect(find.text('BELOW TARGET'), findsOneWidget);
+    expect(find.text("You're close to your target."), findsOneWidget);
+    expect(
+      find.text('Illustrative demo data · not synced from a device'),
+      findsOneWidget,
+    );
+    expect(find.text('Modalities'), findsOneWidget);
+    expect(find.textContaining('6,240'), findsOneWidget);
     expect(find.text('Search 140 activities'), findsOneWidget);
     expect(find.text('RECENT'), findsOneWidget);
     expect(find.text('Running'), findsWidgets);
-    expect(find.text('Strength training'), findsOneWidget);
+    // 该名称也会出现在活动页的静态演示区域中。
+    expect(find.text('Strength training'), findsWidgets);
   });
 }

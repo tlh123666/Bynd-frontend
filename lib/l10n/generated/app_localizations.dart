@@ -375,6 +375,150 @@ abstract class AppLocalizations {
   /// **'A integração de dados e o cálculo da carga ainda não estão disponíveis.'**
   String get activityUnavailableDescription;
 
+  /// No description provided for @activityTargetStatus.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'ABAIXO DO ALVO'**
+  String get activityTargetStatus;
+
+  /// No description provided for @activityTargetTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Falta pouco para o alvo.'**
+  String get activityTargetTitle;
+
+  /// No description provided for @activityTargetDescription.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Hoje: musculação, 35 min, carga 28. Com recuperação em 57, a meta do dia é 35–55: faltam 7. Uma caminhada leve de 20 a 30 minutos deve completar a meta. Estimativa de recuperação para amanhã: perto de 66.'**
+  String get activityTargetDescription;
+
+  /// No description provided for @activityMetricActiveCalories.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Calorias ativas'**
+  String get activityMetricActiveCalories;
+
+  /// No description provided for @activityMetricActiveMinutes.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Minutos ativos'**
+  String get activityMetricActiveMinutes;
+
+  /// No description provided for @activityMetricSteps.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Passos'**
+  String get activityMetricSteps;
+
+  /// No description provided for @activityMetricRestingTime.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Tempo parado'**
+  String get activityMetricRestingTime;
+
+  /// No description provided for @activityMetricAbove25.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'↑ 25% acima'**
+  String get activityMetricAbove25;
+
+  /// No description provided for @activityMetricAbove28.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'↑ 28% acima'**
+  String get activityMetricAbove28;
+
+  /// No description provided for @activityMetricWithinNormal.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'dentro do normal'**
+  String get activityMetricWithinNormal;
+
+  /// No description provided for @activityMetricNormalCalories.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'normal 256–383 kcal'**
+  String get activityMetricNormalCalories;
+
+  /// No description provided for @activityMetricNormalMinutes.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'normal 35–53 min'**
+  String get activityMetricNormalMinutes;
+
+  /// No description provided for @activityMetricNormalSteps.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'normal 3.904–5.856'**
+  String get activityMetricNormalSteps;
+
+  /// No description provided for @activityMetricNormalRest.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'normal 3h32–5h18'**
+  String get activityMetricNormalRest;
+
+  /// No description provided for @activityDemoStrength.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Musculação'**
+  String get activityDemoStrength;
+
+  /// No description provided for @activityDemoRun.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Corrida'**
+  String get activityDemoRun;
+
+  /// No description provided for @activityDemoWalk.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Caminhada'**
+  String get activityDemoWalk;
+
+  /// No description provided for @activityDemoSetsAndWeight.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'séries e peso'**
+  String get activityDemoSetsAndWeight;
+
+  /// No description provided for @activityDemoWithGps.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'com GPS'**
+  String get activityDemoWithGps;
+
+  /// No description provided for @activityDemoSummary.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'{count, plural, one{{count} treino} other{{count} treinos}} · {minutes} min no total'**
+  String activityDemoSummary(int count, int minutes);
+
+  /// No description provided for @activityDemoLoadLabel.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'carga'**
+  String get activityDemoLoadLabel;
+
+  /// No description provided for @activityDemoLabel.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Dados ilustrativos de demonstração · não sincronizados'**
+  String get activityDemoLabel;
+
+  /// No description provided for @activityDemoStepsValue.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'6.240'**
+  String get activityDemoStepsValue;
+
+  /// No description provided for @activityDemoRestingTimeValue.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'4h44'**
+  String get activityDemoRestingTimeValue;
+
   /// No description provided for @dayInNumbers.
   ///
   /// In pt_BR, this message translates to:
@@ -392,6 +536,12 @@ abstract class AppLocalizations {
   /// In pt_BR, this message translates to:
   /// **'Modalidades'**
   String get modalities;
+
+  /// No description provided for @viewAll.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Ver todas'**
+  String get viewAll;
 
   /// No description provided for @recentModalitiesUnavailable.
   ///
