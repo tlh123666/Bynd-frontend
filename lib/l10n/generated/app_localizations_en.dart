@@ -9,6 +9,81 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get activityRegistrationPreview =>
+      'Preview · simulated data · not saved';
+
+  @override
+  String get activityDetailHighIntensity => 'High intensity';
+
+  @override
+  String get activityDetailEffortPeaks => 'Effort peaks';
+
+  @override
+  String get registrationTitle => 'Log activity';
+
+  @override
+  String get registrationModality => 'ACTIVITY';
+
+  @override
+  String get registrationChange => 'Tap to change';
+
+  @override
+  String get registrationWhen => 'WHEN';
+
+  @override
+  String get registrationOtherDay => 'Another day';
+
+  @override
+  String get registrationStart => 'Started at';
+
+  @override
+  String get registrationDuration => 'Duration';
+
+  @override
+  String get registrationEffort => 'EFFORT YOU FELT';
+
+  @override
+  String get registrationOfTen => 'of 10';
+
+  @override
+  String get registrationEstimated => 'Estimated demo load';
+
+  @override
+  String get registrationSave => 'Save';
+
+  @override
+  String get registrationUnavailable =>
+      'Demo only: activity saving is not connected yet.';
+
+  @override
+  String get registrationInvalid =>
+      'The activity cannot end in the future or after midnight.';
+
+  @override
+  String get registrationDone => 'Done';
+
+  @override
+  String get registrationHigh => 'HIGH';
+
+  @override
+  String get registrationModerate => 'MODERATE';
+
+  @override
+  String get registrationLight => 'Light';
+
+  @override
+  String get registrationStrong => 'Strong';
+
+  @override
+  String get registrationMaximum => 'Maximum';
+
+  @override
+  String get registrationShortPhrases => 'short phrases';
+
+  @override
+  String get registrationEffortDescription => 'Effort from 1 to 10';
+
+  @override
   String get language => 'Language';
 
   @override
@@ -95,6 +170,126 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get history => 'History';
+
+  @override
+  String get historyNormalStatus => 'WITHIN YOUR NORMAL RANGE';
+
+  @override
+  String get historyAverage => 'your average';
+
+  @override
+  String get historyNormalRange => 'normal 35–58';
+
+  @override
+  String get historySevenDayAverage => '7-day average';
+
+  @override
+  String get historyDemoMonth => 'Nov';
+
+  @override
+  String historyDemoSummary(int count, int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count activities',
+      one: '$count activity',
+    );
+    return '$_temp0 · $minutes min total';
+  }
+
+  @override
+  String get historyDemoTime => 'today 07:50';
+
+  @override
+  String get activityDetailDemoSource => 'Example · illustrative data';
+
+  @override
+  String get activityDetailTimeTo => 'to';
+
+  @override
+  String get activityDetailDuration => 'Duration';
+
+  @override
+  String get activityDetailCalories => 'Calories';
+
+  @override
+  String get activityDetailAverageHeartRate => 'Average HR';
+
+  @override
+  String get activityDetailMaximumHeartRate => 'Maximum HR';
+
+  @override
+  String get activityDetailHeartZones => 'Heart rate zones';
+
+  @override
+  String activityDetailZoneMost(int zone) {
+    return 'most time in zone $zone';
+  }
+
+  @override
+  String get activityDetailZone => 'Zone';
+
+  @override
+  String get activityDetailZoneRest => 'rest';
+
+  @override
+  String get activityDetailZoneVeryLight => 'very light';
+
+  @override
+  String get activityDetailZoneLight => 'light';
+
+  @override
+  String get activityDetailZoneModerate => 'moderate';
+
+  @override
+  String get activityDetailZoneHard => 'hard';
+
+  @override
+  String get activityDetailZoneMaximum => 'maximum';
+
+  @override
+  String get activityDetailMin => 'Min';
+
+  @override
+  String get activityDetailMax => 'Max';
+
+  @override
+  String get activityDetailOptions => 'Options';
+
+  @override
+  String get activityDetailShare => 'Share';
+
+  @override
+  String get activityDetailEdit => 'Edit time and duration';
+
+  @override
+  String get activityDetailDelete => 'Delete activity';
+
+  @override
+  String get activityDetailStart => 'Start time (HH:mm)';
+
+  @override
+  String get activityDetailSave => 'Save';
+
+  @override
+  String get activityDetailCancel => 'Cancel';
+
+  @override
+  String get activityDetailInvalid =>
+      'Enter a valid time and duration (1–720 minutes).';
+
+  @override
+  String get activityDetailDemoOnly =>
+      'Demo only · changes last until you leave this page.';
+
+  @override
+  String get activityDetailCopied => 'Demo summary copied.';
+
+  @override
+  String get activityDetailCopyFailed => 'Could not copy the demo summary.';
+
+  @override
+  String get activityDetailDeleteConfirm => 'Delete this example?';
 
   @override
   String get quickActionsHeading => 'QUICK ACTIONS';

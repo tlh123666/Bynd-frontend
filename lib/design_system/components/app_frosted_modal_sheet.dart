@@ -29,6 +29,7 @@ class AppFrostedModalSheet extends StatelessWidget {
     bool showHandle = true,
     bool enableDrag = true,
     double maxHeightFraction = .84,
+    double? topInset,
     Color barrierColor = AppColors.menuVeil,
   }) {
     final motionEnabled = AppMotion.enabled(context);
@@ -56,7 +57,12 @@ class AppFrostedModalSheet extends StatelessWidget {
               padding: EdgeInsets.only(bottom: bottomInset),
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  maxHeight: size.height * maxHeightFactor,
+                  maxHeight: topInset == null
+                      ? size.height * maxHeightFactor
+                      : (size.height - topInset - bottomInset).clamp(
+                          0.0,
+                          size.height,
+                        ),
                 ),
                 child: SizedBox(
                   width: double.infinity,
