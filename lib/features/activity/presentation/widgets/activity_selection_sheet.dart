@@ -11,12 +11,15 @@ import 'activity_type_icon.dart';
 
 /// 活动选择面板，对应网页原型的 Modalidades 底部面板。
 class ActivitySelectionSheet extends StatefulWidget {
-  const ActivitySelectionSheet({super.key});
+  const ActivitySelectionSheet({this.title, super.key});
+
+  final String? title;
 
   /// 展示可拖动的全高活动面板，选中后将稳定活动类型返回调用方。
-  static Future<ActivityType?> show(BuildContext context) {
+  static Future<ActivityType?> show(BuildContext context, {String? title}) {
     return Navigator.of(context).push<ActivityType>(
       _ActivitySelectionRoute(
+        title: title,
         routeBarrierLabel: MaterialLocalizations.of(
           context,
         ).modalBarrierDismissLabel,
@@ -93,7 +96,7 @@ class _ActivitySelectionSheetState extends State<ActivitySelectionSheet> {
                 child: Column(
                   children: [
                     _SheetHandle(
-                      title: strings.startActivityTitle,
+                      title: widget.title ?? strings.startActivityTitle,
                       onClose: () => Navigator.of(context).pop(),
                       onDragStart: () => setState(() => _isDragging = true),
                       onDragUpdate: (delta) => setState(() {
@@ -234,7 +237,9 @@ class _ActivitySelectionSheetState extends State<ActivitySelectionSheet> {
 }
 
 class _ActivitySelectionRoute extends PopupRoute<ActivityType> {
-  _ActivitySelectionRoute({required this.routeBarrierLabel});
+  _ActivitySelectionRoute({required this.routeBarrierLabel, this.title});
+
+  final String? title;
 
   final String routeBarrierLabel;
 
@@ -275,7 +280,7 @@ class _ActivitySelectionRoute extends PopupRoute<ActivityType> {
           begin: const Offset(0, 1),
           end: Offset.zero,
         ).animate(sheetAnimation),
-        child: const ActivitySelectionSheet(),
+        child: ActivitySelectionSheet(title: title),
       ),
     );
   }

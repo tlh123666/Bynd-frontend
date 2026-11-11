@@ -1,13 +1,230 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:new_jcvital/design_system/components/app_frosted_surface.dart';
+import 'package:new_jcvital/design_system/components/app_frosted_modal_sheet.dart';
 import 'package:new_jcvital/design_system/tokens/app_colors.dart';
 import 'package:new_jcvital/features/activity/presentation/pages/activity_overview_page.dart';
+import 'package:new_jcvital/features/activity/presentation/pages/activity_history_page.dart';
+import 'package:new_jcvital/features/activity/presentation/widgets/activity_detail_sheet.dart';
+import 'package:new_jcvital/features/activity/presentation/models/demo_history_activity.dart';
+import 'package:new_jcvital/l10n/generated/app_localizations.dart';
 import 'package:new_jcvital/design_system/components/app_page_header.dart';
 import 'package:new_jcvital/design_system/components/app_icon.dart';
 
 void main() {
+  testWidgets('示例详情菜单可复制、校验编辑和确认删除', (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(400, 804);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
+    String? copied;
+    var failCopy = false;
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (call) async {
+        if (call.method == 'Clipboard.setData') {
+          if (failCopy) throw PlatformException(code: 'clipboard_unavailable');
+          copied = (call.arguments as Map)['text'] as String?;
+        }
+        return null;
+      },
+    );
+    addTearDown(
+      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        null,
+      ),
+    );
+
+    await tester.pumpWidget(const MaterialApp(home: ActivityHistoryPage()));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Sauna'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text('Sauna'));
+    await tester.pumpAndSettle();
+    expect(
+      tester.getTopLeft(find.byType(AppFrostedModalSheet).last).dy,
+      closeTo(54, .1),
+    );
+
+    await tester.tap(find.bySemanticsLabel('Opções'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Compartilhar'));
+    await tester.pumpAndSettle();
+    expect(copied, contains('Sauna'));
+    expect(find.text('Resumo de exemplo copiado.'), findsOneWidget);
+    await tester.tap(find.text('Fechar').last);
+    await tester.pumpAndSettle();
+
+    failCopy = true;
+    await tester.tap(find.bySemanticsLabel('Opções'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Compartilhar'));
+    await tester.pumpAndSettle();
+    expect(
+      find.text('Não foi possível copiar o resumo de exemplo.'),
+      findsOneWidget,
+    );
+    await tester.tap(find.text('Fechar').last);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.bySemanticsLabel('Opções'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Editar horário e duração'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).first, '25:00');
+    await tester.enterText(find.byType(TextField).last, '0');
+    await tester.tap(find.text('Salvar'));
+    await tester.pumpAndSettle();
+    expect(
+      find.text('Informe um horário válido e uma duração de 1 a 720 minutos.'),
+      findsOneWidget,
+    );
+    await tester.enterText(find.byType(TextField).first, '20:05');
+    await tester.enterText(find.byType(TextField).last, '25');
+    await tester.tap(find.text('Salvar'));
+    await tester.pumpAndSettle();
+    expect(find.text('Ontem, 20:05 a 20:30'), findsOneWidget);
+
+    await tester.tap(
+      find.descendant(
+        of: find.byType(ActivityDetailSheet),
+        matching: find.bySemanticsLabel('Fechar'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('ontem 20:05'), findsOneWidget);
+    await tester.tap(find.text('Sauna'));
+    await tester.pumpAndSettle();
+    expect(find.text('Ontem, 20:05 a 20:30'), findsOneWidget);
+
+    await tester.tap(find.bySemanticsLabel('Opções'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Apagar atividade'));
+    await tester.pumpAndSettle();
+    expect(find.text('Apagar este exemplo?'), findsOneWidget);
+    await tester.tap(find.text('Cancelar').last);
+    await tester.pumpAndSettle();
+    expect(find.byType(ActivityDetailSheet), findsOneWidget);
+    await tester.tap(find.bySemanticsLabel('Opções'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Apagar atividade'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Apagar atividade').last);
+    await tester.pumpAndSettle();
+    expect(find.byType(ActivityDetailSheet), findsNothing);
+    expect(find.text('Sauna'), findsNothing);
+    expect(find.text('1 atividade · 35 min no total'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('活动详情支持英文文案和示例数据标识', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('en'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => TextButton(
+              onPressed: () => ActivityDetailSheet.show(
+                context,
+                DemoHistoryActivity.examples.last,
+              ),
+              child: const Text('Open'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+    expect(find.text('Yesterday, 19:40 to 20:00'), findsOneWidget);
+    expect(find.text('Example · illustrative data'), findsOneWidget);
+    expect(find.text('Average HR'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('历史入口打开演示历史，图表可拖动并返回活动页', (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(320, 640);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
+
+    await tester.pumpWidget(const MaterialApp(home: ActivityOverviewPage()));
+    await tester.pumpAndSettle();
+    await tester.tap(find.bySemanticsLabel('Histórico'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ActivityHistoryPage), findsOneWidget);
+    expect(
+      find.text('Dados ilustrativos de demonstração · não sincronizados'),
+      findsOneWidget,
+    );
+    final chart = find.byKey(const ValueKey('activity-history-chart'));
+    expect(tester.widget<Semantics>(chart).properties.label, endsWith('66'));
+    await tester.drag(chart, const Offset(100, 0));
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<Semantics>(chart).properties.label,
+      isNot(endsWith('66')),
+    );
+    await tester.scrollUntilVisible(
+      find.text('Musculação'),
+      180,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text('Musculação'));
+    await tester.pumpAndSettle();
+    var sheet = find.byType(ActivityDetailSheet);
+    expect(sheet, findsOneWidget);
+    expect(
+      tester.widget<ActivityDetailSheet>(sheet).activity.kind,
+      DemoActivityKind.strength,
+    );
+    expect(find.text('Exemplo · dados ilustrativos'), findsOneWidget);
+    await tester.tap(
+      find.descendant(of: sheet, matching: find.bySemanticsLabel('Fechar')),
+    );
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Sauna'),
+      180,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text('Sauna'));
+    await tester.pumpAndSettle();
+    sheet = find.byType(ActivityDetailSheet);
+    expect(
+      tester.widget<ActivityDetailSheet>(sheet).activity.kind,
+      DemoActivityKind.sauna,
+    );
+    expect(find.text('Ontem, 19:40 a 20:00'), findsOneWidget);
+    expect(find.text('FC média'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Zona 5'),
+      180,
+      scrollable: find.descendant(of: sheet, matching: find.byType(Scrollable)),
+    );
+    expect(find.text('Zonas da FC'), findsOneWidget);
+    expect(find.text('Zona 5'), findsOneWidget);
+    await tester.tap(
+      find.descendant(of: sheet, matching: find.bySemanticsLabel('Fechar')),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(find.bySemanticsLabel('Voltar').first);
+    await tester.pumpAndSettle();
+    expect(find.byType(ActivityHistoryPage), findsNothing);
+    expect(find.byType(ActivityOverviewPage), findsOneWidget);
+  });
+
   testWidgets('活动行动区匹配原型的按钮尺寸、字级与玻璃高光', (tester) async {
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(456, 990);

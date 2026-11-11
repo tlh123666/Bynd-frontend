@@ -9,6 +9,81 @@ class AppLocalizationsPt extends AppLocalizations {
   AppLocalizationsPt([String locale = 'pt']) : super(locale);
 
   @override
+  String get activityRegistrationPreview =>
+      'Prévia · dados simulados · não salvo';
+
+  @override
+  String get activityDetailHighIntensity => 'Alta intensidade';
+
+  @override
+  String get activityDetailEffortPeaks => 'Picos de esforço';
+
+  @override
+  String get registrationTitle => 'Registrar atividade';
+
+  @override
+  String get registrationModality => 'MODALIDADE';
+
+  @override
+  String get registrationChange => 'tocar para trocar';
+
+  @override
+  String get registrationWhen => 'QUANDO';
+
+  @override
+  String get registrationOtherDay => 'Outro dia';
+
+  @override
+  String get registrationStart => 'Começou às';
+
+  @override
+  String get registrationDuration => 'Duração';
+
+  @override
+  String get registrationEffort => 'ESFORÇO QUE VOCÊ SENTIU';
+
+  @override
+  String get registrationOfTen => 'de 10';
+
+  @override
+  String get registrationEstimated => 'carga estimada de exemplo';
+
+  @override
+  String get registrationSave => 'Salvar';
+
+  @override
+  String get registrationUnavailable =>
+      'Demonstração: o registro de atividades ainda não está conectado.';
+
+  @override
+  String get registrationInvalid =>
+      'A atividade não pode terminar no futuro ou depois da meia-noite.';
+
+  @override
+  String get registrationDone => 'Concluído';
+
+  @override
+  String get registrationHigh => 'ALTA';
+
+  @override
+  String get registrationModerate => 'MODERADA';
+
+  @override
+  String get registrationLight => 'Leve';
+
+  @override
+  String get registrationStrong => 'Forte';
+
+  @override
+  String get registrationMaximum => 'Máximo';
+
+  @override
+  String get registrationShortPhrases => 'frases curtas';
+
+  @override
+  String get registrationEffortDescription => 'Esforço de 1 a 10';
+
+  @override
   String get language => 'Idioma';
 
   @override
@@ -95,6 +170,127 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get history => 'Histórico';
+
+  @override
+  String get historyNormalStatus => 'DENTRO DO SEU NORMAL';
+
+  @override
+  String get historyAverage => 'sua média';
+
+  @override
+  String get historyNormalRange => 'normal 35–58';
+
+  @override
+  String get historySevenDayAverage => 'média de 7 dias';
+
+  @override
+  String get historyDemoMonth => 'nov';
+
+  @override
+  String historyDemoSummary(int count, int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count atividades',
+      one: '$count atividade',
+    );
+    return '$_temp0 · $minutes min no total';
+  }
+
+  @override
+  String get historyDemoTime => 'hoje 07:50';
+
+  @override
+  String get activityDetailDemoSource => 'Exemplo · dados ilustrativos';
+
+  @override
+  String get activityDetailTimeTo => 'a';
+
+  @override
+  String get activityDetailDuration => 'Duração';
+
+  @override
+  String get activityDetailCalories => 'Calorias';
+
+  @override
+  String get activityDetailAverageHeartRate => 'FC média';
+
+  @override
+  String get activityDetailMaximumHeartRate => 'FC máxima';
+
+  @override
+  String get activityDetailHeartZones => 'Zonas da FC';
+
+  @override
+  String activityDetailZoneMost(int zone) {
+    return 'mais tempo na zona $zone';
+  }
+
+  @override
+  String get activityDetailZone => 'Zona';
+
+  @override
+  String get activityDetailZoneRest => 'repouso';
+
+  @override
+  String get activityDetailZoneVeryLight => 'muito leve';
+
+  @override
+  String get activityDetailZoneLight => 'leve';
+
+  @override
+  String get activityDetailZoneModerate => 'moderada';
+
+  @override
+  String get activityDetailZoneHard => 'intensa';
+
+  @override
+  String get activityDetailZoneMaximum => 'máxima';
+
+  @override
+  String get activityDetailMin => 'Mín';
+
+  @override
+  String get activityDetailMax => 'Máx';
+
+  @override
+  String get activityDetailOptions => 'Opções';
+
+  @override
+  String get activityDetailShare => 'Compartilhar';
+
+  @override
+  String get activityDetailEdit => 'Editar horário e duração';
+
+  @override
+  String get activityDetailDelete => 'Apagar atividade';
+
+  @override
+  String get activityDetailStart => 'Horário de início (HH:mm)';
+
+  @override
+  String get activityDetailSave => 'Salvar';
+
+  @override
+  String get activityDetailCancel => 'Cancelar';
+
+  @override
+  String get activityDetailInvalid =>
+      'Informe um horário válido e uma duração de 1 a 720 minutos.';
+
+  @override
+  String get activityDetailDemoOnly =>
+      'Apenas demonstração · alterações duram até você sair desta página.';
+
+  @override
+  String get activityDetailCopied => 'Resumo de exemplo copiado.';
+
+  @override
+  String get activityDetailCopyFailed =>
+      'Não foi possível copiar o resumo de exemplo.';
+
+  @override
+  String get activityDetailDeleteConfirm => 'Apagar este exemplo?';
 
   @override
   String get quickActionsHeading => 'AÇÕES RÁPIDAS';
@@ -1172,6 +1368,81 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   AppLocalizationsPtBr() : super('pt_BR');
 
   @override
+  String get activityRegistrationPreview =>
+      'Prévia · dados simulados · não salvo';
+
+  @override
+  String get activityDetailHighIntensity => 'Alta intensidade';
+
+  @override
+  String get activityDetailEffortPeaks => 'Picos de esforço';
+
+  @override
+  String get registrationTitle => 'Registrar atividade';
+
+  @override
+  String get registrationModality => 'MODALIDADE';
+
+  @override
+  String get registrationChange => 'tocar para trocar';
+
+  @override
+  String get registrationWhen => 'QUANDO';
+
+  @override
+  String get registrationOtherDay => 'Outro dia';
+
+  @override
+  String get registrationStart => 'Começou às';
+
+  @override
+  String get registrationDuration => 'Duração';
+
+  @override
+  String get registrationEffort => 'ESFORÇO QUE VOCÊ SENTIU';
+
+  @override
+  String get registrationOfTen => 'de 10';
+
+  @override
+  String get registrationEstimated => 'carga estimada de exemplo';
+
+  @override
+  String get registrationSave => 'Salvar';
+
+  @override
+  String get registrationUnavailable =>
+      'Demonstração: o registro de atividades ainda não está conectado.';
+
+  @override
+  String get registrationInvalid =>
+      'A atividade não pode terminar no futuro ou depois da meia-noite.';
+
+  @override
+  String get registrationDone => 'Concluído';
+
+  @override
+  String get registrationHigh => 'ALTA';
+
+  @override
+  String get registrationModerate => 'MODERADA';
+
+  @override
+  String get registrationLight => 'Leve';
+
+  @override
+  String get registrationStrong => 'Forte';
+
+  @override
+  String get registrationMaximum => 'Máximo';
+
+  @override
+  String get registrationShortPhrases => 'frases curtas';
+
+  @override
+  String get registrationEffortDescription => 'Esforço de 1 a 10';
+
+  @override
   String get language => 'Idioma';
 
   @override
@@ -1258,6 +1529,127 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get history => 'Histórico';
+
+  @override
+  String get historyNormalStatus => 'DENTRO DO SEU NORMAL';
+
+  @override
+  String get historyAverage => 'sua média';
+
+  @override
+  String get historyNormalRange => 'normal 35–58';
+
+  @override
+  String get historySevenDayAverage => 'média de 7 dias';
+
+  @override
+  String get historyDemoMonth => 'nov';
+
+  @override
+  String historyDemoSummary(int count, int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count atividades',
+      one: '$count atividade',
+    );
+    return '$_temp0 · $minutes min no total';
+  }
+
+  @override
+  String get historyDemoTime => 'hoje 07:50';
+
+  @override
+  String get activityDetailDemoSource => 'Exemplo · dados ilustrativos';
+
+  @override
+  String get activityDetailTimeTo => 'a';
+
+  @override
+  String get activityDetailDuration => 'Duração';
+
+  @override
+  String get activityDetailCalories => 'Calorias';
+
+  @override
+  String get activityDetailAverageHeartRate => 'FC média';
+
+  @override
+  String get activityDetailMaximumHeartRate => 'FC máxima';
+
+  @override
+  String get activityDetailHeartZones => 'Zonas da FC';
+
+  @override
+  String activityDetailZoneMost(int zone) {
+    return 'mais tempo na zona $zone';
+  }
+
+  @override
+  String get activityDetailZone => 'Zona';
+
+  @override
+  String get activityDetailZoneRest => 'repouso';
+
+  @override
+  String get activityDetailZoneVeryLight => 'muito leve';
+
+  @override
+  String get activityDetailZoneLight => 'leve';
+
+  @override
+  String get activityDetailZoneModerate => 'moderada';
+
+  @override
+  String get activityDetailZoneHard => 'intensa';
+
+  @override
+  String get activityDetailZoneMaximum => 'máxima';
+
+  @override
+  String get activityDetailMin => 'Mín';
+
+  @override
+  String get activityDetailMax => 'Máx';
+
+  @override
+  String get activityDetailOptions => 'Opções';
+
+  @override
+  String get activityDetailShare => 'Compartilhar';
+
+  @override
+  String get activityDetailEdit => 'Editar horário e duração';
+
+  @override
+  String get activityDetailDelete => 'Apagar atividade';
+
+  @override
+  String get activityDetailStart => 'Horário de início (HH:mm)';
+
+  @override
+  String get activityDetailSave => 'Salvar';
+
+  @override
+  String get activityDetailCancel => 'Cancelar';
+
+  @override
+  String get activityDetailInvalid =>
+      'Informe um horário válido e uma duração de 1 a 720 minutos.';
+
+  @override
+  String get activityDetailDemoOnly =>
+      'Apenas demonstração · alterações duram até você sair desta página.';
+
+  @override
+  String get activityDetailCopied => 'Resumo de exemplo copiado.';
+
+  @override
+  String get activityDetailCopyFailed =>
+      'Não foi possível copiar o resumo de exemplo.';
+
+  @override
+  String get activityDetailDeleteConfirm => 'Apagar este exemplo?';
 
   @override
   String get quickActionsHeading => 'AÇÕES RÁPIDAS';

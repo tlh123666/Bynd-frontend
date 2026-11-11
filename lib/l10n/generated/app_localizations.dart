@@ -99,6 +99,150 @@ abstract class AppLocalizations {
     Locale('pt', 'BR'),
   ];
 
+  /// No description provided for @activityRegistrationPreview.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Prévia · dados simulados · não salvo'**
+  String get activityRegistrationPreview;
+
+  /// No description provided for @activityDetailHighIntensity.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Alta intensidade'**
+  String get activityDetailHighIntensity;
+
+  /// No description provided for @activityDetailEffortPeaks.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Picos de esforço'**
+  String get activityDetailEffortPeaks;
+
+  /// No description provided for @registrationTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Registrar atividade'**
+  String get registrationTitle;
+
+  /// No description provided for @registrationModality.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'MODALIDADE'**
+  String get registrationModality;
+
+  /// No description provided for @registrationChange.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'tocar para trocar'**
+  String get registrationChange;
+
+  /// No description provided for @registrationWhen.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'QUANDO'**
+  String get registrationWhen;
+
+  /// No description provided for @registrationOtherDay.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Outro dia'**
+  String get registrationOtherDay;
+
+  /// No description provided for @registrationStart.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Começou às'**
+  String get registrationStart;
+
+  /// No description provided for @registrationDuration.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Duração'**
+  String get registrationDuration;
+
+  /// No description provided for @registrationEffort.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'ESFORÇO QUE VOCÊ SENTIU'**
+  String get registrationEffort;
+
+  /// No description provided for @registrationOfTen.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'de 10'**
+  String get registrationOfTen;
+
+  /// No description provided for @registrationEstimated.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'carga estimada de exemplo'**
+  String get registrationEstimated;
+
+  /// No description provided for @registrationSave.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Salvar'**
+  String get registrationSave;
+
+  /// No description provided for @registrationUnavailable.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Demonstração: o registro de atividades ainda não está conectado.'**
+  String get registrationUnavailable;
+
+  /// No description provided for @registrationInvalid.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'A atividade não pode terminar no futuro ou depois da meia-noite.'**
+  String get registrationInvalid;
+
+  /// No description provided for @registrationDone.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Concluído'**
+  String get registrationDone;
+
+  /// No description provided for @registrationHigh.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'ALTA'**
+  String get registrationHigh;
+
+  /// No description provided for @registrationModerate.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'MODERADA'**
+  String get registrationModerate;
+
+  /// No description provided for @registrationLight.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Leve'**
+  String get registrationLight;
+
+  /// No description provided for @registrationStrong.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Forte'**
+  String get registrationStrong;
+
+  /// No description provided for @registrationMaximum.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Máximo'**
+  String get registrationMaximum;
+
+  /// No description provided for @registrationShortPhrases.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'frases curtas'**
+  String get registrationShortPhrases;
+
+  /// No description provided for @registrationEffortDescription.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Esforço de 1 a 10'**
+  String get registrationEffortDescription;
+
   /// No description provided for @language.
   ///
   /// In pt_BR, this message translates to:
@@ -272,6 +416,222 @@ abstract class AppLocalizations {
   /// In pt_BR, this message translates to:
   /// **'Histórico'**
   String get history;
+
+  /// No description provided for @historyNormalStatus.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'DENTRO DO SEU NORMAL'**
+  String get historyNormalStatus;
+
+  /// No description provided for @historyAverage.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'sua média'**
+  String get historyAverage;
+
+  /// No description provided for @historyNormalRange.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'normal 35–58'**
+  String get historyNormalRange;
+
+  /// No description provided for @historySevenDayAverage.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'média de 7 dias'**
+  String get historySevenDayAverage;
+
+  /// No description provided for @historyDemoMonth.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'nov'**
+  String get historyDemoMonth;
+
+  /// No description provided for @historyDemoSummary.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'{count, plural, one{{count} atividade} other{{count} atividades}} · {minutes} min no total'**
+  String historyDemoSummary(int count, int minutes);
+
+  /// No description provided for @historyDemoTime.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'hoje 07:50'**
+  String get historyDemoTime;
+
+  /// No description provided for @activityDetailDemoSource.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Exemplo · dados ilustrativos'**
+  String get activityDetailDemoSource;
+
+  /// No description provided for @activityDetailTimeTo.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'a'**
+  String get activityDetailTimeTo;
+
+  /// No description provided for @activityDetailDuration.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Duração'**
+  String get activityDetailDuration;
+
+  /// No description provided for @activityDetailCalories.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Calorias'**
+  String get activityDetailCalories;
+
+  /// No description provided for @activityDetailAverageHeartRate.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'FC média'**
+  String get activityDetailAverageHeartRate;
+
+  /// No description provided for @activityDetailMaximumHeartRate.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'FC máxima'**
+  String get activityDetailMaximumHeartRate;
+
+  /// No description provided for @activityDetailHeartZones.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Zonas da FC'**
+  String get activityDetailHeartZones;
+
+  /// No description provided for @activityDetailZoneMost.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'mais tempo na zona {zone}'**
+  String activityDetailZoneMost(int zone);
+
+  /// No description provided for @activityDetailZone.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Zona'**
+  String get activityDetailZone;
+
+  /// No description provided for @activityDetailZoneRest.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'repouso'**
+  String get activityDetailZoneRest;
+
+  /// No description provided for @activityDetailZoneVeryLight.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'muito leve'**
+  String get activityDetailZoneVeryLight;
+
+  /// No description provided for @activityDetailZoneLight.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'leve'**
+  String get activityDetailZoneLight;
+
+  /// No description provided for @activityDetailZoneModerate.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'moderada'**
+  String get activityDetailZoneModerate;
+
+  /// No description provided for @activityDetailZoneHard.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'intensa'**
+  String get activityDetailZoneHard;
+
+  /// No description provided for @activityDetailZoneMaximum.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'máxima'**
+  String get activityDetailZoneMaximum;
+
+  /// No description provided for @activityDetailMin.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Mín'**
+  String get activityDetailMin;
+
+  /// No description provided for @activityDetailMax.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Máx'**
+  String get activityDetailMax;
+
+  /// No description provided for @activityDetailOptions.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Opções'**
+  String get activityDetailOptions;
+
+  /// No description provided for @activityDetailShare.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Compartilhar'**
+  String get activityDetailShare;
+
+  /// No description provided for @activityDetailEdit.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Editar horário e duração'**
+  String get activityDetailEdit;
+
+  /// No description provided for @activityDetailDelete.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Apagar atividade'**
+  String get activityDetailDelete;
+
+  /// No description provided for @activityDetailStart.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Horário de início (HH:mm)'**
+  String get activityDetailStart;
+
+  /// No description provided for @activityDetailSave.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Salvar'**
+  String get activityDetailSave;
+
+  /// No description provided for @activityDetailCancel.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Cancelar'**
+  String get activityDetailCancel;
+
+  /// No description provided for @activityDetailInvalid.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Informe um horário válido e uma duração de 1 a 720 minutos.'**
+  String get activityDetailInvalid;
+
+  /// No description provided for @activityDetailDemoOnly.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Apenas demonstração · alterações duram até você sair desta página.'**
+  String get activityDetailDemoOnly;
+
+  /// No description provided for @activityDetailCopied.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Resumo de exemplo copiado.'**
+  String get activityDetailCopied;
+
+  /// No description provided for @activityDetailCopyFailed.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Não foi possível copiar o resumo de exemplo.'**
+  String get activityDetailCopyFailed;
+
+  /// No description provided for @activityDetailDeleteConfirm.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Apagar este exemplo?'**
+  String get activityDetailDeleteConfirm;
 
   /// No description provided for @quickActionsHeading.
   ///

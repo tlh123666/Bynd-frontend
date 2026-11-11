@@ -8,6 +8,8 @@ import '../../../../shared/widgets/day_calendar.dart';
 import '../../../../shared/widgets/day_strip.dart';
 import '../../../../l10n/app_localizations_context.dart';
 import '../activity_selection_flow.dart';
+import 'activity_history_page.dart';
+import '../widgets/activity_registration_sheet.dart';
 
 /// 活动总览页：对应网页原型的 `exercicio` 页面。
 ///
@@ -123,10 +125,9 @@ class _ActivityOverviewPageState extends State<ActivityOverviewPage> {
                         ),
                         child: _DailySummary(
                           onStart: () => openActivitySelection(context),
-                          onRegister: () => AppNotice.show(
+                          onRegister: () => ActivityRegistrationSheet.show(
                             context,
-                            kind: AppNoticeKind.info,
-                            message: context.l10n.activityRegisterComingSoon,
+                            initialDay: _selectedDay,
                           ),
                         ),
                       ),
@@ -334,11 +335,16 @@ class _ActivityHeader extends StatelessWidget {
         label: context.l10n.history,
         button: true,
         child: IconButton(
-          onPressed: () => AppNotice.show(
-            context,
-            kind: AppNoticeKind.info,
-            message: context.l10n.activityHistoryComingSoon,
-          ),
+          onPressed: () async {
+            final destination = await Navigator.of(context).push<int>(
+              MaterialPageRoute<int>(
+                builder: (_) => const ActivityHistoryPage(),
+              ),
+            );
+            if (!context.mounted || destination == null) return;
+            // 将历史页的首页选择交给活动页处理，保持原有返回链路。
+            if (destination == 0) Navigator.of(context).pop(destination);
+          },
           icon: const Icon(Icons.history, color: AppColors.textPrimary),
         ),
       ),
