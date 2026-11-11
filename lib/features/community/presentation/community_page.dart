@@ -86,9 +86,6 @@ class _CommunityPageState extends State<CommunityPage> {
           .toList(growable: false);
       for (final group in joinedGroups) {
         try {
-          _members[group.id] = await _repo.groupMembers(group.id);
-        } catch (_) {}
-        try {
           final goals = await _repo.groupGoals(group.id);
           for (final goal in goals) {
             final ranking = await _repo.goalRanking(group.id, goal.id);
@@ -338,14 +335,13 @@ class _CommunityPageState extends State<CommunityPage> {
               _GroupCover(
                 name: group.name,
                 memberCount: group.memberCount,
-                members: _members[group.id] ?? const [],
+                members: group.members,
                 myRank: _myRank[group.id],
                 onTap: () => _openChat(group),
               )
             else
               _PublicCover(
-                name: group.name,
-                memberCount: group.memberCount,
+                group: group,
                 onJoin: () => _join(group),
               ),
           for (final invitation in _invitations)
@@ -637,14 +633,9 @@ class _GroupCover extends StatelessWidget {
 }
 
 class _PublicCover extends StatelessWidget {
-  const _PublicCover({
-    required this.name,
-    required this.memberCount,
-    required this.onJoin,
-  });
+  const _PublicCover({required this.group, required this.onJoin});
 
-  final String name;
-  final int memberCount;
+  final CommunityGroup group;
   final VoidCallback onJoin;
 
   @override
@@ -672,35 +663,36 @@ class _PublicCover extends StatelessWidget {
           Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  context.l10n.communityPublicGroup,
-                  style: AppTypography.caption.copyWith(
-                    color: CommunityStyle.onImage,
+              Row(
+                children: [
+                  Expanded(child: _AvatarStack(members: group.members)),
+                  Text(
+                    context.l10n.communityMemberCount(group.memberCount),
+                    style: AppTypography.caption.copyWith(
+                      color: CommunityStyle.onImage,
+                    ),
                   ),
-                ),
+                ],
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    name,
-                    style: AppTypography.body.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
+                    context.l10n.communityPublicGroup,
+                    style: AppTypography.caption.copyWith(
+                      color: CommunityStyle.onImage,
                     ),
                   ),
-                  const SizedBox(height: 8),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        context.l10n.communityMemberCount(memberCount),
-                        style: AppTypography.caption.copyWith(
-                          color: CommunityStyle.onImage,
+                        group.name,
+                        style: AppTypography.body.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
-                      const SizedBox(width: 10),
                       _CoverButton(
                         label: context.l10n.communityJoin,
                         filled: true,
