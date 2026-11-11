@@ -172,6 +172,7 @@ class CuratedChallenge {
     required this.id,
     required this.title,
     required this.summary,
+    required this.description,
     required this.domain,
     required this.durationDays,
     required this.status,
@@ -184,6 +185,7 @@ class CuratedChallenge {
     id: json['id'] as String,
     title: json['title'] as String? ?? '',
     summary: json['summary'] as String? ?? '',
+    description: json['description'] as String? ?? '',
     domain: json['domain'] as String? ?? '',
     durationDays: (json['durationDays'] as num?)?.toInt() ?? 0,
     status: json['status'] as String? ?? '',
@@ -198,6 +200,7 @@ class CuratedChallenge {
   final String id;
   final String title;
   final String summary;
+  final String description;
   final String domain;
   final int durationDays;
   final String status;
@@ -267,4 +270,53 @@ class CommunityRankingEntry {
   final double currentValue;
   final double progressPercent;
   final bool isMe;
+}
+
+/// 群目标，对应 `GroupGoalData`。排名与「谁完成了今天」都挂在目标上。
+class CommunityGoal {
+  const CommunityGoal({
+    required this.id,
+    required this.groupId,
+    required this.title,
+    required this.category,
+    required this.metric,
+    required this.targetValue,
+    required this.unit,
+    required this.status,
+    required this.myCurrentValue,
+    required this.myProgressPercent,
+    required this.teamProgressPercent,
+    required this.participatingCount,
+    required this.canManage,
+  });
+
+  factory CommunityGoal.fromJson(Map<String, dynamic> json) => CommunityGoal(
+    id: json['id'] as String,
+    groupId: json['groupId'] as String? ?? '',
+    title: json['title'] as String? ?? '',
+    category: json['category'] as String? ?? '',
+    metric: json['metric'] as String? ?? '',
+    targetValue: (json['targetValue'] as num?)?.toDouble() ?? 0,
+    unit: json['unit'] as String? ?? '',
+    status: json['status'] as String? ?? '',
+    myCurrentValue: (json['myCurrentValue'] as num?)?.toDouble() ?? 0,
+    myProgressPercent: (json['myProgressPercent'] as num?)?.toDouble() ?? 0,
+    teamProgressPercent: (json['teamProgressPercent'] as num?)?.toDouble() ?? 0,
+    participatingCount: (json['participatingCount'] as num?)?.toInt() ?? 0,
+    canManage: json['canManage'] as bool? ?? false,
+  );
+
+  final String id;
+  final String groupId;
+  final String title;
+  final String category;
+  final String metric;
+  final double targetValue;
+  final String unit;
+  final String status;
+  final double myCurrentValue;
+  final double myProgressPercent;
+  final double teamProgressPercent;
+  final int participatingCount;
+  final bool canManage;
 }

@@ -1712,6 +1712,378 @@ abstract class AppLocalizations {
   /// In pt_BR, this message translates to:
   /// **'{inviter} convidou você para \"{group}\"'**
   String communityInvitationFrom(Object group, Object inviter);
+
+  /// No description provided for @communityNewCover.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Criar grupo\nou entrar com código'**
+  String get communityNewCover;
+
+  /// No description provided for @communityInviteFromShort.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'convite de {name}'**
+  String communityInviteFromShort(Object name);
+
+  /// No description provided for @communityRankBadge.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'{rank}º no desafio de {total}'**
+  String communityRankBadge(Object rank, Object total);
+
+  /// No description provided for @communityParaHoje.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Para hoje'**
+  String get communityParaHoje;
+
+  /// No description provided for @communityPickChallenge.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Escolher um desafio'**
+  String get communityPickChallenge;
+
+  /// No description provided for @communityPickChallengeSub.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'sozinho ou com o seu grupo'**
+  String get communityPickChallengeSub;
+
+  /// No description provided for @communityDayOfTotal.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'dia {day} de {total}'**
+  String communityDayOfTotal(Object day, Object total);
+
+  /// No description provided for @communityMuralToday.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'No grupo hoje'**
+  String get communityMuralToday;
+
+  /// No description provided for @communityMuralYesterday.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'No grupo ontem'**
+  String get communityMuralYesterday;
+
+  /// No description provided for @communityMuralIntro.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Do mais novo para o mais antigo. Toque em \"Dar força\" para apoiar.'**
+  String get communityMuralIntro;
+
+  /// No description provided for @communityNoCheckinsToday.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Nenhum check-in hoje ainda. Quem fizer aparece aqui.'**
+  String get communityNoCheckinsToday;
+
+  /// No description provided for @communityNoCheckinsYesterday.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Nenhum check-in ontem.'**
+  String get communityNoCheckinsYesterday;
+
+  /// No description provided for @communityAtlasKicker.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'ATLAS · RESUMO DO GRUPO'**
+  String get communityAtlasKicker;
+
+  /// No description provided for @communityCheer.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Dar força'**
+  String get communityCheer;
+
+  /// No description provided for @communityCheerSoon.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Dar força chega em breve.'**
+  String get communityCheerSoon;
+
+  /// No description provided for @communityRespond.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Responder'**
+  String get communityRespond;
+
+  /// No description provided for @communityOpenGroupChat.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Abrir a conversa do grupo'**
+  String get communityOpenGroupChat;
+
+  /// No description provided for @communityCheckinText.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'✓ Check-in de hoje'**
+  String get communityCheckinText;
+
+  /// No description provided for @communityNewTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Novo'**
+  String get communityNewTitle;
+
+  /// No description provided for @communityTabChallenges.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Desafios'**
+  String get communityTabChallenges;
+
+  /// No description provided for @communityTabCreateGroup.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Criar grupo'**
+  String get communityTabCreateGroup;
+
+  /// No description provided for @communityTabCode.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Código'**
+  String get communityTabCode;
+
+  /// No description provided for @communityChallengesIntro.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Desafios criados pela BYND com especialistas. Faça sozinho ou leve para o seu grupo.'**
+  String get communityChallengesIntro;
+
+  /// No description provided for @communityDetailsOpen.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Ver detalhes'**
+  String get communityDetailsOpen;
+
+  /// No description provided for @communityDetailsClose.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Fechar'**
+  String get communityDetailsClose;
+
+  /// No description provided for @communityChallengeWhy.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Por que funciona'**
+  String get communityChallengeWhy;
+
+  /// No description provided for @communityChallengeDaily.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Todo dia'**
+  String get communityChallengeDaily;
+
+  /// No description provided for @communityEnrolledBadge.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Você está neste desafio'**
+  String get communityEnrolledBadge;
+
+  /// No description provided for @communityStartToday.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Começar hoje'**
+  String get communityStartToday;
+
+  /// No description provided for @communityChallengeLeave.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Sair do desafio'**
+  String get communityChallengeLeave;
+
+  /// No description provided for @communityStepName.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'1 · Nome do grupo'**
+  String get communityStepName;
+
+  /// No description provided for @communityStepInvite.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'2 · Quem você quer chamar (e-mail)'**
+  String get communityStepInvite;
+
+  /// No description provided for @communityCodeIntro.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Recebeu um convite? Digite o código do grupo (ele vem no link ou na mensagem de quem te chamou).'**
+  String get communityCodeIntro;
+
+  /// No description provided for @communityCodeHint.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'BYND-0000'**
+  String get communityCodeHint;
+
+  /// No description provided for @communityCodeGo.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Entrar no grupo'**
+  String get communityCodeGo;
+
+  /// No description provided for @communityCodeSoon.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Entrar por código chega em breve.'**
+  String get communityCodeSoon;
+
+  /// No description provided for @communityAjustesTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Grupo'**
+  String get communityAjustesTitle;
+
+  /// No description provided for @communityAjustesInvite.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'+ Convidar'**
+  String get communityAjustesInvite;
+
+  /// No description provided for @communityPlacarTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Placar'**
+  String get communityPlacarTitle;
+
+  /// No description provided for @communityRoleAdmin.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'admin'**
+  String get communityRoleAdmin;
+
+  /// No description provided for @communityNotifTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Avisos'**
+  String get communityNotifTitle;
+
+  /// No description provided for @communityNotifMessages.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Mensagens'**
+  String get communityNotifMessages;
+
+  /// No description provided for @communityLeaveDoubleTap.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Toque de novo para sair'**
+  String get communityLeaveDoubleTap;
+
+  /// No description provided for @communityInviteTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Convidar para o grupo'**
+  String get communityInviteTitle;
+
+  /// No description provided for @communityInviteEmailHint.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'nome@exemplo.com'**
+  String get communityInviteEmailHint;
+
+  /// No description provided for @communityInviteSend.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Enviar'**
+  String get communityInviteSend;
+
+  /// No description provided for @communityInviteSuccess.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Convite enviado.'**
+  String get communityInviteSuccess;
+
+  /// No description provided for @communityMembersTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Pessoas · {count}'**
+  String communityMembersTitle(Object count);
+
+  /// No description provided for @communityLeaveGroup.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Sair do grupo'**
+  String get communityLeaveGroup;
+
+  /// No description provided for @communityGoalsTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Objetivos'**
+  String get communityGoalsTitle;
+
+  /// No description provided for @communityNoGoals.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Nenhum objetivo neste grupo ainda.'**
+  String get communityNoGoals;
+
+  /// No description provided for @communityCreateIntro.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Um grupo é para fazer desafios juntos, comparar os números do objetivo e conversar.'**
+  String get communityCreateIntro;
+
+  /// No description provided for @communityGroupName.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Nome do grupo'**
+  String get communityGroupName;
+
+  /// No description provided for @communityGroupNameHint.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Ex.: Corrida das 6h, Família, Trabalho'**
+  String get communityGroupNameHint;
+
+  /// No description provided for @communityGroupDescription.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Descrição'**
+  String get communityGroupDescription;
+
+  /// No description provided for @communityGroupDescriptionHint.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Sobre o que é o grupo?'**
+  String get communityGroupDescriptionHint;
+
+  /// No description provided for @communityInviteEmails.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Quem você quer chamar'**
+  String get communityInviteEmails;
+
+  /// No description provided for @communityInviteEmailsHint.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'e-mails separados por vírgula'**
+  String get communityInviteEmailsHint;
+
+  /// No description provided for @communityGroupCreate.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Criar grupo'**
+  String get communityGroupCreate;
+
+  /// No description provided for @communityCreating.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Criando...'**
+  String get communityCreating;
+
+  /// No description provided for @communityGroupCreated.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Grupo criado · {count} convite(s) enviado(s).'**
+  String communityGroupCreated(Object count);
+
+  /// No description provided for @communityCreateNote.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Pode criar sem ninguém: depois de criar, você chama mais gente nos ajustes do grupo.'**
+  String get communityCreateNote;
 }
 
 class _AppLocalizationsDelegate

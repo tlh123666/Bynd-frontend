@@ -875,4 +875,205 @@ class AppLocalizationsEn extends AppLocalizations {
   String communityInvitationFrom(Object group, Object inviter) {
     return '$inviter invited you to \"$group\"';
   }
+
+  @override
+  String get communityNewCover => 'Create a group\nor join with a code';
+
+  @override
+  String communityInviteFromShort(Object name) {
+    return 'invite from $name';
+  }
+
+  @override
+  String communityRankBadge(Object rank, Object total) {
+    return '$rank of $total in the challenge';
+  }
+
+  @override
+  String get communityParaHoje => 'For today';
+
+  @override
+  String get communityPickChallenge => 'Choose a challenge';
+
+  @override
+  String get communityPickChallengeSub => 'alone or with your group';
+
+  @override
+  String communityDayOfTotal(Object day, Object total) {
+    return 'day $day of $total';
+  }
+
+  @override
+  String get communityMuralToday => 'In the group today';
+
+  @override
+  String get communityMuralYesterday => 'In the group yesterday';
+
+  @override
+  String get communityMuralIntro => 'Newest first. Tap \"Cheer\" to support.';
+
+  @override
+  String get communityNoCheckinsToday =>
+      'No check-ins today yet. Whoever posts one shows up here.';
+
+  @override
+  String get communityNoCheckinsYesterday => 'No check-ins yesterday.';
+
+  @override
+  String get communityAtlasKicker => 'ATLAS · GROUP SUMMARY';
+
+  @override
+  String get communityCheer => 'Cheer';
+
+  @override
+  String get communityCheerSoon => 'Cheering is coming soon.';
+
+  @override
+  String get communityRespond => 'Reply';
+
+  @override
+  String get communityOpenGroupChat => 'Open the group chat';
+
+  @override
+  String get communityCheckinText => '✓ Today\'s check-in';
+
+  @override
+  String get communityNewTitle => 'New';
+
+  @override
+  String get communityTabChallenges => 'Challenges';
+
+  @override
+  String get communityTabCreateGroup => 'Create group';
+
+  @override
+  String get communityTabCode => 'Code';
+
+  @override
+  String get communityChallengesIntro =>
+      'Challenges created by BYND with specialists. Do it alone or bring it to your group.';
+
+  @override
+  String get communityDetailsOpen => 'View details';
+
+  @override
+  String get communityDetailsClose => 'Close';
+
+  @override
+  String get communityChallengeWhy => 'Why it works';
+
+  @override
+  String get communityChallengeDaily => 'Every day';
+
+  @override
+  String get communityEnrolledBadge => 'You are in this challenge';
+
+  @override
+  String get communityStartToday => 'Start today';
+
+  @override
+  String get communityChallengeLeave => 'Leave challenge';
+
+  @override
+  String get communityStepName => '1 · Group name';
+
+  @override
+  String get communityStepInvite => '2 · Who to invite (email)';
+
+  @override
+  String get communityCodeIntro =>
+      'Received an invitation? Type the group code (it comes in the link or message).';
+
+  @override
+  String get communityCodeHint => 'BYND-0000';
+
+  @override
+  String get communityCodeGo => 'Join group';
+
+  @override
+  String get communityCodeSoon => 'Joining by code is coming soon.';
+
+  @override
+  String get communityAjustesTitle => 'Group';
+
+  @override
+  String get communityAjustesInvite => '+ Invite';
+
+  @override
+  String get communityPlacarTitle => 'Leaderboard';
+
+  @override
+  String get communityRoleAdmin => 'admin';
+
+  @override
+  String get communityNotifTitle => 'Notifications';
+
+  @override
+  String get communityNotifMessages => 'Messages';
+
+  @override
+  String get communityLeaveDoubleTap => 'Tap again to leave';
+
+  @override
+  String get communityInviteTitle => 'Invite to the group';
+
+  @override
+  String get communityInviteEmailHint => 'name@example.com';
+
+  @override
+  String get communityInviteSend => 'Send';
+
+  @override
+  String get communityInviteSuccess => 'Invitation sent.';
+
+  @override
+  String communityMembersTitle(Object count) {
+    return 'Members · $count';
+  }
+
+  @override
+  String get communityLeaveGroup => 'Leave group';
+
+  @override
+  String get communityGoalsTitle => 'Goals';
+
+  @override
+  String get communityNoGoals => 'No goals yet in this group.';
+
+  @override
+  String get communityCreateIntro =>
+      'A group is for doing challenges together, comparing the numbers of the goal and chatting.';
+
+  @override
+  String get communityGroupName => 'Group name';
+
+  @override
+  String get communityGroupNameHint => 'e.g. 6am run, Family, Work';
+
+  @override
+  String get communityGroupDescription => 'Description';
+
+  @override
+  String get communityGroupDescriptionHint => 'What is this group about?';
+
+  @override
+  String get communityInviteEmails => 'Who to invite';
+
+  @override
+  String get communityInviteEmailsHint => 'emails separated by commas';
+
+  @override
+  String get communityGroupCreate => 'Create group';
+
+  @override
+  String get communityCreating => 'Creating...';
+
+  @override
+  String communityGroupCreated(Object count) {
+    return 'Group created · $count invitation(s) sent.';
+  }
+
+  @override
+  String get communityCreateNote =>
+      'You can create it alone: right after, you can invite more people in the group settings.';
 }

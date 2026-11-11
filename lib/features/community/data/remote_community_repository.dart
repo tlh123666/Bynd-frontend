@@ -59,6 +59,17 @@ class RemoteCommunityRepository {
   Future<void> leaveGroup(String groupId) =>
       _call('DELETE', ApiEndpoints.communityGroupMembership(groupId));
 
+  /// 群消息静音开关（原型的「Avisos」）。
+  Future<void> updateNotificationSettings(
+    String groupId, {
+    required bool muted,
+  }) =>
+      _call(
+        'PATCH',
+        ApiEndpoints.communityGroupNotificationSettings(groupId),
+        body: {'muted': muted},
+      );
+
   Future<void> inviteMember(String groupId, String email) => _call(
     'POST',
     ApiEndpoints.communityGroupInvitations(groupId),
@@ -160,9 +171,10 @@ class RemoteCommunityRepository {
   }
 
   /// 群目标列表（排名的 goalId 从这里来）。
-  Future<List<Map<String, dynamic>>> groupGoals(String groupId) async {
+  Future<List<CommunityGoal>> groupGoals(String groupId) async {
     final data = await _call('GET', ApiEndpoints.communityGroupGoals(groupId));
     return (data['items'] as List<Object?>? ?? const [])
-        .cast<Map<String, dynamic>>();
+        .map((e) => CommunityGoal.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 }

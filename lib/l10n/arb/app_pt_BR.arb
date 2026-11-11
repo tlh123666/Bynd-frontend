@@ -330,5 +330,94 @@
       "inviter": {},
       "group": {}
     }
-  }
+  },
+  "communityNewCover": "Criar grupo\nou entrar com código",
+  "communityInviteFromShort": "convite de {name}",
+  "@@communityInviteFromShort": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "communityRankBadge": "{rank}º no desafio de {total}",
+  "@@communityRankBadge": {
+    "placeholders": {
+      "rank": {},
+      "total": {}
+    }
+  },
+  "communityParaHoje": "Para hoje",
+  "communityPickChallenge": "Escolher um desafio",
+  "communityPickChallengeSub": "sozinho ou com o seu grupo",
+  "communityDayOfTotal": "dia {day} de {total}",
+  "@@communityDayOfTotal": {
+    "placeholders": {
+      "day": {},
+      "total": {}
+    }
+  },
+  "communityMuralToday": "No grupo hoje",
+  "communityMuralYesterday": "No grupo ontem",
+  "communityMuralIntro": "Do mais novo para o mais antigo. Toque em \"Dar força\" para apoiar.",
+  "communityNoCheckinsToday": "Nenhum check-in hoje ainda. Quem fizer aparece aqui.",
+  "communityNoCheckinsYesterday": "Nenhum check-in ontem.",
+  "communityAtlasKicker": "ATLAS · RESUMO DO GRUPO",
+  "communityCheer": "Dar força",
+  "communityCheerSoon": "Dar força chega em breve.",
+  "communityRespond": "Responder",
+  "communityOpenGroupChat": "Abrir a conversa do grupo",
+  "communityCheckinText": "✓ Check-in de hoje",
+  "communityNewTitle": "Novo",
+  "communityTabChallenges": "Desafios",
+  "communityTabCreateGroup": "Criar grupo",
+  "communityTabCode": "Código",
+  "communityChallengesIntro": "Desafios criados pela BYND com especialistas. Faça sozinho ou leve para o seu grupo.",
+  "communityDetailsOpen": "Ver detalhes",
+  "communityDetailsClose": "Fechar",
+  "communityChallengeWhy": "Por que funciona",
+  "communityChallengeDaily": "Todo dia",
+  "communityEnrolledBadge": "Você está neste desafio",
+  "communityStartToday": "Começar hoje",
+  "communityChallengeLeave": "Sair do desafio",
+  "communityStepName": "1 · Nome do grupo",
+  "communityStepInvite": "2 · Quem você quer chamar (e-mail)",
+  "communityCodeIntro": "Recebeu um convite? Digite o código do grupo (ele vem no link ou na mensagem de quem te chamou).",
+  "communityCodeHint": "BYND-0000",
+  "communityCodeGo": "Entrar no grupo",
+  "communityCodeSoon": "Entrar por código chega em breve.",
+  "communityAjustesTitle": "Grupo",
+  "communityAjustesInvite": "+ Convidar",
+  "communityPlacarTitle": "Placar",
+  "communityRoleAdmin": "admin",
+  "communityNotifTitle": "Avisos",
+  "communityNotifMessages": "Mensagens",
+  "communityLeaveDoubleTap": "Toque de novo para sair",
+  "communityInviteTitle": "Convidar para o grupo",
+  "communityInviteEmailHint": "nome@exemplo.com",
+  "communityInviteSend": "Enviar",
+  "communityInviteSuccess": "Convite enviado.",
+  "communityMembersTitle": "Pessoas · {count}",
+  "@@communityMembersTitle": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "communityLeaveGroup": "Sair do grupo",
+  "communityGoalsTitle": "Objetivos",
+  "communityNoGoals": "Nenhum objetivo neste grupo ainda.",
+  "communityCreateIntro": "Um grupo é para fazer desafios juntos, comparar os números do objetivo e conversar.",
+  "communityGroupName": "Nome do grupo",
+  "communityGroupNameHint": "Ex.: Corrida das 6h, Família, Trabalho",
+  "communityGroupDescription": "Descrição",
+  "communityGroupDescriptionHint": "Sobre o que é o grupo?",
+  "communityInviteEmails": "Quem você quer chamar",
+  "communityInviteEmailsHint": "e-mails separados por vírgula",
+  "communityGroupCreate": "Criar grupo",
+  "communityCreating": "Criando...",
+  "communityGroupCreated": "Grupo criado · {count} convite(s) enviado(s).",
+  "@@communityGroupCreated": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "communityCreateNote": "Pode criar sem ninguém: depois de criar, você chama mais gente nos ajustes do grupo."
 }
