@@ -154,13 +154,98 @@ class AppLocalizationsEn extends AppLocalizations {
       'Data integration and load calculation are not available yet.';
 
   @override
+  String get activityTargetStatus => 'BELOW TARGET';
+
+  @override
+  String get activityTargetTitle => 'You\'re close to your target.';
+
+  @override
+  String get activityTargetDescription =>
+      'Today: strength training, 35 min, load 28. With recovery at 57, today\'s target is 35–55: 7 points to go. A light 20–30 minute walk should get you there. Tomorrow\'s estimated recovery: around 66.';
+
+  @override
+  String get activityMetricActiveCalories => 'Active calories';
+
+  @override
+  String get activityMetricActiveMinutes => 'Active minutes';
+
+  @override
+  String get activityMetricSteps => 'Steps';
+
+  @override
+  String get activityMetricRestingTime => 'Resting time';
+
+  @override
+  String get activityMetricAbove25 => '↑ 25% above';
+
+  @override
+  String get activityMetricAbove28 => '↑ 28% above';
+
+  @override
+  String get activityMetricWithinNormal => 'within normal range';
+
+  @override
+  String get activityMetricNormalCalories => 'normal 256–383 kcal';
+
+  @override
+  String get activityMetricNormalMinutes => 'normal 35–53 min';
+
+  @override
+  String get activityMetricNormalSteps => 'normal 3,904–5,856';
+
+  @override
+  String get activityMetricNormalRest => 'normal 3h32–5h18';
+
+  @override
+  String get activityDemoStrength => 'Strength training';
+
+  @override
+  String get activityDemoRun => 'Running';
+
+  @override
+  String get activityDemoWalk => 'Walking';
+
+  @override
+  String get activityDemoSetsAndWeight => 'sets and weight';
+
+  @override
+  String get activityDemoWithGps => 'with GPS';
+
+  @override
+  String activityDemoSummary(int count, int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count workouts',
+      one: '$count workout',
+    );
+    return '$_temp0 · $minutes min total';
+  }
+
+  @override
+  String get activityDemoLoadLabel => 'load';
+
+  @override
+  String get activityDemoLabel =>
+      'Illustrative demo data · not synced from a device';
+
+  @override
+  String get activityDemoStepsValue => '6,240';
+
+  @override
+  String get activityDemoRestingTimeValue => '4h44';
+
+  @override
   String get dayInNumbers => 'Your day in numbers';
 
   @override
   String get dailyMetricsUnavailable => 'Daily metrics are not integrated yet.';
 
   @override
-  String get modalities => 'Activities';
+  String get modalities => 'Modalities';
+
+  @override
+  String get viewAll => 'View all';
 
   @override
   String get recentModalitiesUnavailable =>

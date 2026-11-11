@@ -76,6 +76,13 @@ void main() {
       findsOneWidget,
     );
     await tester.tap(find.text('Idioma'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 60));
+    final scrimOpacity = tester
+        .widget<FadeTransition>(find.byKey(const Key('frosted-modal-scrim')))
+        .opacity
+        .value;
+    expect(scrimOpacity, greaterThan(.6));
     await tester.pumpAndSettle();
 
     expect(find.byType(AppFrostedModalSheet), findsOneWidget);
@@ -106,6 +113,38 @@ void main() {
     );
   });
 
+  testWidgets('磨砂弹窗使用较短的收起时长', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) => Scaffold(
+            body: Center(
+              child: TextButton(
+                onPressed: () => AppFrostedModalSheet.show<void>(
+                  context,
+                  builder: (_) => const SizedBox(
+                    height: 120,
+                    child: Center(child: Text('Sheet content')),
+                  ),
+                ),
+                child: const Text('Open sheet'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open sheet'));
+    await tester.pumpAndSettle();
+    expect(find.byType(AppFrostedModalSheet), findsOneWidget);
+
+    await tester.tapAt(const Offset(10, 10));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 230));
+    expect(find.byType(AppFrostedModalSheet), findsNothing);
+  });
+
   testWidgets('英文模式下活动入口和运动目录完整使用英文文案', (tester) async {
     SharedPreferences.setMockInitialValues({'bynd_locale': 'en'});
     tester.view.physicalSize = const Size(390, 844);
@@ -123,14 +162,23 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Quick actions'));
+    await tester.tap(find.bySemanticsLabel('Quick actions'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Start\nactivity'));
     await tester.pumpAndSettle();
 
+    expect(find.text('BELOW TARGET'), findsOneWidget);
+    expect(find.text("You're close to your target."), findsOneWidget);
+    expect(
+      find.text('Illustrative demo data · not synced from a device'),
+      findsOneWidget,
+    );
+    expect(find.text('Modalities'), findsOneWidget);
+    expect(find.textContaining('6,240'), findsOneWidget);
     expect(find.text('Search 140 activities'), findsOneWidget);
     expect(find.text('RECENT'), findsOneWidget);
     expect(find.text('Running'), findsWidgets);
-    expect(find.text('Strength training'), findsOneWidget);
+    // 该名称也会出现在活动页的静态演示区域中。
+    expect(find.text('Strength training'), findsWidgets);
   });
 }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../tokens/app_colors.dart';
 import '../tokens/app_dimensions.dart';
+import '../tokens/app_motion.dart';
 import 'app_icon.dart';
 import 'app_quick_actions_button.dart';
 import '../../l10n/app_localizations_context.dart';
@@ -71,39 +72,57 @@ class AppBottomNav extends StatelessWidget {
                           borderRadius: AppRadii.pillBorder,
                           border: Border.fromBorderSide(AppBorders.nav),
                         ),
-                        child: Row(
-                          children: List.generate(_icons.length, (index) {
-                            final selected = selectedIndex == index;
-                            return Expanded(
-                              child: Tooltip(
-                                message: labels[index],
-                                child: Semantics(
-                                  label: labels[index],
-                                  selected: selected,
-                                  button: true,
-                                  child: Material(
-                                    color: selected
-                                        ? AppColors.navSelected
-                                        : Colors.transparent,
-                                    borderRadius: AppRadii.pillBorder,
-                                    child: InkWell(
-                                      onTap: () => onDestinationSelected(index),
-                                      borderRadius: AppRadii.pillBorder,
-                                      child: Center(
-                                        child: AppSvgIcon(
-                                          _icons[index],
-                                          size: 26,
-                                          color: selected
-                                              ? AppColors.textPrimary
-                                              : AppColors.menuIcon,
-                                        ),
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            final itemWidth =
+                                constraints.maxWidth / _icons.length;
+                            return Stack(
+                              children: [
+                                // 共用选中胶囊按活动标签序号横向滑动；详情页无选中项时不显示。
+                                if (selectedIndex != null)
+                                  AnimatedPositioned(
+                                    key: const Key(
+                                      'bottom-nav-active-indicator',
+                                    ),
+                                    duration: AppMotion.enabled(context)
+                                        ? const Duration(milliseconds: 450)
+                                        : Duration.zero,
+                                    curve: const Cubic(.32, .72, 0, 1),
+                                    left: itemWidth * selectedIndex!,
+                                    top: 2,
+                                    width: itemWidth,
+                                    height: 46,
+                                    child: DecoratedBox(
+                                      decoration: BoxDecoration(
+                                        color: AppColors.navSelected,
+                                        borderRadius: AppRadii.pillBorder,
                                       ),
                                     ),
                                   ),
+                                Row(
+                                  children: List.generate(_icons.length, (
+                                    index,
+                                  ) {
+                                    final selected = selectedIndex == index;
+                                    return Expanded(
+                                      child: Semantics(
+                                        label: labels[index],
+                                        selected: selected,
+                                        button: true,
+                                        child: _BottomNavDestination(
+                                          label: labels[index],
+                                          selected: selected,
+                                          icon: _icons[index],
+                                          onTap: () =>
+                                              onDestinationSelected(index),
+                                        ),
+                                      ),
+                                    );
+                                  }),
                                 ),
-                              ),
+                              ],
                             );
-                          }),
+                          },
                         ),
                       ),
                     ),
@@ -123,6 +142,85 @@ class AppBottomNav extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 单个导航入口只负责触控压感，选中胶囊仍由外层统一滑动。
+class _BottomNavDestination extends StatefulWidget {
+  const _BottomNavDestination({
+    required this.label,
+    required this.selected,
+    required this.icon,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final String icon;
+  final VoidCallback onTap;
+
+  @override
+  State<_BottomNavDestination> createState() => _BottomNavDestinationState();
+}
+
+class _BottomNavDestinationState extends State<_BottomNavDestination> {
+  bool _pressed = false;
+  int? _activePointer;
+
+  void _handlePointerDown(PointerDownEvent event) {
+    // 忽略鼠标右键和额外触点，避免非主操作意外触发压感。
+    if (event.buttons != 1 || _activePointer != null) return;
+    _activePointer = event.pointer;
+    setState(() => _pressed = true);
+  }
+
+  void _handlePointerEnd(PointerEvent event) {
+    if (_activePointer != event.pointer) return;
+    _activePointer = null;
+    setState(() => _pressed = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final motionEnabled = AppMotion.enabled(context);
+    return Material(
+      color: Colors.transparent,
+      borderRadius: AppRadii.pillBorder,
+      child: Listener(
+        onPointerDown: _handlePointerDown,
+        onPointerUp: _handlePointerEnd,
+        onPointerCancel: _handlePointerEnd,
+        child: InkWell(
+          onTap: widget.onTap,
+          // 原型没有 Material 水波纹；避免它与滑动选中胶囊叠成双重亮圈。
+          splashFactory: NoSplash.splashFactory,
+          overlayColor: const WidgetStatePropertyAll(Colors.transparent),
+          borderRadius: AppRadii.pillBorder,
+          child: AnimatedScale(
+            scale: motionEnabled && _pressed ? .97 : 1,
+            duration: motionEnabled
+                ? (_pressed ? AppMotion.touchPress : AppMotion.touchRelease)
+                : Duration.zero,
+            curve: _pressed ? AppMotion.touchPressCurve : Curves.easeOutBack,
+            child: AnimatedOpacity(
+              // 原型在减少动态效果时用轻微淡化代替缩放。
+              opacity: !motionEnabled && _pressed ? .6 : 1,
+              duration: motionEnabled ? Duration.zero : AppMotion.touchPress,
+              curve: Curves.easeOut,
+              child: Center(
+                child: AppSvgIcon(
+                  widget.icon,
+                  size: 26,
+                  color: widget.selected
+                      ? AppColors.textPrimary
+                      : AppColors.menuIcon,
+                ),
+              ),
             ),
           ),
         ),
