@@ -30,11 +30,14 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _handleQuickAction(AppQuickAction action) async {
     setState(() => _quickActionsOpen = false);
     if (action == AppQuickAction.startActivity) {
-      await Navigator.of(context).push<void>(
-        MaterialPageRoute<void>(
+      final selectedIndex = await Navigator.of(context).push<int>(
+        MaterialPageRoute<int>(
           builder: (_) => const ActivityOverviewPage(openSelectorOnEnter: true),
         ),
       );
+      if (mounted && selectedIndex != null) {
+        Navigator.of(context).pop(selectedIndex);
+      }
       return;
     }
     if (action == AppQuickAction.dayReview || action == AppQuickAction.meal) {

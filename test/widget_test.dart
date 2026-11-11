@@ -45,13 +45,57 @@ void main() {
       0,
     );
 
-    await tester.tap(find.byTooltip('Comunidade'));
+    await tester.tap(find.bySemanticsLabel('Comunidade'));
     await tester.pump();
+    final indicator = find.byKey(const Key('bottom-nav-active-indicator'));
+    final startingX = tester.getTopLeft(indicator).dx;
+    await tester.pump(const Duration(milliseconds: 225));
+    final movingX = tester.getTopLeft(indicator).dx;
+    expect(movingX, greaterThan(startingX));
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(indicator).dx, greaterThan(movingX));
 
     expect(
       tester.widget<AppBottomNav>(find.byType(AppBottomNav)).selectedIndex,
       2,
     );
+  });
+
+  testWidgets('底部导航按压有轻微压感且不叠加水波纹', (tester) async {
+    await tester.pumpWidget(
+      ByndApp(
+        config: AppConfig.resolve(
+          defines: const {'MAPA_USE_DEMO_DATA': 'true'},
+        ),
+      ),
+    );
+
+    final destination = find.bySemanticsLabel('Saúde');
+    final scaleFinder = find.descendant(
+      of: destination,
+      matching: find.byType(AnimatedScale),
+    );
+    final inkWellFinder = find.descendant(
+      of: destination,
+      matching: find.byType(InkWell),
+    );
+    expect(scaleFinder, findsOneWidget);
+    expect(inkWellFinder, findsOneWidget);
+    expect(
+      tester.widget<InkWell>(inkWellFinder).splashFactory,
+      NoSplash.splashFactory,
+    );
+
+    final gesture = await tester.startGesture(tester.getCenter(destination));
+    await tester.pump();
+    await tester.pump(AppMotion.touchPress ~/ 2);
+    final pressedScale = tester.widget<AnimatedScale>(scaleFinder).scale;
+    expect(pressedScale, lessThan(1));
+    expect(pressedScale, greaterThanOrEqualTo(.97));
+
+    await gesture.up();
+    await tester.pump(AppMotion.touchRelease);
+    expect(tester.widget<AnimatedScale>(scaleFinder).scale, 1);
   });
 
   testWidgets('更多按钮展开六项快捷导航并可关闭', (tester) async {
@@ -63,7 +107,7 @@ void main() {
       ),
     );
 
-    await tester.tap(find.byTooltip('Ações rápidas'));
+    await tester.tap(find.bySemanticsLabel('Ações rápidas'));
     await tester.pump();
 
     expect(find.byType(AppQuickActionsOverlay), findsOneWidget);
@@ -164,7 +208,7 @@ void main() {
         ),
       ),
     );
-    await tester.tap(find.byTooltip('Ações rápidas'));
+    await tester.tap(find.bySemanticsLabel('Ações rápidas'));
     await tester.pumpAndSettle();
 
     await tester.tap(find.text(AppQuickAction.breathe.label));
@@ -184,7 +228,7 @@ void main() {
         ),
       ),
     );
-    await tester.tap(find.byTooltip('Ações rápidas'));
+    await tester.tap(find.bySemanticsLabel('Ações rápidas'));
     await tester.pumpAndSettle();
 
     await tester.binding.handlePopRoute();

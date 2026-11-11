@@ -58,23 +58,20 @@ class AppQuickActionsButton extends StatelessWidget {
       ),
     );
 
-    return Tooltip(
-      message: label,
-      child: Semantics(
-        label: label,
-        button: true,
-        child: isOpen
-            ? button
-            : ClipOval(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(
-                    sigmaX: AppSizes.glassBlur,
-                    sigmaY: AppSizes.glassBlur,
-                  ),
-                  child: button,
+    return Semantics(
+      label: label,
+      button: true,
+      child: isOpen
+          ? button
+          : ClipOval(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(
+                  sigmaX: AppSizes.glassBlur,
+                  sigmaY: AppSizes.glassBlur,
                 ),
+                child: button,
               ),
-      ),
+            ),
     );
   }
 }

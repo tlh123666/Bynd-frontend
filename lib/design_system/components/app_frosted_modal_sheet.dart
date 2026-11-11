@@ -37,71 +37,81 @@ class AppFrostedModalSheet extends StatelessWidget {
         : Duration.zero;
     final maxHeightFactor = isScrollControlled ? maxHeightFraction : .5;
 
-    return showGeneralDialog<T>(
-      context: context,
-      useRootNavigator: false,
-      barrierDismissible: true,
-      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-      barrierColor: Colors.transparent,
-      transitionDuration: duration,
-      pageBuilder: (sheetContext, _, _) {
-        final size = MediaQuery.sizeOf(sheetContext);
-        final bottomInset = MediaQuery.viewInsetsOf(sheetContext).bottom;
-        return _ModalSheetDragController(
-          enabled: enableDrag,
-          motionEnabled: motionEnabled,
-          child: Padding(
-            padding: EdgeInsets.only(bottom: bottomInset),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight: size.height * maxHeightFactor,
-              ),
-              child: SizedBox(
-                width: double.infinity,
-                child: AppFrostedModalSheet(
-                  showHandle: showHandle,
-                  useSafeArea: useSafeArea,
-                  child: builder(sheetContext),
+    return Navigator.of(context, rootNavigator: false).push<T>(
+      _FrostedModalRoute<T>(
+        barrierLabel: MaterialLocalizations.of(
+          context,
+        ).modalBarrierDismissLabel,
+        transitionDuration: duration,
+        reverseTransitionDuration: motionEnabled
+            ? const Duration(milliseconds: 220)
+            : Duration.zero,
+        pageBuilder: (sheetContext, _, _) {
+          final size = MediaQuery.sizeOf(sheetContext);
+          final bottomInset = MediaQuery.viewInsetsOf(sheetContext).bottom;
+          return _ModalSheetDragController(
+            enabled: enableDrag,
+            motionEnabled: motionEnabled,
+            child: Padding(
+              padding: EdgeInsets.only(bottom: bottomInset),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: size.height * maxHeightFactor,
                 ),
-              ),
-            ),
-          ),
-        );
-      },
-      transitionBuilder: (dialogContext, animation, _, child) {
-        final curvedAnimation = CurvedAnimation(
-          parent: animation,
-          curve: const Cubic(.32, .72, 0, 1),
-          reverseCurve: const Cubic(.32, .72, 0, 1),
-        );
-        return Stack(
-          children: [
-            Positioned.fill(
-              child: FadeTransition(
-                opacity: animation,
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () => Navigator.of(dialogContext).pop(),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
-                    child: ColoredBox(color: barrierColor),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: AppFrostedModalSheet(
+                    showHandle: showHandle,
+                    useSafeArea: useSafeArea,
+                    child: builder(sheetContext),
                   ),
                 ),
               ),
             ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(0, 1),
-                  end: Offset.zero,
-                ).animate(curvedAnimation),
-                child: child,
+          );
+        },
+        transitionBuilder: (dialogContext, animation, _, child) {
+          final curvedAnimation = CurvedAnimation(
+            parent: animation,
+            curve: const Cubic(.32, .72, 0, 1),
+            reverseCurve: Curves.easeInCubic,
+          );
+          // 遮罩先于面板完成淡入，关闭时也随面板快速淡出。
+          final backdropAnimation = CurvedAnimation(
+            parent: animation,
+            curve: const Interval(0, .28, curve: Curves.easeOut),
+            reverseCurve: Curves.easeInCubic,
+          );
+          return Stack(
+            children: [
+              Positioned.fill(
+                child: FadeTransition(
+                  key: const Key('frosted-modal-scrim'),
+                  opacity: backdropAnimation,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => Navigator.of(dialogContext).pop(),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+                      child: ColoredBox(color: barrierColor),
+                    ),
+                  ),
+                ),
               ),
-            ),
-          ],
-        );
-      },
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, 1),
+                    end: Offset.zero,
+                  ).animate(curvedAnimation),
+                  child: child,
+                ),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 
@@ -140,6 +150,20 @@ class AppFrostedModalSheet extends StatelessWidget {
       ),
     );
   }
+}
+
+/// 为弹窗的打开和关闭动画分别设置时长。
+class _FrostedModalRoute<T> extends RawDialogRoute<T> {
+  _FrostedModalRoute({
+    required super.pageBuilder,
+    required super.transitionBuilder,
+    required super.barrierLabel,
+    required super.transitionDuration,
+    required this.reverseTransitionDuration,
+  }) : super(barrierDismissible: true, barrierColor: Colors.transparent);
+
+  @override
+  final Duration reverseTransitionDuration;
 }
 
 /// 让内容高度保持自适应，同时支持向下拖动关闭。

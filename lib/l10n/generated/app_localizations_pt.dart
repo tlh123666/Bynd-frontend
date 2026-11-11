@@ -155,6 +155,88 @@ class AppLocalizationsPt extends AppLocalizations {
       'A integração de dados e o cálculo da carga ainda não estão disponíveis.';
 
   @override
+  String get activityTargetStatus => 'ABAIXO DO ALVO';
+
+  @override
+  String get activityTargetTitle => 'Falta pouco para o alvo.';
+
+  @override
+  String get activityTargetDescription =>
+      'Hoje: musculação, 35 min, carga 28. Com recuperação em 57, a meta do dia é 35–55: faltam 7. Uma caminhada leve de 20 a 30 minutos deve completar a meta. Estimativa de recuperação para amanhã: perto de 66.';
+
+  @override
+  String get activityMetricActiveCalories => 'Calorias ativas';
+
+  @override
+  String get activityMetricActiveMinutes => 'Minutos ativos';
+
+  @override
+  String get activityMetricSteps => 'Passos';
+
+  @override
+  String get activityMetricRestingTime => 'Tempo parado';
+
+  @override
+  String get activityMetricAbove25 => '↑ 25% acima';
+
+  @override
+  String get activityMetricAbove28 => '↑ 28% acima';
+
+  @override
+  String get activityMetricWithinNormal => 'dentro do normal';
+
+  @override
+  String get activityMetricNormalCalories => 'normal 256–383 kcal';
+
+  @override
+  String get activityMetricNormalMinutes => 'normal 35–53 min';
+
+  @override
+  String get activityMetricNormalSteps => 'normal 3.904–5.856';
+
+  @override
+  String get activityMetricNormalRest => 'normal 3h32–5h18';
+
+  @override
+  String get activityDemoStrength => 'Musculação';
+
+  @override
+  String get activityDemoRun => 'Corrida';
+
+  @override
+  String get activityDemoWalk => 'Caminhada';
+
+  @override
+  String get activityDemoSetsAndWeight => 'séries e peso';
+
+  @override
+  String get activityDemoWithGps => 'com GPS';
+
+  @override
+  String activityDemoSummary(int count, int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count treinos',
+      one: '$count treino',
+    );
+    return '$_temp0 · $minutes min no total';
+  }
+
+  @override
+  String get activityDemoLoadLabel => 'carga';
+
+  @override
+  String get activityDemoLabel =>
+      'Dados ilustrativos de demonstração · não sincronizados';
+
+  @override
+  String get activityDemoStepsValue => '6.240';
+
+  @override
+  String get activityDemoRestingTimeValue => '4h44';
+
+  @override
   String get dayInNumbers => 'O dia em números';
 
   @override
@@ -163,6 +245,9 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get modalities => 'Modalidades';
+
+  @override
+  String get viewAll => 'Ver todas';
 
   @override
   String get recentModalitiesUnavailable =>
@@ -1242,6 +1327,88 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
       'A integração de dados e o cálculo da carga ainda não estão disponíveis.';
 
   @override
+  String get activityTargetStatus => 'ABAIXO DO ALVO';
+
+  @override
+  String get activityTargetTitle => 'Falta pouco para o alvo.';
+
+  @override
+  String get activityTargetDescription =>
+      'Hoje: musculação, 35 min, carga 28. Com recuperação em 57, a meta do dia é 35–55: faltam 7. Uma caminhada leve de 20 a 30 minutos deve completar a meta. Estimativa de recuperação para amanhã: perto de 66.';
+
+  @override
+  String get activityMetricActiveCalories => 'Calorias ativas';
+
+  @override
+  String get activityMetricActiveMinutes => 'Minutos ativos';
+
+  @override
+  String get activityMetricSteps => 'Passos';
+
+  @override
+  String get activityMetricRestingTime => 'Tempo parado';
+
+  @override
+  String get activityMetricAbove25 => '↑ 25% acima';
+
+  @override
+  String get activityMetricAbove28 => '↑ 28% acima';
+
+  @override
+  String get activityMetricWithinNormal => 'dentro do normal';
+
+  @override
+  String get activityMetricNormalCalories => 'normal 256–383 kcal';
+
+  @override
+  String get activityMetricNormalMinutes => 'normal 35–53 min';
+
+  @override
+  String get activityMetricNormalSteps => 'normal 3.904–5.856';
+
+  @override
+  String get activityMetricNormalRest => 'normal 3h32–5h18';
+
+  @override
+  String get activityDemoStrength => 'Musculação';
+
+  @override
+  String get activityDemoRun => 'Corrida';
+
+  @override
+  String get activityDemoWalk => 'Caminhada';
+
+  @override
+  String get activityDemoSetsAndWeight => 'séries e peso';
+
+  @override
+  String get activityDemoWithGps => 'com GPS';
+
+  @override
+  String activityDemoSummary(int count, int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count treinos',
+      one: '$count treino',
+    );
+    return '$_temp0 · $minutes min no total';
+  }
+
+  @override
+  String get activityDemoLoadLabel => 'carga';
+
+  @override
+  String get activityDemoLabel =>
+      'Dados ilustrativos de demonstração · não sincronizados';
+
+  @override
+  String get activityDemoStepsValue => '6.240';
+
+  @override
+  String get activityDemoRestingTimeValue => '4h44';
+
+  @override
   String get dayInNumbers => 'O dia em números';
 
   @override
@@ -1250,6 +1417,9 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get modalities => 'Modalidades';
+
+  @override
+  String get viewAll => 'Ver todas';
 
   @override
   String get recentModalitiesUnavailable =>
