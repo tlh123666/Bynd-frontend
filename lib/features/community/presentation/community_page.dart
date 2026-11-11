@@ -34,7 +34,6 @@ class _CommunityPageState extends State<CommunityPage> {
   List<CommunityGroup> _groups = const [];
   List<CommunityInvitation> _invitations = const [];
   List<CuratedChallenge> _mine = const [];
-  final Map<String, List<CommunityMember>> _members = {};
   final Map<String, CommunityRankingEntry?> _myRank = {};
   List<CommunityMessage> _mural = const [];
   List<CommunityAtlasInsight> _atlas = const [];
@@ -63,19 +62,6 @@ class _CommunityPageState extends State<CommunityPage> {
         } catch (_) {
           mine.add(challenge);
         }
-      }
-      // 封面需要的成员头像与「我的名次」，按群补齐；单个失败不影响整页。
-      for (final group in groups) {
-        try {
-          _members[group.id] = await _repo.groupMembers(group.id);
-        } catch (_) {}
-        try {
-          final goals = await _repo.groupGoals(group.id);
-          for (final goal in goals) {
-            final ranking = await _repo.goalRanking(group.id, goal.id);
-            _myRank[group.id] ??= ranking.where((r) => r.isMe).firstOrNull;
-          }
-        } catch (_) {}
       }
       // 群列表会连同「可发现的公开群」一起返回（membershipState =
       // not_joined）。只有 joined 的群才允许读详情/消息，公开未加入的群
