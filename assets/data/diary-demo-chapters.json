@@ -1,0 +1,223 @@
+[
+  {
+    "id": "reference-0",
+    "title": "O começo",
+    "body": "A pulseira aprende quem você é. Em 11 dias a VFC ficou entre 54 e 66 ms. É daí que nasce o seu normal.",
+    "period": "11 set a 21 set · 11 dias",
+    "sections": [
+      [
+        {
+          "label": "VFC média",
+          "note": "",
+          "value": "62ms"
+        },
+        {
+          "label": "Treinos",
+          "note": "",
+          "value": "11"
+        },
+        {
+          "label": "Sono",
+          "note": "",
+          "value": "7h08"
+        }
+      ],
+      [
+        {
+          "label": "Você dorme melhor perto das 23h",
+          "note": "18 set · A BYND aprendeu",
+          "value": ""
+        },
+        {
+          "label": "Dia 1: começou com a pulseira",
+          "note": "11 set · Marco",
+          "value": ""
+        }
+      ]
+    ]
+  },
+  {
+    "id": "reference-1",
+    "title": "O resfriado",
+    "body": "O corpo avisou dois dias antes. A respiração subiu nas noites de 23 e 24/09; a garganta só arranhou em 25/09. Cinco dias sem treino.",
+    "period": "22 set a 29 set · 8 dias",
+    "sections": [
+      [
+        {
+          "label": "Respiração",
+          "note": "",
+          "value": "16,4rpm"
+        },
+        {
+          "label": "Recuperação",
+          "note": "",
+          "value": "43"
+        },
+        {
+          "label": "Sem treino",
+          "note": "",
+          "value": "5dias"
+        }
+      ],
+      [
+        {
+          "label": "Melhor noite",
+          "note": "28 set",
+          "value": "93"
+        }
+      ],
+      [
+        {
+          "label": "Resfriado, visto 2 dias antes",
+          "note": "23 set a 29 set · Evento",
+          "value": ""
+        }
+      ]
+    ]
+  },
+  {
+    "id": "reference-2",
+    "title": "De volta, mais forte",
+    "body": "A melhor fase dos dois meses. A recuperação chegou a 91 em 1 out. Só caiu numa quinta depois do vinho: foi quando a BYND achou esse padrão.",
+    "period": "30 set a 15 out · 16 dias",
+    "sections": [
+      [
+        {
+          "label": "Melhor",
+          "note": "",
+          "value": "91"
+        },
+        {
+          "label": "Corridas",
+          "note": "",
+          "value": "3"
+        },
+        {
+          "label": "Padrão novo",
+          "note": "",
+          "value": "vinho"
+        }
+      ],
+      [
+        {
+          "label": "Melhor recuperação",
+          "note": "1 out",
+          "value": "91"
+        }
+      ],
+      [
+        {
+          "label": "30 dias: a BYND aprendeu o seu normal",
+          "note": "10 out · Marco",
+          "value": ""
+        },
+        {
+          "label": "O vinho de quarta cobra na quinta",
+          "note": "8 out · A BYND aprendeu",
+          "value": ""
+        }
+      ]
+    ]
+  },
+  {
+    "id": "reference-3",
+    "title": "A semana de entrega",
+    "body": "Pouco sono, muito café. Quatro noites depois da meia-noite e 4 cafés por dia. O estresse dobrou e a recuperação caiu para 53.",
+    "period": "16 out a 22 out · 7 dias",
+    "sections": [
+      [
+        {
+          "label": "Sono",
+          "note": "",
+          "value": "5h47"
+        },
+        {
+          "label": "Estresse",
+          "note": "",
+          "value": "72"
+        },
+        {
+          "label": "Recuperação",
+          "note": "",
+          "value": "53"
+        }
+      ],
+      [
+        {
+          "label": "Seu ciclo é regular, de 28 dias",
+          "note": "20 out · A BYND aprendeu",
+          "value": ""
+        },
+        {
+          "label": "Semana de entrega no trabalho",
+          "note": "16 out a 20 out · Evento",
+          "value": ""
+        }
+      ]
+    ]
+  },
+  {
+    "id": "reference-4",
+    "title": "Os 14 km",
+    "body": "Recorde de VFC e a corrida mais longa. A VFC bateu 73 ms em 28 out. Depois vieram três treinos fortes seguidos e os 14 km, e a VFC caiu para 46 na quinta.",
+    "period": "23 out a 5 nov · 14 dias",
+    "sections": [
+      [
+        {
+          "label": "VFC recorde",
+          "note": "",
+          "value": "73ms"
+        },
+        {
+          "label": "Corrida",
+          "note": "",
+          "value": "14km"
+        },
+        {
+          "label": "Treinos",
+          "note": "",
+          "value": "14"
+        }
+      ],
+      [
+        {
+          "label": "VFC recorde",
+          "note": "28 out",
+          "value": "73ms"
+        },
+        {
+          "label": "Corrida mais longa",
+          "note": "4 nov",
+          "value": "14km"
+        },
+        {
+          "label": "Dia mais ativo",
+          "note": "4 nov",
+          "value": "21.950passos"
+        },
+        {
+          "label": "Noites no horário",
+          "note": "1 nov",
+          "value": "4de 8"
+        }
+      ],
+      [
+        {
+          "label": "Três treinos fortes seguidos",
+          "note": "3 nov a 5 nov · Evento",
+          "value": ""
+        },
+        {
+          "label": "Entrou no desafio “Deitar até 23h”",
+          "note": "1 nov · Marco",
+          "value": ""
+        },
+        {
+          "label": "O estresse sobe com o sono curto",
+          "note": "23 out · A BYND aprendeu",
+          "value": ""
+        }
+      ]
+    ]
+  }
+]

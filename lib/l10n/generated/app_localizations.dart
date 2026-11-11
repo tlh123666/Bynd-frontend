@@ -1424,6 +1424,816 @@ abstract class AppLocalizations {
   /// In pt_BR, this message translates to:
   /// **'Sua conta mudou. Feche esta tela e abra novamente para ver os dados atuais.'**
   String get homeAccountChanged;
+
+  /// No description provided for @authWelcome.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'BEM-VINDO À BYND'**
+  String get authWelcome;
+
+  /// No description provided for @authHeadline.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Seu corpo.\nSua direção.'**
+  String get authHeadline;
+
+  /// No description provided for @authSubtitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Entenda seus sinais. Viva no seu ritmo.'**
+  String get authSubtitle;
+
+  /// No description provided for @authEmailContinue.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Continuar com e-mail'**
+  String get authEmailContinue;
+
+  /// No description provided for @authGoogleContinue.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Continuar com Google'**
+  String get authGoogleContinue;
+
+  /// No description provided for @authEmailTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Qual é o seu e-mail?'**
+  String get authEmailTitle;
+
+  /// No description provided for @authEmailBody.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Vamos enviar um código para você entrar. Sem senha.'**
+  String get authEmailBody;
+
+  /// No description provided for @authAccountHint.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'No primeiro acesso, você pode criar sua conta por aqui.'**
+  String get authAccountHint;
+
+  /// No description provided for @authEmailLabel.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'E-mail'**
+  String get authEmailLabel;
+
+  /// No description provided for @authEmailHint.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'voce@exemplo.com'**
+  String get authEmailHint;
+
+  /// No description provided for @authSendCode.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Enviar código'**
+  String get authSendCode;
+
+  /// No description provided for @authCodeTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Confira seu e-mail'**
+  String get authCodeTitle;
+
+  /// No description provided for @authCodeBody.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Enviamos um código de 6 dígitos para {email}.'**
+  String authCodeBody(String email);
+
+  /// No description provided for @authCodeLabel.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Código de verificação'**
+  String get authCodeLabel;
+
+  /// No description provided for @authCodeHint.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'000000'**
+  String get authCodeHint;
+
+  /// No description provided for @authEditEmail.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Alterar e-mail'**
+  String get authEditEmail;
+
+  /// No description provided for @authSignIn.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Entrar'**
+  String get authSignIn;
+
+  /// No description provided for @authCreateAccount.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Criar conta e entrar'**
+  String get authCreateAccount;
+
+  /// No description provided for @authResend.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Reenviar código'**
+  String get authResend;
+
+  /// No description provided for @authResendIn.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Reenviar em {seconds}s'**
+  String authResendIn(int seconds);
+
+  /// No description provided for @authSpamHint.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Não chegou? Confira a caixa de spam ou peça um novo código.'**
+  String get authSpamHint;
+
+  /// No description provided for @authCodeSent.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Código enviado. Confira também a caixa de spam.'**
+  String get authCodeSent;
+
+  /// No description provided for @authInvalidEmail.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Informe um e-mail válido.'**
+  String get authInvalidEmail;
+
+  /// No description provided for @authInvalidCode.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Digite os 6 números do código.'**
+  String get authInvalidCode;
+
+  /// No description provided for @authCodeRejected.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Não foi possível validar o código. Confira os números ou peça outro.'**
+  String get authCodeRejected;
+
+  /// No description provided for @authCodeExpired.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Esse código expirou. Peça um novo para continuar.'**
+  String get authCodeExpired;
+
+  /// No description provided for @authNetworkError.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Não foi possível conectar. Confira sua conexão e tente novamente.'**
+  String get authNetworkError;
+
+  /// No description provided for @authServerError.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Não foi possível entrar agora. Tente novamente em instantes.'**
+  String get authServerError;
+
+  /// No description provided for @authRateLimited.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Aguarde um pouco antes de tentar novamente.'**
+  String get authRateLimited;
+
+  /// No description provided for @authStorageError.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Não foi possível salvar seu acesso neste dispositivo. Tente novamente.'**
+  String get authStorageError;
+
+  /// No description provided for @authGoogleError.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Não foi possível entrar com Google. Tente novamente ou use seu e-mail.'**
+  String get authGoogleError;
+
+  /// No description provided for @authSessionExpired.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Seu acesso expirou. Entre novamente para continuar.'**
+  String get authSessionExpired;
+
+  /// No description provided for @authConsentTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Seus dados de saúde, sua escolha'**
+  String get authConsentTitle;
+
+  /// No description provided for @authConsentBody.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'A BYND usa os sinais de saúde coletados pela sua pulseira, como frequência cardíaca, VFC, sono e atividade, para gerar informações pessoais sobre o seu corpo. Para criar sua conta, precisamos do seu consentimento para esse tratamento.'**
+  String get authConsentBody;
+
+  /// No description provided for @authConsentLabel.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Concordo com o tratamento dos meus dados de saúde para gerar informações pessoais, conforme descrito em Privacidade.'**
+  String get authConsentLabel;
+
+  /// No description provided for @authConsentRequired.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Para criar sua conta, confirme sua escolha sobre os dados de saúde.'**
+  String get authConsentRequired;
+
+  /// No description provided for @authConsentAccept.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Concordar e continuar'**
+  String get authConsentAccept;
+
+  /// No description provided for @authConsentDecline.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Agora não'**
+  String get authConsentDecline;
+
+  /// No description provided for @authPrivacy.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Privacidade'**
+  String get authPrivacy;
+
+  /// No description provided for @authPrivacyLink.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Como usamos seus dados'**
+  String get authPrivacyLink;
+
+  /// No description provided for @authPrivacyTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Seus dados na BYND'**
+  String get authPrivacyTitle;
+
+  /// No description provided for @authPrivacyPurposeTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Para entender seus sinais'**
+  String get authPrivacyPurposeTitle;
+
+  /// No description provided for @authPrivacyPurpose.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Os dados de saúde da pulseira e os registros que você adiciona permitem apresentar informações sobre sono, atividade e outros sinais do seu corpo.'**
+  String get authPrivacyPurpose;
+
+  /// No description provided for @authPrivacyChoiceTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Uma escolha explícita'**
+  String get authPrivacyChoiceTitle;
+
+  /// No description provided for @authPrivacyChoice.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'A criação da conta exige seu consentimento para o tratamento dos dados de saúde. Você pode ler estas informações e voltar sem concordar; nesse caso, nenhuma conta será criada por esta etapa.'**
+  String get authPrivacyChoice;
+
+  /// No description provided for @authPrivacyAccessTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Seu acesso'**
+  String get authPrivacyAccessTitle;
+
+  /// No description provided for @authPrivacyAccess.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'O acesso por e-mail usa um código temporário. Guarde esse código só para você. A sessão permanece no dispositivo até você sair ou o acesso expirar.'**
+  String get authPrivacyAccess;
+
+  /// No description provided for @authLegalFootnote.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Conheça como a BYND utiliza seus dados antes de continuar.'**
+  String get authLegalFootnote;
+
+  /// No description provided for @authRestore.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Preparando seu acesso…'**
+  String get authRestore;
+
+  /// No description provided for @authSignOutTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Sair da sua conta?'**
+  String get authSignOutTitle;
+
+  /// No description provided for @authSignOutBody.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Você poderá entrar novamente com seu e-mail ou com Google.'**
+  String get authSignOutBody;
+
+  /// No description provided for @authSignOutConfirm.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Sair'**
+  String get authSignOutConfirm;
+
+  /// No description provided for @authCancel.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Cancelar'**
+  String get authCancel;
+
+  /// No description provided for @authSignOutFailed.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Você saiu, mas não foi possível limpar todos os dados locais. Tente reiniciar o app.'**
+  String get authSignOutFailed;
+
+  /// No description provided for @authBackground.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Paisagem {index} de {total}'**
+  String authBackground(int index, int total);
+
+  /// No description provided for @authChangeLanguage.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Alterar idioma'**
+  String get authChangeLanguage;
+
+  /// No description provided for @communityMyGroups.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Meus grupos'**
+  String get communityMyGroups;
+
+  /// No description provided for @communityEmptyGroups.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Nenhum grupo ainda. Crie um ou entre com um convite.'**
+  String get communityEmptyGroups;
+
+  /// No description provided for @communityToday.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Para hoje'**
+  String get communityToday;
+
+  /// No description provided for @communityMarkDone.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Marcar como feito'**
+  String get communityMarkDone;
+
+  /// No description provided for @communityMarkedDone.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Dia marcado como feito.'**
+  String get communityMarkedDone;
+
+  /// No description provided for @communityDoneToday.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Feito hoje'**
+  String get communityDoneToday;
+
+  /// No description provided for @communityRetry.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Tentar novamente'**
+  String get communityRetry;
+
+  /// No description provided for @communityAccept.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Aceitar'**
+  String get communityAccept;
+
+  /// No description provided for @communityDecline.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Recusar'**
+  String get communityDecline;
+
+  /// No description provided for @communityMemberCount.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'{count} pessoas'**
+  String communityMemberCount(Object count);
+
+  /// No description provided for @communityDaysTotal.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'desafio de {days} dias'**
+  String communityDaysTotal(Object days);
+
+  /// No description provided for @communityEmptyChat.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Nenhuma mensagem ainda. Diga oi!'**
+  String get communityEmptyChat;
+
+  /// No description provided for @communityDayToday.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Hoje'**
+  String get communityDayToday;
+
+  /// No description provided for @communityDayYesterday.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Ontem'**
+  String get communityDayYesterday;
+
+  /// No description provided for @communityMessageRecalled.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Mensagem removida'**
+  String get communityMessageRecalled;
+
+  /// No description provided for @communitySendHint.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Mensagem para o grupo'**
+  String get communitySendHint;
+
+  /// No description provided for @communityInvitationFrom.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'{inviter} convidou você para \"{group}\"'**
+  String communityInvitationFrom(Object group, Object inviter);
+
+  /// No description provided for @communityNewCover.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Criar grupo\nou entrar com código'**
+  String get communityNewCover;
+
+  /// No description provided for @communityInviteFromShort.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'convite de {name}'**
+  String communityInviteFromShort(Object name);
+
+  /// No description provided for @communityRankBadge.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'{rank}º no desafio de {total}'**
+  String communityRankBadge(Object rank, Object total);
+
+  /// No description provided for @communityParaHoje.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Para hoje'**
+  String get communityParaHoje;
+
+  /// No description provided for @communityPickChallenge.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Escolher um desafio'**
+  String get communityPickChallenge;
+
+  /// No description provided for @communityPickChallengeSub.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'sozinho ou com o seu grupo'**
+  String get communityPickChallengeSub;
+
+  /// No description provided for @communityDayOfTotal.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'dia {day} de {total}'**
+  String communityDayOfTotal(Object day, Object total);
+
+  /// No description provided for @communityMuralToday.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'No grupo hoje'**
+  String get communityMuralToday;
+
+  /// No description provided for @communityMuralYesterday.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'No grupo ontem'**
+  String get communityMuralYesterday;
+
+  /// No description provided for @communityMuralIntro.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Do mais novo para o mais antigo. Toque em \"Dar força\" para apoiar.'**
+  String get communityMuralIntro;
+
+  /// No description provided for @communityNoCheckinsToday.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Nenhum check-in hoje ainda. Quem fizer aparece aqui.'**
+  String get communityNoCheckinsToday;
+
+  /// No description provided for @communityNoCheckinsYesterday.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Nenhum check-in ontem.'**
+  String get communityNoCheckinsYesterday;
+
+  /// No description provided for @communityAtlasKicker.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'ATLAS · RESUMO DO GRUPO'**
+  String get communityAtlasKicker;
+
+  /// No description provided for @communityCheer.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Dar força'**
+  String get communityCheer;
+
+  /// No description provided for @communityCheerSoon.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Dar força chega em breve.'**
+  String get communityCheerSoon;
+
+  /// No description provided for @communityRespond.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Responder'**
+  String get communityRespond;
+
+  /// No description provided for @communityOpenGroupChat.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Abrir a conversa do grupo'**
+  String get communityOpenGroupChat;
+
+  /// No description provided for @communityCheckinText.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'✓ Check-in de hoje'**
+  String get communityCheckinText;
+
+  /// No description provided for @communityNewTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Novo'**
+  String get communityNewTitle;
+
+  /// No description provided for @communityTabChallenges.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Desafios'**
+  String get communityTabChallenges;
+
+  /// No description provided for @communityTabCreateGroup.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Criar grupo'**
+  String get communityTabCreateGroup;
+
+  /// No description provided for @communityTabCode.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Código'**
+  String get communityTabCode;
+
+  /// No description provided for @communityChallengesIntro.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Desafios criados pela BYND com especialistas. Faça sozinho ou leve para o seu grupo.'**
+  String get communityChallengesIntro;
+
+  /// No description provided for @communityDetailsOpen.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Ver detalhes'**
+  String get communityDetailsOpen;
+
+  /// No description provided for @communityDetailsClose.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Fechar'**
+  String get communityDetailsClose;
+
+  /// No description provided for @communityChallengeWhy.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Por que funciona'**
+  String get communityChallengeWhy;
+
+  /// No description provided for @communityChallengeDaily.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Todo dia'**
+  String get communityChallengeDaily;
+
+  /// No description provided for @communityEnrolledBadge.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Você está neste desafio'**
+  String get communityEnrolledBadge;
+
+  /// No description provided for @communityStartToday.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Começar hoje'**
+  String get communityStartToday;
+
+  /// No description provided for @communityChallengeLeave.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Sair do desafio'**
+  String get communityChallengeLeave;
+
+  /// No description provided for @communityStepName.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'1 · Nome do grupo'**
+  String get communityStepName;
+
+  /// No description provided for @communityStepInvite.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'2 · Quem você quer chamar (e-mail)'**
+  String get communityStepInvite;
+
+  /// No description provided for @communityCodeIntro.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Recebeu um convite? Digite o código do grupo (ele vem no link ou na mensagem de quem te chamou).'**
+  String get communityCodeIntro;
+
+  /// No description provided for @communityCodeHint.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'BYND-0000'**
+  String get communityCodeHint;
+
+  /// No description provided for @communityCodeGo.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Entrar no grupo'**
+  String get communityCodeGo;
+
+  /// No description provided for @communityCodeSoon.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Entrar por código chega em breve.'**
+  String get communityCodeSoon;
+
+  /// No description provided for @communityAjustesTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Grupo'**
+  String get communityAjustesTitle;
+
+  /// No description provided for @communityAjustesInvite.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'+ Convidar'**
+  String get communityAjustesInvite;
+
+  /// No description provided for @communityPlacarTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Placar'**
+  String get communityPlacarTitle;
+
+  /// No description provided for @communityRoleAdmin.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'admin'**
+  String get communityRoleAdmin;
+
+  /// No description provided for @communityNotifTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Avisos'**
+  String get communityNotifTitle;
+
+  /// No description provided for @communityNotifMessages.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Mensagens'**
+  String get communityNotifMessages;
+
+  /// No description provided for @communityLeaveDoubleTap.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Toque de novo para sair'**
+  String get communityLeaveDoubleTap;
+
+  /// No description provided for @communityInviteTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Convidar para o grupo'**
+  String get communityInviteTitle;
+
+  /// No description provided for @communityInviteEmailHint.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'nome@exemplo.com'**
+  String get communityInviteEmailHint;
+
+  /// No description provided for @communityInviteSend.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Enviar'**
+  String get communityInviteSend;
+
+  /// No description provided for @communityInviteSuccess.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Convite enviado.'**
+  String get communityInviteSuccess;
+
+  /// No description provided for @communityMembersTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Pessoas · {count}'**
+  String communityMembersTitle(Object count);
+
+  /// No description provided for @communityLeaveGroup.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Sair do grupo'**
+  String get communityLeaveGroup;
+
+  /// No description provided for @communityGoalsTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Objetivos'**
+  String get communityGoalsTitle;
+
+  /// No description provided for @communityNoGoals.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Nenhum objetivo neste grupo ainda.'**
+  String get communityNoGoals;
+
+  /// No description provided for @communityCreateIntro.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Um grupo é para fazer desafios juntos, comparar os números do objetivo e conversar.'**
+  String get communityCreateIntro;
+
+  /// No description provided for @communityGroupName.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Nome do grupo'**
+  String get communityGroupName;
+
+  /// No description provided for @communityGroupNameHint.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Ex.: Corrida das 6h, Família, Trabalho'**
+  String get communityGroupNameHint;
+
+  /// No description provided for @communityGroupDescription.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Descrição'**
+  String get communityGroupDescription;
+
+  /// No description provided for @communityGroupDescriptionHint.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Sobre o que é o grupo?'**
+  String get communityGroupDescriptionHint;
+
+  /// No description provided for @communityInviteEmails.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Quem você quer chamar'**
+  String get communityInviteEmails;
+
+  /// No description provided for @communityInviteEmailsHint.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'e-mails separados por vírgula'**
+  String get communityInviteEmailsHint;
+
+  /// No description provided for @communityGroupCreate.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Criar grupo'**
+  String get communityGroupCreate;
+
+  /// No description provided for @communityCreating.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Criando...'**
+  String get communityCreating;
+
+  /// No description provided for @communityGroupCreated.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Grupo criado · {count} convite(s) enviado(s).'**
+  String communityGroupCreated(Object count);
+
+  /// No description provided for @communityCreateNote.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Pode criar sem ninguém: depois de criar, você chama mais gente nos ajustes do grupo.'**
+  String get communityCreateNote;
 }
 
 class _AppLocalizationsDelegate

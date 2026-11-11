@@ -1,3 +1,4 @@
+import '../diary/presentation/diary_page.dart';
 import 'package:flutter/material.dart';
 
 import '../../design_system/design_system.dart';
@@ -37,6 +38,18 @@ class _ProfilePageState extends State<ProfilePage> {
       if (mounted && selectedIndex != null) {
         Navigator.of(context).pop(selectedIndex);
       }
+      return;
+    }
+    if (action == AppQuickAction.dayReview || action == AppQuickAction.meal) {
+      await Navigator.push(
+        context,
+        MaterialPageRoute<void>(
+          builder: (_) => DiaryPage(
+            openRecord: true,
+            initialTracker: action == AppQuickAction.meal ? 'almoco' : null,
+          ),
+        ),
+      );
       return;
     }
     _showComingSoon(action.localizedLabel(context.l10n).replaceAll('\n', ' '));

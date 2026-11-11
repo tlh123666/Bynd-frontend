@@ -1,0 +1,510 @@
+[
+  {
+    "key": "cafe",
+    "it": [
+      [
+        "Pão integral",
+        "2 fatias"
+      ],
+      [
+        "Ovos mexidos",
+        "2 ovos"
+      ],
+      [
+        "Mamão",
+        "150 g"
+      ],
+      [
+        "Café sem açúcar",
+        "1 xícara"
+      ]
+    ],
+    "p": 30,
+    "c": 62,
+    "g": 14,
+    "f": 8
+  },
+  {
+    "key": "almoco",
+    "it": [
+      [
+        "Arroz branco",
+        "120 g"
+      ],
+      [
+        "Feijão preto",
+        "100 g"
+      ],
+      [
+        "Frango grelhado",
+        "130 g"
+      ],
+      [
+        "Salada com tomate",
+        "60 g"
+      ]
+    ],
+    "p": 42,
+    "c": 78,
+    "g": 17,
+    "f": 11
+  },
+  {
+    "key": "lanche",
+    "it": [
+      [
+        "Pão de queijo",
+        "4 unidades"
+      ],
+      [
+        "Café com leite",
+        "1 xícara"
+      ]
+    ],
+    "p": 8,
+    "c": 30,
+    "g": 12,
+    "f": 2
+  },
+  {
+    "key": "jantar",
+    "it": [
+      [
+        "Omelete",
+        "3 ovos"
+      ],
+      [
+        "Legumes",
+        "120 g"
+      ],
+      [
+        "Queijo branco",
+        "30 g"
+      ]
+    ],
+    "p": 34,
+    "c": 20,
+    "g": 22,
+    "f": 6
+  },
+  {
+    "key": "cafe2",
+    "it": [
+      [
+        "Iogurte natural",
+        "170 g"
+      ],
+      [
+        "Granola",
+        "30 g"
+      ],
+      [
+        "Frutas vermelhas",
+        "80 g"
+      ],
+      [
+        "Banana",
+        "1 unidade"
+      ]
+    ],
+    "p": 14,
+    "c": 58,
+    "g": 9,
+    "f": 7
+  },
+  {
+    "key": "cafe3",
+    "it": [
+      [
+        "Tapioca com ovo",
+        "1 unidade"
+      ],
+      [
+        "Maçã",
+        "1 unidade"
+      ],
+      [
+        "Café sem açúcar",
+        "1 xícara"
+      ]
+    ],
+    "p": 12,
+    "c": 48,
+    "g": 7,
+    "f": 4
+  },
+  {
+    "key": "almoco2",
+    "it": [
+      [
+        "Macarrão",
+        "150 g"
+      ],
+      [
+        "Molho de carne",
+        "100 g"
+      ],
+      [
+        "Brócolis",
+        "60 g"
+      ],
+      [
+        "Queijo ralado",
+        "10 g"
+      ]
+    ],
+    "p": 36,
+    "c": 84,
+    "g": 16,
+    "f": 7
+  },
+  {
+    "key": "almoco3",
+    "it": [
+      [
+        "Salmão grelhado",
+        "150 g"
+      ],
+      [
+        "Alface",
+        "50 g"
+      ],
+      [
+        "Pepino",
+        "60 g"
+      ],
+      [
+        "Limão",
+        "2 fatias"
+      ]
+    ],
+    "p": 36,
+    "c": 8,
+    "g": 18,
+    "f": 4
+  },
+  {
+    "key": "lanche2",
+    "it": [
+      [
+        "Banana",
+        "1 unidade"
+      ],
+      [
+        "Maçã",
+        "1 unidade"
+      ],
+      [
+        "Uvas",
+        "80 g"
+      ]
+    ],
+    "p": 2,
+    "c": 52,
+    "g": 1,
+    "f": 6
+  },
+  {
+    "key": "lanche3",
+    "it": [
+      [
+        "Sanduíche natural",
+        "1 unidade"
+      ],
+      [
+        "Suco",
+        "200 ml"
+      ]
+    ],
+    "p": 18,
+    "c": 44,
+    "g": 10,
+    "f": 4
+  },
+  {
+    "key": "jantar2",
+    "it": [
+      [
+        "Sopa de abóbora",
+        "300 ml"
+      ],
+      [
+        "Torrada",
+        "2 unidades"
+      ]
+    ],
+    "p": 10,
+    "c": 38,
+    "g": 8,
+    "f": 6
+  },
+  {
+    "key": "cuscuz",
+    "it": [
+      [
+        "Cuscuz com manteiga",
+        "150 g"
+      ],
+      [
+        "Ovo frito",
+        "1 ovo"
+      ],
+      [
+        "Queijo coalho",
+        "2 fatias"
+      ]
+    ],
+    "p": 22,
+    "c": 46,
+    "g": 20,
+    "f": 3
+  },
+  {
+    "key": "paofrances",
+    "it": [
+      [
+        "Pão francês com manteiga",
+        "2 unidades"
+      ],
+      [
+        "Café com leite",
+        "1 xícara"
+      ]
+    ],
+    "p": 14,
+    "c": 62,
+    "g": 14,
+    "f": 3
+  },
+  {
+    "key": "bife",
+    "it": [
+      [
+        "Arroz",
+        "120 g"
+      ],
+      [
+        "Feijão",
+        "100 g"
+      ],
+      [
+        "Bife acebolado",
+        "120 g"
+      ],
+      [
+        "Batata frita",
+        "80 g"
+      ]
+    ],
+    "p": 40,
+    "c": 92,
+    "g": 30,
+    "f": 9
+  },
+  {
+    "key": "feijoada",
+    "it": [
+      [
+        "Feijoada",
+        "250 g"
+      ],
+      [
+        "Arroz",
+        "100 g"
+      ],
+      [
+        "Couve refogada",
+        "50 g"
+      ],
+      [
+        "Farofa",
+        "30 g"
+      ],
+      [
+        "Laranja",
+        "4 gomos"
+      ]
+    ],
+    "p": 42,
+    "c": 86,
+    "g": 34,
+    "f": 14
+  },
+  {
+    "key": "strogonoff",
+    "it": [
+      [
+        "Strogonoff de carne",
+        "180 g"
+      ],
+      [
+        "Arroz",
+        "120 g"
+      ],
+      [
+        "Batata palha",
+        "25 g"
+      ]
+    ],
+    "p": 36,
+    "c": 62,
+    "g": 28,
+    "f": 2
+  },
+  {
+    "key": "fit",
+    "it": [
+      [
+        "Frango grelhado",
+        "150 g"
+      ],
+      [
+        "Batata-doce",
+        "150 g"
+      ],
+      [
+        "Brócolis",
+        "80 g"
+      ]
+    ],
+    "p": 46,
+    "c": 36,
+    "g": 6,
+    "f": 7
+  },
+  {
+    "key": "acai",
+    "it": [
+      [
+        "Açaí",
+        "300 ml"
+      ],
+      [
+        "Granola",
+        "30 g"
+      ],
+      [
+        "Banana",
+        "1 unidade"
+      ],
+      [
+        "Morango",
+        "4 unidades"
+      ]
+    ],
+    "p": 6,
+    "c": 78,
+    "g": 16,
+    "f": 9
+  },
+  {
+    "key": "coxinha",
+    "it": [
+      [
+        "Coxinha",
+        "3 unidades"
+      ],
+      [
+        "Molho",
+        "1 colher"
+      ]
+    ],
+    "p": 18,
+    "c": 54,
+    "g": 30,
+    "f": 3
+  },
+  {
+    "key": "bolo",
+    "it": [
+      [
+        "Bolo de cenoura com cobertura",
+        "1 fatia"
+      ],
+      [
+        "Café",
+        "1 xícara"
+      ]
+    ],
+    "p": 5,
+    "c": 50,
+    "g": 16,
+    "f": 1
+  },
+  {
+    "key": "pizza",
+    "it": [
+      [
+        "Pizza de calabresa",
+        "3 fatias"
+      ]
+    ],
+    "p": 36,
+    "c": 96,
+    "g": 36,
+    "f": 5
+  },
+  {
+    "key": "sushi",
+    "it": [
+      [
+        "Sushi variado",
+        "10 peças"
+      ],
+      [
+        "Shoyu",
+        "1 colher"
+      ],
+      [
+        "Gengibre",
+        "15 g"
+      ]
+    ],
+    "p": 24,
+    "c": 70,
+    "g": 8,
+    "f": 3
+  },
+  {
+    "key": "burger",
+    "it": [
+      [
+        "Hambúrguer",
+        "1 unidade"
+      ],
+      [
+        "Batata frita",
+        "100 g"
+      ],
+      [
+        "Ketchup",
+        "1 colher"
+      ]
+    ],
+    "p": 32,
+    "c": 68,
+    "g": 36,
+    "f": 4
+  },
+  {
+    "key": "jantar3",
+    "it": [
+      [
+        "Salada verde",
+        "150 g"
+      ],
+      [
+        "Frango grelhado",
+        "120 g"
+      ],
+      [
+        "Ovo cozido",
+        "1 unidade"
+      ]
+    ],
+    "p": 40,
+    "c": 12,
+    "g": 14,
+    "f": 7
+  }
+]

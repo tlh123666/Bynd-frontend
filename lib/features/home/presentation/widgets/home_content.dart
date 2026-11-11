@@ -273,7 +273,10 @@ class HomeContent extends StatelessWidget {
                           MaterialPageRoute<void>(
                             builder: (_) => HomeAccountGuard(
                               controller: controller,
-                              child: HomeDiaryPage(controller: controller),
+                              child: HomeDiaryPage(
+                                controller: controller,
+                                openRecord: true,
+                              ),
                             ),
                           ),
                         ),

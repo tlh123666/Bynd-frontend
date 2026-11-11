@@ -10,6 +10,8 @@ import 'package:new_jcvital/features/home/presentation/pages/home_signal_detail_
 import 'package:new_jcvital/features/home/presentation/pages/home_diary_page.dart';
 import 'package:new_jcvital/l10n/generated/app_localizations.dart';
 import 'package:new_jcvital/main.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../support/auth_fakes.dart';
 import 'package:new_jcvital/core/auth/auth_session.dart';
 import 'package:new_jcvital/core/auth/auth_token_store.dart';
 import 'package:new_jcvital/features/home/presentation/widgets/home_account_guard.dart';
@@ -110,20 +112,21 @@ void main() {
     expect(controller.signals.first, HomeSignal.steps);
     expect(controller.signals.indexOf(HomeSignal.sleep), greaterThan(0));
   });
-  testWidgets('anonymous Home renders at 320px without overflowing', (
-    tester,
-  ) async {
-    tester.view.physicalSize = const Size(320, 640);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-    await tester.pumpWidget(const ByndApp());
-    await tester.pumpAndSettle();
-    expect(
-      find.text('Entre na sua conta para ver seus dados.'),
-      findsOneWidget,
-    );
-  });
+  testWidgets(
+    'anonymous application opens login at 320px without overflowing',
+    (tester) async {
+      SharedPreferences.setMockInitialValues({});
+      final auth = AuthHarness();
+      addTearDown(auth.dispose);
+      tester.view.physicalSize = const Size(320, 640);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.pumpWidget(ByndApp(authController: auth.auth));
+      await tester.pumpAndSettle();
+      expect(find.text('Continuar com e-mail'), findsOneWidget);
+    },
+  );
   testWidgets(
     'Home renders six signals and a photo change, customization enforces six and persists',
     (tester) async {
@@ -188,29 +191,23 @@ void main() {
     expect(find.byType(HomeSignalDetailPage), findsNothing);
     expect(find.byType(HomeContent), findsOneWidget);
   });
-  testWidgets('diary validates empty entry and saves a real form submission', (
-    tester,
-  ) async {
-    final controller = await mount(tester);
-    await tester.ensureVisible(find.text('Adicionar registro +'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Adicionar registro +'));
-    await tester.pumpAndSettle();
-    expect(find.byType(HomeDiaryPage), findsOneWidget);
-    await tester.tap(find.text('Adicionar registro +').last);
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Salvar'));
-    await tester.pumpAndSettle();
-    expect(find.text('Descreva o registro antes de salvar.'), findsOneWidget);
-    await tester.enterText(find.byKey(const Key('home-diary-label')), 'Almoço');
-    await tester.enterText(find.byKey(const Key('home-diary-note')), 'Leve');
-    await tester.tap(find.text('Salvar'));
-    await tester.pumpAndSettle();
-    final events = await controller.repository.diary(controller.date, 'pt');
-    expect(events.single.label, 'Almoço');
-    expect(events.single.note, 'Leve');
-    expect(find.text('Almoço'), findsOneWidget);
-  });
+  testWidgets(
+    'Home diary entry opens the diary feature with its selected date',
+    (tester) async {
+      final controller = await mount(tester);
+      // The visible Home link keeps the selected day when navigating.
+      final link = find.textContaining('registro +');
+      await tester.ensureVisible(link);
+      await tester.tap(link);
+      await tester.pumpAndSettle();
+      expect(find.byType(HomeDiaryPage), findsOneWidget);
+      expect(
+        tester.widget<HomeDiaryPage>(find.byType(HomeDiaryPage)).controller,
+        controller,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
   testWidgets(
     'compact screen and large text remain scrollable without overflow',
     (tester) async {

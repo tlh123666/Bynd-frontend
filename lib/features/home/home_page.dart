@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../core/config/app_config.dart';
+import '../../core/auth/auth_scope.dart';
 
 import '../../design_system/design_system.dart';
 import '../../shared/navigation/app_side_menu.dart';
@@ -9,6 +10,7 @@ import '../../l10n/app_localizations_context.dart';
 import '../../l10n/language_picker_sheet.dart';
 import 'application/home_controller.dart';
 import 'presentation/widgets/home_content.dart';
+import '../community/presentation/community_page.dart';
 import 'presentation/pages/home_diary_page.dart';
 import 'presentation/widgets/home_account_guard.dart';
 import '../profile/profile_page.dart';
@@ -109,6 +111,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   void _otherMenuItem(String label) {
     setState(() => _menuOpen = false);
+    if (label == context.l10n.signOut) {
+      unawaited(_signOut());
+      return;
+    }
     if (label == 'Mapa' || label == context.l10n.atlas) {
       // 抽屉收起有动画，直接 push 会和收起动作叠在一起；与设备页保持同一步调。
       _openMapa();
@@ -125,11 +131,41 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       );
       return;
     }
+    if (label == context.l10n.community) {
+      Navigator.of(context).push<void>(
+        MaterialPageRoute(
+          builder: (_) => HomeAccountGuard(
+            controller: _home,
+            child: const CommunityPage(),
+          ),
+        ),
+      );
+      return;
+    }
     AppNotice.show(
       context,
       kind: AppNoticeKind.info,
       message: context.l10n.comingSoon(label),
     );
+  }
+
+  Future<void> _signOut() async {
+    await Future<void>.delayed(
+      AppMotion.enabled(context) ? AppMotion.drawer : Duration.zero,
+    );
+    if (!mounted) return;
+    final auth = AuthScope.maybeOf(context);
+    if (auth == null) return;
+    final s = context.l10n;
+    final confirmed = await AppConfirmationSheet.show(
+      context,
+      title: s.authSignOutTitle,
+      message: s.authSignOutBody,
+      confirmLabel: s.authSignOutConfirm,
+      cancelLabel: s.authCancel,
+    );
+    if (!mounted || !confirmed) return;
+    await auth.logout();
   }
 
   Future<void> _openLanguagePicker() async {
@@ -156,6 +192,21 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       if (mounted && selectedIndex != null) {
         setState(() => _selectedIndex = selectedIndex);
       }
+      return;
+    }
+    if (action == AppQuickAction.dayReview || action == AppQuickAction.meal) {
+      await Navigator.of(context).push<void>(
+        MaterialPageRoute(
+          builder: (_) => HomeAccountGuard(
+            controller: _home,
+            child: HomeDiaryPage(
+              controller: _home,
+              openRecord: true,
+              initialTracker: action == AppQuickAction.meal ? 'almoco' : null,
+            ),
+          ),
+        ),
+      );
       return;
     }
     AppNotice.show(

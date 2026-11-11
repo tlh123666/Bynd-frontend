@@ -40,7 +40,11 @@
   "logActivity": "Registrar\natividade",
   "doEcg": "Fazer\nECG",
   "comingSoon": "{feature}: em breve.",
-  "@@comingSoon": { "placeholders": { "feature": {} } },
+  "@@comingSoon": {
+    "placeholders": {
+      "feature": {}
+    }
+  },
   "activityRegisterComingSoon": "Registro de atividade: em breve.",
   "sectionComingSoon": "Esta seção estará disponível em breve.",
   "activityHistoryComingSoon": "Histórico de atividades: em breve.",
@@ -83,7 +87,13 @@
   "register": "Registrar",
   "startActivityTitle": "Iniciar atividade",
   "searchActivities": "Buscar entre {count} modalidades",
-  "@@searchActivities": { "placeholders": { "count": { "type": "int" } } },
+  "@@searchActivities": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "recent": "Recentes",
   "categoryCardio": "Cardio",
   "categoryStrength": "Força",
@@ -106,7 +116,11 @@
   "activityHintMachineDistance": "distância da máquina",
   "activityHintTimeHeartRate": "tempo e coração",
   "noActivityMatches": "Nenhuma modalidade com “{query}”. Use “Outro”.",
-  "@@noActivityMatches": { "placeholders": { "query": {} } },
+  "@@noActivityMatches": {
+    "placeholders": {
+      "query": {}
+    }
+  },
   "closeCalendar": "Fechar calendário",
   "previousMonth": "Mês anterior",
   "nextMonth": "Próximo mês",
@@ -155,7 +169,11 @@
   "wristband": "Pulseira",
   "wristbandConnectedSince": "BYND ONE · conectada desde 9 set 2026",
   "connectedDeviceComingSoon": "{device}: em breve.",
-  "@@connectedDeviceComingSoon": { "placeholders": { "device": {} } },
+  "@@connectedDeviceComingSoon": {
+    "placeholders": {
+      "device": {}
+    }
+  },
   "calendarWeekdayMon": "Seg",
   "calendarWeekdayTue": "Ter",
   "calendarWeekdayWed": "Qua",
@@ -225,5 +243,207 @@
   "homeRefresh": "Atualizar",
   "homeDrag": "Arrastar para mudar a ordem",
   "homeNoDirection": "Sincronize a pulseira para acompanhar a direção do seu dia.",
-  "homeAccountChanged": "Sua conta mudou. Feche esta tela e abra novamente para ver os dados atuais."
+  "homeAccountChanged": "Sua conta mudou. Feche esta tela e abra novamente para ver os dados atuais.",
+  "authWelcome": "BEM-VINDO À BYND",
+  "authHeadline": "Seu corpo.\nSua direção.",
+  "authSubtitle": "Entenda seus sinais. Viva no seu ritmo.",
+  "authEmailContinue": "Continuar com e-mail",
+  "authGoogleContinue": "Continuar com Google",
+  "authEmailTitle": "Qual é o seu e-mail?",
+  "authEmailBody": "Vamos enviar um código para você entrar. Sem senha.",
+  "authAccountHint": "No primeiro acesso, você pode criar sua conta por aqui.",
+  "authEmailLabel": "E-mail",
+  "authEmailHint": "voce@exemplo.com",
+  "authSendCode": "Enviar código",
+  "authCodeTitle": "Confira seu e-mail",
+  "authCodeBody": "Enviamos um código de 6 dígitos para {email}.",
+  "authCodeLabel": "Código de verificação",
+  "authCodeHint": "000000",
+  "authEditEmail": "Alterar e-mail",
+  "authSignIn": "Entrar",
+  "authCreateAccount": "Criar conta e entrar",
+  "authResend": "Reenviar código",
+  "authResendIn": "Reenviar em {seconds}s",
+  "authSpamHint": "Não chegou? Confira a caixa de spam ou peça um novo código.",
+  "authCodeSent": "Código enviado. Confira também a caixa de spam.",
+  "authInvalidEmail": "Informe um e-mail válido.",
+  "authInvalidCode": "Digite os 6 números do código.",
+  "authCodeRejected": "Não foi possível validar o código. Confira os números ou peça outro.",
+  "authCodeExpired": "Esse código expirou. Peça um novo para continuar.",
+  "authNetworkError": "Não foi possível conectar. Confira sua conexão e tente novamente.",
+  "authServerError": "Não foi possível entrar agora. Tente novamente em instantes.",
+  "authRateLimited": "Aguarde um pouco antes de tentar novamente.",
+  "authStorageError": "Não foi possível salvar seu acesso neste dispositivo. Tente novamente.",
+  "authGoogleError": "Não foi possível entrar com Google. Tente novamente ou use seu e-mail.",
+  "authSessionExpired": "Seu acesso expirou. Entre novamente para continuar.",
+  "authConsentTitle": "Seus dados de saúde, sua escolha",
+  "authConsentBody": "A BYND usa os sinais de saúde coletados pela sua pulseira, como frequência cardíaca, VFC, sono e atividade, para gerar informações pessoais sobre o seu corpo. Para criar sua conta, precisamos do seu consentimento para esse tratamento.",
+  "authConsentLabel": "Concordo com o tratamento dos meus dados de saúde para gerar informações pessoais, conforme descrito em Privacidade.",
+  "authConsentRequired": "Para criar sua conta, confirme sua escolha sobre os dados de saúde.",
+  "authConsentAccept": "Concordar e continuar",
+  "authConsentDecline": "Agora não",
+  "authPrivacy": "Privacidade",
+  "authPrivacyLink": "Como usamos seus dados",
+  "authPrivacyTitle": "Seus dados na BYND",
+  "authPrivacyPurposeTitle": "Para entender seus sinais",
+  "authPrivacyPurpose": "Os dados de saúde da pulseira e os registros que você adiciona permitem apresentar informações sobre sono, atividade e outros sinais do seu corpo.",
+  "authPrivacyChoiceTitle": "Uma escolha explícita",
+  "authPrivacyChoice": "A criação da conta exige seu consentimento para o tratamento dos dados de saúde. Você pode ler estas informações e voltar sem concordar; nesse caso, nenhuma conta será criada por esta etapa.",
+  "authPrivacyAccessTitle": "Seu acesso",
+  "authPrivacyAccess": "O acesso por e-mail usa um código temporário. Guarde esse código só para você. A sessão permanece no dispositivo até você sair ou o acesso expirar.",
+  "authLegalFootnote": "Conheça como a BYND utiliza seus dados antes de continuar.",
+  "authRestore": "Preparando seu acesso…",
+  "authSignOutTitle": "Sair da sua conta?",
+  "authSignOutBody": "Você poderá entrar novamente com seu e-mail ou com Google.",
+  "authSignOutConfirm": "Sair",
+  "authCancel": "Cancelar",
+  "authSignOutFailed": "Você saiu, mas não foi possível limpar todos os dados locais. Tente reiniciar o app.",
+  "authBackground": "Paisagem {index} de {total}",
+  "authChangeLanguage": "Alterar idioma",
+  "@authCodeBody": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "@authResendIn": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "@authBackground": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "communityMyGroups": "Meus grupos",
+  "communityEmptyGroups": "Nenhum grupo ainda. Crie um ou entre com um convite.",
+  "communityToday": "Para hoje",
+  "communityMarkDone": "Marcar como feito",
+  "communityMarkedDone": "Dia marcado como feito.",
+  "communityDoneToday": "Feito hoje",
+  "communityRetry": "Tentar novamente",
+  "communityAccept": "Aceitar",
+  "communityDecline": "Recusar",
+  "communityMemberCount": "{count} pessoas",
+  "@@communityMemberCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "communityDaysTotal": "desafio de {days} dias",
+  "@@communityDaysTotal": {
+    "placeholders": {
+      "days": {}
+    }
+  },
+  "communityEmptyChat": "Nenhuma mensagem ainda. Diga oi!",
+  "communityDayToday": "Hoje",
+  "communityDayYesterday": "Ontem",
+  "communityMessageRecalled": "Mensagem removida",
+  "communitySendHint": "Mensagem para o grupo",
+  "communityInvitationFrom": "{inviter} convidou você para \"{group}\"",
+  "@@communityInvitationFrom": {
+    "placeholders": {
+      "inviter": {},
+      "group": {}
+    }
+  },
+  "communityNewCover": "Criar grupo\nou entrar com código",
+  "communityInviteFromShort": "convite de {name}",
+  "@@communityInviteFromShort": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "communityRankBadge": "{rank}º no desafio de {total}",
+  "@@communityRankBadge": {
+    "placeholders": {
+      "rank": {},
+      "total": {}
+    }
+  },
+  "communityParaHoje": "Para hoje",
+  "communityPickChallenge": "Escolher um desafio",
+  "communityPickChallengeSub": "sozinho ou com o seu grupo",
+  "communityDayOfTotal": "dia {day} de {total}",
+  "@@communityDayOfTotal": {
+    "placeholders": {
+      "day": {},
+      "total": {}
+    }
+  },
+  "communityMuralToday": "No grupo hoje",
+  "communityMuralYesterday": "No grupo ontem",
+  "communityMuralIntro": "Do mais novo para o mais antigo. Toque em \"Dar força\" para apoiar.",
+  "communityNoCheckinsToday": "Nenhum check-in hoje ainda. Quem fizer aparece aqui.",
+  "communityNoCheckinsYesterday": "Nenhum check-in ontem.",
+  "communityAtlasKicker": "ATLAS · RESUMO DO GRUPO",
+  "communityCheer": "Dar força",
+  "communityCheerSoon": "Dar força chega em breve.",
+  "communityRespond": "Responder",
+  "communityOpenGroupChat": "Abrir a conversa do grupo",
+  "communityCheckinText": "✓ Check-in de hoje",
+  "communityNewTitle": "Novo",
+  "communityTabChallenges": "Desafios",
+  "communityTabCreateGroup": "Criar grupo",
+  "communityTabCode": "Código",
+  "communityChallengesIntro": "Desafios criados pela BYND com especialistas. Faça sozinho ou leve para o seu grupo.",
+  "communityDetailsOpen": "Ver detalhes",
+  "communityDetailsClose": "Fechar",
+  "communityChallengeWhy": "Por que funciona",
+  "communityChallengeDaily": "Todo dia",
+  "communityEnrolledBadge": "Você está neste desafio",
+  "communityStartToday": "Começar hoje",
+  "communityChallengeLeave": "Sair do desafio",
+  "communityStepName": "1 · Nome do grupo",
+  "communityStepInvite": "2 · Quem você quer chamar (e-mail)",
+  "communityCodeIntro": "Recebeu um convite? Digite o código do grupo (ele vem no link ou na mensagem de quem te chamou).",
+  "communityCodeHint": "BYND-0000",
+  "communityCodeGo": "Entrar no grupo",
+  "communityCodeSoon": "Entrar por código chega em breve.",
+  "communityAjustesTitle": "Grupo",
+  "communityAjustesInvite": "+ Convidar",
+  "communityPlacarTitle": "Placar",
+  "communityRoleAdmin": "admin",
+  "communityNotifTitle": "Avisos",
+  "communityNotifMessages": "Mensagens",
+  "communityLeaveDoubleTap": "Toque de novo para sair",
+  "communityInviteTitle": "Convidar para o grupo",
+  "communityInviteEmailHint": "nome@exemplo.com",
+  "communityInviteSend": "Enviar",
+  "communityInviteSuccess": "Convite enviado.",
+  "communityMembersTitle": "Pessoas · {count}",
+  "@@communityMembersTitle": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "communityLeaveGroup": "Sair do grupo",
+  "communityGoalsTitle": "Objetivos",
+  "communityNoGoals": "Nenhum objetivo neste grupo ainda.",
+  "communityCreateIntro": "Um grupo é para fazer desafios juntos, comparar os números do objetivo e conversar.",
+  "communityGroupName": "Nome do grupo",
+  "communityGroupNameHint": "Ex.: Corrida das 6h, Família, Trabalho",
+  "communityGroupDescription": "Descrição",
+  "communityGroupDescriptionHint": "Sobre o que é o grupo?",
+  "communityInviteEmails": "Quem você quer chamar",
+  "communityInviteEmailsHint": "e-mails separados por vírgula",
+  "communityGroupCreate": "Criar grupo",
+  "communityCreating": "Criando...",
+  "communityGroupCreated": "Grupo criado · {count} convite(s) enviado(s).",
+  "@@communityGroupCreated": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "communityCreateNote": "Pode criar sem ninguém: depois de criar, você chama mais gente nos ajustes do grupo."
 }

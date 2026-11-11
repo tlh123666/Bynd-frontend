@@ -1,0 +1,577 @@
+{
+  "2026-11-08": {
+    "r": {
+      "agua": {
+        "v": "s",
+        "q": 2000,
+        "o": "você"
+      },
+      "cafe": {
+        "v": "s",
+        "q": 3,
+        "o": "você"
+      },
+      "acordou": {
+        "v": 5,
+        "o": "você"
+      },
+      "humor": {
+        "v": 7,
+        "o": "você"
+      }
+    },
+    "reg": [
+      {
+        "ic": "prato",
+        "k": "Café da manhã",
+        "h": "07:30",
+        "v": "",
+        "u": "",
+        "n": "registrado por você",
+        "mac": {
+          "tipo": "cafe2",
+          "kc": 370,
+          "p": 14,
+          "c": 58,
+          "g": 9,
+          "f": 7
+        },
+        "id": "r-cafe_m"
+      },
+      {
+        "ic": "prato",
+        "k": "Almoço",
+        "h": "13:10",
+        "v": "",
+        "u": "",
+        "n": "registrado por você",
+        "mac": {
+          "tipo": "feijoada",
+          "kc": 820,
+          "p": 42,
+          "c": 86,
+          "g": 34,
+          "f": 14
+        },
+        "id": "r-almoco"
+      },
+      {
+        "ic": "prato",
+        "k": "Jantar",
+        "h": "20:15",
+        "v": "",
+        "u": "",
+        "n": "registrado por você",
+        "mac": {
+          "tipo": "jantar2",
+          "kc": 260,
+          "p": 10,
+          "c": 38,
+          "g": 8,
+          "f": 6
+        },
+        "id": "r-jantar_r",
+        "novo": 1
+      },
+      {
+        "ic": "copo",
+        "k": "Beber água",
+        "v": "2",
+        "u": "L",
+        "n": "registrado por você",
+        "id": "r-agua",
+        "h": "17:00"
+      },
+      {
+        "ic": "cafe",
+        "k": "Café",
+        "v": "3",
+        "u": "xícaras",
+        "n": "registrado por você",
+        "id": "r-cafe",
+        "h": "15:20"
+      },
+      {
+        "ic": "sol",
+        "k": "Como acordou",
+        "v": "5",
+        "u": "de 10 · ok",
+        "n": "registrado por você",
+        "id": "r-acordou",
+        "h": "07:05"
+      },
+      {
+        "ic": "mente",
+        "k": "Humor",
+        "v": "7",
+        "u": "de 10 · bem",
+        "n": "registrado por você",
+        "id": "r-humor",
+        "h": "21:30"
+      }
+    ],
+    "nota": "",
+    "semeado": 1,
+    "ref": {
+      "cafe_m": {
+        "t": "Normal",
+        "it": [
+          [
+            "Iogurte natural",
+            "170 g"
+          ],
+          [
+            "Granola",
+            "30 g"
+          ],
+          [
+            "Frutas vermelhas",
+            "80 g"
+          ],
+          [
+            "Banana",
+            "1 unidade"
+          ]
+        ],
+        "h": "07:30",
+        "tipo": "cafe2",
+        "p": 14,
+        "c": 58,
+        "g": 9,
+        "f": 7,
+        "foto": 1,
+        "kc": 370
+      },
+      "almoco": {
+        "t": "Pesado",
+        "it": [
+          [
+            "Feijoada",
+            "250 g"
+          ],
+          [
+            "Arroz",
+            "100 g"
+          ],
+          [
+            "Couve refogada",
+            "50 g"
+          ],
+          [
+            "Farofa",
+            "30 g"
+          ],
+          [
+            "Laranja",
+            "4 gomos"
+          ]
+        ],
+        "h": "13:10",
+        "tipo": "feijoada",
+        "p": 42,
+        "c": 86,
+        "g": 34,
+        "f": 14,
+        "foto": 1,
+        "kc": 820
+      },
+      "jantar_r": {
+        "t": "Leve",
+        "it": [
+          [
+            "Sopa de abóbora",
+            "300 ml"
+          ],
+          [
+            "Torrada",
+            "2 unidades"
+          ]
+        ],
+        "h": "20:15",
+        "tipo": "jantar2",
+        "p": 10,
+        "c": 38,
+        "g": 8,
+        "f": 6,
+        "foto": 1,
+        "kc": 260
+      }
+    }
+  },
+  "2026-11-09": {
+    "r": {
+      "acordou": {
+        "v": 7,
+        "o": "você"
+      },
+      "humor": {
+        "v": 8,
+        "o": "você"
+      },
+      "luz": {
+        "v": "s",
+        "o": "você"
+      },
+      "vit": {
+        "v": "s",
+        "o": "você"
+      },
+      "creat": {
+        "v": "s",
+        "q": 5,
+        "o": "você"
+      },
+      "cafe": {
+        "v": "s",
+        "q": 2,
+        "o": "você"
+      },
+      "medit": {
+        "v": "s",
+        "q": 10,
+        "o": "você"
+      },
+      "estresse": {
+        "v": 5,
+        "o": "você"
+      },
+      "agua": {
+        "v": "s",
+        "q": 1500,
+        "o": "você"
+      },
+      "energia": {
+        "v": 6,
+        "o": "você"
+      },
+      "along": {
+        "v": "s",
+        "q": 15,
+        "o": "você"
+      },
+      "jantar": {
+        "v": "s",
+        "o": "você"
+      },
+      "grat": {
+        "v": "s",
+        "o": "você"
+      },
+      "ler": {
+        "v": "s",
+        "q": 20,
+        "o": "você"
+      }
+    },
+    "reg": [
+      {
+        "ic": "prato",
+        "k": "Café da manhã",
+        "h": "07:30",
+        "v": "",
+        "u": "",
+        "n": "registrado por você",
+        "mac": {
+          "tipo": "cafe3",
+          "kc": 300,
+          "p": 12,
+          "c": 48,
+          "g": 7,
+          "f": 4
+        },
+        "id": "r-cafe_m"
+      },
+      {
+        "ic": "prato",
+        "k": "Almoço",
+        "h": "12:40",
+        "v": "",
+        "u": "",
+        "n": "registrado por você",
+        "mac": {
+          "tipo": "strogonoff",
+          "kc": 640,
+          "p": 36,
+          "c": 62,
+          "g": 28,
+          "f": 2
+        },
+        "id": "r-almoco"
+      },
+      {
+        "ic": "prato",
+        "k": "Lanche da tarde",
+        "h": "16:10",
+        "v": "",
+        "u": "",
+        "n": "registrado por você",
+        "mac": {
+          "tipo": "bolo",
+          "kc": 360,
+          "p": 5,
+          "c": 50,
+          "g": 16,
+          "f": 1
+        },
+        "id": "r-lanche_t"
+      },
+      {
+        "ic": "prato",
+        "k": "Whey",
+        "h": "16:30",
+        "v": "1",
+        "u": "dose",
+        "n": "registrado por você",
+        "id": "r-whey"
+      },
+      {
+        "ic": "prato",
+        "k": "Jantar",
+        "h": "19:40",
+        "v": "",
+        "u": "",
+        "n": "registrado por você",
+        "mac": {
+          "tipo": "jantar3",
+          "kc": 330,
+          "p": 40,
+          "c": 12,
+          "g": 14,
+          "f": 7
+        },
+        "id": "r-jantar_r",
+        "novo": 1
+      },
+      {
+        "ic": "sol",
+        "k": "Como acordou",
+        "v": "7",
+        "u": "de 10 · bem",
+        "n": "registrado por você",
+        "id": "r-acordou",
+        "h": "07:05"
+      },
+      {
+        "ic": "mente",
+        "k": "Humor",
+        "v": "8",
+        "u": "de 10 · bem",
+        "n": "registrado por você",
+        "id": "r-humor",
+        "h": "07:20"
+      },
+      {
+        "ic": "sol",
+        "k": "Sol pela manhã",
+        "v": "",
+        "u": "",
+        "n": "registrado por você",
+        "id": "r-luz",
+        "h": "07:40"
+      },
+      {
+        "ic": "cap",
+        "k": "Vitaminas",
+        "v": "",
+        "u": "",
+        "n": "registrado por você",
+        "id": "r-vit",
+        "h": "08:05"
+      },
+      {
+        "ic": "cap",
+        "k": "Creatina",
+        "v": "5",
+        "u": "g",
+        "n": "registrado por você",
+        "id": "r-creat",
+        "h": "08:10"
+      },
+      {
+        "ic": "cafe",
+        "k": "Café",
+        "v": "2",
+        "u": "xícaras",
+        "n": "registrado por você",
+        "id": "r-cafe",
+        "h": "09:30"
+      },
+      {
+        "ic": "lotus",
+        "k": "Meditar",
+        "v": "10",
+        "u": "min",
+        "n": "registrado por você",
+        "id": "r-medit",
+        "h": "13:15"
+      },
+      {
+        "ic": "grafo",
+        "k": "Estresse",
+        "v": "5",
+        "u": "de 10 · médio",
+        "n": "registrado por você",
+        "id": "r-estresse",
+        "h": "14:30"
+      },
+      {
+        "ic": "copo",
+        "k": "Beber água",
+        "v": "1,5",
+        "u": "L",
+        "n": "registrado por você",
+        "id": "r-agua",
+        "h": "15:10"
+      },
+      {
+        "ic": "raio",
+        "k": "Disposição",
+        "v": "6",
+        "u": "de 10 · ok",
+        "n": "registrado por você",
+        "id": "r-energia",
+        "h": "17:00"
+      },
+      {
+        "ic": "corre",
+        "k": "Alongar",
+        "v": "15",
+        "u": "min",
+        "n": "registrado por você",
+        "id": "r-along",
+        "h": "18:50"
+      },
+      {
+        "ic": "relo",
+        "k": "Jantar até as 20h",
+        "v": "",
+        "u": "",
+        "n": "registrado por você",
+        "id": "r-jantar",
+        "h": "19:50"
+      },
+      {
+        "ic": "livro",
+        "k": "Escrever 3 gratidões",
+        "v": "",
+        "u": "",
+        "n": "registrado por você",
+        "id": "r-grat",
+        "h": "22:10"
+      },
+      {
+        "ic": "livro",
+        "k": "Ler antes de dormir",
+        "v": "",
+        "u": "",
+        "n": "registrado por você",
+        "id": "r-ler",
+        "h": "22:30"
+      }
+    ],
+    "nota": "Dia bom. O treino cedo ajudou.",
+    "semeado": 2,
+    "ref": {
+      "cafe_m": {
+        "t": "Normal",
+        "it": [
+          [
+            "Tapioca com ovo",
+            "1 unidade"
+          ],
+          [
+            "Maçã",
+            "1 unidade"
+          ],
+          [
+            "Café sem açúcar",
+            "1 xícara"
+          ]
+        ],
+        "h": "07:30",
+        "tipo": "cafe3",
+        "p": 12,
+        "c": 48,
+        "g": 7,
+        "f": 4,
+        "foto": 1,
+        "kc": 300
+      },
+      "almoco": {
+        "t": "Normal",
+        "it": [
+          [
+            "Strogonoff de carne",
+            "180 g"
+          ],
+          [
+            "Arroz",
+            "120 g"
+          ],
+          [
+            "Batata palha",
+            "25 g"
+          ]
+        ],
+        "h": "12:40",
+        "tipo": "strogonoff",
+        "p": 36,
+        "c": 62,
+        "g": 28,
+        "f": 2,
+        "foto": 1,
+        "kc": 640
+      },
+      "lanche_t": {
+        "t": "Leve",
+        "it": [
+          [
+            "Bolo de cenoura com cobertura",
+            "1 fatia"
+          ],
+          [
+            "Café",
+            "1 xícara"
+          ]
+        ],
+        "h": "16:10",
+        "tipo": "bolo",
+        "p": 5,
+        "c": 50,
+        "g": 16,
+        "f": 1,
+        "foto": 1,
+        "kc": 360
+      },
+      "whey": {
+        "q": 1,
+        "h": "16:30"
+      },
+      "jantar_r": {
+        "t": "Normal",
+        "it": [
+          [
+            "Salada verde",
+            "150 g"
+          ],
+          [
+            "Frango grelhado",
+            "120 g"
+          ],
+          [
+            "Ovo cozido",
+            "1 unidade"
+          ]
+        ],
+        "h": "19:40",
+        "tipo": "jantar3",
+        "p": 40,
+        "c": 12,
+        "g": 14,
+        "f": 7,
+        "foto": 1,
+        "kc": 330
+      }
+    }
+  }
+}

@@ -4,6 +4,7 @@ import '../tokens/app_colors.dart';
 import '../tokens/app_dimensions.dart';
 import '../tokens/app_typography.dart';
 import '../navigation/app_page_transitions.dart';
+import 'app_button_styles.dart';
 
 abstract final class AppTheme {
   static final dark = ThemeData(
@@ -27,13 +28,30 @@ abstract final class AppTheme {
     colorScheme: const ColorScheme.dark(
       primary: AppColors.action,
       onPrimary: AppColors.onAction,
+      primaryContainer: AppColors.surfaceRaised,
+      onPrimaryContainer: AppColors.textPrimary,
       secondary: AppColors.brandBlue,
+      secondaryContainer: AppColors.surfaceRaised,
+      onSecondaryContainer: AppColors.textPrimary,
       surface: AppColors.surface,
       onSurface: AppColors.textPrimary,
       error: AppColors.error,
       outline: AppColors.glassBorder,
     ),
     scaffoldBackgroundColor: AppColors.background,
+    filledButtonTheme: FilledButtonThemeData(
+      style: AppButtonStyles.filledTheme,
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(style: AppButtonStyles.filled),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: AppButtonStyles.outlined,
+    ),
+    textButtonTheme: TextButtonThemeData(style: AppButtonStyles.text),
+    floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      backgroundColor: AppColors.surfaceRaised,
+      foregroundColor: AppColors.textPrimary,
+      elevation: 0,
+    ),
     iconTheme: const IconThemeData(color: AppColors.textPrimary),
     textTheme:
         const TextTheme(

@@ -709,4 +709,456 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get homeAccountChanged =>
       'Your account changed. Close this screen and reopen it to see current data.';
+
+  @override
+  String get authWelcome => 'WELCOME TO BYND';
+
+  @override
+  String get authHeadline => 'Your body.\nYour direction.';
+
+  @override
+  String get authSubtitle => 'Understand your signals. Live at your own pace.';
+
+  @override
+  String get authEmailContinue => 'Continue with email';
+
+  @override
+  String get authGoogleContinue => 'Continue with Google';
+
+  @override
+  String get authEmailTitle => 'What\'s your email?';
+
+  @override
+  String get authEmailBody =>
+      'We\'ll send you a code to sign in. No password needed.';
+
+  @override
+  String get authAccountHint =>
+      'First time here? You can create your account this way too.';
+
+  @override
+  String get authEmailLabel => 'Email';
+
+  @override
+  String get authEmailHint => 'you@example.com';
+
+  @override
+  String get authSendCode => 'Send code';
+
+  @override
+  String get authCodeTitle => 'Check your email';
+
+  @override
+  String authCodeBody(String email) {
+    return 'We sent a 6-digit code to $email.';
+  }
+
+  @override
+  String get authCodeLabel => 'Verification code';
+
+  @override
+  String get authCodeHint => '000000';
+
+  @override
+  String get authEditEmail => 'Change email';
+
+  @override
+  String get authSignIn => 'Sign in';
+
+  @override
+  String get authCreateAccount => 'Create account and sign in';
+
+  @override
+  String get authResend => 'Resend code';
+
+  @override
+  String authResendIn(int seconds) {
+    return 'Resend in ${seconds}s';
+  }
+
+  @override
+  String get authSpamHint =>
+      'Didn\'t arrive? Check your spam folder or request another code.';
+
+  @override
+  String get authCodeSent => 'Code sent. Please check your spam folder too.';
+
+  @override
+  String get authInvalidEmail => 'Enter a valid email address.';
+
+  @override
+  String get authInvalidCode => 'Enter all 6 digits of the code.';
+
+  @override
+  String get authCodeRejected =>
+      'We couldn\'t verify that code. Check the digits or request another one.';
+
+  @override
+  String get authCodeExpired =>
+      'That code has expired. Request a new one to continue.';
+
+  @override
+  String get authNetworkError =>
+      'Couldn\'t connect. Check your connection and try again.';
+
+  @override
+  String get authServerError =>
+      'Couldn\'t sign in right now. Please try again shortly.';
+
+  @override
+  String get authRateLimited => 'Please wait a little before trying again.';
+
+  @override
+  String get authStorageError =>
+      'Couldn\'t save your access on this device. Please try again.';
+
+  @override
+  String get authGoogleError =>
+      'Couldn\'t sign in with Google. Try again or use your email.';
+
+  @override
+  String get authSessionExpired =>
+      'Your access expired. Sign in again to continue.';
+
+  @override
+  String get authConsentTitle => 'Your health data, your choice';
+
+  @override
+  String get authConsentBody =>
+      'BYND uses health signals collected by your band, such as heart rate, HRV, sleep and activity, to generate personal information about your body. Creating your account requires your consent to this processing.';
+
+  @override
+  String get authConsentLabel =>
+      'I agree to the processing of my health data to generate personal information, as described in Privacy.';
+
+  @override
+  String get authConsentRequired =>
+      'To create your account, confirm your choice about health data.';
+
+  @override
+  String get authConsentAccept => 'Agree and continue';
+
+  @override
+  String get authConsentDecline => 'Not now';
+
+  @override
+  String get authPrivacy => 'Privacy';
+
+  @override
+  String get authPrivacyLink => 'How we use your data';
+
+  @override
+  String get authPrivacyTitle => 'Your data at BYND';
+
+  @override
+  String get authPrivacyPurposeTitle => 'To understand your signals';
+
+  @override
+  String get authPrivacyPurpose =>
+      'Your band\'s health data and the entries you add help present information about sleep, activity and other signals from your body.';
+
+  @override
+  String get authPrivacyChoiceTitle => 'An explicit choice';
+
+  @override
+  String get authPrivacyChoice =>
+      'Creating an account requires your consent to health-data processing. You can read this information and return without agreeing; in that case, this step will not create an account.';
+
+  @override
+  String get authPrivacyAccessTitle => 'Your access';
+
+  @override
+  String get authPrivacyAccess =>
+      'Email sign-in uses a temporary code. Keep that code to yourself. Your session stays on this device until you sign out or access expires.';
+
+  @override
+  String get authLegalFootnote =>
+      'Learn how BYND uses your data before continuing.';
+
+  @override
+  String get authRestore => 'Preparing your access…';
+
+  @override
+  String get authSignOutTitle => 'Sign out of your account?';
+
+  @override
+  String get authSignOutBody =>
+      'You can sign in again with your email or Google.';
+
+  @override
+  String get authSignOutConfirm => 'Sign out';
+
+  @override
+  String get authCancel => 'Cancel';
+
+  @override
+  String get authSignOutFailed =>
+      'You signed out, but some local data couldn\'t be cleared. Please restart the app.';
+
+  @override
+  String authBackground(int index, int total) {
+    return 'Landscape $index of $total';
+  }
+
+  @override
+  String get authChangeLanguage => 'Change language';
+
+  @override
+  String get communityMyGroups => 'My groups';
+
+  @override
+  String get communityEmptyGroups =>
+      'No groups yet. Create one or join with an invitation.';
+
+  @override
+  String get communityToday => 'For today';
+
+  @override
+  String get communityMarkDone => 'Mark as done';
+
+  @override
+  String get communityMarkedDone => 'Day marked as done.';
+
+  @override
+  String get communityDoneToday => 'Done today';
+
+  @override
+  String get communityRetry => 'Try again';
+
+  @override
+  String get communityAccept => 'Accept';
+
+  @override
+  String get communityDecline => 'Decline';
+
+  @override
+  String communityMemberCount(Object count) {
+    return '$count members';
+  }
+
+  @override
+  String communityDaysTotal(Object days) {
+    return '$days-day challenge';
+  }
+
+  @override
+  String get communityEmptyChat => 'No messages yet. Say hi!';
+
+  @override
+  String get communityDayToday => 'Today';
+
+  @override
+  String get communityDayYesterday => 'Yesterday';
+
+  @override
+  String get communityMessageRecalled => 'Message removed';
+
+  @override
+  String get communitySendHint => 'Message the group';
+
+  @override
+  String communityInvitationFrom(Object group, Object inviter) {
+    return '$inviter invited you to \"$group\"';
+  }
+
+  @override
+  String get communityNewCover => 'Create a group\nor join with a code';
+
+  @override
+  String communityInviteFromShort(Object name) {
+    return 'invite from $name';
+  }
+
+  @override
+  String communityRankBadge(Object rank, Object total) {
+    return '$rank of $total in the challenge';
+  }
+
+  @override
+  String get communityParaHoje => 'For today';
+
+  @override
+  String get communityPickChallenge => 'Choose a challenge';
+
+  @override
+  String get communityPickChallengeSub => 'alone or with your group';
+
+  @override
+  String communityDayOfTotal(Object day, Object total) {
+    return 'day $day of $total';
+  }
+
+  @override
+  String get communityMuralToday => 'In the group today';
+
+  @override
+  String get communityMuralYesterday => 'In the group yesterday';
+
+  @override
+  String get communityMuralIntro => 'Newest first. Tap \"Cheer\" to support.';
+
+  @override
+  String get communityNoCheckinsToday =>
+      'No check-ins today yet. Whoever posts one shows up here.';
+
+  @override
+  String get communityNoCheckinsYesterday => 'No check-ins yesterday.';
+
+  @override
+  String get communityAtlasKicker => 'ATLAS · GROUP SUMMARY';
+
+  @override
+  String get communityCheer => 'Cheer';
+
+  @override
+  String get communityCheerSoon => 'Cheering is coming soon.';
+
+  @override
+  String get communityRespond => 'Reply';
+
+  @override
+  String get communityOpenGroupChat => 'Open the group chat';
+
+  @override
+  String get communityCheckinText => '✓ Today\'s check-in';
+
+  @override
+  String get communityNewTitle => 'New';
+
+  @override
+  String get communityTabChallenges => 'Challenges';
+
+  @override
+  String get communityTabCreateGroup => 'Create group';
+
+  @override
+  String get communityTabCode => 'Code';
+
+  @override
+  String get communityChallengesIntro =>
+      'Challenges created by BYND with specialists. Do it alone or bring it to your group.';
+
+  @override
+  String get communityDetailsOpen => 'View details';
+
+  @override
+  String get communityDetailsClose => 'Close';
+
+  @override
+  String get communityChallengeWhy => 'Why it works';
+
+  @override
+  String get communityChallengeDaily => 'Every day';
+
+  @override
+  String get communityEnrolledBadge => 'You are in this challenge';
+
+  @override
+  String get communityStartToday => 'Start today';
+
+  @override
+  String get communityChallengeLeave => 'Leave challenge';
+
+  @override
+  String get communityStepName => '1 · Group name';
+
+  @override
+  String get communityStepInvite => '2 · Who to invite (email)';
+
+  @override
+  String get communityCodeIntro =>
+      'Received an invitation? Type the group code (it comes in the link or message).';
+
+  @override
+  String get communityCodeHint => 'BYND-0000';
+
+  @override
+  String get communityCodeGo => 'Join group';
+
+  @override
+  String get communityCodeSoon => 'Joining by code is coming soon.';
+
+  @override
+  String get communityAjustesTitle => 'Group';
+
+  @override
+  String get communityAjustesInvite => '+ Invite';
+
+  @override
+  String get communityPlacarTitle => 'Leaderboard';
+
+  @override
+  String get communityRoleAdmin => 'admin';
+
+  @override
+  String get communityNotifTitle => 'Notifications';
+
+  @override
+  String get communityNotifMessages => 'Messages';
+
+  @override
+  String get communityLeaveDoubleTap => 'Tap again to leave';
+
+  @override
+  String get communityInviteTitle => 'Invite to the group';
+
+  @override
+  String get communityInviteEmailHint => 'name@example.com';
+
+  @override
+  String get communityInviteSend => 'Send';
+
+  @override
+  String get communityInviteSuccess => 'Invitation sent.';
+
+  @override
+  String communityMembersTitle(Object count) {
+    return 'Members · $count';
+  }
+
+  @override
+  String get communityLeaveGroup => 'Leave group';
+
+  @override
+  String get communityGoalsTitle => 'Goals';
+
+  @override
+  String get communityNoGoals => 'No goals yet in this group.';
+
+  @override
+  String get communityCreateIntro =>
+      'A group is for doing challenges together, comparing the numbers of the goal and chatting.';
+
+  @override
+  String get communityGroupName => 'Group name';
+
+  @override
+  String get communityGroupNameHint => 'e.g. 6am run, Family, Work';
+
+  @override
+  String get communityGroupDescription => 'Description';
+
+  @override
+  String get communityGroupDescriptionHint => 'What is this group about?';
+
+  @override
+  String get communityInviteEmails => 'Who to invite';
+
+  @override
+  String get communityInviteEmailsHint => 'emails separated by commas';
+
+  @override
+  String get communityGroupCreate => 'Create group';
+
+  @override
+  String get communityCreating => 'Creating...';
+
+  @override
+  String communityGroupCreated(Object count) {
+    return 'Group created · $count invitation(s) sent.';
+  }
+
+  @override
+  String get communityCreateNote =>
+      'You can create it alone: right after, you can invite more people in the group settings.';
 }

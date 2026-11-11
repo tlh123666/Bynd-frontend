@@ -6,7 +6,8 @@ import 'package:flutter/material.dart';
 abstract final class AppColors {
   static const brandSlate = Color(0xFF2C3A4E);
   static const brandLight = Color(0xFFF4F5F7);
-  static const action = Color(0xFFFF6900);
+  // Default actions follow the reference's light button, never an orange accent.
+  static const action = brandLight;
   static const metallic = Color(0x8AF4F5F7);
   static const brandBlue = Color(0xFF7088A1);
   static const sky = Color(0xFFB4D0F0);
@@ -55,6 +56,7 @@ abstract final class AppColors {
   static const homePhotoChip = Color(0x73121418);
   static const homePhotoBorder = Color(0x2EFFFFFF);
   static const contentSheetVeil = Color(0x59080A0E); // .fl-veu, .35
+  static const contentSheetGlass = Color.fromRGBO(20,24,30,.62); // base.css .fl
   static const homePatternTag = Color(0x248FBCF0);
   static const homePatternText = Color(0xFFCFE2FB);
   static const homePhotoShade = <Color>[
@@ -89,6 +91,7 @@ abstract final class AppColors {
   static const profileBottom = Color(0xFF121418);
 
   static const onAction = profileBottom;
+  static const buttonDisabledBackground = Color(0x1FF4F5F7);
   static const success = sage;
   static const error = rose;
   static const warning = Color(0xFFFF8A3D);

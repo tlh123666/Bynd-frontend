@@ -44,7 +44,9 @@ class AppLocaleController extends ChangeNotifier {
 
     try {
       final preferences = await SharedPreferences.getInstance();
-      return preferences.setString(_preferenceKey, nextLocale.languageCode);
+      // 必须 await：否则 setString 的异步失败会绕过下面的 catch，
+      // 设置界面拿不到 false，会误报「已保存」。
+      return await preferences.setString(_preferenceKey, nextLocale.languageCode);
     } catch (_) {
       // 当前会话立即生效；返回失败状态供设置界面提示用户未能保存。
       return false;

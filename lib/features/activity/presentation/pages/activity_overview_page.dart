@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 import '../../../../design_system/design_system.dart';
+import '../../../diary/presentation/diary_page.dart';
 import '../../../../shared/widgets/day_calendar.dart';
 import '../../../../shared/widgets/day_strip.dart';
 import '../../../../l10n/app_localizations_context.dart';
@@ -182,6 +183,19 @@ class _ActivityOverviewPageState extends State<ActivityOverviewPage> {
                 setState(() => _quickActionsOpen = false);
                 if (action == AppQuickAction.startActivity) {
                   openActivitySelection(context);
+                } else if (action == AppQuickAction.dayReview ||
+                    action == AppQuickAction.meal) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (_) => DiaryPage(
+                        openRecord: true,
+                        initialTracker: action == AppQuickAction.meal
+                            ? 'almoco'
+                            : null,
+                      ),
+                    ),
+                  );
                 } else {
                   AppNotice.show(
                     context,

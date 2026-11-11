@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../tokens/app_colors.dart';
 import '../tokens/app_dimensions.dart';
-import '../tokens/app_typography.dart';
+import '../theme/app_button_styles.dart';
 import 'app_icon.dart';
 import 'app_loading.dart';
 
@@ -39,35 +39,19 @@ class AppButton extends StatelessWidget {
       AppButtonVariant.primary || AppButtonVariant.danger => AppColors.onAction,
       _ => AppColors.textPrimary,
     };
-    final background = switch (variant) {
-      AppButtonVariant.primary => AppColors.action,
-      AppButtonVariant.danger => AppColors.error,
-      AppButtonVariant.secondary => AppColors.glass,
-      AppButtonVariant.ghost => Colors.transparent,
+    final contentColor = loading || onPressed == null
+        ? AppColors.textDim
+        : foreground;
+    final baseStyle = switch (variant) {
+      AppButtonVariant.primary => AppButtonStyles.filled,
+      AppButtonVariant.danger => AppButtonStyles.danger,
+      AppButtonVariant.secondary => AppButtonStyles.outlined,
+      AppButtonVariant.ghost => AppButtonStyles.text,
     };
-    final style = ButtonStyle(
+    final style = baseStyle.copyWith(
       minimumSize: WidgetStatePropertyAll(Size(0, height)),
       padding: const WidgetStatePropertyAll(
         EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-      ),
-      shape: const WidgetStatePropertyAll(
-        RoundedRectangleBorder(borderRadius: AppRadii.pillBorder),
-      ),
-      textStyle: const WidgetStatePropertyAll(AppTypography.label),
-      foregroundColor: WidgetStateProperty.resolveWith(
-        (states) => states.contains(WidgetState.disabled)
-            ? AppColors.textMuted
-            : foreground,
-      ),
-      backgroundColor: WidgetStateProperty.resolveWith(
-        (states) => states.contains(WidgetState.disabled)
-            ? AppColors.disabled
-            : background,
-      ),
-      side: WidgetStatePropertyAll(
-        variant == AppButtonVariant.secondary
-            ? AppBorders.glass
-            : BorderSide.none,
       ),
     );
     final content = Stack(
@@ -82,7 +66,7 @@ class AppButton extends StatelessWidget {
                 AppSvgIcon(
                   iconAsset!,
                   size: AppSizes.iconSmall,
-                  color: foreground,
+                  color: contentColor,
                 ),
                 const SizedBox(width: AppSpacing.xs),
               ],
@@ -99,7 +83,7 @@ class AppButton extends StatelessWidget {
         if (loading)
           AppLoadingIndicator(
             size: AppSizes.iconSmall,
-            color: foreground,
+            color: contentColor,
             showLabel: false,
           ),
       ],

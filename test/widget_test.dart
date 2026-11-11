@@ -1,3 +1,4 @@
+import 'package:new_jcvital/core/config/app_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -6,10 +7,18 @@ import 'package:new_jcvital/design_system/design_system.dart';
 import 'package:new_jcvital/main.dart';
 import 'package:new_jcvital/features/profile/profile_page.dart';
 import 'package:new_jcvital/shared/navigation/app_side_menu.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+  setUp(() => SharedPreferences.setMockInitialValues({}));
   testWidgets('主页显示底部导航并更新选中入口', (tester) async {
-    await tester.pumpWidget(const ByndApp());
+    await tester.pumpWidget(
+      ByndApp(
+        config: AppConfig.resolve(
+          defines: const {'MAPA_USE_DEMO_DATA': 'true'},
+        ),
+      ),
+    );
 
     expect(find.byType(AppBottomNav), findsOneWidget);
     for (final asset in [
@@ -53,7 +62,13 @@ void main() {
   });
 
   testWidgets('底部导航按压有轻微压感且不叠加水波纹', (tester) async {
-    await tester.pumpWidget(const ByndApp());
+    await tester.pumpWidget(
+      ByndApp(
+        config: AppConfig.resolve(
+          defines: const {'MAPA_USE_DEMO_DATA': 'true'},
+        ),
+      ),
+    );
 
     final destination = find.bySemanticsLabel('Saúde');
     final scaleFinder = find.descendant(
@@ -84,7 +99,13 @@ void main() {
   });
 
   testWidgets('更多按钮展开六项快捷导航并可关闭', (tester) async {
-    await tester.pumpWidget(const ByndApp());
+    await tester.pumpWidget(
+      ByndApp(
+        config: AppConfig.resolve(
+          defines: const {'MAPA_USE_DEMO_DATA': 'true'},
+        ),
+      ),
+    );
 
     await tester.tap(find.bySemanticsLabel('Ações rápidas'));
     await tester.pump();
@@ -180,7 +201,13 @@ void main() {
   });
 
   testWidgets('快捷入口触发对应反馈并关闭菜单', (tester) async {
-    await tester.pumpWidget(const ByndApp());
+    await tester.pumpWidget(
+      ByndApp(
+        config: AppConfig.resolve(
+          defines: const {'MAPA_USE_DEMO_DATA': 'true'},
+        ),
+      ),
+    );
     await tester.tap(find.bySemanticsLabel('Ações rápidas'));
     await tester.pumpAndSettle();
 
@@ -194,7 +221,13 @@ void main() {
   });
 
   testWidgets('系统返回键收起快捷菜单并保留当前页面', (tester) async {
-    await tester.pumpWidget(const ByndApp());
+    await tester.pumpWidget(
+      ByndApp(
+        config: AppConfig.resolve(
+          defines: const {'MAPA_USE_DEMO_DATA': 'true'},
+        ),
+      ),
+    );
     await tester.tap(find.bySemanticsLabel('Ações rápidas'));
     await tester.pumpAndSettle();
 
@@ -214,7 +247,13 @@ void main() {
       tester.view.resetPhysicalSize();
       tester.view.resetDevicePixelRatio();
     });
-    await tester.pumpWidget(const ByndApp());
+    await tester.pumpWidget(
+      ByndApp(
+        config: AppConfig.resolve(
+          defines: const {'MAPA_USE_DEMO_DATA': 'true'},
+        ),
+      ),
+    );
 
     await tester.tap(find.byTooltip('Menu'));
     await tester.pump();
@@ -266,7 +305,13 @@ void main() {
   });
 
   testWidgets('导入的 SVG 资源均可解析', (tester) async {
-    await tester.pumpWidget(const ByndApp());
+    await tester.pumpWidget(
+      ByndApp(
+        config: AppConfig.resolve(
+          defines: const {'MAPA_USE_DEMO_DATA': 'true'},
+        ),
+      ),
+    );
     final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
     final assets = manifest
         .listAssets()

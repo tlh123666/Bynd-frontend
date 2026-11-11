@@ -1,0 +1,486 @@
+{
+  "reference": "https://bynd-app.vercel.app/",
+  "diarySource": "https://bynd-app.vercel.app/cartoes-oura/final/diario.html",
+  "capturedAt": "2026-11-09",
+  "assets": [
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/base.js",
+      "path": "assets/icons/site/diary-alvo.svg",
+      "sha256": "210acbe76cd842b5d75300c9ebba35f4cd9675c786ab93c3a9c01c93bde5c39e"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/base.js",
+      "path": "assets/icons/site/diary-bola.svg",
+      "sha256": "00df141fc47b768d57c68dae64147a0d90b38cf345529018afc3a107651be02d"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/base.js",
+      "path": "assets/icons/site/diary-busca.svg",
+      "sha256": "881eff28c7d8da0c018b4f954e0bc2e9b2a341f3d244d194dbf3a49f05f42f70"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/base.js",
+      "path": "assets/icons/site/diary-cafe.svg",
+      "sha256": "02a94fd589ff5ce1898ed9487d10600236bcf57507bb4e3f2016c8f9a0779d38"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/base.js",
+      "path": "assets/icons/site/diary-cal.svg",
+      "sha256": "b77babdf8f72d17d2c681a819c4e55ba90dc3441719ea6dcf0e9980a56a2b48c"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/base.js",
+      "path": "assets/icons/site/diary-cap.svg",
+      "sha256": "7dcf00ea53b52531879fdfd222ff043425021f4ded9cfecf3c9b2607bdf8d01d"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/base.js",
+      "path": "assets/icons/site/diary-cel.svg",
+      "sha256": "4b3fbf66c9f87866b0ac4afc9973487acb1c5b6aad6d90d02f49c8db35539baf"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/base.js",
+      "path": "assets/icons/site/diary-copo.svg",
+      "sha256": "03a94ac49091f12076384a5e7350aec48442e008f851dedd5c42b991b02ea376"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/base.js",
+      "path": "assets/icons/site/diary-corre.svg",
+      "sha256": "8c3f82878740414da73e0fc53beca3b69d35c4849ff542de416aee0633d5937d"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/base.js",
+      "path": "assets/icons/site/diary-dor.svg",
+      "sha256": "d6e5eb3a55fca4eb648fef27f0f21fb3882223da06c00e8f235a27ec1f18ce15"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/base.js",
+      "path": "assets/icons/site/diary-env.svg",
+      "sha256": "f3aba0af8cce0e3e5ee270a3e20c06a3c3b3e3d5c0929fe0d9e4b4529a0ff37c"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/assets/main-DN5h_XhA.js",
+      "path": "assets/icons/site/diary-escudo.svg",
+      "sha256": "c12ce9113c0ab4b3341c360880516096bdfee458b4c699c34e2ceae68b7e01a0"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/base.js",
+      "path": "assets/icons/site/diary-estrela.svg",
+      "sha256": "2bcecd600cfdf25ef4ce6780a24a3ac5a62ea91dde950fc5c19fb30b66233ee4"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/base.js",
+      "path": "assets/icons/site/diary-fogo.svg",
+      "sha256": "f3232e72992cd4d39e4834683485377976d92dbe2cdbbab01f7a07bbdb37d08d"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/base.js",
+      "path": "assets/icons/site/diary-folha.svg",
+      "sha256": "fdc2fd69db4a7a8f7c0a88586c1c1ff186d606b4f22303ad7f83c501d4b7c432"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/base.js",
+      "path": "assets/icons/site/diary-gelo.svg",
+      "sha256": "d6d6cea9398a79e777e1a262a1ad1ae1dfa95897aea4eb5741baa5c1a78880bd"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/base.js",
+      "path": "assets/icons/site/diary-gota.svg",
+      "sha256": "f44796ddff1f1f22dbbbd09d4d87cb495cfc3da6192dc9ac4ae1b855f20b2a06"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/base.js",
+      "path": "assets/icons/site/diary-grafo.svg",
+      "sha256": "5f2beb47ff4190de736fa1c704cde3a8be77b51ee8bd931379cb75b514b8c274"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/base.js",
+      "path": "assets/icons/site/diary-grao.svg",
+      "sha256": "f2de04f516ef3fe80f5049fa41e02920f4a4c53925ba7520dc40343996690b52"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/base.js",
+      "path": "assets/icons/site/diary-lapis.svg",
+      "sha256": "849a9aaf69c1f03298abe2a7c9a70fa605b6b506d7549c9888102d33edd2ded8"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/diario.html",
+      "path": "assets/icons/site/diary-livro.svg",
+      "sha256": "08efaeeeeddd07bde6420950756ca66ac8002b262f415fa92e39da80c0bf5202"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/base.js",
+      "path": "assets/icons/site/diary-lotus.svg",
+      "sha256": "233df8050dbbf4eaa72ccdbc620ff2c6f9adc8188fa3cca2e5cd2387db220d7b"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/base.js",
+      "path": "assets/icons/site/diary-lua.svg",
+      "sha256": "401455fe54e57b87905b964e04c950b08386d1f2eb094eefc9af50f0a1bd5b4f"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/base.js",
+      "path": "assets/icons/site/diary-mais.svg",
+      "sha256": "56c9a491a9463862e1f47c70b7f24c686c6ed3d041a71e7fa654ffc552d12ce4"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/base.js",
+      "path": "assets/icons/site/diary-mente.svg",
+      "sha256": "f3dcf2fa71fd57a8e0d6877448b4330c7cf8af0930211c51611a8d576a67356f"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/diario.html",
+      "path": "assets/icons/site/diary-mic.svg",
+      "sha256": "3c37be2a757fac83e610a534baf1b912778f991e5e1142b88b5fe298b2e6965d"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/base.js",
+      "path": "assets/icons/site/diary-nota.svg",
+      "sha256": "5e00ec03c4e0c918f8ea6b322f51d17fbe4bdb7f8bdf865ceca08b951c2a1450"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/base.js",
+      "path": "assets/icons/site/diary-ok.svg",
+      "sha256": "3b2f2e8d562747f55262a5a803e11392609f51102ce18d1cd47d30693aed4304"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/base.js",
+      "path": "assets/icons/site/diary-onda.svg",
+      "sha256": "834c6d0cd6e2cdf4d45eccaa185ff3dbf74b8d00c6344749fb03582c93b89406"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/base.js",
+      "path": "assets/icons/site/diary-ovo.svg",
+      "sha256": "eea0ca4cdcd31ac2913102209ade9ab2f9047d9f79f858aa1ffabc5758af3a33"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/base.js",
+      "path": "assets/icons/site/diary-pes.svg",
+      "sha256": "a499b5cfbc0048810dc1f6bf0da180efcd8910183150f84c22313cd8636e99ed"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/base.js",
+      "path": "assets/icons/site/diary-prato.svg",
+      "sha256": "a268e61666d0ab0f6d3d7f1bebdcaaa8fbd14823f09262665137b254efdbb150"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/base.js",
+      "path": "assets/icons/site/diary-raio.svg",
+      "sha256": "38b4121a786c88c5308264fcdf5748f7d362eb73115ce4b7d8f7dedf31313102"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/base.js",
+      "path": "assets/icons/site/diary-relo.svg",
+      "sha256": "c66cbfa63778b45702b6169cfdfe1bee0e3d9ce2cc54329cd038ce50a571f362"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/base.js",
+      "path": "assets/icons/site/diary-resp.svg",
+      "sha256": "32c08f5fbcd41873db763f6496a873ed06f32f31f0f2f74c6412ce8b1f9e8550"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/base.js",
+      "path": "assets/icons/site/diary-seta.svg",
+      "sha256": "239e77d50682979b0cb1cb7d57f6a5ddb492d840aef9efd49574f09d7fc666ae"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/base.js",
+      "path": "assets/icons/site/diary-sol.svg",
+      "sha256": "8e3114ccee8495e9f4a525cce941e3b1c1853b5c0e22c5eba3b290e78c8f0e55"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/base.js",
+      "path": "assets/icons/site/diary-taca.svg",
+      "sha256": "a0a51baa6940fa27963e3432a48875b7083c3b019df32b48ff459219730c3295"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/base.js",
+      "path": "assets/icons/site/diary-termo.svg",
+      "sha256": "48b85b03bc99f31669083ebfb500e8584719a5f10d102b202c320775c02d6f3a"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/base.js",
+      "path": "assets/icons/site/diary-vol.svg",
+      "sha256": "f8b4255ab5d3cc8700042a2f3ac913df379b96a7cbe67011a535e2dbf8bd4f9c"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/diario.html",
+      "path": "assets/icons/site/diary-volta.svg",
+      "sha256": "8d60db6215ee46db41e7617b79bf21897a7c3b98b864f9e197668c889ab82e08"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/base.js",
+      "path": "assets/icons/site/diary-x.svg",
+      "sha256": "66a35e8532f4911ab8321faa489d0de6fd9841f6bf5bba4d5964700d2e34b386"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/acai.png",
+      "sha256": "d5a07e0d410201c68e97241964e6428c55fa12d0e314f65da086af1efa8756e6",
+      "conversion": "Original SVG rendered by Edge at 400x400; SVG retained."
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/acai.svg",
+      "sha256": "e7624cf4eaff6d3df8e9e04af1018b24b1312b5ef5267ffb2452997537c44b5e"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/almoco.png",
+      "sha256": "e5505cf2bcf22167ab97336e9c6579f678492793ee104fc5ad8f2172f8eb03d2",
+      "conversion": "Original SVG rendered by Edge at 400x400; SVG retained."
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/almoco.svg",
+      "sha256": "26c07bf06e45bce546cb9a6fb84105ecd3ccfd70e95914f114c4bf68c96d9713"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/almoco2.png",
+      "sha256": "92c364f9510c4898264a50aa648f9be7f75cad5042496f08d139b0a1133f7e63",
+      "conversion": "Original SVG rendered by Edge at 400x400; SVG retained."
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/almoco2.svg",
+      "sha256": "150919759279276526ed872d5253fe1b937c36c7ea7b4b90ffd7a7f7c6c0a46b"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/almoco3.png",
+      "sha256": "6f2e7c36b9c871fe3e6a80388f9f54af14ce9367a31d5ebf156ccb05545aa3ad",
+      "conversion": "Original SVG rendered by Edge at 400x400; SVG retained."
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/almoco3.svg",
+      "sha256": "0847a8e0083877becdaecfcc6c60480814774c094255c96249ada64c9a5f3c3d"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/bife.png",
+      "sha256": "571bdbf800bdcfba7d20af0aa4ecf64623c1e73b888e04f966f13a1490a796f2",
+      "conversion": "Original SVG rendered by Edge at 400x400; SVG retained."
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/bife.svg",
+      "sha256": "68ab9b0e05c1f5f07fa428dbefc0e1b2bf0974ef94d406b935714e0ed43cebbd"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/bolo.png",
+      "sha256": "c73860317baa41068cf58c4144dbb1aaa80792c8efd5b8b44246b74e999e5aee",
+      "conversion": "Original SVG rendered by Edge at 400x400; SVG retained."
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/bolo.svg",
+      "sha256": "7b1e9ea469e5ded7f4aa6bbe753b572a4b1a4f1f70b2bf54bddeb5cc12d88621"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/burger.png",
+      "sha256": "b0392e93c229ab691d57274c685b73e747e27a132c3ee39d11926bdc158f970f",
+      "conversion": "Original SVG rendered by Edge at 400x400; SVG retained."
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/burger.svg",
+      "sha256": "c53659850f2c51d430a517a0cf1d53c9a8de3f1b31aae187098b736b6bd4d684"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/cafe.png",
+      "sha256": "56fef3a083ccf72423b01db97b0aa748608be8b7a1f98548c260981c9ecf648a",
+      "conversion": "Original SVG rendered by Edge at 400x400; SVG retained."
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/cafe.svg",
+      "sha256": "8cd09745dd2b2432316194a85310850cce6067874b23b722f575b7b806f30cf0"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/cafe2.png",
+      "sha256": "75402cefeb0dd301a65caa98ab848e48a7689c0834bbbb2611267d5524b5fc30",
+      "conversion": "Original SVG rendered by Edge at 400x400; SVG retained."
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/cafe2.svg",
+      "sha256": "0865ef92a327c7a49bd0275cc6802531261d63dc54158ed27e1931d0c943b643"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/cafe3.png",
+      "sha256": "0f52ef6eb47f97bb16de3bad4cf7bd5a7197e471a1c1202e02c54151d1fc9ba9",
+      "conversion": "Original SVG rendered by Edge at 400x400; SVG retained."
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/cafe3.svg",
+      "sha256": "0fbc6cf77fc1ff789df7a6e7bac343db385fa1096e362cd1df000623f9b02838"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/coxinha.png",
+      "sha256": "1d6d9cd22007f4b79ff163c26cda9b1affac5007a941c473fcf0fcfa69d96b55",
+      "conversion": "Original SVG rendered by Edge at 400x400; SVG retained."
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/coxinha.svg",
+      "sha256": "91bba56817edf0fe5f2661ebb4e395edb9162acac2a39bd237354e88d0ef366c"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/cuscuz.png",
+      "sha256": "3e7fa253303e6ef79194f2b2a83f61cb88d9975c5ef56878700e77669b9a107a",
+      "conversion": "Original SVG rendered by Edge at 400x400; SVG retained."
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/cuscuz.svg",
+      "sha256": "7b3f9b8371f9c81613e78fc17328c3ea4a5afee1d4f5a1270ebf7f8621be6ad5"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/feijoada.png",
+      "sha256": "a24d8d025465c65a8666c0ee7cb0de692ed1ff5ea068e8d10c340e1574630ad0",
+      "conversion": "Original SVG rendered by Edge at 400x400; SVG retained."
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/feijoada.svg",
+      "sha256": "e7ba67130d57198650bb1cb4900742dfc6963d3372f48f6003b93e15a6c45310"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/fit.png",
+      "sha256": "4241b407b7982ac5676209a4302cb418cb9d8210335072ab2baf6cad17889ec3",
+      "conversion": "Original SVG rendered by Edge at 400x400; SVG retained."
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/fit.svg",
+      "sha256": "5dc35c7640d2bae1c0b27a6ef0face8ea3d5d856ba96004974df2a26c8d144fa"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/jantar.png",
+      "sha256": "f977f04703baf5ab642f3502785a14b9d0da1222d59fc57ced1df9a36ff96022",
+      "conversion": "Original SVG rendered by Edge at 400x400; SVG retained."
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/jantar.svg",
+      "sha256": "2ec35faea64da59e19f6ced597e2f040c83346a8e3d8c30bcd69a01603993784"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/jantar2.png",
+      "sha256": "93a3a74168e607d05830bb04252363d4273d3f976fd2419b1bbd7c034296c8cf",
+      "conversion": "Original SVG rendered by Edge at 400x400; SVG retained."
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/jantar2.svg",
+      "sha256": "fd7f841cd476dae4fdfc1edbe3151c3afcdbe3b9850d65e6179711f2625d18e5"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/jantar3.png",
+      "sha256": "8a92a13b209c1c06801fd457e7639ad8b314b40d5171f827f24bfb80d448b530",
+      "conversion": "Original SVG rendered by Edge at 400x400; SVG retained."
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/jantar3.svg",
+      "sha256": "ec8261ce3d101cf9a7b3bf1a12a903373502f10d6d4e3f12a8e20bbc4eb77c2b"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/lanche.png",
+      "sha256": "148cd210073abf20ca25a57855929b1f14b8fe973e7151477585c4ee34a9a64e",
+      "conversion": "Original SVG rendered by Edge at 400x400; SVG retained."
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/lanche.svg",
+      "sha256": "eeaa363f9c1bd08f4b9b865cf4819a41e7082dd3563a919eef20c9d9f6569269"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/lanche2.png",
+      "sha256": "0934a40eb0fa6499731e35517e39a6644436e2cb537f530f714936afe9765f66",
+      "conversion": "Original SVG rendered by Edge at 400x400; SVG retained."
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/lanche2.svg",
+      "sha256": "ef07368b9823352a582acf2a8ee0998626a21c49d42064e0db3883a053d430a4"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/lanche3.png",
+      "sha256": "f262141e0a417f82932d06c824c351e0ad88d5300f9dff171c16525afc8b800e",
+      "conversion": "Original SVG rendered by Edge at 400x400; SVG retained."
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/lanche3.svg",
+      "sha256": "3adee9b86ea1a4514c4503579b790a7e2f418e7d4da22b1a881a79d3425d28f5"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/paofrances.png",
+      "sha256": "44ec82315a19a9e0a4627511fb48aaa93fdc5b3531ae087513002b072620ac91",
+      "conversion": "Original SVG rendered by Edge at 400x400; SVG retained."
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/paofrances.svg",
+      "sha256": "19d5ee8d68d0602540768472a8cde0a98c97abf878f66857d5d9d23024495e1b"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/pizza.png",
+      "sha256": "845c8b465e8f0b40c69548dd7a96742a30d4c8c157f2507de02c56bc2721ea33",
+      "conversion": "Original SVG rendered by Edge at 400x400; SVG retained."
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/pizza.svg",
+      "sha256": "0c3a1374925c067de68427fd3107f19c3164133c7518dd99245450278f9ff7a5"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/strogonoff.png",
+      "sha256": "7fc76f4a4278691c28aa802cfd336a06d4ca7f6b65807fa2eab9a12ffdf050ef",
+      "conversion": "Original SVG rendered by Edge at 400x400; SVG retained."
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/strogonoff.svg",
+      "sha256": "b45304ba94a961204b21aa0d295b46f50d9edcacf6189fd09797786b0fd10e9a"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/sushi.png",
+      "sha256": "8887fde502d6f2e24c2ee397dc9b789f94c04da8bdfa9a9a9499c9b8b91e5a37",
+      "conversion": "Original SVG rendered by Edge at 400x400; SVG retained."
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/pratos.js",
+      "path": "assets/images/diary/sushi.svg",
+      "sha256": "4e1a4d7a4fbb10493aa2e5a87e586a9f27b91b16a7319c530d0797f95bcc4099"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/img/pulseira-mini.png",
+      "path": "assets/images/diary-band.png",
+      "sha256": "3067abc7566a24980c7805382dc88492fe8584fb9e65b2caed6509cf7ea9c3fa"
+    }
+  ]
+}

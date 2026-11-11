@@ -12,6 +12,7 @@ class AppConfig {
     required this.connectTimeout,
     required this.receiveTimeout,
     required this.googleWebClientId,
+    required this.googleIosClientId,
     required this.cartoBasemapApiKey,
     required this.cartoAndroidCertSha1,
     required this.revenueCatGoogleApiKey,
@@ -38,6 +39,7 @@ class AppConfig {
       'API_RECEIVE_TIMEOUT_SECONDS',
     ),
     'GOOGLE_WEB_CLIENT_ID': String.fromEnvironment('GOOGLE_WEB_CLIENT_ID'),
+    'GOOGLE_IOS_CLIENT_ID': String.fromEnvironment('GOOGLE_IOS_CLIENT_ID'),
     'CARTO_BASEMAP_API_KEY': String.fromEnvironment('CARTO_BASEMAP_API_KEY'),
     'CARTO_ANDROID_CERT_SHA1': String.fromEnvironment(
       'CARTO_ANDROID_CERT_SHA1',
@@ -70,6 +72,7 @@ class AppConfig {
   final Duration connectTimeout;
   final Duration receiveTimeout;
   final String googleWebClientId;
+  final String googleIosClientId;
   final String cartoBasemapApiKey;
   final String cartoAndroidCertSha1;
   final String revenueCatGoogleApiKey;
@@ -153,6 +156,7 @@ class AppConfig {
       connectTimeout: timeout('API_CONNECT_TIMEOUT_SECONDS', 15),
       receiveTimeout: timeout('API_RECEIVE_TIMEOUT_SECONDS', 30),
       googleWebClientId: read('GOOGLE_WEB_CLIENT_ID', defaultGoogleWebClientId),
+      googleIosClientId: read('GOOGLE_IOS_CLIENT_ID'),
       cartoBasemapApiKey: read('CARTO_BASEMAP_API_KEY'),
       cartoAndroidCertSha1: read('CARTO_ANDROID_CERT_SHA1'),
       revenueCatGoogleApiKey: read('REVENUECAT_GOOGLE_API_KEY'),
