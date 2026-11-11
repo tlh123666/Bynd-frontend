@@ -49,10 +49,20 @@ class PlatformGoogleIdentity implements GoogleIdentity {
       }
       return credentials.idToken;
     } on PlatformException catch (error) {
+      // 把平台侧真实错误码打进日志并带进对外消息： DEVELOPER_ERROR(10)、
+      // INTERNAL_ERROR(12500)、网络(7/20) 各是不同的修法，笼统一句
+      // “Google sign-in failed” 会让这类配置问题变成无头案。
+      debugPrint(
+        'GoogleSignIn PlatformException code=${error.code} '
+        'message=${error.message} details=${error.details}',
+      );
       if (error.code == 'sign_in_canceled' || error.code == '12501') {
         return null;
       }
-      throw const ApiException('Google sign-in failed', code: 'google_failed');
+      throw ApiException(
+        'Google sign-in failed (${error.code})',
+        code: 'google_failed',
+      );
     }
   }
 

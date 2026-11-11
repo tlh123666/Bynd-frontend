@@ -51,6 +51,16 @@ android {
         release {
             signingConfig = signingConfigs.getByName("release")
         }
+        debug {
+            // Google 登录按「包名 + 签名证书 SHA-1」匹配 OAuth 客户端。默认 debug
+            // 证书的指纹虽然已登记到 Firebase，但对应 OAuth 客户端的自动生成要数小
+            // 时到一天，期间登录一律报 DEVELOPER_ERROR(10)。本地上传证书的客户端
+            // 早已存在，debug 构建直接复用它，flutter run 立即可用。
+            // key.properties 缺失时回退默认 debug 签名，不阻塞无签名的开发环境。
+            if (releaseSigningReady) {
+                signingConfig = signingConfigs.getByName("release")
+            }
+        }
     }
 }
 
