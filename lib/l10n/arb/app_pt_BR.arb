@@ -297,5 +297,38 @@
         "type": "int"
       }
     }
+  },
+  "communityMyGroups": "Meus grupos",
+  "communityEmptyGroups": "Nenhum grupo ainda. Crie um ou entre com um convite.",
+  "communityToday": "Para hoje",
+  "communityMarkDone": "Marcar como feito",
+  "communityMarkedDone": "Dia marcado como feito.",
+  "communityDoneToday": "Feito hoje",
+  "communityRetry": "Tentar novamente",
+  "communityAccept": "Aceitar",
+  "communityDecline": "Recusar",
+  "communityMemberCount": "{count} pessoas",
+  "@@communityMemberCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "communityDaysTotal": "desafio de {days} dias",
+  "@@communityDaysTotal": {
+    "placeholders": {
+      "days": {}
+    }
+  },
+  "communityEmptyChat": "Nenhuma mensagem ainda. Diga oi!",
+  "communityDayToday": "Hoje",
+  "communityDayYesterday": "Ontem",
+  "communityMessageRecalled": "Mensagem removida",
+  "communitySendHint": "Mensagem para o grupo",
+  "communityInvitationFrom": "{inviter} convidou você para \"{group}\"",
+  "@@communityInvitationFrom": {
+    "placeholders": {
+      "inviter": {},
+      "group": {}
+    }
   }
 }

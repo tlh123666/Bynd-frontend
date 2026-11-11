@@ -10,6 +10,7 @@ import '../../l10n/app_localizations_context.dart';
 import '../../l10n/language_picker_sheet.dart';
 import 'application/home_controller.dart';
 import 'presentation/widgets/home_content.dart';
+import '../community/presentation/community_page.dart';
 import 'presentation/pages/home_diary_page.dart';
 import 'presentation/widgets/home_account_guard.dart';
 import '../profile/profile_page.dart';
@@ -125,6 +126,17 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           builder: (_) => HomeAccountGuard(
             controller: _home,
             child: HomeDiaryPage(controller: _home),
+          ),
+        ),
+      );
+      return;
+    }
+    if (label == context.l10n.community) {
+      Navigator.of(context).push<void>(
+        MaterialPageRoute(
+          builder: (_) => HomeAccountGuard(
+            controller: _home,
+            child: const CommunityPage(),
           ),
         ),
       );

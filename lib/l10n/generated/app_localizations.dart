@@ -1610,6 +1610,108 @@ abstract class AppLocalizations {
   /// In pt_BR, this message translates to:
   /// **'Alterar idioma'**
   String get authChangeLanguage;
+
+  /// No description provided for @communityMyGroups.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Meus grupos'**
+  String get communityMyGroups;
+
+  /// No description provided for @communityEmptyGroups.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Nenhum grupo ainda. Crie um ou entre com um convite.'**
+  String get communityEmptyGroups;
+
+  /// No description provided for @communityToday.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Para hoje'**
+  String get communityToday;
+
+  /// No description provided for @communityMarkDone.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Marcar como feito'**
+  String get communityMarkDone;
+
+  /// No description provided for @communityMarkedDone.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Dia marcado como feito.'**
+  String get communityMarkedDone;
+
+  /// No description provided for @communityDoneToday.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Feito hoje'**
+  String get communityDoneToday;
+
+  /// No description provided for @communityRetry.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Tentar novamente'**
+  String get communityRetry;
+
+  /// No description provided for @communityAccept.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Aceitar'**
+  String get communityAccept;
+
+  /// No description provided for @communityDecline.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Recusar'**
+  String get communityDecline;
+
+  /// No description provided for @communityMemberCount.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'{count} pessoas'**
+  String communityMemberCount(Object count);
+
+  /// No description provided for @communityDaysTotal.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'desafio de {days} dias'**
+  String communityDaysTotal(Object days);
+
+  /// No description provided for @communityEmptyChat.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Nenhuma mensagem ainda. Diga oi!'**
+  String get communityEmptyChat;
+
+  /// No description provided for @communityDayToday.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Hoje'**
+  String get communityDayToday;
+
+  /// No description provided for @communityDayYesterday.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Ontem'**
+  String get communityDayYesterday;
+
+  /// No description provided for @communityMessageRecalled.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Mensagem removida'**
+  String get communityMessageRecalled;
+
+  /// No description provided for @communitySendHint.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Mensagem para o grupo'**
+  String get communitySendHint;
+
+  /// No description provided for @communityInvitationFrom.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'{inviter} convidou você para \"{group}\"'**
+  String communityInvitationFrom(Object group, Object inviter);
 }
 
 class _AppLocalizationsDelegate

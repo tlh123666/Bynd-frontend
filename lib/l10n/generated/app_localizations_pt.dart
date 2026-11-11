@@ -820,6 +820,64 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get authChangeLanguage => 'Alterar idioma';
+
+  @override
+  String get communityMyGroups => 'Meus grupos';
+
+  @override
+  String get communityEmptyGroups =>
+      'Nenhum grupo ainda. Crie um ou entre com um convite.';
+
+  @override
+  String get communityToday => 'Para hoje';
+
+  @override
+  String get communityMarkDone => 'Marcar como feito';
+
+  @override
+  String get communityMarkedDone => 'Dia marcado como feito.';
+
+  @override
+  String get communityDoneToday => 'Feito hoje';
+
+  @override
+  String get communityRetry => 'Tentar novamente';
+
+  @override
+  String get communityAccept => 'Aceitar';
+
+  @override
+  String get communityDecline => 'Recusar';
+
+  @override
+  String communityMemberCount(Object count) {
+    return '$count pessoas';
+  }
+
+  @override
+  String communityDaysTotal(Object days) {
+    return 'desafio de $days dias';
+  }
+
+  @override
+  String get communityEmptyChat => 'Nenhuma mensagem ainda. Diga oi!';
+
+  @override
+  String get communityDayToday => 'Hoje';
+
+  @override
+  String get communityDayYesterday => 'Ontem';
+
+  @override
+  String get communityMessageRecalled => 'Mensagem removida';
+
+  @override
+  String get communitySendHint => 'Mensagem para o grupo';
+
+  @override
+  String communityInvitationFrom(Object group, Object inviter) {
+    return '$inviter convidou você para \"$group\"';
+  }
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -1638,4 +1696,62 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get authChangeLanguage => 'Alterar idioma';
+
+  @override
+  String get communityMyGroups => 'Meus grupos';
+
+  @override
+  String get communityEmptyGroups =>
+      'Nenhum grupo ainda. Crie um ou entre com um convite.';
+
+  @override
+  String get communityToday => 'Para hoje';
+
+  @override
+  String get communityMarkDone => 'Marcar como feito';
+
+  @override
+  String get communityMarkedDone => 'Dia marcado como feito.';
+
+  @override
+  String get communityDoneToday => 'Feito hoje';
+
+  @override
+  String get communityRetry => 'Tentar novamente';
+
+  @override
+  String get communityAccept => 'Aceitar';
+
+  @override
+  String get communityDecline => 'Recusar';
+
+  @override
+  String communityMemberCount(Object count) {
+    return '$count pessoas';
+  }
+
+  @override
+  String communityDaysTotal(Object days) {
+    return 'desafio de $days dias';
+  }
+
+  @override
+  String get communityEmptyChat => 'Nenhuma mensagem ainda. Diga oi!';
+
+  @override
+  String get communityDayToday => 'Hoje';
+
+  @override
+  String get communityDayYesterday => 'Ontem';
+
+  @override
+  String get communityMessageRecalled => 'Mensagem removida';
+
+  @override
+  String get communitySendHint => 'Mensagem para o grupo';
+
+  @override
+  String communityInvitationFrom(Object group, Object inviter) {
+    return '$inviter convidou você para \"$group\"';
+  }
 }

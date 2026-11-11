@@ -297,5 +297,38 @@
         "type": "int"
       }
     }
+  },
+  "communityMyGroups": "My groups",
+  "communityEmptyGroups": "No groups yet. Create one or join with an invitation.",
+  "communityToday": "For today",
+  "communityMarkDone": "Mark as done",
+  "communityMarkedDone": "Day marked as done.",
+  "communityDoneToday": "Done today",
+  "communityRetry": "Try again",
+  "communityAccept": "Accept",
+  "communityDecline": "Decline",
+  "communityMemberCount": "{count} members",
+  "@@communityMemberCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "communityDaysTotal": "{days}-day challenge",
+  "@@communityDaysTotal": {
+    "placeholders": {
+      "days": {}
+    }
+  },
+  "communityEmptyChat": "No messages yet. Say hi!",
+  "communityDayToday": "Today",
+  "communityDayYesterday": "Yesterday",
+  "communityMessageRecalled": "Message removed",
+  "communitySendHint": "Message the group",
+  "communityInvitationFrom": "{inviter} invited you to \"{group}\"",
+  "@@communityInvitationFrom": {
+    "placeholders": {
+      "inviter": {},
+      "group": {}
+    }
   }
 }

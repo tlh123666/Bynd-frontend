@@ -817,4 +817,62 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get authChangeLanguage => 'Change language';
+
+  @override
+  String get communityMyGroups => 'My groups';
+
+  @override
+  String get communityEmptyGroups =>
+      'No groups yet. Create one or join with an invitation.';
+
+  @override
+  String get communityToday => 'For today';
+
+  @override
+  String get communityMarkDone => 'Mark as done';
+
+  @override
+  String get communityMarkedDone => 'Day marked as done.';
+
+  @override
+  String get communityDoneToday => 'Done today';
+
+  @override
+  String get communityRetry => 'Try again';
+
+  @override
+  String get communityAccept => 'Accept';
+
+  @override
+  String get communityDecline => 'Decline';
+
+  @override
+  String communityMemberCount(Object count) {
+    return '$count members';
+  }
+
+  @override
+  String communityDaysTotal(Object days) {
+    return '$days-day challenge';
+  }
+
+  @override
+  String get communityEmptyChat => 'No messages yet. Say hi!';
+
+  @override
+  String get communityDayToday => 'Today';
+
+  @override
+  String get communityDayYesterday => 'Yesterday';
+
+  @override
+  String get communityMessageRecalled => 'Message removed';
+
+  @override
+  String get communitySendHint => 'Message the group';
+
+  @override
+  String communityInvitationFrom(Object group, Object inviter) {
+    return '$inviter invited you to \"$group\"';
+  }
 }
