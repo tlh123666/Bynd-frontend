@@ -1361,6 +1361,15 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get communityCreateNote =>
       'Pode criar sem ninguém: depois de criar, você chama mais gente nos ajustes do grupo.';
+
+  @override
+  String get communityPublicGroup => 'Grupo público';
+
+  @override
+  String get communityJoin => 'Entrar';
+
+  @override
+  String get communityJoinedGroup => 'Boas-vindas ao grupo!';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -2720,4 +2729,13 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   @override
   String get communityCreateNote =>
       'Pode criar sem ninguém: depois de criar, você chama mais gente nos ajustes do grupo.';
+
+  @override
+  String get communityPublicGroup => 'Grupo público';
+
+  @override
+  String get communityJoin => 'Entrar';
+
+  @override
+  String get communityJoinedGroup => 'Boas-vindas ao grupo!';
 }

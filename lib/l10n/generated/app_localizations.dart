@@ -2594,6 +2594,24 @@ abstract class AppLocalizations {
   /// In pt_BR, this message translates to:
   /// **'Pode criar sem ninguém: depois de criar, você chama mais gente nos ajustes do grupo.'**
   String get communityCreateNote;
+
+  /// No description provided for @communityPublicGroup.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Grupo público'**
+  String get communityPublicGroup;
+
+  /// No description provided for @communityJoin.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Entrar'**
+  String get communityJoin;
+
+  /// No description provided for @communityJoinedGroup.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Boas-vindas ao grupo!'**
+  String get communityJoinedGroup;
 }
 
 class _AppLocalizationsDelegate

@@ -1356,4 +1356,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get communityCreateNote =>
       'You can create it alone: right after, you can invite more people in the group settings.';
+
+  @override
+  String get communityPublicGroup => 'Public group';
+
+  @override
+  String get communityJoin => 'Join';
+
+  @override
+  String get communityJoinedGroup => 'Welcome to the group!';
 }

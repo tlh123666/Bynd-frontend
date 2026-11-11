@@ -77,14 +77,35 @@ class _CommunityPageState extends State<CommunityPage> {
           }
         } catch (_) {}
       }
+      // 群列表会连同「可发现的公开群」一起返回（membershipState =
+      // not_joined）。只有 joined 的群才允许读详情/消息，公开未加入的群
+      // 详情会 403——这不是错误，是「还没加入」的正常状态，封面给
+      // Entrar 按钮即可。打卡墙挂在第一个已加入的群上。
+      final joinedGroups = groups
+          .where((g) => g.membershipState == 'joined')
+          .toList(growable: false);
+      for (final group in joinedGroups) {
+        try {
+          _members[group.id] = await _repo.groupMembers(group.id);
+        } catch (_) {}
+        try {
+          final goals = await _repo.groupGoals(group.id);
+          for (final goal in goals) {
+            final ranking = await _repo.goalRanking(group.id, goal.id);
+            _myRank[group.id] ??= ranking.where((r) => r.isMe).firstOrNull;
+          }
+        } catch (_) {}
+      }
       var mural = <CommunityMessage>[];
       var atlas = <CommunityAtlasInsight>[];
-      if (groups.isNotEmpty) {
-        final messages = await _repo.listMessages(groups.first.id);
-        messages.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-        mural = messages;
+      if (joinedGroups.isNotEmpty) {
         try {
-          atlas = await _repo.groupAtlas(groups.first.id);
+          final messages = await _repo.listMessages(joinedGroups.first.id);
+          messages.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+          mural = messages;
+          try {
+            atlas = await _repo.groupAtlas(joinedGroups.first.id);
+          } catch (_) {}
         } catch (_) {}
       }
       if (!mounted) return;
@@ -147,6 +168,21 @@ class _CommunityPageState extends State<CommunityPage> {
     );
   }
 
+  Future<void> _join(CommunityGroup group) async {
+    try {
+      await _repo.joinGroup(group.id, consent: true);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.communityJoinedGroup)),
+      );
+      await _reload();
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(error.toString())));
+    }
+  }
+
   void _openChat(CommunityGroup group) {
     Navigator.of(context).push<void>(
       MaterialPageRoute(
@@ -169,7 +205,10 @@ class _CommunityPageState extends State<CommunityPage> {
   Widget build(BuildContext context) {
     final strings = context.l10n;
     final today = _day == 0;
-    final main = _groups.isEmpty ? null : _groups.first;
+    final joined = _groups
+        .where((g) => g.membershipState == 'joined')
+        .toList(growable: false);
+    final main = joined.isEmpty ? null : joined.first;
     final mural =
         _mural.where((m) => _sameDay(m.createdAt, today)).toList();
     return Scaffold(
@@ -295,13 +334,20 @@ class _CommunityPageState extends State<CommunityPage> {
         clipBehavior: Clip.none,
         children: [
           for (final group in _groups)
-            _GroupCover(
-              name: group.name,
-              memberCount: group.memberCount,
-              members: _members[group.id] ?? const [],
-              myRank: _myRank[group.id],
-              onTap: () => _openChat(group),
-            ),
+            if (group.membershipState == 'joined')
+              _GroupCover(
+                name: group.name,
+                memberCount: group.memberCount,
+                members: _members[group.id] ?? const [],
+                myRank: _myRank[group.id],
+                onTap: () => _openChat(group),
+              )
+            else
+              _PublicCover(
+                name: group.name,
+                memberCount: group.memberCount,
+                onJoin: () => _join(group),
+              ),
           for (final invitation in _invitations)
             _InviteCover(
               invitation: invitation,
@@ -585,6 +631,88 @@ class _GroupCover extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _PublicCover extends StatelessWidget {
+  const _PublicCover({
+    required this.name,
+    required this.memberCount,
+    required this.onJoin,
+  });
+
+  final String name;
+  final int memberCount;
+  final VoidCallback onJoin;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: CommunityStyle.coverWidth,
+      height: CommunityStyle.coverHeight,
+      margin: const EdgeInsets.only(right: 10),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(CommunityStyle.coverRadius),
+        gradient: CommunityStyle.coverFallback,
+      ),
+      child: Stack(
+        children: [
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.all(
+                Radius.circular(CommunityStyle.coverRadius),
+              ),
+              gradient: CommunityStyle.coverScrim,
+            ),
+            child: SizedBox.expand(),
+          ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  context.l10n.communityPublicGroup,
+                  style: AppTypography.caption.copyWith(
+                    color: CommunityStyle.onImage,
+                  ),
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    style: AppTypography.body.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Text(
+                        context.l10n.communityMemberCount(memberCount),
+                        style: AppTypography.caption.copyWith(
+                          color: CommunityStyle.onImage,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      _CoverButton(
+                        label: context.l10n.communityJoin,
+                        filled: true,
+                        onTap: onJoin,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
