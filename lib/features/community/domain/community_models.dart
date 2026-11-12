@@ -22,6 +22,7 @@ class CommunityGroup {
     required this.memberCount,
     required this.unreadCount,
     required this.messageMuted,
+    this.members = const [],
   });
 
   factory CommunityGroup.fromJson(Map<String, dynamic> json) => CommunityGroup(
@@ -35,6 +36,9 @@ class CommunityGroup {
     memberCount: (json['memberCount'] as num?)?.toInt() ?? 0,
     unreadCount: (json['unreadCount'] as num?)?.toInt() ?? 0,
     messageMuted: json['messageMuted'] as bool? ?? false,
+    members: (json['members'] as List<Object?>? ?? const [])
+        .map((e) => CommunityMember.fromJson(e as Map<String, dynamic>))
+        .toList(),
   );
 
   final String id;
@@ -47,6 +51,9 @@ class CommunityGroup {
   final int memberCount;
   final int unreadCount;
   final bool messageMuted;
+
+  /// 列表接口直接携带的成员头像栈（前 5 个活跃成员）。
+  final List<CommunityMember> members;
 }
 
 /// 群成员，对应 `GroupMemberData`。
