@@ -120,6 +120,10 @@ class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
   // 只有列表处于顶部时才累积位移（否则是正常滚动列表内容）。
   double _dragDy = 0;
   bool _dragging = false;
+
+  /// 整卡关闭中：子层瞬间归位并「粘」在卡片上随整卡滑出——若让子层
+  /// 自己滑走（_dragDy=1400），它会比整卡更快飞出，露出卡片自身底色。
+  bool _closing = false;
   bool _listAtTop = true;
   Duration? _lastMoveAt;
   double? _lastMoveDy;
@@ -166,11 +170,12 @@ class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
     }
     final shouldClose = _dragDy > 90 || _velocity > 650;
     if (shouldClose) {
-      // 立即恢复对话层（避免滑出后露出暗底），卡片自身继续滑出动画；
+      // 子层瞬间归位、粘在卡片上，由宿主把整张卡（含子层）滑出——
       // 下滑语义=关闭整个 Atlas 浮层（与在 Atlas 卡片上下滑一致）
       setState(() {
         _dragging = false;
-        _dragDy = 1400;
+        _closing = true;
+        _dragDy = 0;
       });
       (widget.onDragClose ?? widget.onClose)();
     } else {
@@ -251,7 +256,9 @@ class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
       onPointerUp: (_) => _onPointerUp(),
       onPointerCancel: (_) => _onPointerUp(),
       child: AnimatedSlide(
-        duration: _dragging ? Duration.zero : const Duration(milliseconds: 220),
+        duration: (_dragging || _closing)
+            ? Duration.zero
+            : const Duration(milliseconds: 220),
         curve: Curves.easeOut,
         offset: Offset(0, _dragDy / 900),
         child: ColoredBox(
