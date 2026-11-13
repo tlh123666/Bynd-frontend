@@ -229,17 +229,13 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
                 curve: Curves.easeOut,
                 offset: Offset(0, _dragDy / media.size.height),
                 child: DecoratedBox(
+                  // 注意：这里刻意不加 BoxShadow/模糊——大半径模糊阴影在
+                  // 拖动与退场动画期间每帧重画，是 Android Impeller 黑屏
+                  // 的触发源（真机踩过两次）；层次感由遮罩层提供。
                   decoration: BoxDecoration(
                     borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(28),
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: .5),
-                        blurRadius: 40,
-                        offset: const Offset(0, -10),
-                      ),
-                    ],
                   ),
                   child: ClipRRect(
                     borderRadius: const BorderRadius.vertical(
