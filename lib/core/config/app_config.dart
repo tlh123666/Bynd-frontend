@@ -25,6 +25,10 @@ class AppConfig {
   static const defaultApiBaseUrl = 'https://api.byndhealth.com.br';
   static const defaultGoogleWebClientId =
       '537472521708-b4tpq2sk0vqo9blj4slanijckc07pd9i.apps.googleusercontent.com';
+  // BYND 于 GCP 控制台创建的 iOS OAuth 客户端（bundle com.byndhealth.app），
+  // 与 Web 客户端同一项目；iOS 登录按它校验受众。
+  static const defaultGoogleIosClientId =
+      '537472521708-hlvrinj89cfebgmr5pvbe4unv3u25i3b.apps.googleusercontent.com';
 
   static const buildValues = <String, String>{
     'APP_ENV': String.fromEnvironment('APP_ENV'),
@@ -156,7 +160,7 @@ class AppConfig {
       connectTimeout: timeout('API_CONNECT_TIMEOUT_SECONDS', 15),
       receiveTimeout: timeout('API_RECEIVE_TIMEOUT_SECONDS', 30),
       googleWebClientId: read('GOOGLE_WEB_CLIENT_ID', defaultGoogleWebClientId),
-      googleIosClientId: read('GOOGLE_IOS_CLIENT_ID'),
+      googleIosClientId: read('GOOGLE_IOS_CLIENT_ID', defaultGoogleIosClientId),
       cartoBasemapApiKey: read('CARTO_BASEMAP_API_KEY'),
       cartoAndroidCertSha1: read('CARTO_ANDROID_CERT_SHA1'),
       revenueCatGoogleApiKey: read('REVENUECAT_GOOGLE_API_KEY'),

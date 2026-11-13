@@ -16,6 +16,8 @@ import 'presentation/widgets/home_account_guard.dart';
 import '../profile/profile_page.dart';
 import '../activity/presentation/pages/activity_overview_page.dart';
 import '../atlas/presentation/pages/mapa_page.dart';
+import '../atlas/presentation/pages/atlas_chat_page.dart';
+import 'presentation/pages/home_signals_page.dart';
 import '../device/presentation/pages/device_management_page.dart';
 
 /// Home owns navigation; content and data live in the home feature layers.
@@ -69,6 +71,18 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Rect? _quickActionOrigin;
   bool _menuOpen = false;
 
+  /// body 的 IndexedStack 索引（Atlas 是浮层，不占 body 槽位）。
+  int get _bodyIndex => switch (_selectedIndex) {
+    2 => 1,
+    3 => 2,
+    _ => 0,
+  };
+
+  /// 底部 tab 的 Atlas：滑出对话浮层（Assistente.jsx 的 folha 模式）。
+  void _openAtlasSheet() {
+    Navigator.of(context).push<void>(AtlasSheetRoute());
+  }
+
   void _openQuickActions() {
     final box = _moreButtonKey.currentContext?.findRenderObject();
     if (box is! RenderBox || !box.hasSize) return;
@@ -115,7 +129,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       unawaited(_signOut());
       return;
     }
-    if (label == 'Mapa' || label == context.l10n.atlas) {
+    if (label == context.l10n.menuMapa || label == 'Mapa') {
       // 抽屉收起有动画，直接 push 会和收起动作叠在一起；与设备页保持同一步调。
       _openMapa();
       return;
@@ -134,10 +148,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     if (label == context.l10n.community) {
       Navigator.of(context).push<void>(
         MaterialPageRoute(
-          builder: (_) => HomeAccountGuard(
-            controller: _home,
-            child: const CommunityPage(),
-          ),
+          builder: (_) =>
+              HomeAccountGuard(controller: _home, child: const CommunityPage()),
         ),
       );
       return;
@@ -224,21 +236,38 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       fit: StackFit.expand,
       children: [
         Scaffold(
-          extendBody: true,
+          // Hoje 标签下内容延伸到底部玻璃胶囊后面（毛玻璃需要背景）；
+          // 其余标签是自带 Scaffold 的整页，收回导航条上方。
+          extendBody: _selectedIndex == 0,
           backgroundColor: Colors.transparent,
-          body: HomeContent(
-            controller: _home,
-            onMenu: () => setState(() => _menuOpen = true),
-            onProfile: _openSettings,
-            onDevice: _openDevice,
-            onMapa: _openMapa,
+          // Atlas 不是 tab 页：TabBar.jsx 里点 Atlas 从底部滑出对话浮层
+          // （folha，盖住 tabbar），body 只驻留 Hoje / Comunidade / Saúde。
+          // body 索引映射：0→Hoje、2→Comunidade、3→Saúde。
+          body: IndexedStack(
+            index: _bodyIndex,
+            children: [
+              HomeContent(
+                controller: _home,
+                onMenu: () => setState(() => _menuOpen = true),
+                onProfile: _openSettings,
+                onDevice: _openDevice,
+                onMapa: _openMapa,
+              ),
+              HomeAccountGuard(controller: _home, child: const CommunityPage()),
+              HomeSignalsPage(controller: _home, showClose: false),
+            ],
           ),
           bottomNavigationBar: AppBottomNav(
             selectedIndex: _selectedIndex,
             moreButtonKey: _moreButtonKey,
             moreOpen: _quickActionsOpen,
-            onDestinationSelected: (index) =>
-                setState(() => _selectedIndex = index),
+            onDestinationSelected: (index) {
+              if (index == 1) {
+                _openAtlasSheet();
+                return;
+              }
+              setState(() => _selectedIndex = index);
+            },
             onMorePressed: _openQuickActions,
           ),
         ),

@@ -1365,4 +1365,109 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get communityJoinedGroup => 'Welcome to the group!';
+
+  @override
+  String get atlasInsights => 'Insights';
+
+  @override
+  String get atlasChat => 'Talk to ATLAS';
+
+  @override
+  String get insightsTitle => 'Insights';
+
+  @override
+  String get insightsRefresh => 'Refresh';
+
+  @override
+  String get insightsError =>
+      'Could not load insights. Pull down to try again.';
+
+  @override
+  String get insightsEmpty =>
+      'No insights yet. Keep syncing your band — ATLAS will speak up when your data tells something worth knowing.';
+
+  @override
+  String get insightsFactors => 'What may be involved';
+
+  @override
+  String get insightsActions => 'What you can try';
+
+  @override
+  String get chatTitle => 'Atlas';
+
+  @override
+  String get chatNew => 'New conversation';
+
+  @override
+  String get chatEmptyHint =>
+      'Ask about your sleep, recovery, stress or training readiness. ATLAS answers with your own data and explains what it means.';
+
+  @override
+  String get chatInputHint => 'Ask ATLAS';
+
+  @override
+  String get menuMapa => 'Mapa';
+
+  @override
+  String get chatSug1 => 'How am I doing?';
+
+  @override
+  String get chatSug2 => 'Summarize my day';
+
+  @override
+  String get chatSug3 => 'Why is my HRV not recovering?';
+
+  @override
+  String get chatHistoryTitle => 'Conversations';
+
+  @override
+  String get chatHistoryEmpty => 'No conversations yet.';
+
+  @override
+  String get chatHistoryUntitled => 'Untitled conversation';
+
+  @override
+  String get healthGroupSleep => 'Sleep';
+
+  @override
+  String get healthGroupEnergy => 'Energy';
+
+  @override
+  String get healthGroupMetabolism => 'Metabolism';
+
+  @override
+  String get healthGroupHeartBody => 'Heart & body';
+
+  @override
+  String get healthGroupBreathOxygen => 'Breathing & oxygen';
+
+  @override
+  String get healthGroupLongevity => 'Longevity';
+
+  @override
+  String get memoriaTitle => 'Memory';
+
+  @override
+  String get memoriaHeroTitle => 'What ATLAS knows about you';
+
+  @override
+  String get memoriaHeroSub => 'The more it knows, the better the answers.';
+
+  @override
+  String get memoriaKicker => 'What it stored';
+
+  @override
+  String get memoriaCurrent => 'Current';
+
+  @override
+  String get memoriaPast => 'Past';
+
+  @override
+  String get memoriaTold => 'You told';
+
+  @override
+  String get memoriaPerceived => 'ATLAS noticed';
+
+  @override
+  String get memoriaSince => 'since';
 }

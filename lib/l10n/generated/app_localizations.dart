@@ -2612,6 +2612,210 @@ abstract class AppLocalizations {
   /// In pt_BR, this message translates to:
   /// **'Boas-vindas ao grupo!'**
   String get communityJoinedGroup;
+
+  /// No description provided for @atlasInsights.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Insights'**
+  String get atlasInsights;
+
+  /// No description provided for @atlasChat.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Conversar com o ATLAS'**
+  String get atlasChat;
+
+  /// No description provided for @insightsTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Insights'**
+  String get insightsTitle;
+
+  /// No description provided for @insightsRefresh.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Atualizar'**
+  String get insightsRefresh;
+
+  /// No description provided for @insightsError.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Não foi possível carregar os insights. Puxe para baixo e tente novamente.'**
+  String get insightsError;
+
+  /// No description provided for @insightsEmpty.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Nenhum insight ainda. Continue sincronizando a pulseira — o ATLAS fala quando seus dados contam algo que vale a pena saber.'**
+  String get insightsEmpty;
+
+  /// No description provided for @insightsFactors.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'O que pode estar envolvido'**
+  String get insightsFactors;
+
+  /// No description provided for @insightsActions.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'O que você pode experimentar'**
+  String get insightsActions;
+
+  /// No description provided for @chatTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Atlas'**
+  String get chatTitle;
+
+  /// No description provided for @chatNew.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Nova conversa'**
+  String get chatNew;
+
+  /// No description provided for @chatEmptyHint.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Pergunte sobre sono, recuperação, estresse ou prontidão para treinar. O ATLAS responde com os seus dados e explica o que significam.'**
+  String get chatEmptyHint;
+
+  /// No description provided for @chatInputHint.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Pergunte ao Atlas'**
+  String get chatInputHint;
+
+  /// No description provided for @menuMapa.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Mapa'**
+  String get menuMapa;
+
+  /// No description provided for @chatSug1.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Como estou?'**
+  String get chatSug1;
+
+  /// No description provided for @chatSug2.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Me dá um resumo do meu dia'**
+  String get chatSug2;
+
+  /// No description provided for @chatSug3.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Por que a VFC não volta?'**
+  String get chatSug3;
+
+  /// No description provided for @chatHistoryTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Conversas'**
+  String get chatHistoryTitle;
+
+  /// No description provided for @chatHistoryEmpty.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Nenhuma conversa ainda.'**
+  String get chatHistoryEmpty;
+
+  /// No description provided for @chatHistoryUntitled.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Conversa sem título'**
+  String get chatHistoryUntitled;
+
+  /// No description provided for @healthGroupSleep.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Sono'**
+  String get healthGroupSleep;
+
+  /// No description provided for @healthGroupEnergy.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Energia'**
+  String get healthGroupEnergy;
+
+  /// No description provided for @healthGroupMetabolism.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Metabolismo'**
+  String get healthGroupMetabolism;
+
+  /// No description provided for @healthGroupHeartBody.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Coração e corpo'**
+  String get healthGroupHeartBody;
+
+  /// No description provided for @healthGroupBreathOxygen.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Respiração e oxigênio'**
+  String get healthGroupBreathOxygen;
+
+  /// No description provided for @healthGroupLongevity.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Longevidade'**
+  String get healthGroupLongevity;
+
+  /// No description provided for @memoriaTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Memória'**
+  String get memoriaTitle;
+
+  /// No description provided for @memoriaHeroTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'O que o Atlas sabe de você'**
+  String get memoriaHeroTitle;
+
+  /// No description provided for @memoriaHeroSub.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Quanto mais ele sabe, melhores as respostas.'**
+  String get memoriaHeroSub;
+
+  /// No description provided for @memoriaKicker.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'O que ele guardou'**
+  String get memoriaKicker;
+
+  /// No description provided for @memoriaCurrent.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Atual'**
+  String get memoriaCurrent;
+
+  /// No description provided for @memoriaPast.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Passou'**
+  String get memoriaPast;
+
+  /// No description provided for @memoriaTold.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Você contou'**
+  String get memoriaTold;
+
+  /// No description provided for @memoriaPerceived.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'O Atlas percebeu'**
+  String get memoriaPerceived;
+
+  /// No description provided for @memoriaSince.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'desde'**
+  String get memoriaSince;
 }
 
 class _AppLocalizationsDelegate

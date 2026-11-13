@@ -11,11 +11,7 @@ import '../data/atlas_repository.dart';
 /// 分散 new 的后果很具体：每页各建一个 ApiClient 就有各自的连接池与
 /// 令牌读取时机，某处登出后别处还拿着旧令牌继续请求。
 class AtlasScope extends InheritedWidget {
-  const AtlasScope({
-    required this.repository,
-    required super.child,
-    super.key,
-  });
+  const AtlasScope({required this.repository, required super.child, super.key});
 
   final AtlasRepository repository;
 

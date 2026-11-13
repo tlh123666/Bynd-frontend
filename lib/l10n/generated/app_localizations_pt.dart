@@ -1370,6 +1370,111 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get communityJoinedGroup => 'Boas-vindas ao grupo!';
+
+  @override
+  String get atlasInsights => 'Insights';
+
+  @override
+  String get atlasChat => 'Conversar com o ATLAS';
+
+  @override
+  String get insightsTitle => 'Insights';
+
+  @override
+  String get insightsRefresh => 'Atualizar';
+
+  @override
+  String get insightsError =>
+      'Não foi possível carregar os insights. Puxe para baixo e tente novamente.';
+
+  @override
+  String get insightsEmpty =>
+      'Nenhum insight ainda. Continue sincronizando a pulseira — o ATLAS fala quando seus dados contam algo que vale a pena saber.';
+
+  @override
+  String get insightsFactors => 'O que pode estar envolvido';
+
+  @override
+  String get insightsActions => 'O que você pode experimentar';
+
+  @override
+  String get chatTitle => 'Atlas';
+
+  @override
+  String get chatNew => 'Nova conversa';
+
+  @override
+  String get chatEmptyHint =>
+      'Pergunte sobre sono, recuperação, estresse ou prontidão para treinar. O ATLAS responde com os seus dados e explica o que significam.';
+
+  @override
+  String get chatInputHint => 'Pergunte ao Atlas';
+
+  @override
+  String get menuMapa => 'Mapa';
+
+  @override
+  String get chatSug1 => 'Como estou?';
+
+  @override
+  String get chatSug2 => 'Me dá um resumo do meu dia';
+
+  @override
+  String get chatSug3 => 'Por que a VFC não volta?';
+
+  @override
+  String get chatHistoryTitle => 'Conversas';
+
+  @override
+  String get chatHistoryEmpty => 'Nenhuma conversa ainda.';
+
+  @override
+  String get chatHistoryUntitled => 'Conversa sem título';
+
+  @override
+  String get healthGroupSleep => 'Sono';
+
+  @override
+  String get healthGroupEnergy => 'Energia';
+
+  @override
+  String get healthGroupMetabolism => 'Metabolismo';
+
+  @override
+  String get healthGroupHeartBody => 'Coração e corpo';
+
+  @override
+  String get healthGroupBreathOxygen => 'Respiração e oxigênio';
+
+  @override
+  String get healthGroupLongevity => 'Longevidade';
+
+  @override
+  String get memoriaTitle => 'Memória';
+
+  @override
+  String get memoriaHeroTitle => 'O que o Atlas sabe de você';
+
+  @override
+  String get memoriaHeroSub => 'Quanto mais ele sabe, melhores as respostas.';
+
+  @override
+  String get memoriaKicker => 'O que ele guardou';
+
+  @override
+  String get memoriaCurrent => 'Atual';
+
+  @override
+  String get memoriaPast => 'Passou';
+
+  @override
+  String get memoriaTold => 'Você contou';
+
+  @override
+  String get memoriaPerceived => 'O Atlas percebeu';
+
+  @override
+  String get memoriaSince => 'desde';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -2738,4 +2843,109 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get communityJoinedGroup => 'Boas-vindas ao grupo!';
+
+  @override
+  String get atlasInsights => 'Insights';
+
+  @override
+  String get atlasChat => 'Conversar com o ATLAS';
+
+  @override
+  String get insightsTitle => 'Insights';
+
+  @override
+  String get insightsRefresh => 'Atualizar';
+
+  @override
+  String get insightsError =>
+      'Não foi possível carregar os insights. Puxe para baixo e tente novamente.';
+
+  @override
+  String get insightsEmpty =>
+      'Nenhum insight ainda. Continue sincronizando a pulseira — o ATLAS fala quando seus dados contam algo que vale a pena saber.';
+
+  @override
+  String get insightsFactors => 'O que pode estar envolvido';
+
+  @override
+  String get insightsActions => 'O que você pode experimentar';
+
+  @override
+  String get chatTitle => 'Atlas';
+
+  @override
+  String get chatNew => 'Nova conversa';
+
+  @override
+  String get chatEmptyHint =>
+      'Pergunte sobre sono, recuperação, estresse ou prontidão para treinar. O ATLAS responde com os seus dados e explica o que significam.';
+
+  @override
+  String get chatInputHint => 'Pergunte ao Atlas';
+
+  @override
+  String get menuMapa => 'Mapa';
+
+  @override
+  String get chatSug1 => 'Como estou?';
+
+  @override
+  String get chatSug2 => 'Me dá um resumo do meu dia';
+
+  @override
+  String get chatSug3 => 'Por que a VFC não volta?';
+
+  @override
+  String get chatHistoryTitle => 'Conversas';
+
+  @override
+  String get chatHistoryEmpty => 'Nenhuma conversa ainda.';
+
+  @override
+  String get chatHistoryUntitled => 'Conversa sem título';
+
+  @override
+  String get healthGroupSleep => 'Sono';
+
+  @override
+  String get healthGroupEnergy => 'Energia';
+
+  @override
+  String get healthGroupMetabolism => 'Metabolismo';
+
+  @override
+  String get healthGroupHeartBody => 'Coração e corpo';
+
+  @override
+  String get healthGroupBreathOxygen => 'Respiração e oxigênio';
+
+  @override
+  String get healthGroupLongevity => 'Longevidade';
+
+  @override
+  String get memoriaTitle => 'Memória';
+
+  @override
+  String get memoriaHeroTitle => 'O que o Atlas sabe de você';
+
+  @override
+  String get memoriaHeroSub => 'Quanto mais ele sabe, melhores as respostas.';
+
+  @override
+  String get memoriaKicker => 'O que ele guardou';
+
+  @override
+  String get memoriaCurrent => 'Atual';
+
+  @override
+  String get memoriaPast => 'Passou';
+
+  @override
+  String get memoriaTold => 'Você contou';
+
+  @override
+  String get memoriaPerceived => 'O Atlas percebeu';
+
+  @override
+  String get memoriaSince => 'desde';
 }

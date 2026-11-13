@@ -59,7 +59,16 @@
   "historySevenDayAverage": "7-day average",
   "historyDemoMonth": "Nov",
   "historyDemoSummary": "{count, plural, one{{count} activity} other{{count} activities}} · {minutes} min total",
-  "@historyDemoSummary": { "placeholders": { "count": { "type": "int" }, "minutes": { "type": "int" } } },
+  "@historyDemoSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "historyDemoTime": "today 07:50",
   "activityDetailDemoSource": "Example · illustrative data",
   "activityDetailTimeTo": "to",
@@ -69,7 +78,13 @@
   "activityDetailMaximumHeartRate": "Maximum HR",
   "activityDetailHeartZones": "Heart rate zones",
   "activityDetailZoneMost": "most time in zone {zone}",
-  "@activityDetailZoneMost": { "placeholders": { "zone": { "type": "int" } } },
+  "@activityDetailZoneMost": {
+    "placeholders": {
+      "zone": {
+        "type": "int"
+      }
+    }
+  },
   "activityDetailZone": "Zone",
   "activityDetailZoneRest": "rest",
   "activityDetailZoneVeryLight": "very light",
@@ -133,7 +148,16 @@
   "activityDemoSetsAndWeight": "sets and weight",
   "activityDemoWithGps": "with GPS",
   "activityDemoSummary": "{count, plural, one{{count} workout} other{{count} workouts}} · {minutes} min total",
-  "@activityDemoSummary": { "placeholders": { "count": { "type": "int" }, "minutes": { "type": "int" } } },
+  "@activityDemoSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "activityDemoLoadLabel": "load",
   "activityDemoLabel": "Illustrative demo data · not synced from a device",
   "activityDemoStepsValue": "6,240",
@@ -510,5 +534,39 @@
   "communityCreateNote": "You can create it alone: right after, you can invite more people in the group settings.",
   "communityPublicGroup": "Public group",
   "communityJoin": "Join",
-  "communityJoinedGroup": "Welcome to the group!"
+  "communityJoinedGroup": "Welcome to the group!",
+  "atlasInsights": "Insights",
+  "atlasChat": "Talk to ATLAS",
+  "insightsTitle": "Insights",
+  "insightsRefresh": "Refresh",
+  "insightsError": "Could not load insights. Pull down to try again.",
+  "insightsEmpty": "No insights yet. Keep syncing your band — ATLAS will speak up when your data tells something worth knowing.",
+  "insightsFactors": "What may be involved",
+  "insightsActions": "What you can try",
+  "chatTitle": "Atlas",
+  "chatNew": "New conversation",
+  "chatEmptyHint": "Ask about your sleep, recovery, stress or training readiness. ATLAS answers with your own data and explains what it means.",
+  "chatInputHint": "Ask ATLAS",
+  "menuMapa": "Mapa",
+  "chatSug1": "How am I doing?",
+  "chatSug2": "Summarize my day",
+  "chatSug3": "Why is my HRV not recovering?",
+  "chatHistoryTitle": "Conversations",
+  "chatHistoryEmpty": "No conversations yet.",
+  "chatHistoryUntitled": "Untitled conversation",
+  "healthGroupSleep": "Sleep",
+  "healthGroupEnergy": "Energy",
+  "healthGroupMetabolism": "Metabolism",
+  "healthGroupHeartBody": "Heart & body",
+  "healthGroupBreathOxygen": "Breathing & oxygen",
+  "healthGroupLongevity": "Longevity",
+  "memoriaTitle": "Memory",
+  "memoriaHeroTitle": "What ATLAS knows about you",
+  "memoriaHeroSub": "The more it knows, the better the answers.",
+  "memoriaKicker": "What it stored",
+  "memoriaCurrent": "Current",
+  "memoriaPast": "Past",
+  "memoriaTold": "You told",
+  "memoriaPerceived": "ATLAS noticed",
+  "memoriaSince": "since"
 }

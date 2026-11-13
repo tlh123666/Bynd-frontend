@@ -75,11 +75,13 @@ class AtlasWorkspace {
       readiness: WorkspaceReadiness.fromJson(
         readMap(json, 'readiness') ?? const <String, dynamic>{},
       ),
-      trainingReadiness:
-          training == null ? null : TrainingReadiness.fromJson(training),
+      trainingReadiness: training == null
+          ? null
+          : TrainingReadiness.fromJson(training),
       earlySignal: early == null ? null : EarlySignal.fromJson(early),
-      dailyDirection:
-          direction == null ? null : DailyDirection.fromJson(direction),
+      dailyDirection: direction == null
+          ? null
+          : DailyDirection.fromJson(direction),
       capabilities: capabilities == null
           ? CapabilitySlice.empty
           : CapabilitySlice.fromJson(capabilities),

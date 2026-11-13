@@ -40,6 +40,19 @@
 	<string>BYND uses the microphone when you choose voice input.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>BYND converts your speech into text for ATLAS and your diary.</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<!-- Google Sign-In 回跳 scheme：iOS OAuth 客户端
+				     537472521708-hlvrinj89cfebgmr5pvbe4unv3u25i3b 的反转 client id -->
+				<string>com.googleusercontent.apps.537472521708-hlvrinj89cfebgmr5pvbe4unv3u25i3b</string>
+			</array>
+		</dict>
+	</array>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>bluetooth-central</string>

@@ -113,7 +113,7 @@ class AppSideMenu extends StatelessWidget {
                                                 onOtherSelected,
                                               ),
                                               _MenuItem(
-                                                strings.atlas,
+                                                strings.menuMapa,
                                                 AppSvgAssets.atlas,
                                                 onOtherSelected,
                                               ),
