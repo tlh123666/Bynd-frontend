@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/physics.dart';
 
 import '../../../../l10n/app_localizations_context.dart';
 import '../../../../l10n/generated/app_localizations.dart';
