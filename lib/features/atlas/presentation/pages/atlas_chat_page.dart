@@ -94,6 +94,10 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
   final _scroll = ScrollController();
   bool _atBottom = true;
 
+  /// 麦克风的「语音输入」演示（源码 ouvir）：逐字把默认问题写进输入框
+  /// 再发送；进行中动作钮变停止方块。
+  bool _voiceTyping = false;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -137,8 +141,7 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
     final strings = context.l10n;
     final media = MediaQuery.of(context);
     // .page.chat.folha：顶部 = max(安全区, 47) + 34（源码 --folha-topo 规则）
-    final sheetTop =
-        (media.padding.top > 47 ? media.padding.top : 47.0) + 34;
+    final sheetTop = (media.padding.top > 47 ? media.padding.top : 47.0) + 34;
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Padding(
@@ -194,6 +197,9 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
 
   /// `.at-cab`：把手居中、X 左、Atlas 中、Memória 右；头部支持下滑关闭
   /// （useFolha：alça/头部拖拽，往下甩出即关）。
+  ///
+  /// 布局用 Row 三段等宽（44/1fr/44）：不能用 Stack 收缩布局——Stack 会
+  /// 收缩到标题宽度，Positioned 的 X/脑图标就全挤到标题周围（真机踩过）。
   Widget _buildHeader(AppLocalizations strings) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -201,58 +207,54 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
         final velocity = details.primaryVelocity ?? 0;
         if (velocity > 600) Navigator.of(context).pop();
       },
-      child: SizedBox(
-        height: 56,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            // .at-alca：把手
-            Positioned(
-              top: 6,
-              child: Container(
-                width: 38,
-                height: 5,
-                decoration: BoxDecoration(
-                  color: _AtlasCss.handle,
-                  borderRadius: BorderRadius.circular(3),
+      child: Column(
+        children: [
+          // .at-alca：把手
+          Container(
+            width: 38,
+            height: 5,
+            margin: const EdgeInsets.only(top: 6),
+            decoration: BoxDecoration(
+              color: _AtlasCss.handle,
+              borderRadius: BorderRadius.circular(3),
+            ),
+          ),
+          SizedBox(
+            height: 48,
+            child: Row(
+              children: [
+                // .at-x：左上关闭
+                IconButton(
+                  tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+                  icon: const Icon(Icons.close, size: 24),
+                  color: _AtlasCss.textFull.withValues(alpha: .85),
+                  onPressed: () => Navigator.of(context).pop(),
                 ),
-              ),
-            ),
-            Text(
-              strings.chatTitle,
-              style: const TextStyle(
-                color: _AtlasCss.textFull,
-                fontSize: 19,
-                fontWeight: FontWeight.w400,
-                letterSpacing: -0.01,
-              ),
-            ),
-            // .at-x：左上关闭
-            Positioned(
-              left: 4,
-              top: 4,
-              child: IconButton(
-                tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
-                icon: const Icon(Icons.close, size: 24),
-                color: _AtlasCss.textFull.withValues(alpha: .85),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ),
-            // .at-mem：Memória 入口（当前先开洞察列表，记忆子屏随新端点补）
-            Positioned(
-              right: 2,
-              top: 4,
-              child: IconButton(
-                tooltip: strings.insightsTitle,
-                icon: const Icon(Icons.psychology_outlined, size: 24),
-                color: _AtlasCss.textFull.withValues(alpha: .85),
-                onPressed: () => Navigator.of(context).push<void>(
-                  MaterialPageRoute(builder: (_) => const InsightsPage()),
+                Expanded(
+                  child: Text(
+                    strings.chatTitle,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: _AtlasCss.textFull,
+                      fontSize: 19,
+                      fontWeight: FontWeight.w400,
+                      letterSpacing: -0.01,
+                    ),
+                  ),
                 ),
-              ),
+                // .at-mem：Memória 入口（当前先开洞察列表，记忆子屏随新端点补）
+                IconButton(
+                  tooltip: strings.insightsTitle,
+                  icon: const Icon(Icons.psychology_outlined, size: 24),
+                  color: _AtlasCss.textFull.withValues(alpha: .85),
+                  onPressed: () => Navigator.of(context).push<void>(
+                    MaterialPageRoute(builder: (_) => const InsightsPage()),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -308,13 +310,13 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
   }
 
   Widget _buildSuggestions(AppLocalizations strings) {
-    final showChips = !_controller.isStreaming && _atBottom;
+    final showChips = !_controller.isStreaming && !_voiceTyping && _atBottom;
     // .at-sug：流式进行中淡出，完成后浮现（opacity 0 → 1 + 位移）
     return AnimatedOpacity(
       opacity: showChips ? 1 : 0,
       duration: const Duration(milliseconds: 350),
       child: SizedBox(
-        height: 44,
+        height: 38,
         child: ListView(
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -342,19 +344,48 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
     _jumpToBottom();
   }
 
+  /// `ouvir`：逐字把默认问题写进输入框（每 45ms 一个字符），停 300ms 后
+  /// 发送。进行中再点动作钮 = 取消（源码 parar 的语义）。
+  Future<void> _voiceAsk(AppLocalizations strings) async {
+    if (_voiceTyping || _controller.isStreaming) return;
+    setState(() => _voiceTyping = true);
+    final phrase = strings.chatSug1;
+    _input.clear();
+    for (var i = 1; i <= phrase.length; i++) {
+      if (!mounted || !_voiceTyping) return;
+      _input.value = TextEditingValue(
+        text: phrase.substring(0, i),
+        selection: TextSelection.collapsed(offset: i),
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 45));
+    }
+    await Future<void>.delayed(const Duration(milliseconds: 300));
+    if (!mounted) return;
+    setState(() => _voiceTyping = false);
+    await _send();
+  }
+
+  void _cancelVoice() {
+    setState(() => _voiceTyping = false);
+    _input.clear();
+  }
+
   Widget _buildComposer(AppLocalizations strings) {
     return Padding(
       padding: EdgeInsets.only(
         left: 12,
         right: 12,
-        top: 6,
+        top: 2,
         bottom: MediaQuery.of(context).padding.bottom + 8,
       ),
       child: _ComposerBox(
         controller: _input,
         streaming: _controller.isStreaming,
+        voiceTyping: _voiceTyping,
         onSend: _send,
         onStop: () => _controller.stop(),
+        onMic: () => _voiceAsk(strings),
+        onStopVoice: _cancelVoice,
         onHistory: () => _openConversations(strings),
       ),
     );
@@ -589,15 +620,21 @@ class _ComposerBox extends StatelessWidget {
   const _ComposerBox({
     required this.controller,
     required this.streaming,
+    required this.voiceTyping,
     required this.onSend,
     required this.onStop,
+    required this.onMic,
+    required this.onStopVoice,
     required this.onHistory,
   });
 
   final TextEditingController controller;
   final bool streaming;
+  final bool voiceTyping;
   final VoidCallback onSend;
   final VoidCallback onStop;
+  final VoidCallback onMic;
+  final VoidCallback onStopVoice;
   final VoidCallback onHistory;
 
   @override
@@ -679,8 +716,11 @@ class _ComposerBox extends StatelessWidget {
                     _SendButton(
                       controller: controller,
                       streaming: streaming,
+                      voiceTyping: voiceTyping,
                       onSend: onSend,
                       onStop: onStop,
+                      onMic: onMic,
+                      onStopVoice: onStopVoice,
                     ),
                   ],
                 ),
@@ -715,20 +755,27 @@ class _ComposerIcon extends StatelessWidget {
   );
 }
 
-/// `.gx-acao`：38 白圆——空文案=麦克风、有文案=上箭头、流式=停止方块
-/// （`.gx-quad`）。麦克风是源码里的形态占位：后端暂无语音端点，不接动作。
+/// `.gx-acao`：38 白圆——四态（源码 `{escrevendo || ouvindo ? parar : text ?
+/// enviar : mic}`）：真实流式/语音打字中=停止方块、有文案=上箭头、
+/// 空文案=麦克风。
 class _SendButton extends StatefulWidget {
   const _SendButton({
     required this.controller,
     required this.streaming,
+    required this.voiceTyping,
     required this.onSend,
     required this.onStop,
+    required this.onMic,
+    required this.onStopVoice,
   });
 
   final TextEditingController controller;
   final bool streaming;
+  final bool voiceTyping;
   final VoidCallback onSend;
   final VoidCallback onStop;
+  final VoidCallback onMic;
+  final VoidCallback onStopVoice;
 
   @override
   State<_SendButton> createState() => _SendButtonState();
@@ -762,6 +809,7 @@ class _SendButtonState extends State<_SendButton> {
 
   @override
   Widget build(BuildContext context) {
+    final busy = widget.streaming || widget.voiceTyping;
     final hasText = widget.controller.text.trim().isNotEmpty;
     return SizedBox(
       width: 38,
@@ -773,11 +821,13 @@ class _SendButtonState extends State<_SendButton> {
           borderRadius: BorderRadius.circular(19),
           onTap: widget.streaming
               ? widget.onStop
+              : widget.voiceTyping
+              ? widget.onStopVoice
               : hasText
               ? widget.onSend
-              : null,
+              : widget.onMic,
           child: Center(
-            child: widget.streaming
+            child: busy
                 ? Container(
                     // .gx-quad：12x12 圆角 3 的深色方块
                     width: 12,
