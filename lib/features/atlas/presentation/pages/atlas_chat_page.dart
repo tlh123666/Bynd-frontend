@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../design_system/design_system.dart';
 import '../../../../l10n/app_localizations_context.dart';
@@ -62,6 +63,16 @@ class _AtlasSheetBackdrop extends StatelessWidget {
     ),
   );
 }
+
+/// 源码的 Memória 脑图标（Assistente.jsx `IC.lampada`，24 viewBox 描边）。
+const String _memoriaBrainSvg =
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"'
+    ' stroke="#F4F5F7" stroke-width="1.7" stroke-linecap="round"'
+    ' stroke-linejoin="round"><path d="M12 5.2a3 3 0 0 0-5.7 1.3A3 3 0 0 0 '
+    '4.2 11a3.2 3.2 0 0 0 1.6 5.4A3 3 0 0 0 12 18.4z"/><path d="M12 5.2a3 3 '
+    '0 0 1 5.7 1.3 3 3 0 0 1 2.1 4.5 3.2 3.2 0 0 1-1.6 5.4A3 3 0 0 1 12 '
+    '18.4z"/><path d="M12 5.2v13.2M8.3 9.6c.9 0 1.6.6 1.6 1.4M15.7 9.6c-.9 0 '
+    '-1.6.6-1.6 1.4M7.6 14.2h1.6M14.8 14.2h1.6"/></svg>';
 
 /// 客户源码里的定稿色值（atlas-caixa.css），集中放这里避免散落的魔法数。
 class _AtlasCss {
@@ -282,9 +293,16 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
                 // 子层在浮层内从右滑入）
                 IconButton(
                   tooltip: strings.memoriaTitle,
-                  icon: const Icon(Icons.psychology_outlined, size: 24),
-                  color: _AtlasCss.textFull.withValues(alpha: .85),
                   onPressed: () => setState(() => _memoryOpen = true),
+                  icon: SvgPicture.string(
+                    _memoriaBrainSvg,
+                    width: 24,
+                    height: 24,
+                    colorFilter: const ColorFilter.mode(
+                      Color(0xD9F4F5F7),
+                      BlendMode.srcIn,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -410,7 +428,7 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
       padding: EdgeInsets.only(
         left: 12,
         right: 12,
-        top: 2,
+        top: 10,
         bottom: MediaQuery.of(context).padding.bottom + 8,
       ),
       child: _ComposerBox(

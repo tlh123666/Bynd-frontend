@@ -104,6 +104,60 @@ class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
   final ScrollController _tabScroll = ScrollController();
   int _active = 0;
 
+  // ── 整卡下滑关闭（用户要求：整个卡片往下滑就收起）──────────────────
+  // 用裸 Listener 而不是手势 arena：内层 ListView 的纵向滚动不与之竞争。
+  // 只有列表处于顶部时才累积位移（否则是正常滚动列表内容）。
+  double _dragDy = 0;
+  bool _dragging = false;
+  bool _listAtTop = true;
+  Duration? _lastMoveAt;
+  double? _lastMoveDy;
+  double _velocity = 0;
+
+  void _onPointerDown(PointerDownEvent event) {
+    _dragDy = 0;
+    _dragging = false;
+    _velocity = 0;
+    _lastMoveAt = null;
+    _lastMoveDy = null;
+  }
+
+  void _onPointerMove(PointerMoveEvent event) {
+    if (!_listAtTop) return;
+    final delta = event.delta.dy;
+    if (delta <= 0 && _dragDy <= 0) return;
+    // 速度估计（px/s），用于松手时的甩动判定
+    final dt = _lastMoveAt == null
+        ? null
+        : (event.timeStamp - _lastMoveAt!).inMicroseconds / 1e6;
+    if (dt != null && dt > 0 && _lastMoveDy != null) {
+      _velocity = (delta - _lastMoveDy!) / dt;
+    }
+    _lastMoveAt = event.timeStamp;
+    _lastMoveDy = delta;
+    if (delta > 0 || _dragDy > 0) {
+      setState(() {
+        _dragging = true;
+        _dragDy = (_dragDy + delta).clamp(0.0, double.infinity);
+      });
+    }
+  }
+
+  void _onPointerUp() {
+    final shouldClose = _dragDy > 140 || _velocity > 800;
+    setState(() {
+      _dragging = false;
+      _dragDy = 0;
+    });
+    if (shouldClose) widget.onClose();
+  }
+
+  bool _onListScroll(ScrollNotification notification) {
+    final atTop = notification.metrics.pixels <= 0.5;
+    if (atTop != _listAtTop) setState(() => _listAtTop = atTop);
+    return false;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -155,84 +209,102 @@ class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
   @override
   Widget build(BuildContext context) {
     final strings = context.l10n;
-    return ColoredBox(
-      color: _MemCss.bgBottom,
-      child: DecoratedBox(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            stops: [0, 0.2, 0.55],
-            colors: [_MemCss.bgTop, _MemCss.bgMid, _MemCss.bgBottom],
-          ),
-        ),
-        child: Column(
-          children: [
-            _buildHeader(strings),
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(21, 8, 21, 40),
-                children: [
-                  // .at-heroi
-                  Text(
-                    strings.memoriaHeroTitle,
-                    style: const TextStyle(
-                      color: _MemCss.textFull,
-                      fontSize: 30,
-                      fontWeight: FontWeight.w200,
-                      height: 1.1,
-                      letterSpacing: -0.01,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 6),
-                    child: Text(
-                      strings.memoriaHeroSub,
-                      style: const TextStyle(
-                        color: _MemCss.text2,
-                        fontSize: 13.5,
-                      ),
-                    ),
-                  ),
-                  // kicker：O QUE ELE GUARDOU
-                  Padding(
-                    padding: const EdgeInsets.only(top: 26),
-                    child: Text(
-                      strings.memoriaKicker.toUpperCase(),
-                      style: const TextStyle(
-                        color: _MemCss.text3,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: .16,
-                      ),
-                    ),
-                  ),
-                  _buildTabs(strings),
-                  for (final item in _visibleItems(_tabs[_active]))
-                    _MemoryCard(
-                      item: item,
-                      onDelete: () => _remove(_tabs[_active], item),
-                    ),
-                  if (_visibleItems(_tabs[_active]).isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 24),
-                      child: Text(
-                        'Nada guardado aqui.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: _MemCss.text3, fontSize: 14),
-                      ),
-                    ),
-                ],
+    // 整卡下滑关闭：裸 Listener 追踪下拖位移（不与内层列表滚动手势竞争），
+    // 列表在顶部时才累积；松手超过阈值或快速下甩 → onClose，否则弹回。
+    return Listener(
+      onPointerDown: _onPointerDown,
+      onPointerMove: _onPointerMove,
+      onPointerUp: (_) => _onPointerUp(),
+      onPointerCancel: (_) => _onPointerUp(),
+      child: AnimatedSlide(
+        duration: _dragging ? Duration.zero : const Duration(milliseconds: 220),
+        curve: Curves.easeOut,
+        offset: Offset(0, _dragDy / 900),
+        child: ColoredBox(
+          color: _MemCss.bgBottom,
+          child: DecoratedBox(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: [0, 0.2, 0.55],
+                colors: [_MemCss.bgTop, _MemCss.bgMid, _MemCss.bgBottom],
               ),
             ),
-          ],
+            child: Column(
+              children: [
+                _buildHeader(strings),
+                Expanded(
+                  child: NotificationListener<ScrollNotification>(
+                    onNotification: _onListScroll,
+                    child: ListView(
+                      padding: const EdgeInsets.fromLTRB(21, 8, 21, 40),
+                      children: [
+                        // .at-heroi
+                        Text(
+                          strings.memoriaHeroTitle,
+                          style: const TextStyle(
+                            color: _MemCss.textFull,
+                            fontSize: 30,
+                            fontWeight: FontWeight.w200,
+                            height: 1.1,
+                            letterSpacing: -0.01,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 6),
+                          child: Text(
+                            strings.memoriaHeroSub,
+                            style: const TextStyle(
+                              color: _MemCss.text2,
+                              fontSize: 13.5,
+                            ),
+                          ),
+                        ),
+                        // kicker：O QUE ELE GUARDOU
+                        Padding(
+                          padding: const EdgeInsets.only(top: 26),
+                          child: Text(
+                            strings.memoriaKicker.toUpperCase(),
+                            style: const TextStyle(
+                              color: _MemCss.text3,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: .16,
+                            ),
+                          ),
+                        ),
+                        _buildTabs(strings),
+                        for (final item in _visibleItems(_tabs[_active]))
+                          _MemoryCard(
+                            item: item,
+                            onDelete: () => _remove(_tabs[_active], item),
+                          ),
+                        if (_visibleItems(_tabs[_active]).isEmpty)
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 24),
+                            child: Text(
+                              'Nada guardado aqui.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: _MemCss.text3,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 
   /// `.at-subcab`：‹ 返回（左）/ Memória（中）；头部下滑返回对话
-  /// （源码 useFolha 对 alça/头部的拖拽语义）。
   Widget _buildHeader(AppLocalizations strings) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -282,7 +354,7 @@ class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
         builder: (context, constraints) {
           final third = constraints.maxWidth / 3;
           return SizedBox(
-            height: 46,
+            height: 54,
             child: Stack(
               alignment: Alignment.bottomCenter,
               children: [
@@ -299,14 +371,14 @@ class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
                     scrollDirection: Axis.horizontal,
                     physics: const NeverScrollableScrollPhysics(),
                     children: [
-                      SizedBox(width: third, height: 46), // <i> 首占位
+                      SizedBox(width: third, height: 54), // <i> 首占位
                       for (var i = 0; i < _tabs.length; i++)
                         GestureDetector(
                           onTap: () => _selectTab(i),
                           behavior: HitTestBehavior.opaque,
                           child: Container(
                             width: third,
-                            height: 46,
+                            height: 54,
                             alignment: Alignment.center,
                             child: Text(
                               _tabs[i],
@@ -314,18 +386,18 @@ class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
                                 color: i == _active
                                     ? _MemCss.textFull
                                     : _MemCss.text42,
-                                fontSize: 15,
+                                fontSize: 16,
                               ),
                             ),
                           ),
                         ),
-                      SizedBox(width: third, height: 46), // <i> 尾占位
+                      SizedBox(width: third, height: 54), // <i> 尾占位
                     ],
                   ),
                 ),
                 // .at-marca：固定居中，永不移动（源码 left:50%; margin-left:-55px）
                 Positioned(
-                  bottom: 12,
+                  bottom: 18,
                   child: Column(
                     children: [
                       DecoratedBox(
