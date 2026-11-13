@@ -146,9 +146,12 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
   /// 整卡下滑关闭：卡片先滑出屏幕（跟手动画的延续），再关路由（路由
   /// 自身的下滑退场动画此刻作用在已离屏的卡片上，不可见，不会双重动画）。
   /// 主卡片的下滑与 Memória 子层的下滑关闭共用。
+  ///
+  /// 注意不要动 _memoryOpen：从 Memória 下滑时若把它置回 false，子层会
+  /// 往右滑走、露出对话页——用户要的是整张卡片（带着 Memória）直接
+  /// 下滑、露出上一页背景。pop 本身会丢弃一切状态，无需复位。
   void _closeSheet() {
     setState(() {
-      _memoryOpen = false;
       _dragging = false;
       _dragDy = 1400;
     });
