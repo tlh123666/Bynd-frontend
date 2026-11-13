@@ -26,17 +26,21 @@ import 'system_gesture_zone.dart';
 class AtlasMemoryLayer extends StatefulWidget {
   const AtlasMemoryLayer({
     required this.onClose,
-    this.onDragClose,
+    this.onDragMove,
+    this.onDragEnd,
     super.key,
   });
 
-  /// 返回对话（‹ 按钮与下滑共用）。
+  /// 返回对话（‹ 按钮）。
   final VoidCallback onClose;
 
-  /// 整卡下滑关闭：与宿主（AtlasChatPage）自身的下滑关闭同效——整个
-  /// Atlas 浮层滑出并回到首页，而不是只收回 Memória 子层。缺省回退到
-  /// [onClose]。
-  final VoidCallback? onDragClose;
+  /// 拖拽量上移给宿主：子层只报告位移，由宿主平移整张卡（含子层），
+  /// 滑动过程中露出的就是上一页背景——若子层自己在卡内滑动，只会露出
+  /// 卡片自身底色。
+  final ValueChanged<double>? onDragMove;
+
+  /// 松手结算：true=关闭整个 Atlas 浮层，false=弹回原位。
+  final ValueChanged<bool>? onDragEnd;
 
   @override
   State<AtlasMemoryLayer> createState() => _AtlasMemoryLayerState();
@@ -115,15 +119,13 @@ class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
   final ScrollController _tabScroll = ScrollController();
   int _active = 0;
 
-  // ── 整卡下滑关闭（用户要求：整个卡片往下滑就收起）──────────────────
+  // ── 下滑关闭（拖拽量上移给宿主，整卡跟手）──────────────────────────
   // 用裸 Listener 而不是手势 arena：内层 ListView 的纵向滚动不与之竞争。
   // 只有列表处于顶部时才累积位移（否则是正常滚动列表内容）。
+  // 子层自身不平移（offset 恒为 0）——位移由宿主作用在整张卡上，滑动
+  // 过程中露出的才是上一页背景而不是卡片底色。_dragDy 仅用于速度与
+  // 关闭阈值判定。
   double _dragDy = 0;
-  bool _dragging = false;
-
-  /// 整卡关闭中：子层瞬间归位并「粘」在卡片上随整卡滑出——若让子层
-  /// 自己滑走（_dragDy=1400），它会比整卡更快飞出，露出卡片自身底色。
-  bool _closing = false;
   bool _listAtTop = true;
   Duration? _lastMoveAt;
   double? _lastMoveDy;
@@ -131,7 +133,6 @@ class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
 
   void _onPointerDown(PointerDownEvent event) {
     _dragDy = 0;
-    _dragging = false;
     _velocity = 0;
     _lastMoveAt = null;
     _lastMoveDy = null;
@@ -156,10 +157,8 @@ class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
     _lastMoveAt = event.timeStamp;
     _lastMoveDy = delta;
     if (delta > 0 || _dragDy > 0) {
-      setState(() {
-        _dragging = true;
-        _dragDy = (_dragDy + delta).clamp(0.0, double.infinity);
-      });
+      _dragDy = (_dragDy + delta).clamp(0.0, double.infinity);
+      widget.onDragMove?.call(_dragDy);
     }
   }
 
@@ -169,20 +168,16 @@ class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
       return;
     }
     final shouldClose = _dragDy > 90 || _velocity > 650;
-    if (shouldClose) {
-      // 子层瞬间归位、粘在卡片上，由宿主把整张卡（含子层）滑出——
-      // 下滑语义=关闭整个 Atlas 浮层（与在 Atlas 卡片上下滑一致）
-      setState(() {
-        _dragging = false;
-        _closing = true;
-        _dragDy = 0;
-      });
-      (widget.onDragClose ?? widget.onClose)();
-    } else {
-      setState(() {
-        _dragging = false;
-        _dragDy = 0;
-      });
+    final dy = _dragDy;
+    _dragDy = 0;
+    _velocity = 0;
+    if (widget.onDragEnd != null) {
+      widget.onDragEnd!(shouldClose);
+    } else if (shouldClose) {
+      widget.onClose();
+    } else if (dy > 0) {
+      // 无宿主回调时的兜底：无动画直接回弹（正常挂载不会走到）
+      setState(() {});
     }
   }
 
@@ -248,31 +243,27 @@ class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
   @override
   Widget build(BuildContext context) {
     final strings = context.l10n;
-    // 整卡下滑关闭：裸 Listener 追踪下拖位移（不与内层列表滚动手势竞争），
-    // 列表在顶部时才累积；松手超过阈值或快速下甩 → onClose，否则弹回。
+    // 下滑关闭：裸 Listener 追踪下拖位移（不与内层列表滚动手势竞争），
+    // 列表在顶部时才累积；位移经 onDragMove 上移给宿主平移整张卡，
+    // 松手超过阈值或快速下甩 → onDragEnd(true) 关闭整个浮层，否则弹回。
+    // 子层自身不再平移（宿主的 AnimatedSlide 负责全部位移）。
     return Listener(
       onPointerDown: _onPointerDown,
       onPointerMove: _onPointerMove,
       onPointerUp: (_) => _onPointerUp(),
       onPointerCancel: (_) => _onPointerUp(),
-      child: AnimatedSlide(
-        duration: (_dragging || _closing)
-            ? Duration.zero
-            : const Duration(milliseconds: 220),
-        curve: Curves.easeOut,
-        offset: Offset(0, _dragDy / 900),
-        child: ColoredBox(
-          color: _MemCss.bgBottom,
-          child: DecoratedBox(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                stops: [0, 0.2, 0.55],
-                colors: [_MemCss.bgTop, _MemCss.bgMid, _MemCss.bgBottom],
-              ),
+      child: ColoredBox(
+        color: _MemCss.bgBottom,
+        child: DecoratedBox(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              stops: [0, 0.2, 0.55],
+              colors: [_MemCss.bgTop, _MemCss.bgMid, _MemCss.bgBottom],
             ),
-            child: Column(
+          ),
+          child: Column(
               children: [
                 _buildHeader(strings),
                 Expanded(
@@ -341,7 +332,6 @@ class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
             ),
           ),
         ),
-      ),
     );
   }
 

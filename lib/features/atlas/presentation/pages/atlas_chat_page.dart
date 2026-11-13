@@ -143,6 +143,27 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
     }
   }
 
+  /// Memória 子层的拖拽量上移：宿主平移整张卡（含子层），滑动过程中
+  /// 露出的就是上一页背景（暗纱随 _veilFade 渐隐）。
+  void _memoryDragMove(double dy) {
+    setState(() {
+      _dragging = true;
+      _dragDy = dy.clamp(0.0, double.infinity);
+    });
+  }
+
+  /// Memória 子层松手结算：关闭=整卡滑出；否则整卡弹回原位。
+  void _memoryDragEnd(bool close) {
+    if (close) {
+      _closeSheet();
+    } else {
+      setState(() {
+        _dragging = false;
+        _dragDy = 0;
+      });
+    }
+  }
+
   /// 整卡下滑关闭：卡片先滑出屏幕（跟手动画的延续），再关路由（路由
   /// 自身的下滑退场动画此刻作用在已离屏的卡片上，不可见，不会双重动画）。
   /// 主卡片的下滑与 Memória 子层的下滑关闭共用。
@@ -342,7 +363,8 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
                                 child: AtlasMemoryLayer(
                                   onClose: () =>
                                       setState(() => _memoryOpen = false),
-                                  onDragClose: _closeSheet,
+                                  onDragMove: _memoryDragMove,
+                                  onDragEnd: _memoryDragEnd,
                                 ),
                               ),
                             ),
