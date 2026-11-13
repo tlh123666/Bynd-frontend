@@ -33,7 +33,7 @@ class AtlasSheetRoute extends PageRouteBuilder<void> {
         transitionDuration: const Duration(milliseconds: 420),
         reverseTransitionDuration: const Duration(milliseconds: 380),
         pageBuilder: (_, _, _) =>
-            const _AtlasSheetBackdrop(child: AtlasChatPage()),
+            const AtlasChatPage(),
         transitionsBuilder: (_, animation, _, child) => SlideTransition(
           position: Tween(begin: const Offset(0, 1), end: Offset.zero).animate(
             CurvedAnimation(
@@ -44,22 +44,6 @@ class AtlasSheetRoute extends PageRouteBuilder<void> {
           child: child,
         ),
       );
-}
-
-/// `.atlas-embaca`：浮层升起时底部页面被遮罩模糊（含 tabbar）。
-class _AtlasSheetBackdrop extends StatelessWidget {
-  const _AtlasSheetBackdrop({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) => ColoredBox(
-    color: const Color(0x590A0E14), // rgba(8,10,14,.35)
-    child: BackdropFilter(
-      filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
-      child: child,
-    ),
-  );
 }
 
 /// 源码的 Memória 脑图标（Assistente.jsx `IC.lampada`，24 viewBox 描边）。
