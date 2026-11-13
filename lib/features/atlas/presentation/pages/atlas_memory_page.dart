@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart';
 
 import '../../../../l10n/app_localizations_context.dart';
 import '../../../../l10n/generated/app_localizations.dart';
@@ -369,7 +370,7 @@ class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
                   child: ListView(
                     controller: _tabScroll,
                     scrollDirection: Axis.horizontal,
-                    physics: const NeverScrollableScrollPhysics(),
+                    physics: _TabSnapPhysics(step: third),
                     children: [
                       SizedBox(width: third, height: 54), // <i> 首占位
                       for (var i = 0; i < _tabs.length; i++)
@@ -379,7 +380,8 @@ class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
                           child: Container(
                             width: third,
                             height: 54,
-                            alignment: Alignment.center,
+                            alignment: Alignment.topCenter,
+                            padding: const EdgeInsets.only(top: 10),
                             child: Text(
                               _tabs[i],
                               style: TextStyle(
@@ -397,7 +399,7 @@ class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
                 ),
                 // .at-marca：固定居中，永不移动（源码 left:50%; margin-left:-55px）
                 Positioned(
-                  bottom: 18,
+                  bottom: 12,
                   child: Column(
                     children: [
                       DecoratedBox(
@@ -440,6 +442,49 @@ class _NotchPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// 吸附物理：松手（含快速滑动）后弹簧滑到最近的整数档位——档位 = 条带宽
+/// 的 1/3（与 tab/spacer 同宽）。保证松手时必有一个 tab 与 marca 对齐，
+/// 下划线永远不可能停在两个 tab 之间。快速滑动按速度方向多走一档。
+class _TabSnapPhysics extends ScrollPhysics {
+  const _TabSnapPhysics({required this.step, super.parent});
+
+  final double step;
+
+  @override
+  _TabSnapPhysics applyTo(ScrollPhysics? ancestor) =>
+      _TabSnapPhysics(step: step, parent: buildParent(ancestor));
+
+  double _snapTarget(double pixels, double velocity, double maxExtent) {
+    final base = pixels / step;
+    final maxSteps = (maxExtent / step).round();
+    int index;
+    if (velocity > minFlingVelocity) {
+      index = base.ceil();
+    } else if (velocity < -minFlingVelocity) {
+      index = base.floor();
+    } else {
+      index = base.round();
+    }
+    return index.clamp(0, maxSteps) * step;
+  }
+
+  @override
+  SpringSimulation? createBallisticSimulation(
+    ScrollMetrics position,
+    double velocity,
+  ) {
+    final target = _snapTarget(
+      position.pixels,
+      velocity,
+      position.maxScrollExtent,
+    ).clamp(position.minScrollExtent, position.maxScrollExtent);
+    if ((target - position.pixels).abs() < toleranceFor(position).distance) {
+      return null;
+    }
+    return SpringSimulation(spring, position.pixels, target, velocity);
+  }
 }
 
 /// `.at-lem`：记忆卡片。
