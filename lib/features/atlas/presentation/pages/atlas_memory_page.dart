@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/physics.dart';
+import 'package:flutter/physics.dart' show SpringDescription, SpringSimulation;
 
 import '../../../../l10n/app_localizations_context.dart';
 import '../../../../l10n/generated/app_localizations.dart';
@@ -195,6 +195,11 @@ class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
     });
   }
 
+  /// 吸附物理上报目标档位 → 立即高亮（松手瞬间切换，无 ~1s 滞后）。
+  void _onSnapTarget(int index) {
+    if (index != _active && mounted) setState(() => _active = index);
+  }
+
   /// 源码 rolouAbas：拖动松手时，吸附到离中心最近的 tab。
   void _onTabStripScroll() {
     if (!_tabScroll.hasClients) return;
@@ -370,7 +375,10 @@ class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
                   child: ListView(
                     controller: _tabScroll,
                     scrollDirection: Axis.horizontal,
-                    physics: _TabSnapPhysics(step: third),
+                    physics: _TabSnapPhysics(
+                      step: third,
+                      onSnapTarget: _onSnapTarget,
+                    ),
                     children: [
                       SizedBox(width: third, height: 54), // <i> 首占位
                       for (var i = 0; i < _tabs.length; i++)
@@ -448,13 +456,27 @@ class _NotchPainter extends CustomPainter {
 /// 的 1/3（与 tab/spacer 同宽）。保证松手时必有一个 tab 与 marca 对齐，
 /// 下划线永远不可能停在两个 tab 之间。快速滑动按速度方向多走一档。
 class _TabSnapPhysics extends ScrollPhysics {
-  const _TabSnapPhysics({required this.step, super.parent});
+  // 非常量构造：携带吸附目标回调
+  _TabSnapPhysics({
+    required this.step,
+    required this.onSnapTarget,
+    super.parent,
+  });
 
   final double step;
+  final ValueChanged<int> onSnapTarget;
+
+  // 弹簧比默认更硬：吸附到位 ~0.25s（默认要 ~1s）
+  @override
+  SpringDescription get spring =>
+      SpringDescription(damping: 30, stiffness: 280, mass: 1);
 
   @override
-  _TabSnapPhysics applyTo(ScrollPhysics? ancestor) =>
-      _TabSnapPhysics(step: step, parent: buildParent(ancestor));
+  _TabSnapPhysics applyTo(ScrollPhysics? ancestor) => _TabSnapPhysics(
+    step: step,
+    onSnapTarget: onSnapTarget,
+    parent: buildParent(ancestor),
+  );
 
   double _snapTarget(double pixels, double velocity, double maxExtent) {
     final base = pixels / step;
@@ -480,6 +502,8 @@ class _TabSnapPhysics extends ScrollPhysics {
       velocity,
       position.maxScrollExtent,
     ).clamp(position.minScrollExtent, position.maxScrollExtent);
+    // 吸附目标一出就高亮对应 tab——不等弹簧停完（此前高亮滞后 ~1s 的根因）
+    onSnapTarget((target / step).round());
     if ((target - position.pixels).abs() < toleranceFor(position).distance) {
       return null;
     }
