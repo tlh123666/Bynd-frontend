@@ -1,5 +1,7 @@
+import 'dart:io' show Platform;
 import 'dart:ui' show ImageFilter;
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -61,6 +63,12 @@ const String _memoriaBrainSvg =
 
 /// 客户源码里的定稿色值（atlas-caixa.css），集中放这里避免散落的魔法数。
 class _AtlasCss {
+  /// Android 上禁用 BackdropFilter：Impeller Vulkan（Flutter 3.47 已无法
+  /// 通过 manifest opt-out）对「透明路由跨层背景采样」有黑帧 bug——真机
+  /// (2510DRK44C / Android 16 / Adreno Vulkan) 实测全屏与露出条两种范围
+  /// 均复现黑屏（应用仍在前台、无异常）。iOS/macOS/web 保留真毛玻璃。
+  static final bool canBlur = kIsWeb || !Platform.isAndroid;
+
   static const bgTop = Color(0xFF222C38);
   static const bgMid = Color(0xFF1A2029);
   static const bgBottom = Color(0xFF121418);
@@ -217,33 +225,31 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
           children: [
             // .atlas-embaca：盖住底后景的暗纱（含首页 tabbar），随卡片下滑
             // 衰减，露出上一个页面（源码 .atlas-embaca { opacity:0 }）。
+            // Android 无真模糊，用略深的暗纱营造层次（黑帧 bug 见
+            // _AtlasCss.canBlur 注释）。
             Positioned.fill(
               child: ColoredBox(
                 color: const Color(0xFF0A0E14).withValues(
-                  alpha: 0.55 * _veilFade,
+                  alpha: (_AtlasCss.canBlur ? 0.55 : 0.72) * _veilFade,
                 ),
               ),
             ),
-            // 毛玻璃只铺顶部露出条：卡片本身不透明，整屏 BackdropFilter
-            // 纯属浪费，并且在 Impeller Vulkan（Flutter 3.47 已弃用
-            // opt-out，manifest 关不掉）上会触发真机全屏黑帧——缩小到
-            // 露出条避开触发面。18:29 黑屏实证：黑屏时应用在前台、无
-            // 异常、无退出，为纯渲染问题。
-            Positioned(
-              left: 0,
-              right: 0,
-              top: 0,
-              height: sheetTop + 8,
-              child: ClipRect(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(
-                    sigmaX: _veilSigma,
-                    sigmaY: _veilSigma,
+            if (_AtlasCss.canBlur)
+              Positioned(
+                left: 0,
+                right: 0,
+                top: 0,
+                height: sheetTop + 8,
+                child: ClipRect(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(
+                      sigmaX: _veilSigma,
+                      sigmaY: _veilSigma,
+                    ),
+                    child: const SizedBox.expand(),
                   ),
-                  child: const SizedBox.expand(),
                 ),
               ),
-            ),
             Padding(
               padding: EdgeInsets.only(top: sheetTop),
               child: AnimatedSlide(
