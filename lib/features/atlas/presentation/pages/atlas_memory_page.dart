@@ -147,12 +147,12 @@ class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
   void _onPointerUp() {
     final shouldClose = _dragDy > 140 || _velocity > 800;
     if (shouldClose) {
-      // 先让卡片滑出屏幕（跟手动画的延续），再通知宿主关闭
+      // 立即恢复对话层（避免滑出后露出暗底），卡片自身继续滑出动画
       setState(() {
         _dragging = false;
         _dragDy = 1400;
       });
-      Future.delayed(const Duration(milliseconds: 240), widget.onClose);
+      widget.onClose();
     } else {
       setState(() {
         _dragging = false;

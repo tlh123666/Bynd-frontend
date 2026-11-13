@@ -219,109 +219,133 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
     final sheetTop = (media.padding.top > 47 ? media.padding.top : 47.0) + 34;
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: Padding(
-        padding: EdgeInsets.only(top: sheetTop),
-        child: Listener(
-          onPointerDown: _onSheetPointerDown,
-          onPointerMove: _onSheetPointerMove,
-          onPointerUp: (_) => _onSheetPointerUp(),
-          onPointerCancel: (_) => _onSheetPointerUp(),
-          child: AnimatedSlide(
-            duration: _dragging
-                ? Duration.zero
-                : const Duration(milliseconds: 240),
-            curve: Curves.easeOut,
-            offset: Offset(0, _dragDy / media.size.height),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(28),
+      body: Listener(
+        onPointerDown: _onSheetPointerDown,
+        onPointerMove: _onSheetPointerMove,
+        onPointerUp: (_) => _onSheetPointerUp(),
+        onPointerCancel: (_) => _onSheetPointerUp(),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // .atlas-embaca：遮罩随卡片下滑淡出，露出后面的页面
+            //（源码 .atlas-cobre:has(.folha.sai) .atlas-embaca { opacity: 0 }）
+            Positioned.fill(
+              child: AnimatedOpacity(
+                duration: _dragging
+                    ? Duration.zero
+                    : const Duration(milliseconds: 220),
+                opacity: _veilOpacity,
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+                  child: const ColoredBox(color: Color(0x590A0E14)),
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: .5),
-                    blurRadius: 40,
-                    offset: const Offset(0, -10),
-                  ),
-                ],
               ),
-              child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(28),
-                ),
-                child: ColoredBox(
-                  color: _AtlasCss.bgBottom,
-                  child: DecoratedBox(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        stops: [0, 0.2, 0.55],
-                        colors: [
-                          _AtlasCss.bgTop,
-                          _AtlasCss.bgMid,
-                          _AtlasCss.bgBottom,
-                        ],
-                      ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(top: sheetTop),
+              child: AnimatedSlide(
+                duration: _dragging
+                    ? Duration.zero
+                    : const Duration(milliseconds: 240),
+                curve: Curves.easeOut,
+                offset: Offset(0, _dragDy / media.size.height),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(28),
                     ),
-                    child: Stack(
-                      children: [
-                        // 主对话 tela：Memória 打开时左移淡出（源码 .at-tela.atras：
-                        // translateX(-22%) + opacity 0），不可点
-                        IgnorePointer(
-                          ignoring: _memoryOpen,
-                          child: AnimatedOpacity(
-                            opacity: _memoryOpen ? 0 : 1,
-                            duration: const Duration(milliseconds: 300),
-                            child: AnimatedSlide(
-                              offset: _memoryOpen
-                                  ? const Offset(-0.22, 0)
-                                  : Offset.zero,
-                              duration: const Duration(milliseconds: 420),
-                              curve: const Cubic(0.32, 0.72, 0, 1),
-                              child: Column(
-                                children: [
-                                  _buildHeader(strings),
-                                  Expanded(
-                                    child: AnimatedBuilder(
-                                      animation: _controller,
-                                      builder: (context, _) =>
-                                          _buildList(strings),
-                                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: .5),
+                        blurRadius: 40,
+                        offset: const Offset(0, -10),
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(28),
+                    ),
+                    child: ColoredBox(
+                      color: _AtlasCss.bgBottom,
+                      child: DecoratedBox(
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            stops: [0, 0.2, 0.55],
+                            colors: [
+                              _AtlasCss.bgTop,
+                              _AtlasCss.bgMid,
+                              _AtlasCss.bgBottom,
+                            ],
+                          ),
+                        ),
+                        child: Stack(
+                          children: [
+                            // 主对话 tela：Memória 打开时左移淡出
+                            IgnorePointer(
+                              ignoring: _memoryOpen,
+                              child: AnimatedOpacity(
+                                opacity: _memoryOpen ? 0 : 1,
+                                duration: const Duration(milliseconds: 300),
+                                child: AnimatedSlide(
+                                  offset: _memoryOpen
+                                      ? const Offset(-0.22, 0)
+                                      : Offset.zero,
+                                  duration: const Duration(milliseconds: 420),
+                                  curve: const Cubic(0.32, 0.72, 0, 1),
+                                  child: Column(
+                                    children: [
+                                      _buildHeader(strings),
+                                      Expanded(
+                                        child: AnimatedBuilder(
+                                          animation: _controller,
+                                          builder: (context, _) =>
+                                              _buildList(strings),
+                                        ),
+                                      ),
+                                      _buildSuggestions(strings),
+                                      _buildComposer(strings),
+                                    ],
                                   ),
-                                  _buildSuggestions(strings),
-                                  _buildComposer(strings),
-                                ],
+                                ),
                               ),
                             ),
-                          ),
-                        ),
-                        // Memória 子 tela：从右滑入盖住对话（源码 at-sub 从
-                        // translateX(100%) 归位）；关闭由 ‹/下滑触发
-                        AnimatedSlide(
-                          offset: _memoryOpen
-                              ? Offset.zero
-                              : const Offset(1, 0),
-                          duration: const Duration(milliseconds: 420),
-                          curve: const Cubic(0.32, 0.72, 0, 1),
-                          child: IgnorePointer(
-                            ignoring: !_memoryOpen,
-                            child: AtlasMemoryLayer(
-                              onClose: () =>
-                                  setState(() => _memoryOpen = false),
+                            // Memória 子 tela：从右滑入盖住对话
+                            AnimatedSlide(
+                              offset: _memoryOpen
+                                  ? Offset.zero
+                                  : const Offset(1, 0),
+                              duration: const Duration(milliseconds: 420),
+                              curve: const Cubic(0.32, 0.72, 0, 1),
+                              child: IgnorePointer(
+                                ignoring: !_memoryOpen,
+                                child: AtlasMemoryLayer(
+                                  onClose: () =>
+                                      setState(() => _memoryOpen = false),
+                                ),
+                              ),
                             ),
-                          ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );
+  }
+
+  /// `.atlas-embaca` 的透明度：静止 0.35；拖动中随位移衰减（>300px 全透），
+  /// 让卡片滑走时直接露出上一个页面而不是黑遮罩。
+  double get _veilOpacity {
+    if (_dragDy <= 0) return 0.35;
+    return (0.35 * (1 - _dragDy / 300)).clamp(0.0, 0.35);
   }
 
   /// `.at-cab`：把手居中、X 左、Atlas 中、Memória 右；头部支持下滑关闭
