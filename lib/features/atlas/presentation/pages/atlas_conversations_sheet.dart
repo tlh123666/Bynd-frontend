@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../l10n/app_localizations_context.dart';
 import '../../data/models/conversation.dart';
+import 'insights_page.dart';
 
 /// 「Conversas anteriores」面板 —— 对应客户源码 Assistente 的会话历史子屏
 /// （`.at-subcab` / `.aj-lin`）：深底、顶栏带把手与居中标题、按天分组的行。
@@ -37,13 +38,35 @@ class AtlasConversationsSheet extends StatelessWidget {
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: Text(
-                    strings.chatHistoryTitle,
-                    style: const TextStyle(
-                      color: Color(0xFFF4F5F7),
-                      fontSize: 19,
-                      fontWeight: FontWeight.w400,
-                    ),
+                  child: Row(
+                    children: [
+                      const SizedBox(width: 48),
+                      Expanded(
+                        child: Text(
+                          strings.chatHistoryTitle,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Color(0xFFF4F5F7),
+                            fontSize: 19,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ),
+                      // 洞察列表入口（原脑图标的职责移到此处，保持可达）
+                      IconButton(
+                        tooltip: strings.insightsTitle,
+                        icon: const Icon(Icons.lightbulb_outline, size: 22),
+                        color: const Color(0xCCF4F5F7),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          Navigator.of(context).push<void>(
+                            MaterialPageRoute(
+                              builder: (_) => const InsightsPage(),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
                   ),
                 ),
                 Expanded(

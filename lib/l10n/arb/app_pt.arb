@@ -535,5 +535,14 @@
   "healthGroupMetabolism": "Metabolismo",
   "healthGroupHeartBody": "Coração e corpo",
   "healthGroupBreathOxygen": "Respiração e oxigênio",
-  "healthGroupLongevity": "Longevidade"
+  "healthGroupLongevity": "Longevidade",
+  "memoriaTitle": "Memória",
+  "memoriaHeroTitle": "O que o Atlas sabe de você",
+  "memoriaHeroSub": "Quanto mais ele sabe, melhores as respostas.",
+  "memoriaKicker": "O que ele guardou",
+  "memoriaCurrent": "Atual",
+  "memoriaPast": "Passou",
+  "memoriaTold": "Você contou",
+  "memoriaPerceived": "O Atlas percebeu",
+  "memoriaSince": "desde"
 }

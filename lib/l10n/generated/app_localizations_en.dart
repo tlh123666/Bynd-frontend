@@ -1443,4 +1443,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get healthGroupLongevity => 'Longevity';
+
+  @override
+  String get memoriaTitle => 'Memory';
+
+  @override
+  String get memoriaHeroTitle => 'What ATLAS knows about you';
+
+  @override
+  String get memoriaHeroSub => 'The more it knows, the better the answers.';
+
+  @override
+  String get memoriaKicker => 'What it stored';
+
+  @override
+  String get memoriaCurrent => 'Current';
+
+  @override
+  String get memoriaPast => 'Past';
+
+  @override
+  String get memoriaTold => 'You told';
+
+  @override
+  String get memoriaPerceived => 'ATLAS noticed';
+
+  @override
+  String get memoriaSince => 'since';
 }

@@ -1448,6 +1448,33 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get healthGroupLongevity => 'Longevidade';
+
+  @override
+  String get memoriaTitle => 'Memória';
+
+  @override
+  String get memoriaHeroTitle => 'O que o Atlas sabe de você';
+
+  @override
+  String get memoriaHeroSub => 'Quanto mais ele sabe, melhores as respostas.';
+
+  @override
+  String get memoriaKicker => 'O que ele guardou';
+
+  @override
+  String get memoriaCurrent => 'Atual';
+
+  @override
+  String get memoriaPast => 'Passou';
+
+  @override
+  String get memoriaTold => 'Você contou';
+
+  @override
+  String get memoriaPerceived => 'O Atlas percebeu';
+
+  @override
+  String get memoriaSince => 'desde';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -2894,4 +2921,31 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get healthGroupLongevity => 'Longevidade';
+
+  @override
+  String get memoriaTitle => 'Memória';
+
+  @override
+  String get memoriaHeroTitle => 'O que o Atlas sabe de você';
+
+  @override
+  String get memoriaHeroSub => 'Quanto mais ele sabe, melhores as respostas.';
+
+  @override
+  String get memoriaKicker => 'O que ele guardou';
+
+  @override
+  String get memoriaCurrent => 'Atual';
+
+  @override
+  String get memoriaPast => 'Passou';
+
+  @override
+  String get memoriaTold => 'Você contou';
+
+  @override
+  String get memoriaPerceived => 'O Atlas percebeu';
+
+  @override
+  String get memoriaSince => 'desde';
 }

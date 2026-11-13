@@ -559,5 +559,14 @@
   "healthGroupMetabolism": "Metabolism",
   "healthGroupHeartBody": "Heart & body",
   "healthGroupBreathOxygen": "Breathing & oxygen",
-  "healthGroupLongevity": "Longevity"
+  "healthGroupLongevity": "Longevity",
+  "memoriaTitle": "Memory",
+  "memoriaHeroTitle": "What ATLAS knows about you",
+  "memoriaHeroSub": "The more it knows, the better the answers.",
+  "memoriaKicker": "What it stored",
+  "memoriaCurrent": "Current",
+  "memoriaPast": "Past",
+  "memoriaTold": "You told",
+  "memoriaPerceived": "ATLAS noticed",
+  "memoriaSince": "since"
 }

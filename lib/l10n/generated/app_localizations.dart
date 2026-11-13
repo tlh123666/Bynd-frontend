@@ -2762,6 +2762,60 @@ abstract class AppLocalizations {
   /// In pt_BR, this message translates to:
   /// **'Longevidade'**
   String get healthGroupLongevity;
+
+  /// No description provided for @memoriaTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Memória'**
+  String get memoriaTitle;
+
+  /// No description provided for @memoriaHeroTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'O que o Atlas sabe de você'**
+  String get memoriaHeroTitle;
+
+  /// No description provided for @memoriaHeroSub.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Quanto mais ele sabe, melhores as respostas.'**
+  String get memoriaHeroSub;
+
+  /// No description provided for @memoriaKicker.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'O que ele guardou'**
+  String get memoriaKicker;
+
+  /// No description provided for @memoriaCurrent.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Atual'**
+  String get memoriaCurrent;
+
+  /// No description provided for @memoriaPast.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Passou'**
+  String get memoriaPast;
+
+  /// No description provided for @memoriaTold.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Você contou'**
+  String get memoriaTold;
+
+  /// No description provided for @memoriaPerceived.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'O Atlas percebeu'**
+  String get memoriaPerceived;
+
+  /// No description provided for @memoriaSince.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'desde'**
+  String get memoriaSince;
 }
 
 class _AppLocalizationsDelegate

@@ -10,7 +10,7 @@ import '../../application/atlas_chat_controller.dart';
 import '../../application/atlas_scope.dart';
 import '../../data/models/conversation.dart';
 import 'atlas_conversations_sheet.dart';
-import 'insights_page.dart';
+import 'atlas_memory_page.dart';
 
 /// ATLAS 对话浮层 —— 按 BYND UI 源码复刻（src/screens/Assistente.jsx +
 /// src/styles/atlas-caixa.css 的 folha 模式）：
@@ -242,13 +242,14 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
                     ),
                   ),
                 ),
-                // .at-mem：Memória 入口（当前先开洞察列表，记忆子屏随新端点补）
+                // .at-mem：Memória 子屏（源码里脑图标开 Memória；这是 Atlas 内
+                // 部子页，压在浮层上，带返回箭头）
                 IconButton(
-                  tooltip: strings.insightsTitle,
+                  tooltip: strings.memoriaTitle,
                   icon: const Icon(Icons.psychology_outlined, size: 24),
                   color: _AtlasCss.textFull.withValues(alpha: .85),
                   onPressed: () => Navigator.of(context).push<void>(
-                    MaterialPageRoute(builder: (_) => const InsightsPage()),
+                    MaterialPageRoute(builder: (_) => const AtlasMemoryPage()),
                   ),
                 ),
               ],
