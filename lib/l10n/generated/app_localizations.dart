@@ -2612,6 +2612,78 @@ abstract class AppLocalizations {
   /// In pt_BR, this message translates to:
   /// **'Boas-vindas ao grupo!'**
   String get communityJoinedGroup;
+
+  /// No description provided for @atlasInsights.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Insights'**
+  String get atlasInsights;
+
+  /// No description provided for @atlasChat.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Conversar com o ATLAS'**
+  String get atlasChat;
+
+  /// No description provided for @insightsTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Insights'**
+  String get insightsTitle;
+
+  /// No description provided for @insightsRefresh.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Atualizar'**
+  String get insightsRefresh;
+
+  /// No description provided for @insightsError.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Não foi possível carregar os insights. Puxe para baixo e tente novamente.'**
+  String get insightsError;
+
+  /// No description provided for @insightsEmpty.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Nenhum insight ainda. Continue sincronizando a pulseira — o ATLAS fala quando seus dados contam algo que vale a pena saber.'**
+  String get insightsEmpty;
+
+  /// No description provided for @insightsFactors.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'O que pode estar envolvido'**
+  String get insightsFactors;
+
+  /// No description provided for @insightsActions.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'O que você pode experimentar'**
+  String get insightsActions;
+
+  /// No description provided for @chatTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'ATLAS'**
+  String get chatTitle;
+
+  /// No description provided for @chatNew.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Nova conversa'**
+  String get chatNew;
+
+  /// No description provided for @chatEmptyHint.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Pergunte sobre sono, recuperação, estresse ou prontidão para treinar. O ATLAS responde com os seus dados e explica o que significam.'**
+  String get chatEmptyHint;
+
+  /// No description provided for @chatInputHint.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Mensagem para o ATLAS'**
+  String get chatInputHint;
 }
 
 class _AppLocalizationsDelegate

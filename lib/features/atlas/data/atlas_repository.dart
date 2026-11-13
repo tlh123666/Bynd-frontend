@@ -1,6 +1,7 @@
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_endpoints.dart';
 import 'models/capabilities.dart';
+import 'models/conversation.dart';
 import 'models/insight.dart';
 import 'models/mapa.dart';
 import 'models/workspace.dart';
@@ -133,6 +134,69 @@ class AtlasRepository {
     // 响应，按空列表处理而不是抛错——列表页空着比报错好。
     if (data.isEmpty) return InsightList.empty;
     return InsightList.fromJson(data);
+  }
+
+  // ── 对话（ATLAS chat）──────────────────────────────────────────
+  //
+  // 发送走 SSE：调用方拿到原始事件行自行解析（start/status/delta/
+  // content_done/done/error）。这里只负责传输，不做状态机——状态机在
+  // chat controller，换界面的代价才不会拖上协议层。
+
+  Future<AtlasConversation> createConversation({String? scope}) async {
+    final data = await _client.request(
+      'POST',
+      ApiEndpoints.assistantConversations,
+      body: {'locale': defaultLocale, 'scope': ?scope},
+    );
+    return AtlasConversation.fromJson(data);
+  }
+
+  Future<AtlasConversationPage> fetchConversations({int limit = 20}) async {
+    final data = await _get(
+      ApiEndpoints.assistantConversations,
+      query: {'locale': defaultLocale, 'limit': limit},
+    );
+    if (data.isEmpty) {
+      return const AtlasConversationPage(items: [], hasMore: false);
+    }
+    return AtlasConversationPage.fromJson(data);
+  }
+
+  Future<List<AtlasMessage>> fetchMessages(String conversationId) async {
+    final data = await _get(ApiEndpoints.assistantMessages(conversationId));
+    final items = data['items'] as List<Object?>? ?? const [];
+    return items
+        .whereType<Map<String, dynamic>>()
+        .map(AtlasMessage.fromJson)
+        .toList();
+  }
+
+  Stream<String> sendMessageSse({
+    required String conversationId,
+    required String content,
+    required String clientRequestId,
+  }) {
+    return _client.postSseLines(
+      ApiEndpoints.assistantMessages(conversationId),
+      body: {
+        'content': content,
+        'locale': defaultLocale,
+        'timezone': defaultTimezone,
+        'stream': true,
+        'clientRequestId': clientRequestId,
+      },
+    );
+  }
+
+  Future<void> cancelGeneration(
+    String conversationId,
+    String generationId,
+  ) async {
+    await _client.request(
+      'POST',
+      ApiEndpoints.assistantCancelGeneration(conversationId),
+      body: {'generationId': generationId},
+    );
   }
 
   /// 关闭底层 HTTP 连接池。仓储独占一个 [ApiClient]，所以可以直接关。

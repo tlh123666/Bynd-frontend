@@ -59,7 +59,16 @@
   "historySevenDayAverage": "média de 7 dias",
   "historyDemoMonth": "nov",
   "historyDemoSummary": "{count, plural, one{{count} atividade} other{{count} atividades}} · {minutes} min no total",
-  "@historyDemoSummary": { "placeholders": { "count": { "type": "int" }, "minutes": { "type": "int" } } },
+  "@historyDemoSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "historyDemoTime": "hoje 07:50",
   "activityDetailDemoSource": "Exemplo · dados ilustrativos",
   "activityDetailTimeTo": "a",
@@ -69,7 +78,13 @@
   "activityDetailMaximumHeartRate": "FC máxima",
   "activityDetailHeartZones": "Zonas da FC",
   "activityDetailZoneMost": "mais tempo na zona {zone}",
-  "@activityDetailZoneMost": { "placeholders": { "zone": { "type": "int" } } },
+  "@activityDetailZoneMost": {
+    "placeholders": {
+      "zone": {
+        "type": "int"
+      }
+    }
+  },
   "activityDetailZone": "Zona",
   "activityDetailZoneRest": "repouso",
   "activityDetailZoneVeryLight": "muito leve",
@@ -133,7 +148,16 @@
   "activityDemoSetsAndWeight": "séries e peso",
   "activityDemoWithGps": "com GPS",
   "activityDemoSummary": "{count, plural, one{{count} treino} other{{count} treinos}} · {minutes} min no total",
-  "@activityDemoSummary": { "placeholders": { "count": { "type": "int" }, "minutes": { "type": "int" } } },
+  "@activityDemoSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "activityDemoLoadLabel": "carga",
   "activityDemoLabel": "Dados ilustrativos de demonstração · não sincronizados",
   "activityDemoStepsValue": "6.240",
@@ -486,5 +510,17 @@
   "communityCreateNote": "Pode criar sem ninguém: depois de criar, você chama mais gente nos ajustes do grupo.",
   "communityPublicGroup": "Grupo público",
   "communityJoin": "Entrar",
-  "communityJoinedGroup": "Boas-vindas ao grupo!"
+  "communityJoinedGroup": "Boas-vindas ao grupo!",
+  "atlasInsights": "Insights",
+  "atlasChat": "Conversar com o ATLAS",
+  "insightsTitle": "Insights",
+  "insightsRefresh": "Atualizar",
+  "insightsError": "Não foi possível carregar os insights. Puxe para baixo e tente novamente.",
+  "insightsEmpty": "Nenhum insight ainda. Continue sincronizando a pulseira — o ATLAS fala quando seus dados contam algo que vale a pena saber.",
+  "insightsFactors": "O que pode estar envolvido",
+  "insightsActions": "O que você pode experimentar",
+  "chatTitle": "ATLAS",
+  "chatNew": "Nova conversa",
+  "chatEmptyHint": "Pergunte sobre sono, recuperação, estresse ou prontidão para treinar. O ATLAS responde com os seus dados e explica o que significam.",
+  "chatInputHint": "Mensagem para o ATLAS"
 }

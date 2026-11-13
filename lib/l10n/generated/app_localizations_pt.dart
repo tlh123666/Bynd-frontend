@@ -1370,6 +1370,45 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get communityJoinedGroup => 'Boas-vindas ao grupo!';
+
+  @override
+  String get atlasInsights => 'Insights';
+
+  @override
+  String get atlasChat => 'Conversar com o ATLAS';
+
+  @override
+  String get insightsTitle => 'Insights';
+
+  @override
+  String get insightsRefresh => 'Atualizar';
+
+  @override
+  String get insightsError =>
+      'Não foi possível carregar os insights. Puxe para baixo e tente novamente.';
+
+  @override
+  String get insightsEmpty =>
+      'Nenhum insight ainda. Continue sincronizando a pulseira — o ATLAS fala quando seus dados contam algo que vale a pena saber.';
+
+  @override
+  String get insightsFactors => 'O que pode estar envolvido';
+
+  @override
+  String get insightsActions => 'O que você pode experimentar';
+
+  @override
+  String get chatTitle => 'ATLAS';
+
+  @override
+  String get chatNew => 'Nova conversa';
+
+  @override
+  String get chatEmptyHint =>
+      'Pergunte sobre sono, recuperação, estresse ou prontidão para treinar. O ATLAS responde com os seus dados e explica o que significam.';
+
+  @override
+  String get chatInputHint => 'Mensagem para o ATLAS';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -2738,4 +2777,43 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get communityJoinedGroup => 'Boas-vindas ao grupo!';
+
+  @override
+  String get atlasInsights => 'Insights';
+
+  @override
+  String get atlasChat => 'Conversar com o ATLAS';
+
+  @override
+  String get insightsTitle => 'Insights';
+
+  @override
+  String get insightsRefresh => 'Atualizar';
+
+  @override
+  String get insightsError =>
+      'Não foi possível carregar os insights. Puxe para baixo e tente novamente.';
+
+  @override
+  String get insightsEmpty =>
+      'Nenhum insight ainda. Continue sincronizando a pulseira — o ATLAS fala quando seus dados contam algo que vale a pena saber.';
+
+  @override
+  String get insightsFactors => 'O que pode estar envolvido';
+
+  @override
+  String get insightsActions => 'O que você pode experimentar';
+
+  @override
+  String get chatTitle => 'ATLAS';
+
+  @override
+  String get chatNew => 'Nova conversa';
+
+  @override
+  String get chatEmptyHint =>
+      'Pergunte sobre sono, recuperação, estresse ou prontidão para treinar. O ATLAS responde com os seus dados e explica o que significam.';
+
+  @override
+  String get chatInputHint => 'Mensagem para o ATLAS';
 }

@@ -205,9 +205,7 @@ class _StateTile extends StatelessWidget {
           children: [
             Text(
               label,
-              style: AppTypography.caption.copyWith(
-                color: AppColors.textMuted,
-              ),
+              style: AppTypography.caption.copyWith(color: AppColors.textMuted),
             ),
             const SizedBox(height: AppSpacing.xxs),
             Text(
@@ -368,7 +366,9 @@ class _RelationshipCardState extends State<_RelationshipCard> {
               const SizedBox(height: AppSpacing.xxs),
               Text(
                 'Observado desde ${evidence.firstSeenAt}.',
-                style: AppTypography.caption.copyWith(color: AppColors.textMuted),
+                style: AppTypography.caption.copyWith(
+                  color: AppColors.textMuted,
+                ),
               ),
             ],
             Text(

@@ -171,6 +171,58 @@ class ApiClient {
     }
   }
 
+  /// POST 一个 SSE 端点，逐行交出事件流。
+  ///
+  /// 与 [request] 的区别是生命周期：SSE 的 preparing/generating/saving 阶段
+  /// 都可能长时间没有字节，所以这里不走 receiveTimeout——断流由上层用
+  /// generationId 调 cancel 端点处理，超时杀连接会把还活着的对话掐死。
+  /// 非 2xx 的响应不是流：读完 body 按 envelope 抛 [ApiException]。
+  Stream<String> postSseLines(String path, {required Object body}) async* {
+    final token = await tokenProvider();
+    if (token == null || token.isEmpty) {
+      throw const ApiException(
+        'Entre na sua conta para continuar.',
+        code: 'authentication_required',
+      );
+    }
+    final request = http.Request('POST', endpoint(path))
+      ..body = jsonEncode(body)
+      ..headers.addAll({
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+        'Accept': 'text/event-stream',
+        'Accept-Language': _localeProvider(),
+      });
+    final response = await _client.send(request);
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      final raw = await response.stream.bytesToString();
+      var message = 'Não foi possível concluir. Tente novamente.';
+      int? serverCode;
+      try {
+        final envelope = jsonDecode(raw) as Map<String, dynamic>;
+        serverCode = int.tryParse('${envelope['code']}');
+        final data = envelope['data'];
+        if (data is Map &&
+            data['message'] is String &&
+            (data['message'] as String).isNotEmpty) {
+          message = data['message'] as String;
+        }
+      } catch (_) {
+        /* 非 JSON 错误体按通用文案处理 */
+      }
+      throw ApiException(
+        message,
+        code: 'http_${response.statusCode}',
+        statusCode: response.statusCode,
+        serverCode: serverCode,
+      );
+    }
+    yield* response.stream
+        .cast<List<int>>()
+        .transform(const Utf8Decoder())
+        .transform(const LineSplitter());
+  }
+
   void close() => _client.close();
 
   static Duration? _retryAfter(String? value) {

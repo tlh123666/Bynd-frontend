@@ -70,6 +70,14 @@ void main() {
 
     await tester.tap(find.byTooltip('Menu'));
     await tester.pumpAndSettle();
+    // 侧菜单在加入 ATLAS 会话与洞察入口后条目超出首屏，「Ajustes」
+    // 需要滚动到可视区才能点到。
+    await tester.scrollUntilVisible(
+      find.text('Ajustes'),
+      120,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Ajustes'));
     await tester.pumpAndSettle();
     await tester.tap(find.bySemanticsLabel('Ações rápidas'));
@@ -162,6 +170,14 @@ void main() {
     await tester.pumpWidget(const MaterialApp(home: HomePage()));
 
     await tester.tap(find.byTooltip('Menu'));
+    await tester.pumpAndSettle();
+    // 侧菜单在加入 ATLAS 会话与洞察入口后条目超出首屏，「Ajustes」
+    // 需要滚动到可视区才能点到。
+    await tester.scrollUntilVisible(
+      find.text('Ajustes'),
+      120,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.text('Ajustes'));
     await tester.pumpAndSettle();

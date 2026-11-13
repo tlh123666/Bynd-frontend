@@ -88,12 +88,15 @@ class CapabilitySource {
   final String? evidence;
 
   /// 用户现在到底能不能读到这个来源。
-  bool get isReadable => available && enabled && entitled && (!consentRequired || consentGranted);
+  bool get isReadable =>
+      available && enabled && entitled && (!consentRequired || consentGranted);
 
   /// 不能读取时，最该让用户做的一件事。
   CapabilitySourceBlocker get blocker {
     if (!available) return CapabilitySourceBlocker.unavailable;
-    if (consentRequired && !consentGranted) return CapabilitySourceBlocker.consent;
+    if (consentRequired && !consentGranted) {
+      return CapabilitySourceBlocker.consent;
+    }
     if (!entitled) return CapabilitySourceBlocker.entitlement;
     return CapabilitySourceBlocker.none;
   }
@@ -377,8 +380,11 @@ class AiCapability {
       consentCategory: readNullableString(gating, 'consentCategory'),
       platforms: readStringList(gating, 'platforms'),
       minAppVersion: readNullableString(gating, 'minAppVersion'),
-      navigation:
-          readObjectList(json, 'navigation', CapabilityNavigation.fromJson),
+      navigation: readObjectList(
+        json,
+        'navigation',
+        CapabilityNavigation.fromJson,
+      ),
       actions: readObjectList(json, 'actions', CapabilityAction.fromJson),
       raw: json,
     );

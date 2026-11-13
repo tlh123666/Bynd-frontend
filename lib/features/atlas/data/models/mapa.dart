@@ -105,8 +105,7 @@ class MapaRelationship {
   int get matches => evidence.matchingOccurrences;
   int get occurrences => evidence.occurrences;
 
-  bool get isEstablished =>
-      state == 'established' || state == 'intensifying';
+  bool get isEstablished => state == 'established' || state == 'intensifying';
 
   factory MapaRelationship.fromJson(Map<String, dynamic> json) {
     final source = json['source'];
@@ -255,8 +254,10 @@ class MapaMaturity {
       daysWithBynd: readInt(json, 'days_with_bynd'),
       observedSignalCount: readInt(json, 'observed_signal_count'),
       activeRelationshipCount: readInt(json, 'active_relationship_count'),
-      establishedRelationshipCount:
-          readInt(json, 'established_relationship_count'),
+      establishedRelationshipCount: readInt(
+        json,
+        'established_relationship_count',
+      ),
     );
   }
 }

@@ -1365,4 +1365,43 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get communityJoinedGroup => 'Welcome to the group!';
+
+  @override
+  String get atlasInsights => 'Insights';
+
+  @override
+  String get atlasChat => 'Talk to ATLAS';
+
+  @override
+  String get insightsTitle => 'Insights';
+
+  @override
+  String get insightsRefresh => 'Refresh';
+
+  @override
+  String get insightsError =>
+      'Could not load insights. Pull down to try again.';
+
+  @override
+  String get insightsEmpty =>
+      'No insights yet. Keep syncing your band — ATLAS will speak up when your data tells something worth knowing.';
+
+  @override
+  String get insightsFactors => 'What may be involved';
+
+  @override
+  String get insightsActions => 'What you can try';
+
+  @override
+  String get chatTitle => 'ATLAS';
+
+  @override
+  String get chatNew => 'New conversation';
+
+  @override
+  String get chatEmptyHint =>
+      'Ask about your sleep, recovery, stress or training readiness. ATLAS answers with your own data and explains what it means.';
+
+  @override
+  String get chatInputHint => 'Message ATLAS';
 }

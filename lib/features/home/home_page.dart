@@ -16,6 +16,8 @@ import 'presentation/widgets/home_account_guard.dart';
 import '../profile/profile_page.dart';
 import '../activity/presentation/pages/activity_overview_page.dart';
 import '../atlas/presentation/pages/mapa_page.dart';
+import '../atlas/presentation/pages/atlas_chat_page.dart';
+import '../atlas/presentation/pages/insights_page.dart';
 import '../device/presentation/pages/device_management_page.dart';
 
 /// Home owns navigation; content and data live in the home feature layers.
@@ -109,6 +111,16 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     ).push<void>(MaterialPageRoute(builder: (_) => const MapaPage()));
   }
 
+  Future<void> _pushAfterMenu(Widget page) async {
+    final delay = AppMotion.enabled(context) ? AppMotion.drawer : Duration.zero;
+    setState(() => _menuOpen = false);
+    await Future<void>.delayed(delay);
+    if (!mounted) return;
+    await Navigator.of(
+      context,
+    ).push<void>(MaterialPageRoute(builder: (_) => page));
+  }
+
   void _otherMenuItem(String label) {
     setState(() => _menuOpen = false);
     if (label == context.l10n.signOut) {
@@ -118,6 +130,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     if (label == 'Mapa' || label == context.l10n.atlas) {
       // 抽屉收起有动画，直接 push 会和收起动作叠在一起；与设备页保持同一步调。
       _openMapa();
+      return;
+    }
+    if (label == context.l10n.atlasInsights) {
+      _pushAfterMenu(const InsightsPage());
+      return;
+    }
+    if (label == context.l10n.atlasChat) {
+      _pushAfterMenu(const AtlasChatPage());
       return;
     }
     if (label == context.l10n.diary || label == 'Diário') {
@@ -134,10 +154,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     if (label == context.l10n.community) {
       Navigator.of(context).push<void>(
         MaterialPageRoute(
-          builder: (_) => HomeAccountGuard(
-            controller: _home,
-            child: const CommunityPage(),
-          ),
+          builder: (_) =>
+              HomeAccountGuard(controller: _home, child: const CommunityPage()),
         ),
       );
       return;
