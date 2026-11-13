@@ -172,7 +172,7 @@ class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
             _buildHeader(strings),
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
+                padding: const EdgeInsets.fromLTRB(21, 8, 21, 40),
                 children: [
                   // .at-heroi
                   Text(
@@ -180,7 +180,7 @@ class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
                     style: const TextStyle(
                       color: _MemCss.textFull,
                       fontSize: 30,
-                      fontWeight: FontWeight.w300,
+                      fontWeight: FontWeight.w200,
                       height: 1.1,
                       letterSpacing: -0.01,
                     ),
@@ -298,7 +298,7 @@ class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
                   child: ListView(
                     controller: _tabScroll,
                     scrollDirection: Axis.horizontal,
-                    physics: _TabSnapPhysics(step: third),
+                    physics: const NeverScrollableScrollPhysics(),
                     children: [
                       SizedBox(width: third, height: 46), // <i> 首占位
                       for (var i = 0; i < _tabs.length; i++)
@@ -314,7 +314,7 @@ class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
                               style: TextStyle(
                                 color: i == _active
                                     ? _MemCss.textFull
-                                    : _MemCss.text3,
+                                    : _MemCss.text42,
                                 fontSize: 15,
                               ),
                             ),
@@ -326,7 +326,7 @@ class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
                 ),
                 // .at-marca：固定居中，永不移动（源码 left:50%; margin-left:-55px）
                 Positioned(
-                  bottom: 4,
+                  bottom: 12,
                   child: Column(
                     children: [
                       DecoratedBox(
@@ -445,7 +445,7 @@ class _MemoryCard extends StatelessWidget {
                   item.title,
                   style: const TextStyle(
                     color: _MemCss.textFull,
-                    fontSize: 15.5,
+                    fontSize: 16,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -461,15 +461,16 @@ class _MemoryCard extends StatelessWidget {
           // 状态行：Atual/Passou · Você contou/O Atlas percebeu · desde 日期
           Text.rich(
             TextSpan(
-              style: const TextStyle(fontSize: 13, color: _MemCss.text2),
+              style: const TextStyle(fontSize: 12, color: _MemCss.text42),
               children: [
                 TextSpan(
                   text: item.passou
                       ? strings.memoriaPast
                       : strings.memoriaCurrent,
                   style: TextStyle(
+                    fontWeight: FontWeight.w500,
                     color: item.passou
-                        ? _MemCss.text3
+                        ? _MemCss.text42
                         : const Color(0xFF86D4A3),
                   ),
                 ),
@@ -506,6 +507,7 @@ class _MemCss {
   static const textFull = Color(0xFFF4F5F7);
   static const text2 = Color(0xB8F4F5F7);
   static const text3 = Color(0x73F4F5F7);
+  static const text42 = Color(0x6BF4F5F7); // rgba(244,245,247,.42)
   static const card = Color(0xFF1C1F24);
   static const insetHighlight = Color(0x0DFFFFFF);
 }
