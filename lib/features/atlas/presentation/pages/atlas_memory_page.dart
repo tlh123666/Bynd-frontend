@@ -101,10 +101,51 @@ final Map<String, List<_MemoryItem>> _fixture = {
 class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
   late final List<String> _tabs = _fixture.keys.toList();
   final Map<String, Set<String>> _removed = {};
+  final ScrollController _tabScroll = ScrollController();
   int _active = 0;
 
+  @override
+  void initState() {
+    super.initState();
+    // 首帧后把默认 tab 滚到正中，marca（固定居中）正好压住它。
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _scrollTabTo(_active, jump: true),
+    );
+  }
+
+  /// 客户源码 centraAba：点 tab → 条带横向滑动把它带到正中；marca 固定
+  /// 居中不动。tab 与两端 spacer 等宽（各 1/3 条带宽），吸附偏移 = i×宽/3。
   void _selectTab(int index) {
     setState(() => _active = index);
+    _scrollTabTo(index);
+  }
+
+  void _scrollTabTo(int index, {bool jump = false}) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_tabScroll.hasClients) return;
+      final step = _tabScroll.position.viewportDimension / 3;
+      final target = (index * step).clamp(
+        0.0,
+        _tabScroll.position.maxScrollExtent,
+      );
+      if (jump) {
+        _tabScroll.jumpTo(target);
+      } else {
+        _tabScroll.animateTo(
+          target,
+          duration: const Duration(milliseconds: 320),
+          curve: const Cubic(0.32, 0.72, 0, 1),
+        );
+      }
+    });
+  }
+
+  /// 源码 rolouAbas：拖动松手时，吸附到离中心最近的 tab。
+  void _onTabStripScroll() {
+    if (!_tabScroll.hasClients) return;
+    final step = _tabScroll.position.viewportDimension / 3;
+    final index = (_tabScroll.offset / step).round().clamp(0, _tabs.length - 1);
+    if (index != _active) setState(() => _active = index);
   }
 
   void _remove(String tab, _MemoryItem item) {
@@ -230,57 +271,68 @@ class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
       .where((item) => !(_removed[tab]?.contains(item.title) ?? false))
       .toList();
 
-  /// `.at-faixa`：tab 条——**不允许横向滑动，只能逐个点**（用户定的交互）。
-  /// 各 tab 等宽铺满条带，marca（110px 白线 + 下指三角）定位到选中 tab
-  /// 的中心：x = (index + 0.5) / n × 条带宽。
+  /// `.at-faixa`：tab 条——可横向滑动 + scroll-snap（源码 trilho），但
+  /// **marca 固定居中永不移动**。布局按源码：两端各 1/3 宽的 `<i>` spacer、
+  /// 每个 tab 也占 1/3 宽、snap 对中。点 tab → 条带横向滑把它带到正中；
+  /// 拖动松手 → 吸附到离中心最近的 tab（rolouAbas）。
   Widget _buildTabs(AppLocalizations strings) {
     return Padding(
       padding: const EdgeInsets.only(top: 8),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final tabWidth = constraints.maxWidth / _tabs.length;
-          final marcaCenter = (_active + 0.5) * tabWidth;
+          final third = constraints.maxWidth / 3;
           return SizedBox(
             height: 46,
             child: Stack(
               alignment: Alignment.bottomCenter,
               children: [
-                Row(
-                  children: [
-                    for (var i = 0; i < _tabs.length; i++)
-                      GestureDetector(
-                        onTap: () => _selectTab(i),
-                        behavior: HitTestBehavior.opaque,
-                        child: Container(
-                          width: tabWidth,
-                          height: 46,
-                          alignment: Alignment.center,
-                          child: Text(
-                            _tabs[i],
-                            style: TextStyle(
-                              color: i == _active
-                                  ? _MemCss.textFull
-                                  : _MemCss.text3,
-                              fontSize: 15,
+                // trilho：spacer + tabs + spacer，全部 1/3 宽、snap 对中
+                NotificationListener<ScrollNotification>(
+                  onNotification: (notification) {
+                    if (notification is ScrollEndNotification) {
+                      _onTabStripScroll();
+                    }
+                    return false;
+                  },
+                  child: ListView(
+                    controller: _tabScroll,
+                    scrollDirection: Axis.horizontal,
+                    children: [
+                      SizedBox(width: third, height: 46), // <i> 首占位
+                      for (var i = 0; i < _tabs.length; i++)
+                        GestureDetector(
+                          onTap: () => _selectTab(i),
+                          behavior: HitTestBehavior.opaque,
+                          child: Container(
+                            width: third,
+                            height: 46,
+                            alignment: Alignment.center,
+                            child: Text(
+                              _tabs[i],
+                              style: TextStyle(
+                                color: i == _active
+                                    ? _MemCss.textFull
+                                    : _MemCss.text3,
+                                fontSize: 15,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                  ],
+                      SizedBox(width: third, height: 46), // <i> 尾占位
+                    ],
+                  ),
                 ),
-                // .marca：线 + 下指小三角，平移到选中 tab 的中心
+                // .at-marca：固定居中，永不移动（源码 left:50%; margin-left:-55px）
                 Positioned(
                   bottom: 4,
-                  left: marcaCenter - 55,
                   child: Column(
                     children: [
-                      Container(
-                        width: 110,
-                        height: 1.5,
+                      DecoratedBox(
                         decoration: BoxDecoration(
                           color: _MemCss.textFull,
                           borderRadius: BorderRadius.circular(1),
                         ),
+                        child: const SizedBox(width: 110, height: 1.5),
                       ),
                       ClipRect(
                         child: CustomPaint(
