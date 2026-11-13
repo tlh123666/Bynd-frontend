@@ -1398,7 +1398,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get insightsActions => 'O que você pode experimentar';
 
   @override
-  String get chatTitle => 'ATLAS';
+  String get chatTitle => 'Atlas';
 
   @override
   String get chatNew => 'Nova conversa';
@@ -1408,10 +1408,28 @@ class AppLocalizationsPt extends AppLocalizations {
       'Pergunte sobre sono, recuperação, estresse ou prontidão para treinar. O ATLAS responde com os seus dados e explica o que significam.';
 
   @override
-  String get chatInputHint => 'Mensagem para o ATLAS';
+  String get chatInputHint => 'Pergunte ao Atlas';
 
   @override
   String get menuMapa => 'Mapa';
+
+  @override
+  String get chatSug1 => 'Como estou?';
+
+  @override
+  String get chatSug2 => 'Me dá um resumo do meu dia';
+
+  @override
+  String get chatSug3 => 'Por que a VFC não volta?';
+
+  @override
+  String get chatHistoryTitle => 'Conversas';
+
+  @override
+  String get chatHistoryEmpty => 'Nenhuma conversa ainda.';
+
+  @override
+  String get chatHistoryUntitled => 'Conversa sem título';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -2808,7 +2826,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get insightsActions => 'O que você pode experimentar';
 
   @override
-  String get chatTitle => 'ATLAS';
+  String get chatTitle => 'Atlas';
 
   @override
   String get chatNew => 'Nova conversa';
@@ -2818,8 +2836,26 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
       'Pergunte sobre sono, recuperação, estresse ou prontidão para treinar. O ATLAS responde com os seus dados e explica o que significam.';
 
   @override
-  String get chatInputHint => 'Mensagem para o ATLAS';
+  String get chatInputHint => 'Pergunte ao Atlas';
 
   @override
   String get menuMapa => 'Mapa';
+
+  @override
+  String get chatSug1 => 'Como estou?';
+
+  @override
+  String get chatSug2 => 'Me dá um resumo do meu dia';
+
+  @override
+  String get chatSug3 => 'Por que a VFC não volta?';
+
+  @override
+  String get chatHistoryTitle => 'Conversas';
+
+  @override
+  String get chatHistoryEmpty => 'Nenhuma conversa ainda.';
+
+  @override
+  String get chatHistoryUntitled => 'Conversa sem título';
 }

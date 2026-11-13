@@ -543,9 +543,15 @@
   "insightsEmpty": "Nenhum insight ainda. Continue sincronizando a pulseira — o ATLAS fala quando seus dados contam algo que vale a pena saber.",
   "insightsFactors": "O que pode estar envolvido",
   "insightsActions": "O que você pode experimentar",
-  "chatTitle": "ATLAS",
+  "chatTitle": "Atlas",
   "chatNew": "Nova conversa",
   "chatEmptyHint": "Pergunte sobre sono, recuperação, estresse ou prontidão para treinar. O ATLAS responde com os seus dados e explica o que significam.",
-  "chatInputHint": "Mensagem para o ATLAS",
-  "menuMapa": "Mapa"
+  "chatInputHint": "Pergunte ao Atlas",
+  "menuMapa": "Mapa",
+  "chatSug1": "Como estou?",
+  "chatSug2": "Me dá um resumo do meu dia",
+  "chatSug3": "Por que a VFC não volta?",
+  "chatHistoryTitle": "Conversas",
+  "chatHistoryEmpty": "Nenhuma conversa ainda.",
+  "chatHistoryUntitled": "Conversa sem título"
 }

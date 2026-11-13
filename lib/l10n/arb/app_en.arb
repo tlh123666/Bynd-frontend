@@ -543,9 +543,15 @@
   "insightsEmpty": "No insights yet. Keep syncing your band — ATLAS will speak up when your data tells something worth knowing.",
   "insightsFactors": "What may be involved",
   "insightsActions": "What you can try",
-  "chatTitle": "ATLAS",
+  "chatTitle": "Atlas",
   "chatNew": "New conversation",
   "chatEmptyHint": "Ask about your sleep, recovery, stress or training readiness. ATLAS answers with your own data and explains what it means.",
-  "chatInputHint": "Message ATLAS",
-  "menuMapa": "Mapa"
+  "chatInputHint": "Ask ATLAS",
+  "menuMapa": "Mapa",
+  "chatSug1": "How am I doing?",
+  "chatSug2": "Summarize my day",
+  "chatSug3": "Why is my HRV not recovering?",
+  "chatHistoryTitle": "Conversations",
+  "chatHistoryEmpty": "No conversations yet.",
+  "chatHistoryUntitled": "Untitled conversation"
 }

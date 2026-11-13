@@ -8,8 +8,16 @@ import 'home_signal_detail_page.dart';
 import '../widgets/home_account_guard.dart';
 
 class HomeSignalsPage extends StatelessWidget {
-  const HomeSignalsPage({required this.controller, super.key});
+  const HomeSignalsPage({
+    required this.controller,
+    this.showClose = true,
+    super.key,
+  });
   final HomeController controller;
+
+  /// 作为底部 tab 根时没有上一页可关，隐藏头部关闭钮。
+  final bool showClose;
+
   @override
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: AppColors.homeCanvas,
@@ -21,7 +29,9 @@ class HomeSignalsPage extends StatelessWidget {
             children: [
               AppDetailHeader(
                 title: context.l10n.homeNumbers,
-                onClose: () => Navigator.pop(context),
+                // 底部 tab 根形态：客户源码里 Saúde 是一级 tab（TabBar.jsx），
+                // 头部没有「返回」语义。
+                onClose: showClose ? () => Navigator.pop(context) : null,
               ),
               DayStrip(day: controller.day, onDayChanged: controller.setDay),
               Expanded(

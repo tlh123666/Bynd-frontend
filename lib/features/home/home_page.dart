@@ -242,7 +242,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               // Atlas tab → Assistente，28/10 起 Mapa 移去三杠菜单）。
               const AtlasChatPage(),
               HomeAccountGuard(controller: _home, child: const CommunityPage()),
-              HomeSignalsPage(controller: _home),
+              HomeSignalsPage(controller: _home, showClose: false),
             ],
           ),
           bottomNavigationBar: AppBottomNav(

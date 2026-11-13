@@ -1393,7 +1393,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get insightsActions => 'What you can try';
 
   @override
-  String get chatTitle => 'ATLAS';
+  String get chatTitle => 'Atlas';
 
   @override
   String get chatNew => 'New conversation';
@@ -1403,8 +1403,26 @@ class AppLocalizationsEn extends AppLocalizations {
       'Ask about your sleep, recovery, stress or training readiness. ATLAS answers with your own data and explains what it means.';
 
   @override
-  String get chatInputHint => 'Message ATLAS';
+  String get chatInputHint => 'Ask ATLAS';
 
   @override
   String get menuMapa => 'Mapa';
+
+  @override
+  String get chatSug1 => 'How am I doing?';
+
+  @override
+  String get chatSug2 => 'Summarize my day';
+
+  @override
+  String get chatSug3 => 'Why is my HRV not recovering?';
+
+  @override
+  String get chatHistoryTitle => 'Conversations';
+
+  @override
+  String get chatHistoryEmpty => 'No conversations yet.';
+
+  @override
+  String get chatHistoryUntitled => 'Untitled conversation';
 }

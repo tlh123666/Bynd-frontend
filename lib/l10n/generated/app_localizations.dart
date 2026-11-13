@@ -2664,7 +2664,7 @@ abstract class AppLocalizations {
   /// No description provided for @chatTitle.
   ///
   /// In pt_BR, this message translates to:
-  /// **'ATLAS'**
+  /// **'Atlas'**
   String get chatTitle;
 
   /// No description provided for @chatNew.
@@ -2682,7 +2682,7 @@ abstract class AppLocalizations {
   /// No description provided for @chatInputHint.
   ///
   /// In pt_BR, this message translates to:
-  /// **'Mensagem para o ATLAS'**
+  /// **'Pergunte ao Atlas'**
   String get chatInputHint;
 
   /// No description provided for @menuMapa.
@@ -2690,6 +2690,42 @@ abstract class AppLocalizations {
   /// In pt_BR, this message translates to:
   /// **'Mapa'**
   String get menuMapa;
+
+  /// No description provided for @chatSug1.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Como estou?'**
+  String get chatSug1;
+
+  /// No description provided for @chatSug2.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Me dá um resumo do meu dia'**
+  String get chatSug2;
+
+  /// No description provided for @chatSug3.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Por que a VFC não volta?'**
+  String get chatSug3;
+
+  /// No description provided for @chatHistoryTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Conversas'**
+  String get chatHistoryTitle;
+
+  /// No description provided for @chatHistoryEmpty.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Nenhuma conversa ainda.'**
+  String get chatHistoryEmpty;
+
+  /// No description provided for @chatHistoryUntitled.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Conversa sem título'**
+  String get chatHistoryUntitled;
 }
 
 class _AppLocalizationsDelegate
