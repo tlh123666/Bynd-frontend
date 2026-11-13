@@ -17,7 +17,7 @@ import '../profile/profile_page.dart';
 import '../activity/presentation/pages/activity_overview_page.dart';
 import '../atlas/presentation/pages/mapa_page.dart';
 import '../atlas/presentation/pages/atlas_chat_page.dart';
-import '../atlas/presentation/pages/insights_page.dart';
+import 'presentation/pages/home_signals_page.dart';
 import '../device/presentation/pages/device_management_page.dart';
 
 /// Home owns navigation; content and data live in the home feature layers.
@@ -111,33 +111,15 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     ).push<void>(MaterialPageRoute(builder: (_) => const MapaPage()));
   }
 
-  Future<void> _pushAfterMenu(Widget page) async {
-    final delay = AppMotion.enabled(context) ? AppMotion.drawer : Duration.zero;
-    setState(() => _menuOpen = false);
-    await Future<void>.delayed(delay);
-    if (!mounted) return;
-    await Navigator.of(
-      context,
-    ).push<void>(MaterialPageRoute(builder: (_) => page));
-  }
-
   void _otherMenuItem(String label) {
     setState(() => _menuOpen = false);
     if (label == context.l10n.signOut) {
       unawaited(_signOut());
       return;
     }
-    if (label == 'Mapa' || label == context.l10n.atlas) {
+    if (label == context.l10n.menuMapa || label == 'Mapa') {
       // 抽屉收起有动画，直接 push 会和收起动作叠在一起；与设备页保持同一步调。
       _openMapa();
-      return;
-    }
-    if (label == context.l10n.atlasInsights) {
-      _pushAfterMenu(const InsightsPage());
-      return;
-    }
-    if (label == context.l10n.atlasChat) {
-      _pushAfterMenu(const AtlasChatPage());
       return;
     }
     if (label == context.l10n.diary || label == 'Diário') {
@@ -242,14 +224,26 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       fit: StackFit.expand,
       children: [
         Scaffold(
-          extendBody: true,
+          // Hoje 标签下内容延伸到底部玻璃胶囊后面（毛玻璃需要背景）；
+          // 其余标签是自带 Scaffold 的整页，收回导航条上方。
+          extendBody: _selectedIndex == 0,
           backgroundColor: Colors.transparent,
-          body: HomeContent(
-            controller: _home,
-            onMenu: () => setState(() => _menuOpen = true),
-            onProfile: _openSettings,
-            onDevice: _openDevice,
-            onMapa: _openMapa,
+          body: IndexedStack(
+            index: _selectedIndex,
+            children: [
+              HomeContent(
+                controller: _home,
+                onMenu: () => setState(() => _menuOpen = true),
+                onProfile: _openSettings,
+                onDevice: _openDevice,
+                onMapa: _openMapa,
+              ),
+              // 底部 Tab 的 Atlas 直接进对话（客户源码 TabBar.jsx：
+              // Atlas tab → Assistente，28/10 起 Mapa 移去三杠菜单）。
+              const AtlasChatPage(),
+              HomeAccountGuard(controller: _home, child: const CommunityPage()),
+              HomeSignalsPage(controller: _home),
+            ],
           ),
           bottomNavigationBar: AppBottomNav(
             selectedIndex: _selectedIndex,

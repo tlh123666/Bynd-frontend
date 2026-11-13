@@ -5,6 +5,7 @@ import '../../../../l10n/app_localizations_context.dart';
 import '../../application/atlas_chat_controller.dart';
 import '../../application/atlas_scope.dart';
 import '../../data/models/conversation.dart';
+import 'insights_page.dart';
 
 /// ATLAS 聊天页：对话流 + 流式回复 + 发送/停止。
 ///
@@ -19,18 +20,24 @@ class AtlasChatPage extends StatefulWidget {
 
 class _AtlasChatPageState extends State<AtlasChatPage> {
   late final AtlasChatController _controller;
+  bool _controllerReady = false;
   final _input = TextEditingController();
   final _scroll = ScrollController();
 
   @override
-  void initState() {
-    super.initState();
-    _controller = AtlasChatController(AtlasScope.of(context));
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 取 InheritedWidget 只能在这里，不能在 initState：那时祖先还没挂稳。
+    // AtlasScope.repository 由 auth_gate 创建、应用生命周期内不变，这里只取一次。
+    if (!_controllerReady) {
+      _controller = AtlasChatController(AtlasScope.of(context));
+      _controllerReady = true;
+    }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    if (_controllerReady) _controller.dispose();
     _input.dispose();
     _scroll.dispose();
     super.dispose();
@@ -64,6 +71,13 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
         iconTheme: const IconThemeData(color: AppColors.textPrimary),
         title: Text(strings.chatTitle, style: AppTypography.homeTitle),
         actions: [
+          IconButton(
+            tooltip: strings.insightsTitle,
+            icon: const Icon(Icons.insights_outlined),
+            onPressed: () => Navigator.of(context).push<void>(
+              MaterialPageRoute(builder: (_) => const InsightsPage()),
+            ),
+          ),
           IconButton(
             tooltip: strings.chatNew,
             icon: const Icon(Icons.add_comment_outlined),

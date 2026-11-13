@@ -522,5 +522,6 @@
   "chatTitle": "ATLAS",
   "chatNew": "Nova conversa",
   "chatEmptyHint": "Pergunte sobre sono, recuperação, estresse ou prontidão para treinar. O ATLAS responde com os seus dados e explica o que significam.",
-  "chatInputHint": "Mensagem para o ATLAS"
+  "chatInputHint": "Mensagem para o ATLAS",
+  "menuMapa": "Mapa"
 }

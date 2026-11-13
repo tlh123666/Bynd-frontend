@@ -1404,4 +1404,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chatInputHint => 'Message ATLAS';
+
+  @override
+  String get menuMapa => 'Mapa';
 }

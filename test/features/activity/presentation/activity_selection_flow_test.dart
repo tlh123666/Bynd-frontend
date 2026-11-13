@@ -3,11 +3,32 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:new_jcvital/design_system/components/app_bottom_nav.dart';
 import 'package:new_jcvital/features/activity/presentation/pages/activity_overview_page.dart';
+import 'package:new_jcvital/core/network/api_client.dart';
+import 'package:new_jcvital/features/atlas/application/atlas_scope.dart';
+import 'package:new_jcvital/features/atlas/data/atlas_repository.dart';
 import 'package:new_jcvital/features/home/home_page.dart';
 import 'package:new_jcvital/features/home/home_sky_background.dart';
 import 'package:new_jcvital/features/profile/profile_page.dart';
 
 void main() {
+  // IndexedStack 现在包含 ATLAS 会话页（didChangeDependencies 里取 AtlasScope），
+  // 与真实树一致：auth_gate 用 AtlasScope 包住整个 app。
+  Future<void> pumpHome(WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: AtlasScope(
+          repository: AtlasRepository(
+            ApiClient(
+              baseUrl: Uri.parse('https://api.example.com'),
+              tokenProvider: () async => null,
+            ),
+          ),
+          child: const HomePage(),
+        ),
+      ),
+    );
+  }
+
   testWidgets('活动页与首页复用同一个底部导航且只应用一次安全区', (tester) async {
     await tester.pumpWidget(const MaterialApp(home: ActivityOverviewPage()));
 
@@ -29,7 +50,7 @@ void main() {
   });
 
   testWidgets('活动页点首页后返回并同步首页选中标签', (tester) async {
-    await tester.pumpWidget(const MaterialApp(home: HomePage()));
+    await pumpHome(tester);
 
     await tester.tap(
       find.descendant(
@@ -66,7 +87,7 @@ void main() {
   });
 
   testWidgets('从资料页进入活动后点首页会正确返回根页面', (tester) async {
-    await tester.pumpWidget(const MaterialApp(home: HomePage()));
+    await pumpHome(tester);
 
     await tester.tap(find.byTooltip('Menu'));
     await tester.pumpAndSettle();
@@ -109,7 +130,7 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await tester.pumpWidget(const MaterialApp(home: HomePage()));
+    await pumpHome(tester);
 
     expect(
       tester.getSize(find.byType(HomeSkyBackground)),
@@ -124,13 +145,13 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await tester.pumpWidget(const MaterialApp(home: HomePage()));
+    await pumpHome(tester);
 
     expect(tester.takeException(), isNull);
   });
 
   testWidgets('首页快捷入口先进入活动页，再自动打开选择面板', (tester) async {
-    await tester.pumpWidget(const MaterialApp(home: HomePage()));
+    await pumpHome(tester);
 
     await tester.tap(find.bySemanticsLabel('Ações rápidas'));
     await tester.pumpAndSettle();
@@ -149,7 +170,7 @@ void main() {
   });
 
   testWidgets('首页选择普通活动后进入准备页', (tester) async {
-    await tester.pumpWidget(const MaterialApp(home: HomePage()));
+    await pumpHome(tester);
 
     await tester.tap(find.bySemanticsLabel('Ações rápidas'));
     await tester.pumpAndSettle();
@@ -167,7 +188,7 @@ void main() {
   });
 
   testWidgets('资料页快捷入口复用目录并进入准备页', (tester) async {
-    await tester.pumpWidget(const MaterialApp(home: HomePage()));
+    await pumpHome(tester);
 
     await tester.tap(find.byTooltip('Menu'));
     await tester.pumpAndSettle();
@@ -195,7 +216,7 @@ void main() {
   });
 
   testWidgets('选择肌肉训练先进入无计划/计划入口', (tester) async {
-    await tester.pumpWidget(const MaterialApp(home: HomePage()));
+    await pumpHome(tester);
 
     await tester.tap(find.bySemanticsLabel('Ações rápidas'));
     await tester.pumpAndSettle();

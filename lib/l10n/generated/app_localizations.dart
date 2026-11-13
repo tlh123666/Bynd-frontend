@@ -2684,6 +2684,12 @@ abstract class AppLocalizations {
   /// In pt_BR, this message translates to:
   /// **'Mensagem para o ATLAS'**
   String get chatInputHint;
+
+  /// No description provided for @menuMapa.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Mapa'**
+  String get menuMapa;
 }
 
 class _AppLocalizationsDelegate

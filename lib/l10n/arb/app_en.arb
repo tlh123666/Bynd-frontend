@@ -546,5 +546,6 @@
   "chatTitle": "ATLAS",
   "chatNew": "New conversation",
   "chatEmptyHint": "Ask about your sleep, recovery, stress or training readiness. ATLAS answers with your own data and explains what it means.",
-  "chatInputHint": "Message ATLAS"
+  "chatInputHint": "Message ATLAS",
+  "menuMapa": "Mapa"
 }

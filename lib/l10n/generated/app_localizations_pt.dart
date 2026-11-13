@@ -1409,6 +1409,9 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get chatInputHint => 'Mensagem para o ATLAS';
+
+  @override
+  String get menuMapa => 'Mapa';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -2816,4 +2819,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get chatInputHint => 'Mensagem para o ATLAS';
+
+  @override
+  String get menuMapa => 'Mapa';
 }

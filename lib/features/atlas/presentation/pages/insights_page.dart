@@ -18,11 +18,16 @@ class InsightsPage extends StatefulWidget {
 
 class _InsightsPageState extends State<InsightsPage> {
   late Future<InsightList> _future;
+  bool _loaded = false;
 
   @override
-  void initState() {
-    super.initState();
-    _future = AtlasScope.of(context).fetchInsights(limit: 20);
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 取 InheritedWidget 只能在这里，不能在 initState：那时祖先还没挂稳。
+    if (!_loaded) {
+      _future = AtlasScope.of(context).fetchInsights(limit: 20);
+      _loaded = true;
+    }
   }
 
   Future<void> _reload() async {
