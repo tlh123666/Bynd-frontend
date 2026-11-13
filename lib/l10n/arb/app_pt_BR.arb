@@ -553,5 +553,11 @@
   "chatSug3": "Por que a VFC não volta?",
   "chatHistoryTitle": "Conversas",
   "chatHistoryEmpty": "Nenhuma conversa ainda.",
-  "chatHistoryUntitled": "Conversa sem título"
+  "chatHistoryUntitled": "Conversa sem título",
+  "healthGroupSleep": "Sono",
+  "healthGroupEnergy": "Energia",
+  "healthGroupMetabolism": "Metabolismo",
+  "healthGroupHeartBody": "Coração e corpo",
+  "healthGroupBreathOxygen": "Respiração e oxigênio",
+  "healthGroupLongevity": "Longevidade"
 }

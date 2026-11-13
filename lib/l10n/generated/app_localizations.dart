@@ -2726,6 +2726,42 @@ abstract class AppLocalizations {
   /// In pt_BR, this message translates to:
   /// **'Conversa sem título'**
   String get chatHistoryUntitled;
+
+  /// No description provided for @healthGroupSleep.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Sono'**
+  String get healthGroupSleep;
+
+  /// No description provided for @healthGroupEnergy.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Energia'**
+  String get healthGroupEnergy;
+
+  /// No description provided for @healthGroupMetabolism.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Metabolismo'**
+  String get healthGroupMetabolism;
+
+  /// No description provided for @healthGroupHeartBody.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Coração e corpo'**
+  String get healthGroupHeartBody;
+
+  /// No description provided for @healthGroupBreathOxygen.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Respiração e oxigênio'**
+  String get healthGroupBreathOxygen;
+
+  /// No description provided for @healthGroupLongevity.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Longevidade'**
+  String get healthGroupLongevity;
 }
 
 class _AppLocalizationsDelegate

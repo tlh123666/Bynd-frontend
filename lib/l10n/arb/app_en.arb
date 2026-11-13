@@ -553,5 +553,11 @@
   "chatSug3": "Why is my HRV not recovering?",
   "chatHistoryTitle": "Conversations",
   "chatHistoryEmpty": "No conversations yet.",
-  "chatHistoryUntitled": "Untitled conversation"
+  "chatHistoryUntitled": "Untitled conversation",
+  "healthGroupSleep": "Sleep",
+  "healthGroupEnergy": "Energy",
+  "healthGroupMetabolism": "Metabolism",
+  "healthGroupHeartBody": "Heart & body",
+  "healthGroupBreathOxygen": "Breathing & oxygen",
+  "healthGroupLongevity": "Longevity"
 }

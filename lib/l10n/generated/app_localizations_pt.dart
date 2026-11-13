@@ -1430,6 +1430,24 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get chatHistoryUntitled => 'Conversa sem título';
+
+  @override
+  String get healthGroupSleep => 'Sono';
+
+  @override
+  String get healthGroupEnergy => 'Energia';
+
+  @override
+  String get healthGroupMetabolism => 'Metabolismo';
+
+  @override
+  String get healthGroupHeartBody => 'Coração e corpo';
+
+  @override
+  String get healthGroupBreathOxygen => 'Respiração e oxigênio';
+
+  @override
+  String get healthGroupLongevity => 'Longevidade';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -2858,4 +2876,22 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get chatHistoryUntitled => 'Conversa sem título';
+
+  @override
+  String get healthGroupSleep => 'Sono';
+
+  @override
+  String get healthGroupEnergy => 'Energia';
+
+  @override
+  String get healthGroupMetabolism => 'Metabolismo';
+
+  @override
+  String get healthGroupHeartBody => 'Coração e corpo';
+
+  @override
+  String get healthGroupBreathOxygen => 'Respiração e oxigênio';
+
+  @override
+  String get healthGroupLongevity => 'Longevidade';
 }

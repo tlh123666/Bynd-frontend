@@ -1425,4 +1425,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chatHistoryUntitled => 'Untitled conversation';
+
+  @override
+  String get healthGroupSleep => 'Sleep';
+
+  @override
+  String get healthGroupEnergy => 'Energy';
+
+  @override
+  String get healthGroupMetabolism => 'Metabolism';
+
+  @override
+  String get healthGroupHeartBody => 'Heart & body';
+
+  @override
+  String get healthGroupBreathOxygen => 'Breathing & oxygen';
+
+  @override
+  String get healthGroupLongevity => 'Longevity';
 }
