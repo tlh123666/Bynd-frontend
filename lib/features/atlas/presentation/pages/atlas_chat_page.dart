@@ -145,7 +145,11 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
 
   void _onSheetPointerUp() {
     if (_memoryOpen || !_dragging) return;
-    final close = _dragDy > 170 || _velocity > 900;
+    // 阈值故意调低（源码 useFolha 更宽松）：滑动起手若落在屏幕底部系统
+    // 手势条（约 27 逻辑 px）会被 MIUI 整个吃掉、卡片纹丝不动，用户会
+    // 反复重试并触发「上滑清理」杀进程（黑屏真因，logcat 五次实锤），
+    // 因此让第一次有效滑动尽量容易成功。
+    final close = _dragDy > 110 || _velocity > 700;
     if (close) {
       // 卡片先滑出屏幕（跟手动画的延续），再关路由（路由自身的下滑
       // 退场动画此刻作用在已离屏的卡片上，不可见，不会双重动画）
@@ -383,7 +387,7 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
           _headerDragBlocked = false;
           return;
         }
-        final close = _dragDy > 170 || velocity > 900;
+        final close = _dragDy > 110 || velocity > 700;
         if (close) {
           setState(() {
             _dragging = false;

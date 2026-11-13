@@ -155,7 +155,7 @@ class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
       _dragBlocked = false;
       return;
     }
-    final shouldClose = _dragDy > 140 || _velocity > 800;
+    final shouldClose = _dragDy > 90 || _velocity > 650;
     if (shouldClose) {
       // 立即恢复对话层（避免滑出后露出暗底），卡片自身继续滑出动画
       setState(() {
