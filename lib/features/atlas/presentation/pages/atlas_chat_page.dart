@@ -10,6 +10,7 @@ import '../../application/atlas_scope.dart';
 import '../../data/models/conversation.dart';
 import 'atlas_conversations_sheet.dart';
 import 'atlas_memory_page.dart';
+import 'system_gesture_zone.dart';
 
 /// ATLAS 对话浮层 —— 按 BYND UI 源码复刻（src/screens/Assistente.jsx +
 /// src/styles/atlas-caixa.css 的 folha 模式）：
@@ -100,14 +101,16 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
   double? _lastMoveDy;
 
   void _onSheetPointerDown(PointerDownEvent event) {
-    if (_memoryOpen) return;
     _dragDy = 0;
     _dragging = false;
     _velocity = 0;
     _lastMoveAt = null;
     _lastMoveDy = null;
+    // 系统手势区（左右边缘/底部）内不起手：同一次滑动会被系统判定为
+    // 返回/回桌面，卡片刚关掉应用就被退到后台（黑屏之谜的真相）。
+    final inGestureZone = pointerStartsInSystemGestureZone(event, context);
     // 从头部（含把手）按下即可拖；列表区域只有在顶部才可拖
-    _dragArmed = _listAtTop;
+    _dragArmed = !inGestureZone && _listAtTop;
   }
 
   void _onSheetPointerMove(PointerMoveEvent event) {
@@ -323,6 +326,9 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
     return (0.35 * (1 - _dragDy / 300)).clamp(0.0, 0.35);
   }
 
+  /// 头部拖拽起手是否被系统手势区拦下（X 按钮贴着左边缘，易误触系统返回）。
+  bool _headerDragBlocked = false;
+
   /// `.at-cab`：把手居中、X 左、Atlas 中、Memória 右；头部支持下滑关闭
   /// （useFolha：alça/头部拖拽，往下甩出即关）。
   ///
@@ -331,8 +337,13 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
   Widget _buildHeader(AppLocalizations strings) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
+      onVerticalDragStart: (details) =>
+          _headerDragBlocked = offsetInSystemGestureZone(
+            details.globalPosition,
+            context,
+          ),
       onVerticalDragUpdate: (details) {
-        if (_memoryOpen) return;
+        if (_headerDragBlocked || _memoryOpen) return;
         final delta = details.primaryDelta ?? 0;
         if (delta > 0 || _dragDy > 0) {
           setState(() {
@@ -343,7 +354,10 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
       },
       onVerticalDragEnd: (details) {
         final velocity = details.primaryVelocity ?? 0;
-        if (_memoryOpen) return;
+        if (_headerDragBlocked || _memoryOpen) {
+          _headerDragBlocked = false;
+          return;
+        }
         final close = _dragDy > 170 || velocity > 900;
         if (close) {
           setState(() {

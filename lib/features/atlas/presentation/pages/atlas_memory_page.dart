@@ -3,6 +3,7 @@ import 'package:flutter/physics.dart' show SpringDescription, SpringSimulation;
 
 import '../../../../l10n/app_localizations_context.dart';
 import '../../../../l10n/generated/app_localizations.dart';
+import 'system_gesture_zone.dart';
 
 /// Memória 子层 —— 按客户源码复刻（Assistente.jsx 的 `at-tela at-sub` 区 +
 /// atlas-caixa.css `.at-heroi/.at-faixa/.at-lem` 定稿）。
@@ -121,10 +122,15 @@ class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
     _velocity = 0;
     _lastMoveAt = null;
     _lastMoveDy = null;
+    // 系统手势区内不起手（避免与系统返回/回桌面手势叠加，详见
+    // system_gesture_zone.dart 的注释）。
+    _dragBlocked = pointerStartsInSystemGestureZone(event, context);
   }
 
+  bool _dragBlocked = false;
+
   void _onPointerMove(PointerMoveEvent event) {
-    if (!_listAtTop) return;
+    if (_dragBlocked || !_listAtTop) return;
     final delta = event.delta.dy;
     if (delta <= 0 && _dragDy <= 0) return;
     // 速度估计（px/s），用于松手时的甩动判定
@@ -145,6 +151,10 @@ class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
   }
 
   void _onPointerUp() {
+    if (_dragBlocked) {
+      _dragBlocked = false;
+      return;
+    }
     final shouldClose = _dragDy > 140 || _velocity > 800;
     if (shouldClose) {
       // 立即恢复对话层（避免滑出后露出暗底），卡片自身继续滑出动画
