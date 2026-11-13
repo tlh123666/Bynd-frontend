@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'core/auth/auth_controller.dart';
 import 'core/auth/auth_scope.dart';
@@ -44,6 +45,35 @@ class ByndApp extends StatefulWidget {
 class _ByndAppState extends State<ByndApp> {
   late final AuthController _auth;
   late final legacy_l10n.AppLocaleController _legacyLocale;
+
+  // 根路由返回拦截：Android/MIUI 的边缘返回手势落在根路由上等于「退出
+  // 应用」——用户关闭 Atlas 卡片后的顺手一划常起手在左边缘手势区，MIUI
+  // 返回帘（用户描述的「左侧栏」）随后把应用退到桌面（logcat 三次实锤：
+  // TYPE_RETURN_TO_HOME）。根路由 canPop:false + 2 秒内双击返回才退出，
+  // 误触返回只弹提示。
+  final GlobalKey<ScaffoldMessengerState> _messengerKey =
+      GlobalKey<ScaffoldMessengerState>();
+  DateTime? _lastRootBackAt;
+
+  void _onRootBackInvoked(bool didPop, Object? result) {
+    if (didPop) return;
+    final now = DateTime.now();
+    if (_lastRootBackAt != null &&
+        now.difference(_lastRootBackAt!) < const Duration(seconds: 2)) {
+      SystemNavigator.pop();
+      return;
+    }
+    _lastRootBackAt = now;
+    final isPt = Localizations.localeOf(context).languageCode == 'pt';
+    _messengerKey.currentState?.showSnackBar(
+      SnackBar(
+        content: Text(isPt ? 'Toque em voltar de novo para sair' : 'Tap back again to exit'),
+        duration: const Duration(milliseconds: 1500),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -80,6 +110,7 @@ class _ByndAppState extends State<ByndApp> {
         builder: (context, _) => MaterialApp(
           title: AppConfig.applicationName,
           debugShowCheckedModeBanner: false,
+          scaffoldMessengerKey: _messengerKey,
           scrollBehavior: const MaterialScrollBehavior().copyWith(
             scrollbars: false,
           ),
@@ -93,12 +124,16 @@ class _ByndAppState extends State<ByndApp> {
           theme: AppTheme.dark,
           home: legacy_l10n.AppLocaleScope(
             controller: _legacyLocale,
-            child: AuthGate(
-              homeController: widget.homeController,
-              deviceController: widget.deviceController,
-              atlasRepository: widget.atlasRepository,
-              localeController: widget.localeController,
-              config: widget.config ?? AppConfig.current,
+            child: PopScope<bool>(
+              canPop: false,
+              onPopInvokedWithResult: _onRootBackInvoked,
+              child: AuthGate(
+                homeController: widget.homeController,
+                deviceController: widget.deviceController,
+                atlasRepository: widget.atlasRepository,
+                localeController: widget.localeController,
+                config: widget.config ?? AppConfig.current,
+              ),
             ),
           ),
         ),
