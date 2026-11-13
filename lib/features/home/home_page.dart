@@ -71,6 +71,18 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Rect? _quickActionOrigin;
   bool _menuOpen = false;
 
+  /// body 的 IndexedStack 索引（Atlas 是浮层，不占 body 槽位）。
+  int get _bodyIndex => switch (_selectedIndex) {
+    2 => 1,
+    3 => 2,
+    _ => 0,
+  };
+
+  /// 底部 tab 的 Atlas：滑出对话浮层（Assistente.jsx 的 folha 模式）。
+  void _openAtlasSheet() {
+    Navigator.of(context).push<void>(AtlasSheetRoute());
+  }
+
   void _openQuickActions() {
     final box = _moreButtonKey.currentContext?.findRenderObject();
     if (box is! RenderBox || !box.hasSize) return;
@@ -228,8 +240,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           // 其余标签是自带 Scaffold 的整页，收回导航条上方。
           extendBody: _selectedIndex == 0,
           backgroundColor: Colors.transparent,
+          // Atlas 不是 tab 页：TabBar.jsx 里点 Atlas 从底部滑出对话浮层
+          // （folha，盖住 tabbar），body 只驻留 Hoje / Comunidade / Saúde。
+          // body 索引映射：0→Hoje、2→Comunidade、3→Saúde。
           body: IndexedStack(
-            index: _selectedIndex,
+            index: _bodyIndex,
             children: [
               HomeContent(
                 controller: _home,
@@ -238,9 +253,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 onDevice: _openDevice,
                 onMapa: _openMapa,
               ),
-              // 底部 Tab 的 Atlas 直接进对话（客户源码 TabBar.jsx：
-              // Atlas tab → Assistente，28/10 起 Mapa 移去三杠菜单）。
-              const AtlasChatPage(),
               HomeAccountGuard(controller: _home, child: const CommunityPage()),
               HomeSignalsPage(controller: _home, showClose: false),
             ],
@@ -249,8 +261,13 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             selectedIndex: _selectedIndex,
             moreButtonKey: _moreButtonKey,
             moreOpen: _quickActionsOpen,
-            onDestinationSelected: (index) =>
-                setState(() => _selectedIndex = index),
+            onDestinationSelected: (index) {
+              if (index == 1) {
+                _openAtlasSheet();
+                return;
+              }
+              setState(() => _selectedIndex = index);
+            },
             onMorePressed: _openQuickActions,
           ),
         ),

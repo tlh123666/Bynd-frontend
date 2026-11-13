@@ -12,22 +12,55 @@ import '../../data/models/conversation.dart';
 import 'atlas_conversations_sheet.dart';
 import 'insights_page.dart';
 
-/// ATLAS 聊天页 —— 按 BYND UI 源码复刻（src/screens/Assistente.jsx +
-/// src/styles/atlas-caixa.css，Luiz 2026-10/11 的 Whoop 模型定稿）。
+/// ATLAS 对话浮层 —— 按 BYND UI 源码复刻（src/screens/Assistente.jsx +
+/// src/styles/atlas-caixa.css 的 folha 模式）：
 ///
-/// 与源码 CSS 的对应关系（最终 rodada 的值为准）：
+/// * 底部 Tab 的 Atlas 不切页，而是从底部滑出一张浮层卡片
+///   （`.page.chat.folha`）：顶部与安全区之间留 34px 间距、圆角 28、
+///   底后景被 `.atlas-embaca` 毛玻璃遮罩盖住（含首页 tabbar）；
+/// * 头部：X 关闭（左）/ Atlas（中）/ Memória 脑图标（右），可下滑关闭；
 /// * 背景 `.page.chat`：linear-gradient(#222C38 → #1A2029 → #121418)；
-/// * AI 回复无卡片（透明、正文 #F4F5F7 92%、15.5 行高 1.6）；
-/// * 用户气泡 `.bubble-me`：#2B2E33、边线白 8%、圆角 16/16/5/16；
-/// * 建议条 `.at-sug`：玻璃胶囊（40,44,52,55% / 白 12%），横滑；
-/// * 输入区 `.gx-caixa`：圆角 26，两团蓝光（58,82,112）叠在深底上；
-/// * 发送钮 `.gx-acao`：白圆 38，深色箭头/停止方块；
+/// * AI 回复无卡片（正文 #F4F5F7 92%、15.5 行高 1.6），流式末尾蓝点光标；
+/// * 用户气泡 `.bubble-me`：#2B2E33、圆角 16/16/5/16；
+/// * 建议条 `.at-sug`：玻璃胶囊，流式中淡出、完成后浮现；
+/// * 输入区 `.gx-caixa`：圆角 26、两团蓝光叠深底；动作钮 `.gx-acao`：
+///   白圆 38 —— 空文案=麦克风、有文案=上箭头、流式=停止方块；
 /// * 反应 `.reac`：复制/赞/踩，灰 45%，选中变白。
-class AtlasChatPage extends StatefulWidget {
-  const AtlasChatPage({super.key});
+class AtlasSheetRoute extends PageRouteBuilder<void> {
+  AtlasSheetRoute()
+    : super(
+        opaque: false,
+        barrierDismissible: false,
+        transitionDuration: const Duration(milliseconds: 420),
+        reverseTransitionDuration: const Duration(milliseconds: 380),
+        pageBuilder: (_, _, _) =>
+            const _AtlasSheetBackdrop(child: AtlasChatPage()),
+        transitionsBuilder: (_, animation, _, child) => SlideTransition(
+          position: Tween(begin: const Offset(0, 1), end: Offset.zero).animate(
+            CurvedAnimation(
+              parent: animation,
+              curve: const Cubic(0.32, 0.72, 0, 1),
+            ),
+          ),
+          child: child,
+        ),
+      );
+}
+
+/// `.atlas-embaca`：浮层升起时底部页面被遮罩模糊（含 tabbar）。
+class _AtlasSheetBackdrop extends StatelessWidget {
+  const _AtlasSheetBackdrop({required this.child});
+
+  final Widget child;
 
   @override
-  State<AtlasChatPage> createState() => _AtlasChatPageState();
+  Widget build(BuildContext context) => ColoredBox(
+    color: const Color(0x590A0E14), // rgba(8,10,14,.35)
+    child: BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+      child: child,
+    ),
+  );
 }
 
 /// 客户源码里的定稿色值（atlas-caixa.css），集中放这里避免散落的魔法数。
@@ -45,6 +78,13 @@ class _AtlasCss {
   static const inputGlow = Color(0x593A5270); // rgba(58,82,112,.35)
   static const cursorBlue = Color(0xFF8FBCF0);
   static const handle = Color(0x47FFFFFF); // rgba(255,255,255,.28)
+}
+
+class AtlasChatPage extends StatefulWidget {
+  const AtlasChatPage({super.key});
+
+  @override
+  State<AtlasChatPage> createState() => _AtlasChatPageState();
 }
 
 class _AtlasChatPageState extends State<AtlasChatPage> {
@@ -95,111 +135,123 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
   @override
   Widget build(BuildContext context) {
     final strings = context.l10n;
+    final media = MediaQuery.of(context);
+    // .page.chat.folha：顶部 = max(安全区, 47) + 34（源码 --folha-topo 规则）
+    final sheetTop =
+        (media.padding.top > 47 ? media.padding.top : 47.0) + 34;
     return Scaffold(
-      // .page.chat 背景：三段渐变，同客户定稿
-      backgroundColor: _AtlasCss.bgBottom,
-      body: DecoratedBox(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            stops: [0, 0.24, 0.58],
-            colors: [_AtlasCss.bgTop, _AtlasCss.bgMid, _AtlasCss.bgBottom],
-          ),
-        ),
-        child: SafeArea(
-          bottom: false,
-          child: Stack(
-            children: [
-              Column(
-                children: [
-                  Expanded(
-                    child: AnimatedBuilder(
-                      animation: _controller,
-                      builder: (context, _) => _buildList(strings),
-                    ),
-                  ),
-                  _buildSuggestions(strings),
-                  _buildComposer(strings),
-                ],
+      backgroundColor: Colors.transparent,
+      body: Padding(
+        padding: EdgeInsets.only(top: sheetTop),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: .5),
+                blurRadius: 40,
+                offset: const Offset(0, -10),
               ),
-              // 顶栏浮在对话上、带向下渐隐的毛玻璃（.page.chat.folha .at-cab）
-              Positioned(
-                left: 0,
-                right: 0,
-                top: 0,
-                child: _buildHeader(strings),
-              ),
-              if (!_atBottom)
-                Positioned(
-                  bottom: 196,
-                  left: 0,
-                  right: 0,
-                  child: Center(child: _buildScrollDownButton()),
-                ),
             ],
+          ),
+          child: ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+            child: ColoredBox(
+              color: _AtlasCss.bgBottom,
+              child: DecoratedBox(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    stops: [0, 0.2, 0.55],
+                    colors: [
+                      _AtlasCss.bgTop,
+                      _AtlasCss.bgMid,
+                      _AtlasCss.bgBottom,
+                    ],
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    _buildHeader(strings),
+                    Expanded(
+                      child: AnimatedBuilder(
+                        animation: _controller,
+                        builder: (context, _) => _buildList(strings),
+                      ),
+                    ),
+                    _buildSuggestions(strings),
+                    _buildComposer(strings),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
       ),
     );
   }
 
+  /// `.at-cab`：把手居中、X 左、Atlas 中、Memória 右；头部支持下滑关闭
+  /// （useFolha：alça/头部拖拽，往下甩出即关）。
   Widget _buildHeader(AppLocalizations strings) {
-    return ClipRect(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Color(0xC21A2029),
-                Color(0x801A2029),
-                Colors.transparent,
-              ],
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onVerticalDragEnd: (details) {
+        final velocity = details.primaryVelocity ?? 0;
+        if (velocity > 600) Navigator.of(context).pop();
+      },
+      child: SizedBox(
+        height: 56,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // .at-alca：把手
+            Positioned(
+              top: 6,
+              child: Container(
+                width: 38,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: _AtlasCss.handle,
+                  borderRadius: BorderRadius.circular(3),
+                ),
+              ),
             ),
-          ),
-          padding: const EdgeInsets.only(top: 12),
-          height: 62,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              // .at-alca：顶部的拖拽把手形状，在 tab 形态里是纯粹的品牌形态
-              Positioned(
-                top: 2,
-                child: Container(
-                  width: 38,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: _AtlasCss.handle,
-                    borderRadius: BorderRadius.circular(3),
-                  ),
+            Text(
+              strings.chatTitle,
+              style: const TextStyle(
+                color: _AtlasCss.textFull,
+                fontSize: 19,
+                fontWeight: FontWeight.w400,
+                letterSpacing: -0.01,
+              ),
+            ),
+            // .at-x：左上关闭
+            Positioned(
+              left: 4,
+              top: 4,
+              child: IconButton(
+                tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+                icon: const Icon(Icons.close, size: 24),
+                color: _AtlasCss.textFull.withValues(alpha: .85),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ),
+            // .at-mem：Memória 入口（当前先开洞察列表，记忆子屏随新端点补）
+            Positioned(
+              right: 2,
+              top: 4,
+              child: IconButton(
+                tooltip: strings.insightsTitle,
+                icon: const Icon(Icons.psychology_outlined, size: 24),
+                color: _AtlasCss.textFull.withValues(alpha: .85),
+                onPressed: () => Navigator.of(context).push<void>(
+                  MaterialPageRoute(builder: (_) => const InsightsPage()),
                 ),
               ),
-              Text(
-                strings.chatTitle,
-                style: const TextStyle(
-                  color: _AtlasCss.textFull,
-                  fontSize: 19,
-                  fontWeight: FontWeight.w400,
-                  letterSpacing: -0.01,
-                ),
-              ),
-              Positioned(
-                right: 2,
-                top: 6,
-                child: IconButton(
-                  tooltip: strings.insightsTitle,
-                  icon: const Icon(Icons.lightbulb_outline, size: 24),
-                  color: _AtlasCss.textFull.withValues(alpha: .85),
-                  onPressed: () => Navigator.of(context).push<void>(
-                    MaterialPageRoute(builder: (_) => const InsightsPage()),
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -216,7 +268,7 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
       },
       child: ListView(
         controller: _scroll,
-        padding: const EdgeInsets.fromLTRB(16, 76, 16, 8),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
         children: [
           if (controller.error != null)
             _ErrorBanner(message: controller.error!),
@@ -318,22 +370,6 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
     if (conversation == null) return;
     await _controller.openConversation(conversation.id);
     _jumpToBottom(smooth: false);
-  }
-
-  Widget _buildScrollDownButton() {
-    // .at-desce：34 圆形玻璃，滚离底部 160px 以上才出现
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: const Color(0xBF282C34),
-        borderRadius: BorderRadius.circular(17),
-        border: Border.all(color: _AtlasCss.whiteLine),
-      ),
-      child: IconButton(
-        icon: const Icon(Icons.arrow_downward, size: 18),
-        color: _AtlasCss.textFull,
-        onPressed: () => _jumpToBottom(),
-      ),
-    );
   }
 }
 
@@ -643,7 +679,6 @@ class _ComposerBox extends StatelessWidget {
                     _SendButton(
                       controller: controller,
                       streaming: streaming,
-                      enabled: controller.text.trim().isNotEmpty || streaming,
                       onSend: onSend,
                       onStop: onStop,
                     ),
@@ -680,21 +715,20 @@ class _ComposerIcon extends StatelessWidget {
   );
 }
 
-/// `.gx-acao`：38 白圆——发送=上箭头、流式=深色停止方块（`.gx-quad`）。
+/// `.gx-acao`：38 白圆——空文案=麦克风、有文案=上箭头、流式=停止方块
+/// （`.gx-quad`）。麦克风是源码里的形态占位：后端暂无语音端点，不接动作。
 class _SendButton extends StatefulWidget {
   const _SendButton({
+    required this.controller,
     required this.streaming,
-    required this.enabled,
     required this.onSend,
     required this.onStop,
-    required this.controller,
   });
 
+  final TextEditingController controller;
   final bool streaming;
-  final bool enabled;
   final VoidCallback onSend;
   final VoidCallback onStop;
-  final TextEditingController controller;
 
   @override
   State<_SendButton> createState() => _SendButtonState();
@@ -754,7 +788,7 @@ class _SendButtonState extends State<_SendButton> {
                     ),
                   )
                 : Icon(
-                    Icons.arrow_upward,
+                    hasText ? Icons.arrow_upward : Icons.mic_none,
                     size: 18,
                     color: hasText
                         ? const Color(0xFF14181D)
