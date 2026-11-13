@@ -104,9 +104,70 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
   final _input = TextEditingController();
   final _scroll = ScrollController();
   bool _atBottom = true;
+  bool _listAtTop = true;
 
   /// Memória 子层是否展开（脑图标切换；‹/下滑收回）。
   bool _memoryOpen = false;
+
+  // ── 整卡跟手下滑关闭（源码 useFolha：头部或列表在顶部时可拖）──────
+  double _dragDy = 0;
+  bool _dragging = false;
+  bool _dragArmed = false;
+  double _velocity = 0;
+  Duration? _lastMoveAt;
+  double? _lastMoveDy;
+
+  void _onSheetPointerDown(PointerDownEvent event) {
+    if (_memoryOpen) return;
+    _dragDy = 0;
+    _dragging = false;
+    _velocity = 0;
+    _lastMoveAt = null;
+    _lastMoveDy = null;
+    // 从头部（含把手）按下即可拖；列表区域只有在顶部才可拖
+    _dragArmed = _listAtTop;
+  }
+
+  void _onSheetPointerMove(PointerMoveEvent event) {
+    if (_memoryOpen || !_dragArmed) return;
+    final delta = event.delta.dy;
+    if (delta <= 0 && _dragDy <= 0) return;
+    final dt = _lastMoveAt == null
+        ? null
+        : (event.timeStamp - _lastMoveAt!).inMicroseconds / 1e6;
+    if (dt != null && dt > 0 && _lastMoveDy != null) {
+      _velocity = (delta - _lastMoveDy!) / dt;
+    }
+    _lastMoveAt = event.timeStamp;
+    _lastMoveDy = delta;
+    if (delta > 0 || _dragDy > 0) {
+      setState(() {
+        _dragging = true;
+        _dragDy = (_dragDy + delta).clamp(0.0, double.infinity);
+      });
+    }
+  }
+
+  void _onSheetPointerUp() {
+    if (_memoryOpen || !_dragging) return;
+    final close = _dragDy > 170 || _velocity > 900;
+    if (close) {
+      // 卡片先滑出屏幕（跟手动画的延续），再关路由（路由自身的下滑
+      // 退场动画此刻作用在已离屏的卡片上，不可见，不会双重动画）
+      setState(() {
+        _dragging = false;
+        _dragDy = 1400;
+      });
+      Future.delayed(const Duration(milliseconds: 240), () {
+        if (mounted) Navigator.of(context).pop();
+      });
+    } else {
+      setState(() {
+        _dragging = false;
+        _dragDy = 0;
+      });
+    }
+  }
 
   /// 麦克风的「语音输入」演示（源码 ouvir）：逐字把默认问题写进输入框
   /// 再发送；进行中动作钮变停止方块。
@@ -160,79 +221,100 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
       backgroundColor: Colors.transparent,
       body: Padding(
         padding: EdgeInsets.only(top: sheetTop),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: .5),
-                blurRadius: 40,
-                offset: const Offset(0, -10),
-              ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-            child: ColoredBox(
-              color: _AtlasCss.bgBottom,
-              child: DecoratedBox(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    stops: [0, 0.2, 0.55],
-                    colors: [
-                      _AtlasCss.bgTop,
-                      _AtlasCss.bgMid,
-                      _AtlasCss.bgBottom,
-                    ],
-                  ),
+        child: Listener(
+          onPointerDown: _onSheetPointerDown,
+          onPointerMove: _onSheetPointerMove,
+          onPointerUp: (_) => _onSheetPointerUp(),
+          onPointerCancel: (_) => _onSheetPointerUp(),
+          child: AnimatedSlide(
+            duration: _dragging
+                ? Duration.zero
+                : const Duration(milliseconds: 240),
+            curve: Curves.easeOut,
+            offset: Offset(0, _dragDy / media.size.height),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(28),
                 ),
-                child: Stack(
-                  children: [
-                    // 主对话 tela：Memória 打开时左移淡出（源码 .at-tela.atras：
-                    // translateX(-22%) + opacity 0），不可点
-                    IgnorePointer(
-                      ignoring: _memoryOpen,
-                      child: AnimatedOpacity(
-                        opacity: _memoryOpen ? 0 : 1,
-                        duration: const Duration(milliseconds: 300),
-                        child: AnimatedSlide(
-                          offset: _memoryOpen
-                              ? const Offset(-0.22, 0)
-                              : Offset.zero,
-                          duration: const Duration(milliseconds: 420),
-                          curve: const Cubic(0.32, 0.72, 0, 1),
-                          child: Column(
-                            children: [
-                              _buildHeader(strings),
-                              Expanded(
-                                child: AnimatedBuilder(
-                                  animation: _controller,
-                                  builder: (context, _) => _buildList(strings),
-                                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: .5),
+                    blurRadius: 40,
+                    offset: const Offset(0, -10),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(28),
+                ),
+                child: ColoredBox(
+                  color: _AtlasCss.bgBottom,
+                  child: DecoratedBox(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        stops: [0, 0.2, 0.55],
+                        colors: [
+                          _AtlasCss.bgTop,
+                          _AtlasCss.bgMid,
+                          _AtlasCss.bgBottom,
+                        ],
+                      ),
+                    ),
+                    child: Stack(
+                      children: [
+                        // 主对话 tela：Memória 打开时左移淡出（源码 .at-tela.atras：
+                        // translateX(-22%) + opacity 0），不可点
+                        IgnorePointer(
+                          ignoring: _memoryOpen,
+                          child: AnimatedOpacity(
+                            opacity: _memoryOpen ? 0 : 1,
+                            duration: const Duration(milliseconds: 300),
+                            child: AnimatedSlide(
+                              offset: _memoryOpen
+                                  ? const Offset(-0.22, 0)
+                                  : Offset.zero,
+                              duration: const Duration(milliseconds: 420),
+                              curve: const Cubic(0.32, 0.72, 0, 1),
+                              child: Column(
+                                children: [
+                                  _buildHeader(strings),
+                                  Expanded(
+                                    child: AnimatedBuilder(
+                                      animation: _controller,
+                                      builder: (context, _) =>
+                                          _buildList(strings),
+                                    ),
+                                  ),
+                                  _buildSuggestions(strings),
+                                  _buildComposer(strings),
+                                ],
                               ),
-                              _buildSuggestions(strings),
-                              _buildComposer(strings),
-                            ],
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                    // Memória 子 tela：从右滑入盖住对话（源码 at-sub 从
-                    // translateX(100%) 归位）；关闭由 ‹/下滑触发
-                    AnimatedSlide(
-                      offset: _memoryOpen ? Offset.zero : const Offset(1, 0),
-                      duration: const Duration(milliseconds: 420),
-                      curve: const Cubic(0.32, 0.72, 0, 1),
-                      child: IgnorePointer(
-                        ignoring: !_memoryOpen,
-                        child: AtlasMemoryLayer(
-                          onClose: () => setState(() => _memoryOpen = false),
+                        // Memória 子 tela：从右滑入盖住对话（源码 at-sub 从
+                        // translateX(100%) 归位）；关闭由 ‹/下滑触发
+                        AnimatedSlide(
+                          offset: _memoryOpen
+                              ? Offset.zero
+                              : const Offset(1, 0),
+                          duration: const Duration(milliseconds: 420),
+                          curve: const Cubic(0.32, 0.72, 0, 1),
+                          child: IgnorePointer(
+                            ignoring: !_memoryOpen,
+                            child: AtlasMemoryLayer(
+                              onClose: () =>
+                                  setState(() => _memoryOpen = false),
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -250,9 +332,34 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
   Widget _buildHeader(AppLocalizations strings) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
+      onVerticalDragUpdate: (details) {
+        if (_memoryOpen) return;
+        final delta = details.primaryDelta ?? 0;
+        if (delta > 0 || _dragDy > 0) {
+          setState(() {
+            _dragging = true;
+            _dragDy = (_dragDy + delta).clamp(0.0, double.infinity);
+          });
+        }
+      },
       onVerticalDragEnd: (details) {
         final velocity = details.primaryVelocity ?? 0;
-        if (velocity > 600) Navigator.of(context).pop();
+        if (_memoryOpen) return;
+        final close = _dragDy > 170 || velocity > 900;
+        if (close) {
+          setState(() {
+            _dragging = false;
+            _dragDy = 1400;
+          });
+          Future.delayed(const Duration(milliseconds: 240), () {
+            if (mounted) Navigator.of(context).pop();
+          });
+        } else {
+          setState(() {
+            _dragging = false;
+            _dragDy = 0;
+          });
+        }
       },
       child: Column(
         children: [
@@ -319,6 +426,8 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
         final metrics = notification.metrics;
         final far = metrics.maxScrollExtent - metrics.pixels > 160;
         if (far != _atBottom) setState(() => _atBottom = !far);
+        final atTop = metrics.pixels <= 0.5;
+        if (atTop != _listAtTop) setState(() => _listAtTop = atTop);
         return false;
       },
       child: ListView(

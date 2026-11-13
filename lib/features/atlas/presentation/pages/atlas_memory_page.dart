@@ -146,11 +146,19 @@ class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
 
   void _onPointerUp() {
     final shouldClose = _dragDy > 140 || _velocity > 800;
-    setState(() {
-      _dragging = false;
-      _dragDy = 0;
-    });
-    if (shouldClose) widget.onClose();
+    if (shouldClose) {
+      // 先让卡片滑出屏幕（跟手动画的延续），再通知宿主关闭
+      setState(() {
+        _dragging = false;
+        _dragDy = 1400;
+      });
+      Future.delayed(const Duration(milliseconds: 240), widget.onClose);
+    } else {
+      setState(() {
+        _dragging = false;
+        _dragDy = 0;
+      });
+    }
   }
 
   bool _onListScroll(ScrollNotification notification) {
@@ -456,7 +464,8 @@ class _NotchPainter extends CustomPainter {
 /// 的 1/3（与 tab/spacer 同宽）。保证松手时必有一个 tab 与 marca 对齐，
 /// 下划线永远不可能停在两个 tab 之间。快速滑动按速度方向多走一档。
 class _TabSnapPhysics extends ScrollPhysics {
-  // 非常量构造：携带吸附目标回调
+  // 非常量构造：携带吸附目标回调（函数字段无法 const）
+  // ignore: prefer_const_constructors_in_immutables
   _TabSnapPhysics({
     required this.step,
     required this.onSnapTarget,
