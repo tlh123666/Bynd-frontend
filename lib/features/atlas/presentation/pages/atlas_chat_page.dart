@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -200,8 +202,9 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
   Widget build(BuildContext context) {
     final strings = context.l10n;
     final media = MediaQuery.of(context);
-    // .page.chat.folha：顶部 = max(安全区, 47) + 34（源码 --folha-topo 规则）
-    final sheetTop = (media.padding.top > 47 ? media.padding.top : 47.0) + 34;
+    // .page.chat.folha：顶部 = max(安全区, 47) + 间距（源码 --folha-topo
+    // 为 34；按反馈收窄到 20，卡片整体显得更高）。
+    final sheetTop = (media.padding.top > 47 ? media.padding.top : 47.0) + 20;
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Listener(
@@ -212,15 +215,25 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // .atlas-embaca：遮罩随卡片下滑淡出，露出后面的页面
-            //（源码 .atlas-cobre:has(.folha.sai) .atlas-embaca { opacity: 0 }）
+            // .atlas-embaca：毛玻璃遮罩盖住底后景（含首页 tabbar）。
+            // 模糊度随卡片下滑衰减——越往下滑背景越清晰，露出上一个页面
+            // （源码 .atlas-cobre:has(.folha.sai) .atlas-embaca { opacity: 0 }）。
+            // 注：此处曾因「黑屏」移除 BackdropFilter，后经 logcat/getevent
+            // 取证证实黑屏真因是系统手势劫持（见 system_gesture_zone.dart），
+            // 与渲染无关，毛玻璃恢复。
             Positioned.fill(
-              child: AnimatedOpacity(
-                duration: _dragging
-                    ? Duration.zero
-                    : const Duration(milliseconds: 220),
-                opacity: _veilOpacity,
-                child: const ColoredBox(color: Color(0x8C0A0E14)),
+              child: ClipRect(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(
+                    sigmaX: _veilSigma,
+                    sigmaY: _veilSigma,
+                  ),
+                  child: ColoredBox(
+                    color: const Color(0xFF0A0E14).withValues(
+                      alpha: 0.55 * _veilFade,
+                    ),
+                  ),
+                ),
               ),
             ),
             Padding(
@@ -319,12 +332,10 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
     );
   }
 
-  /// `.atlas-embaca` 的透明度：静止 0.35；拖动中随位移衰减（>300px 全透），
-  /// 让卡片滑走时直接露出上一个页面而不是黑遮罩。
-  double get _veilOpacity {
-    if (_dragDy <= 0) return 0.35;
-    return (0.35 * (1 - _dragDy / 300)).clamp(0.0, 0.35);
-  }
+  /// `.atlas-embaca`：静止时毛玻璃 sigma 与暗色 tint 都取满值；拖动中随
+  /// 位移衰减（>300px 全清），卡片滑走时直接露出清晰的上一个页面。
+  double get _veilFade => (1 - _dragDy / 300).clamp(0.0, 1.0);
+  double get _veilSigma => 12 * _veilFade;
 
   /// 头部拖拽起手是否被系统手势区拦下（X 按钮贴着左边缘，易误触系统返回）。
   bool _headerDragBlocked = false;
