@@ -245,8 +245,8 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
     final strings = context.l10n;
     final media = MediaQuery.of(context);
     // .page.chat.folha：顶部 = max(安全区, 47) + 间距（源码 --folha-topo
-    // 为 34；按反馈收窄到 20，卡片整体显得更高）。
-    final sheetTop = (media.padding.top > 47 ? media.padding.top : 47.0) + 20;
+    // 为 34；按反馈两轮收窄到 12，卡片更高）。
+    final sheetTop = (media.padding.top > 47 ? media.padding.top : 47.0) + 12;
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Listener(
