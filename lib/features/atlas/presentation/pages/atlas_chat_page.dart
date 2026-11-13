@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -235,10 +233,7 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
                     ? Duration.zero
                     : const Duration(milliseconds: 220),
                 opacity: _veilOpacity,
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
-                  child: const ColoredBox(color: Color(0x590A0E14)),
-                ),
+                child: const ColoredBox(color: Color(0x8C0A0E14)),
               ),
             ),
             Padding(
