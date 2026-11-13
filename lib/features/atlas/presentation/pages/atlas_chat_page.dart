@@ -215,24 +215,32 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // .atlas-embaca：毛玻璃遮罩盖住底后景（含首页 tabbar）。
-            // 模糊度随卡片下滑衰减——越往下滑背景越清晰，露出上一个页面
-            // （源码 .atlas-cobre:has(.folha.sai) .atlas-embaca { opacity: 0 }）。
-            // 注：此处曾因「黑屏」移除 BackdropFilter，后经 logcat/getevent
-            // 取证证实黑屏真因是系统手势劫持（见 system_gesture_zone.dart），
-            // 与渲染无关，毛玻璃恢复。
+            // .atlas-embaca：盖住底后景的暗纱（含首页 tabbar），随卡片下滑
+            // 衰减，露出上一个页面（源码 .atlas-embaca { opacity:0 }）。
             Positioned.fill(
+              child: ColoredBox(
+                color: const Color(0xFF0A0E14).withValues(
+                  alpha: 0.55 * _veilFade,
+                ),
+              ),
+            ),
+            // 毛玻璃只铺顶部露出条：卡片本身不透明，整屏 BackdropFilter
+            // 纯属浪费，并且在 Impeller Vulkan（Flutter 3.47 已弃用
+            // opt-out，manifest 关不掉）上会触发真机全屏黑帧——缩小到
+            // 露出条避开触发面。18:29 黑屏实证：黑屏时应用在前台、无
+            // 异常、无退出，为纯渲染问题。
+            Positioned(
+              left: 0,
+              right: 0,
+              top: 0,
+              height: sheetTop + 8,
               child: ClipRect(
                 child: BackdropFilter(
                   filter: ImageFilter.blur(
                     sigmaX: _veilSigma,
                     sigmaY: _veilSigma,
                   ),
-                  child: ColoredBox(
-                    color: const Color(0xFF0A0E14).withValues(
-                      alpha: 0.55 * _veilFade,
-                    ),
-                  ),
+                  child: const SizedBox.expand(),
                 ),
               ),
             ),
