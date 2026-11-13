@@ -99,66 +99,12 @@ final Map<String, List<_MemoryItem>> _fixture = {
 };
 
 class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
-  static const _tabWidth = 140.0;
-
   late final List<String> _tabs = _fixture.keys.toList();
   final Map<String, Set<String>> _removed = {};
-  final ScrollController _tabScroll = ScrollController();
   int _active = 0;
-
-  /// tab 条的视口宽度（首帧布局后可得），用于计算居中 spacer。
-  double? _viewport;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabScroll.addListener(() {
-      final viewport = _tabScroll.position.viewportDimension;
-      if (viewport != _viewport && mounted) {
-        setState(() => _viewport = viewport);
-      }
-    });
-    // 首帧后把默认 tab（Rotina）滚到正中，让 marca 与它对上。
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => _centerTab(0, jump: true),
-    );
-  }
-
-  @override
-  void dispose() {
-    _tabScroll.dispose();
-    super.dispose();
-  }
-
-  void _centerTab(int index, {bool jump = false}) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!_tabScroll.hasClients) return;
-      final viewport = _tabScroll.position.viewportDimension;
-      final target =
-          index * _tabWidth -
-          (viewport - _tabWidth) / 2 +
-          _leadingSpacer(viewport);
-      final clamped = target.clamp(0.0, _tabScroll.position.maxScrollExtent);
-      if (jump) {
-        _tabScroll.jumpTo(clamped);
-      } else {
-        _tabScroll.animateTo(
-          clamped,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
-      }
-    });
-  }
-
-  /// 首尾 spacer：让第一个/最后一个 tab 也能滚到正中（源码 trilho 两端的
-  /// `<i>` 占位同款思路）。
-  double _leadingSpacer(double viewport) =>
-      ((viewport - _tabWidth) / 2).clamp(0.0, double.infinity);
 
   void _selectTab(int index) {
     setState(() => _active = index);
-    _centerTab(index);
   }
 
   void _remove(String tab, _MemoryItem item) {
@@ -284,66 +230,71 @@ class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
       .where((item) => !(_removed[tab]?.contains(item.title) ?? false))
       .toList();
 
-  /// `.at-faixa`：横滑 tab 条 + 居中 marca（110px 白线 + 下指三角）。
-  /// 选中 tab 通过首尾 spacer 精确滚到正中，marca 因此与 tab 对齐。
+  /// `.at-faixa`：tab 条——**不允许横向滑动，只能逐个点**（用户定的交互）。
+  /// 各 tab 等宽铺满条带，marca（110px 白线 + 下指三角）定位到选中 tab
+  /// 的中心：x = (index + 0.5) / n × 条带宽。
   Widget _buildTabs(AppLocalizations strings) {
-    final leading = _viewport == null ? 0.0 : _leadingSpacer(_viewport!);
     return Padding(
       padding: const EdgeInsets.only(top: 8),
-      child: SizedBox(
-        height: 46,
-        child: Stack(
-          alignment: Alignment.bottomCenter,
-          children: [
-            ListView(
-              controller: _tabScroll,
-              scrollDirection: Axis.horizontal,
-              padding: EdgeInsets.only(left: leading, right: leading),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final tabWidth = constraints.maxWidth / _tabs.length;
+          final marcaCenter = (_active + 0.5) * tabWidth;
+          return SizedBox(
+            height: 46,
+            child: Stack(
+              alignment: Alignment.bottomCenter,
               children: [
-                for (var i = 0; i < _tabs.length; i++)
-                  GestureDetector(
-                    onTap: () => _selectTab(i),
-                    behavior: HitTestBehavior.opaque,
-                    child: Container(
-                      width: _tabWidth,
-                      alignment: Alignment.center,
-                      child: Text(
-                        _tabs[i],
-                        style: TextStyle(
-                          color: i == _active
-                              ? _MemCss.textFull
-                              : _MemCss.text3,
-                          fontSize: 15,
+                Row(
+                  children: [
+                    for (var i = 0; i < _tabs.length; i++)
+                      GestureDetector(
+                        onTap: () => _selectTab(i),
+                        behavior: HitTestBehavior.opaque,
+                        child: Container(
+                          width: tabWidth,
+                          height: 46,
+                          alignment: Alignment.center,
+                          child: Text(
+                            _tabs[i],
+                            style: TextStyle(
+                              color: i == _active
+                                  ? _MemCss.textFull
+                                  : _MemCss.text3,
+                              fontSize: 15,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                  ],
+                ),
+                // .marca：线 + 下指小三角，平移到选中 tab 的中心
+                Positioned(
+                  bottom: 4,
+                  left: marcaCenter - 55,
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 110,
+                        height: 1.5,
+                        decoration: BoxDecoration(
+                          color: _MemCss.textFull,
+                          borderRadius: BorderRadius.circular(1),
+                        ),
+                      ),
+                      ClipRect(
+                        child: CustomPaint(
+                          size: const Size(12, 6),
+                          painter: _NotchPainter(),
+                        ),
+                      ),
+                    ],
                   ),
+                ),
               ],
             ),
-            // .marca：线 + 下指小三角（::after 的 border-top-color 形态）
-            Positioned(
-              bottom: 4,
-              child: Column(
-                children: [
-                  Container(
-                    width: 110,
-                    height: 1.5,
-                    decoration: BoxDecoration(
-                      color: _MemCss.textFull,
-                      borderRadius: BorderRadius.circular(1),
-                    ),
-                  ),
-                  ClipRect(
-                    child: CustomPaint(
-                      size: const Size(12, 6),
-                      painter: _NotchPainter(),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
