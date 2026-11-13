@@ -24,10 +24,19 @@ import 'system_gesture_zone.dart';
 /// ⚠️ 数据现状：后端尚无记忆端点，这里用与原型 Clara 场景一致的演示
 /// 夹具撑起 UI；端点就绪后把 [_fixture] 换成接口数据即可，界面不动。
 class AtlasMemoryLayer extends StatefulWidget {
-  const AtlasMemoryLayer({required this.onClose, super.key});
+  const AtlasMemoryLayer({
+    required this.onClose,
+    this.onDragClose,
+    super.key,
+  });
 
   /// 返回对话（‹ 按钮与下滑共用）。
   final VoidCallback onClose;
+
+  /// 整卡下滑关闭：与宿主（AtlasChatPage）自身的下滑关闭同效——整个
+  /// Atlas 浮层滑出并回到首页，而不是只收回 Memória 子层。缺省回退到
+  /// [onClose]。
+  final VoidCallback? onDragClose;
 
   @override
   State<AtlasMemoryLayer> createState() => _AtlasMemoryLayerState();
@@ -157,12 +166,13 @@ class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
     }
     final shouldClose = _dragDy > 90 || _velocity > 650;
     if (shouldClose) {
-      // 立即恢复对话层（避免滑出后露出暗底），卡片自身继续滑出动画
+      // 立即恢复对话层（避免滑出后露出暗底），卡片自身继续滑出动画；
+      // 下滑语义=关闭整个 Atlas 浮层（与在 Atlas 卡片上下滑一致）
       setState(() {
         _dragging = false;
         _dragDy = 1400;
       });
-      widget.onClose();
+      (widget.onDragClose ?? widget.onClose)();
     } else {
       setState(() {
         _dragging = false;

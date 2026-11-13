@@ -143,6 +143,20 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
     }
   }
 
+  /// 整卡下滑关闭：卡片先滑出屏幕（跟手动画的延续），再关路由（路由
+  /// 自身的下滑退场动画此刻作用在已离屏的卡片上，不可见，不会双重动画）。
+  /// 主卡片的下滑与 Memória 子层的下滑关闭共用。
+  void _closeSheet() {
+    setState(() {
+      _memoryOpen = false;
+      _dragging = false;
+      _dragDy = 1400;
+    });
+    Future.delayed(const Duration(milliseconds: 240), () {
+      if (mounted) Navigator.of(context).pop();
+    });
+  }
+
   void _onSheetPointerUp() {
     if (_memoryOpen || !_dragging) return;
     // 阈值故意调低（源码 useFolha 更宽松）：滑动起手若落在屏幕底部系统
@@ -151,15 +165,7 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
     // 因此让第一次有效滑动尽量容易成功。
     final close = _dragDy > 110 || _velocity > 700;
     if (close) {
-      // 卡片先滑出屏幕（跟手动画的延续），再关路由（路由自身的下滑
-      // 退场动画此刻作用在已离屏的卡片上，不可见，不会双重动画）
-      setState(() {
-        _dragging = false;
-        _dragDy = 1400;
-      });
-      Future.delayed(const Duration(milliseconds: 240), () {
-        if (mounted) Navigator.of(context).pop();
-      });
+      _closeSheet();
     } else {
       setState(() {
         _dragging = false;
@@ -333,6 +339,7 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
                                 child: AtlasMemoryLayer(
                                   onClose: () =>
                                       setState(() => _memoryOpen = false),
+                                  onDragClose: _closeSheet,
                                 ),
                               ),
                             ),
@@ -389,13 +396,7 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
         }
         final close = _dragDy > 110 || velocity > 700;
         if (close) {
-          setState(() {
-            _dragging = false;
-            _dragDy = 1400;
-          });
-          Future.delayed(const Duration(milliseconds: 240), () {
-            if (mounted) Navigator.of(context).pop();
-          });
+          _closeSheet();
         } else {
           setState(() {
             _dragging = false;
