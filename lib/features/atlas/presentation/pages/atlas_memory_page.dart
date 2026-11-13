@@ -3,25 +3,32 @@ import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations_context.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 
-/// Memória 子屏 —— 按客户源码复刻（Assistente.jsx 的 `at-tela at-sub` 区 +
+/// Memória 子层 —— 按客户源码复刻（Assistente.jsx 的 `at-tela at-sub` 区 +
 /// atlas-caixa.css `.at-heroi/.at-faixa/.at-lem` 定稿）。
+///
+/// **不是推入页**：与主对话同为 Atlas 浮层内的一个 tela，由宿主
+/// （AtlasChatPage）叠放——打开时主对话左移淡出（`atras`：-22%）、
+/// 本层从右滑入；头部支持下滑（velocity > 600）返回对话，‹ 按钮同效。
 ///
 /// 结构（对照 vercel 截图）：
 /// * 顶栏：‹ 返回（左）/ Memória（中），44/1fr/44；
 /// * hero：`O que o Atlas sabe de você`（Urbanist 300/30）+ 副题；
 /// * kicker `O QUE ELE GUARDOU`（11 大写 .16em）；
-/// * 分类 tab 条 `.at-faixa`：横滑、选中项居中、下方 110px 白线 + 上指
-///   小三角（`.marca`）；
+/// * 分类 tab 条 `.at-faixa`：横滑、选中项滚到正中、下方 110px 白线 +
+///   下指小三角（`.marca::after` 的 border-top-color 形态——尖端朝下）；
 /// * 记忆卡 `.at-lem`：标题 + X 删除、状态行（Atual 绿 / Passou 灰 ·
 ///   Você contou / O Atlas percebeu · desde 日期）、正文 60% 灰。
 ///
 /// ⚠️ 数据现状：后端尚无记忆端点，这里用与原型 Clara 场景一致的演示
 /// 夹具撑起 UI；端点就绪后把 [_fixture] 换成接口数据即可，界面不动。
-class AtlasMemoryPage extends StatefulWidget {
-  const AtlasMemoryPage({super.key});
+class AtlasMemoryLayer extends StatefulWidget {
+  const AtlasMemoryLayer({required this.onClose, super.key});
+
+  /// 返回对话（‹ 按钮与下滑共用）。
+  final VoidCallback onClose;
 
   @override
-  State<AtlasMemoryPage> createState() => _AtlasMemoryPageState();
+  State<AtlasMemoryLayer> createState() => _AtlasMemoryLayerState();
 }
 
 class _MemoryItem {
@@ -91,11 +98,31 @@ final Map<String, List<_MemoryItem>> _fixture = {
   ],
 };
 
-class _AtlasMemoryPageState extends State<AtlasMemoryPage> {
+class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
+  static const _tabWidth = 140.0;
+
   late final List<String> _tabs = _fixture.keys.toList();
   final Map<String, Set<String>> _removed = {};
   final ScrollController _tabScroll = ScrollController();
   int _active = 0;
+
+  /// tab 条的视口宽度（首帧布局后可得），用于计算居中 spacer。
+  double? _viewport;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabScroll.addListener(() {
+      final viewport = _tabScroll.position.viewportDimension;
+      if (viewport != _viewport && mounted) {
+        setState(() => _viewport = viewport);
+      }
+    });
+    // 首帧后把默认 tab（Rotina）滚到正中，让 marca 与它对上。
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _centerTab(0, jump: true),
+    );
+  }
 
   @override
   void dispose() {
@@ -103,18 +130,35 @@ class _AtlasMemoryPageState extends State<AtlasMemoryPage> {
     super.dispose();
   }
 
+  void _centerTab(int index, {bool jump = false}) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_tabScroll.hasClients) return;
+      final viewport = _tabScroll.position.viewportDimension;
+      final target =
+          index * _tabWidth -
+          (viewport - _tabWidth) / 2 +
+          _leadingSpacer(viewport);
+      final clamped = target.clamp(0.0, _tabScroll.position.maxScrollExtent);
+      if (jump) {
+        _tabScroll.jumpTo(clamped);
+      } else {
+        _tabScroll.animateTo(
+          clamped,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  /// 首尾 spacer：让第一个/最后一个 tab 也能滚到正中（源码 trilho 两端的
+  /// `<i>` 占位同款思路）。
+  double _leadingSpacer(double viewport) =>
+      ((viewport - _tabWidth) / 2).clamp(0.0, double.infinity);
+
   void _selectTab(int index) {
     setState(() => _active = index);
-    // 源码 centraAba：把选中的 tab 滚到条带正中。
-    const tabWidth = 140.0;
-    final target =
-        (index * tabWidth) -
-        (_tabScroll.position.viewportDimension - tabWidth) / 2;
-    _tabScroll.animateTo(
-      target.clamp(0, _tabScroll.position.maxScrollExtent),
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeOut,
-    );
+    _centerTab(index);
   }
 
   void _remove(String tab, _MemoryItem item) {
@@ -124,9 +168,9 @@ class _AtlasMemoryPageState extends State<AtlasMemoryPage> {
   @override
   Widget build(BuildContext context) {
     final strings = context.l10n;
-    return Scaffold(
-      backgroundColor: _MemCss.bgBottom,
-      body: DecoratedBox(
+    return ColoredBox(
+      color: _MemCss.bgBottom,
+      child: DecoratedBox(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
@@ -135,95 +179,102 @@ class _AtlasMemoryPageState extends State<AtlasMemoryPage> {
             colors: [_MemCss.bgTop, _MemCss.bgMid, _MemCss.bgBottom],
           ),
         ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              // .at-subcab：‹ 左 / Memória 中
-              SizedBox(
-                height: 56,
-                child: Row(
-                  children: [
-                    IconButton(
-                      tooltip: MaterialLocalizations.of(
-                        context,
-                      ).backButtonTooltip,
-                      icon: const Icon(Icons.arrow_back_ios_new, size: 20),
+        child: Column(
+          children: [
+            _buildHeader(strings),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
+                children: [
+                  // .at-heroi
+                  Text(
+                    strings.memoriaHeroTitle,
+                    style: const TextStyle(
                       color: _MemCss.textFull,
-                      onPressed: () => Navigator.of(context).pop(),
+                      fontSize: 30,
+                      fontWeight: FontWeight.w300,
+                      height: 1.1,
+                      letterSpacing: -0.01,
                     ),
-                    Expanded(
-                      child: Text(
-                        strings.memoriaTitle,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: _MemCss.textFull,
-                          fontSize: 19,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 48),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
-                  children: [
-                    // .at-heroi
-                    Text(
-                      strings.memoriaHeroTitle,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Text(
+                      strings.memoriaHeroSub,
                       style: const TextStyle(
-                        color: _MemCss.textFull,
-                        fontSize: 30,
-                        fontWeight: FontWeight.w300,
-                        height: 1.1,
-                        letterSpacing: -0.01,
+                        color: _MemCss.text2,
+                        fontSize: 13.5,
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 6),
+                  ),
+                  // kicker：O QUE ELE GUARDOU
+                  Padding(
+                    padding: const EdgeInsets.only(top: 26),
+                    child: Text(
+                      strings.memoriaKicker.toUpperCase(),
+                      style: const TextStyle(
+                        color: _MemCss.text3,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: .16,
+                      ),
+                    ),
+                  ),
+                  _buildTabs(strings),
+                  for (final item in _visibleItems(_tabs[_active]))
+                    _MemoryCard(
+                      item: item,
+                      onDelete: () => _remove(_tabs[_active], item),
+                    ),
+                  if (_visibleItems(_tabs[_active]).isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 24),
                       child: Text(
-                        strings.memoriaHeroSub,
-                        style: const TextStyle(
-                          color: _MemCss.text2,
-                          fontSize: 13.5,
-                        ),
+                        'Nada guardado aqui.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: _MemCss.text3, fontSize: 14),
                       ),
                     ),
-                    // kicker：O QUE ELE GUARDOU
-                    Padding(
-                      padding: const EdgeInsets.only(top: 26),
-                      child: Text(
-                        strings.memoriaKicker.toUpperCase(),
-                        style: const TextStyle(
-                          color: _MemCss.text3,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
-                          letterSpacing: .16,
-                        ),
-                      ),
-                    ),
-                    _buildTabs(strings),
-                    for (final item in _visibleItems(_tabs[_active]))
-                      _MemoryCard(
-                        item: item,
-                        onDelete: () => _remove(_tabs[_active], item),
-                      ),
-                    if (_visibleItems(_tabs[_active]).isEmpty)
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 24),
-                        child: Text(
-                          'Nada guardado aqui.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: _MemCss.text3, fontSize: 14),
-                        ),
-                      ),
-                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// `.at-subcab`：‹ 返回（左）/ Memória（中）；头部下滑返回对话
+  /// （源码 useFolha 对 alça/头部的拖拽语义）。
+  Widget _buildHeader(AppLocalizations strings) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onVerticalDragEnd: (details) {
+        if ((details.primaryVelocity ?? 0) > 600) widget.onClose();
+      },
+      child: SizedBox(
+        height: 56,
+        child: Row(
+          children: [
+            IconButton(
+              tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+              icon: const Icon(Icons.arrow_back_ios_new, size: 20),
+              color: _MemCss.textFull,
+              onPressed: widget.onClose,
+            ),
+            Expanded(
+              child: Text(
+                strings.memoriaTitle,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: _MemCss.textFull,
+                  fontSize: 19,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
-            ],
-          ),
+            ),
+            const SizedBox(width: 48),
+          ],
         ),
       ),
     );
@@ -233,9 +284,10 @@ class _AtlasMemoryPageState extends State<AtlasMemoryPage> {
       .where((item) => !(_removed[tab]?.contains(item.title) ?? false))
       .toList();
 
-  /// `.at-faixa`：横滑 tab 条 + 居中 marca（110px 白线 + 上指三角）。
-  /// 选中的 tab 始终滚到正中，因此 marca 固定画在条带中心。
+  /// `.at-faixa`：横滑 tab 条 + 居中 marca（110px 白线 + 下指三角）。
+  /// 选中 tab 通过首尾 spacer 精确滚到正中，marca 因此与 tab 对齐。
   Widget _buildTabs(AppLocalizations strings) {
+    final leading = _viewport == null ? 0.0 : _leadingSpacer(_viewport!);
     return Padding(
       padding: const EdgeInsets.only(top: 8),
       child: SizedBox(
@@ -246,14 +298,14 @@ class _AtlasMemoryPageState extends State<AtlasMemoryPage> {
             ListView(
               controller: _tabScroll,
               scrollDirection: Axis.horizontal,
-              padding: EdgeInsets.zero,
+              padding: EdgeInsets.only(left: leading, right: leading),
               children: [
                 for (var i = 0; i < _tabs.length; i++)
                   GestureDetector(
                     onTap: () => _selectTab(i),
                     behavior: HitTestBehavior.opaque,
                     child: Container(
-                      width: 140,
+                      width: _tabWidth,
                       alignment: Alignment.center,
                       child: Text(
                         _tabs[i],
@@ -268,7 +320,7 @@ class _AtlasMemoryPageState extends State<AtlasMemoryPage> {
                   ),
               ],
             ),
-            // .marca：线 + 上指小三角
+            // .marca：线 + 下指小三角（::after 的 border-top-color 形态）
             Positioned(
               bottom: 4,
               child: Column(
@@ -281,9 +333,11 @@ class _AtlasMemoryPageState extends State<AtlasMemoryPage> {
                       borderRadius: BorderRadius.circular(1),
                     ),
                   ),
-                  CustomPaint(
-                    size: const Size(12, 6),
-                    painter: _NotchPainter(),
+                  ClipRect(
+                    child: CustomPaint(
+                      size: const Size(12, 6),
+                      painter: _NotchPainter(),
+                    ),
                   ),
                 ],
               ),
@@ -295,15 +349,15 @@ class _AtlasMemoryPageState extends State<AtlasMemoryPage> {
   }
 }
 
-/// `.marca::after` 的上指三角。
+/// `.marca::after`：贴着线的下指三角（平底在上、尖朝下）。
 class _NotchPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..color = _MemCss.textFull;
     final path = Path()
-      ..moveTo(0, size.height)
-      ..lineTo(size.width / 2, 0)
-      ..lineTo(size.width, size.height)
+      ..moveTo(0, 0)
+      ..lineTo(size.width, 0)
+      ..lineTo(size.width / 2, size.height)
       ..close();
     canvas.drawPath(path, paint);
   }

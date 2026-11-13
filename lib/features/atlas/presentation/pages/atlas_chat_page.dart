@@ -94,6 +94,9 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
   final _scroll = ScrollController();
   bool _atBottom = true;
 
+  /// Memória 子层是否展开（脑图标切换；‹/下滑收回）。
+  bool _memoryOpen = false;
+
   /// 麦克风的「语音输入」演示（源码 ouvir）：逐字把默认问题写进输入框
   /// 再发送；进行中动作钮变停止方块。
   bool _voiceTyping = false;
@@ -174,17 +177,50 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
                     ],
                   ),
                 ),
-                child: Column(
+                child: Stack(
                   children: [
-                    _buildHeader(strings),
-                    Expanded(
-                      child: AnimatedBuilder(
-                        animation: _controller,
-                        builder: (context, _) => _buildList(strings),
+                    // 主对话 tela：Memória 打开时左移淡出（源码 .at-tela.atras：
+                    // translateX(-22%) + opacity 0），不可点
+                    IgnorePointer(
+                      ignoring: _memoryOpen,
+                      child: AnimatedOpacity(
+                        opacity: _memoryOpen ? 0 : 1,
+                        duration: const Duration(milliseconds: 300),
+                        child: AnimatedSlide(
+                          offset: _memoryOpen
+                              ? const Offset(-0.22, 0)
+                              : Offset.zero,
+                          duration: const Duration(milliseconds: 420),
+                          curve: const Cubic(0.32, 0.72, 0, 1),
+                          child: Column(
+                            children: [
+                              _buildHeader(strings),
+                              Expanded(
+                                child: AnimatedBuilder(
+                                  animation: _controller,
+                                  builder: (context, _) => _buildList(strings),
+                                ),
+                              ),
+                              _buildSuggestions(strings),
+                              _buildComposer(strings),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
-                    _buildSuggestions(strings),
-                    _buildComposer(strings),
+                    // Memória 子 tela：从右滑入盖住对话（源码 at-sub 从
+                    // translateX(100%) 归位）；关闭由 ‹/下滑触发
+                    AnimatedSlide(
+                      offset: _memoryOpen ? Offset.zero : const Offset(1, 0),
+                      duration: const Duration(milliseconds: 420),
+                      curve: const Cubic(0.32, 0.72, 0, 1),
+                      child: IgnorePointer(
+                        ignoring: !_memoryOpen,
+                        child: AtlasMemoryLayer(
+                          onClose: () => setState(() => _memoryOpen = false),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -242,15 +278,13 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
                     ),
                   ),
                 ),
-                // .at-mem：Memória 子屏（源码里脑图标开 Memória；这是 Atlas 内
-                // 部子页，压在浮层上，带返回箭头）
+                // .at-mem：Memória 子层开关（与源码一致：setTela(['mem'])，
+                // 子层在浮层内从右滑入）
                 IconButton(
                   tooltip: strings.memoriaTitle,
                   icon: const Icon(Icons.psychology_outlined, size: 24),
                   color: _AtlasCss.textFull.withValues(alpha: .85),
-                  onPressed: () => Navigator.of(context).push<void>(
-                    MaterialPageRoute(builder: (_) => const AtlasMemoryPage()),
-                  ),
+                  onPressed: () => setState(() => _memoryOpen = true),
                 ),
               ],
             ),
