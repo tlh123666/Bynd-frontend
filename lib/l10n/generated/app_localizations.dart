@@ -99,6 +99,90 @@ abstract class AppLocalizations {
     Locale('pt', 'BR'),
   ];
 
+  /// No description provided for @exerciseDetailCountAs.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Conta como'**
+  String get exerciseDetailCountAs;
+
+  /// No description provided for @exerciseDetailSeconds.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'segundos'**
+  String get exerciseDetailSeconds;
+
+  /// No description provided for @exerciseDetailMinutes.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'minutos'**
+  String get exerciseDetailMinutes;
+
+  /// No description provided for @exerciseDetailRepsBody.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'repetições (peso do corpo)'**
+  String get exerciseDetailRepsBody;
+
+  /// No description provided for @exerciseDetailRepsWeight.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'repetições × carga'**
+  String get exerciseDetailRepsWeight;
+
+  /// No description provided for @exerciseDetailTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Exercício'**
+  String get exerciseDetailTitle;
+
+  /// No description provided for @exerciseDetailHow.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Como fazer: {name}'**
+  String exerciseDetailHow(String name);
+
+  /// No description provided for @exerciseDetailMark.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Marcar para adicionar'**
+  String get exerciseDetailMark;
+
+  /// No description provided for @exerciseDetailMuscles.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Músculos'**
+  String get exerciseDetailMuscles;
+
+  /// No description provided for @exerciseDetailEquipment.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Equipamento'**
+  String get exerciseDetailEquipment;
+
+  /// No description provided for @exerciseDetailGroup.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Grupo'**
+  String get exerciseDetailGroup;
+
+  /// No description provided for @exerciseDetailLevel.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Nível'**
+  String get exerciseDetailLevel;
+
+  /// No description provided for @exerciseDetailAnimation.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Animação: {name}'**
+  String exerciseDetailAnimation(String name);
+
+  /// No description provided for @exerciseDetailNoAnimation.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Animação não disponível para este exercício.'**
+  String get exerciseDetailNoAnimation;
+
   /// No description provided for @exerciseConfirmEmpty.
   ///
   /// In pt_BR, this message translates to:

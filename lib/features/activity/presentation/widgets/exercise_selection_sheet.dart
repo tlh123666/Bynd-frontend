@@ -6,6 +6,8 @@ import '../../../../design_system/design_system.dart';
 import '../../../../l10n/app_localizations_context.dart';
 import '../models/exercise_catalog_item.dart';
 import 'activity_frosted_sheet_header.dart';
+import 'exercise_anatomy.dart';
+import 'exercise_detail_sheet.dart';
 
 /// 动作目录叶片：搜索、筛选和多选只作用于当前草稿。
 class ExerciseSelectionSheet extends StatefulWidget {
@@ -197,6 +199,17 @@ class _ExerciseSelectionSheetState extends State<ExerciseSelectionSheet> {
                               return _ExerciseRow(
                                 item: item,
                                 selected: selected,
+                                onDetails: () async {
+                                  // 从搜索进入详情时先收起键盘，避免遮挡动作示意。
+                                  FocusManager.instance.primaryFocus?.unfocus();
+                                  final marked = await ExerciseDetailSheet.show(
+                                    context,
+                                    item,
+                                    selected: _selected.contains(item.id),
+                                  );
+                                  if (!context.mounted || !marked) return;
+                                  setState(() => _selected.add(item.id));
+                                },
                                 onTap: () => setState(() {
                                   if (selected) {
                                     _selected.remove(item.id);
@@ -287,10 +300,12 @@ class _ExerciseRow extends StatelessWidget {
     required this.item,
     required this.selected,
     required this.onTap,
+    required this.onDetails,
   });
   final ExerciseCatalogItem item;
   final bool selected;
   final VoidCallback onTap;
+  final VoidCallback onDetails;
   @override
   Widget build(BuildContext context) => Semantics(
     button: true,
@@ -299,8 +314,9 @@ class _ExerciseRow extends StatelessWidget {
       onTap: onTap,
       child: Container(
         height: 72,
-        decoration: const BoxDecoration(
-          border: Border(bottom: BorderSide(color: Color(0x14ffffff))),
+        decoration: BoxDecoration(
+          color: selected ? const Color(0x0affffff) : null,
+          border: const Border(bottom: BorderSide(color: Color(0x14ffffff))),
         ),
         child: Row(
           children: [
@@ -310,12 +326,18 @@ class _ExerciseRow extends StatelessWidget {
               color: selected ? AppColors.textPrimary : AppColors.textMuted,
             ),
             const SizedBox(width: 12),
-            const SizedBox(
-              width: 40,
-              child: Icon(
-                Icons.fitness_center,
-                size: 20,
-                color: AppColors.textMuted,
+            Semantics(
+              label: context.l10n.exerciseDetailHow(item.name),
+              button: true,
+              child: InkWell(
+                onTap: onDetails,
+                child: SizedBox(
+                  width: 40,
+                  height: 48,
+                  child: Center(
+                    child: ExerciseAnatomy(exercise: item, size: 40),
+                  ),
+                ),
               ),
             ),
             const SizedBox(width: 12),

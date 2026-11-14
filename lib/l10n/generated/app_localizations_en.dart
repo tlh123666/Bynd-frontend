@@ -9,6 +9,53 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get exerciseDetailCountAs => 'Measured as';
+
+  @override
+  String get exerciseDetailSeconds => 'seconds';
+
+  @override
+  String get exerciseDetailMinutes => 'minutes';
+
+  @override
+  String get exerciseDetailRepsBody => 'repetitions (bodyweight)';
+
+  @override
+  String get exerciseDetailRepsWeight => 'repetitions × weight';
+
+  @override
+  String get exerciseDetailTitle => 'Exercise';
+
+  @override
+  String exerciseDetailHow(String name) {
+    return 'How to do: $name';
+  }
+
+  @override
+  String get exerciseDetailMark => 'Mark to add';
+
+  @override
+  String get exerciseDetailMuscles => 'Muscles';
+
+  @override
+  String get exerciseDetailEquipment => 'Equipment';
+
+  @override
+  String get exerciseDetailGroup => 'Group';
+
+  @override
+  String get exerciseDetailLevel => 'Level';
+
+  @override
+  String exerciseDetailAnimation(String name) {
+    return 'Animation: $name';
+  }
+
+  @override
+  String get exerciseDetailNoAnimation =>
+      'Animation not available for this exercise.';
+
+  @override
   String get exerciseConfirmEmpty => 'Confirm';
 
   @override
