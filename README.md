@@ -78,6 +78,8 @@ AppCard(
 
 ## 运行
 
+睡眠页面已接入首页 Sono 卡片，包含阶段详情、历史趋势、目标规划、提醒与日记问题。真实数据、迁移和平台说明见 [睡眠功能](docs/sleep.md)；后端需执行新增的 `000063_sleep_display_preferences` 迁移。
+
 ```sh
 flutter run
 flutter run --dart-define-from-file=config/demo.json

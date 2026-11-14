@@ -1,0 +1,17 @@
+{
+  "checkedAt": "2026-11-14",
+  "assets": [
+    {
+      "file": "sleep-back.svg",
+      "source": "https://bynd-app.vercel.app/sono.html?app",
+      "selector": "#voltar svg",
+      "sha256": "68e3ce919939d667b3b5006f30757d89cee823fc5fd6cf28ff04271529b7b67d"
+    },
+    {
+      "file": "sleep-settings.svg",
+      "source": "https://bynd-app.vercel.app/sono.html?app",
+      "selector": "#bt-aj svg",
+      "sha256": "18e58751c4b50a6b9a120d6daefeff73f98012d83bcae4e0f3dc92b94adf84b2"
+    }
+  ]
+}

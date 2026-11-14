@@ -20,6 +20,7 @@ class HomeController extends ChangeNotifier {
     session?.addListener(_sessionChanged);
   }
   final HomeRepository repository;
+  bool get demoData => repository is DemoHomeRepository;
   final HomePreferences preferences;
   final AuthSession? session;
   final DateTime Function() _clock;

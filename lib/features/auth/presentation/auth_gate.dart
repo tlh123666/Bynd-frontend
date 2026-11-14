@@ -13,6 +13,7 @@ import '../../device/application/device_scope.dart';
 import '../../atlas/application/atlas_scope.dart';
 import '../../atlas/data/atlas_repository.dart';
 import 'login_page.dart';
+import '../../sleep/application/sleep_reminder_scope.dart';
 
 /// Changing accounts replaces the complete inner navigation stack. Private
 /// pages and forms cannot survive logout underneath a new login screen.
@@ -61,7 +62,11 @@ class AuthGate extends StatelessWidget {
             locale: localeController,
             child: navigator,
           )
-        : navigator;
+        : SleepReminderScope(
+            config: config,
+            authenticated: false,
+            child: navigator,
+          );
   }
 }
 
@@ -130,6 +135,9 @@ class _AuthenticatedServicesState extends State<_AuthenticatedServices> {
   @override
   Widget build(BuildContext context) => DeviceScope(
     controller: _devices,
-    child: AtlasScope(repository: _atlas, child: widget.child),
+    child: AtlasScope(
+      repository: _atlas,
+      child: SleepReminderScope(config: widget.config, child: widget.child),
+    ),
   );
 }

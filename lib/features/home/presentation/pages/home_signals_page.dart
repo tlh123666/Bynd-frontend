@@ -1,3 +1,4 @@
+import '../../../sleep/presentation/pages/sleep_page.dart';
 import 'package:flutter/material.dart';
 import '../../../../design_system/design_system.dart';
 import '../../../../l10n/app_localizations_context.dart';
@@ -253,10 +254,15 @@ class _SignalCard extends StatelessWidget {
             MaterialPageRoute<void>(
               builder: (_) => HomeAccountGuard(
                 controller: controller,
-                child: HomeSignalDetailPage(
-                  controller: controller,
-                  signal: card.signal,
-                ),
+                child: card.signal == HomeSignal.sleep
+                    ? SleepPage(
+                        date: controller.date,
+                        demo: controller.demoData,
+                      )
+                    : HomeSignalDetailPage(
+                        controller: controller,
+                        signal: card.signal,
+                      ),
               ),
             ),
           ),

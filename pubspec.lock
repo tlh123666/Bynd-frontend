@@ -89,6 +89,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.9"
+  dbus:
+    dependency: transitive
+    description:
+      name: dbus
+      sha256: f7db8504e715b835f5ebe5fe74604ccd961d504c73389a5d8e81bafc2e2f3612
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.8.0"
   equatable:
     dependency: transitive
     description:
@@ -182,6 +190,46 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.0.0"
+  flutter_local_notifications:
+    dependency: "direct main"
+    description:
+      name: flutter_local_notifications
+      sha256: fd5fc8966a8b34337ac182dc394f3506139b69d8138d4e9e174a13d6468adcd4
+      url: "https://pub.dev"
+    source: hosted
+    version: "22.3.3"
+  flutter_local_notifications_linux:
+    dependency: transitive
+    description:
+      name: flutter_local_notifications_linux
+      sha256: "3b89a4bf095fa5f8a99beeabf982c5bd506c3ad25e7b9e61da945e994dc5b615"
+      url: "https://pub.dev"
+    source: hosted
+    version: "8.0.2"
+  flutter_local_notifications_platform_interface:
+    dependency: transitive
+    description:
+      name: flutter_local_notifications_platform_interface
+      sha256: "43c3761d916c9bd3d5c7ebbc44d82f4990329840c0c5d62ad5260cc1b5d399bd"
+      url: "https://pub.dev"
+    source: hosted
+    version: "12.2.0"
+  flutter_local_notifications_web:
+    dependency: transitive
+    description:
+      name: flutter_local_notifications_web
+      sha256: "516afaf97a2d1e67a036c6617321b00d205d72f7a67b6eccf936cd565f985878"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
+  flutter_local_notifications_windows:
+    dependency: transitive
+    description:
+      name: flutter_local_notifications_windows
+      sha256: "6f43bdd03b171b7a90f22647506fea33e2bb12294b7c7c7a3d690e960a382945"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.1"
   flutter_localizations:
     dependency: "direct main"
     description: flutter
@@ -247,10 +295,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_svg
-      sha256: d02281c22cebba7aa7ac72e75978c946274c8c05f8623e9893e1f5f2eb951713
+      sha256: "455a22036f8d1b7c74f53283c8644d6af2f6f7c9ec72c7b06a2ff70fb3954a54"
       url: "https://pub.dev"
     source: hosted
-    version: "2.3.3"
+    version: "2.4.0"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -649,10 +697,10 @@ packages:
     dependency: transitive
     description:
       name: shared_preferences_android
-      sha256: "33b38b07d9ac7d16aff0426c61418752fd3e7a8c7dc8be786c875d6ce673b002"
+      sha256: "137dedccacb394b8f470d6c9b435ffc3d33faaa6ce2949c4f54a61007d64396d"
       url: "https://pub.dev"
     source: hosted
-    version: "2.5.4"
+    version: "2.5.5"
   shared_preferences_foundation:
     dependency: transitive
     description:
@@ -770,6 +818,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.11"
+  timezone:
+    dependency: "direct main"
+    description:
+      name: timezone
+      sha256: "9f4e5a1a0e4fef7dd3424842c0575db01bfb7a11730e8d55753fcd5c5c98767b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.11.2"
   typed_data:
     dependency: transitive
     description:
@@ -782,10 +838,10 @@ packages:
     dependency: transitive
     description:
       name: vector_graphics
-      sha256: fb6241e12737b9ac96fb799abc9af8fb7b76c66bb5e751cd99c1f94cbcd26b4a
+      sha256: "06081e4f2d8f17c306aa58989520694b463ad411bc7c7b93e76afa3e41ca17ac"
       url: "https://pub.dev"
     source: hosted
-    version: "1.2.7"
+    version: "1.3.1"
   vector_graphics_codec:
     dependency: transitive
     description:
@@ -798,10 +854,10 @@ packages:
     dependency: transitive
     description:
       name: vector_graphics_compiler
-      sha256: "7471171f129768c2e0398e91d39022cf47f03e1a541bb1737760bd1b9aed6c63"
+      sha256: "7d3d604c1ede26711f865f74e9273c5c5504ac449f3d92faa722878dbac88807"
       url: "https://pub.dev"
     source: hosted
-    version: "1.3.5"
+    version: "1.3.6"
   vector_math:
     dependency: transitive
     description:

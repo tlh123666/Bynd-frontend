@@ -6,7 +6,7 @@ import 'package:new_jcvital/features/home/data/demo_home_repository.dart';
 import 'package:new_jcvital/features/home/domain/home_models.dart';
 import 'package:new_jcvital/features/home/presentation/widgets/home_content.dart';
 import 'package:new_jcvital/features/home/presentation/widgets/home_customize_sheet.dart';
-import 'package:new_jcvital/features/home/presentation/pages/home_signal_detail_page.dart';
+import 'package:new_jcvital/features/sleep/presentation/pages/sleep_page.dart';
 import 'package:new_jcvital/features/home/presentation/pages/home_diary_page.dart';
 import 'package:new_jcvital/l10n/generated/app_localizations.dart';
 import 'package:new_jcvital/main.dart';
@@ -61,6 +61,7 @@ Future<HomeController> mount(
 }
 
 void main() {
+  setUp(() => SharedPreferences.setMockInitialValues({}));
   testWidgets('open content cannot retain another account\'s private data', (
     tester,
   ) async {
@@ -183,12 +184,14 @@ void main() {
     final card = find.byKey(const ValueKey('home-signal-sleep'));
     await tester.ensureVisible(card);
     await tester.tap(card);
-    await tester.pumpAndSettle();
-    expect(find.byType(HomeSignalDetailPage), findsOneWidget);
-    expect(find.text('SEMANA · UM PONTO POR DIA'), findsOneWidget);
+    await tester.pump();
+    // This test verifies routing; sleep rendering is covered with controlled
+    // repositories in sleep_page_test. Do not wait for an asset-backed spinner.
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.byType(SleepPage), findsOneWidget);
     await tester.tap(find.byTooltip('Voltar'));
     await tester.pumpAndSettle();
-    expect(find.byType(HomeSignalDetailPage), findsNothing);
+    expect(find.byType(SleepPage), findsNothing);
     expect(find.byType(HomeContent), findsOneWidget);
   });
   testWidgets(
