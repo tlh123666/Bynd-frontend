@@ -1,3 +1,5 @@
+import '../../domain/home_models.dart';
+import '../../../sleep/presentation/pages/sleep_page.dart';
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
@@ -241,10 +243,15 @@ class HomeContent extends StatelessWidget {
                           MaterialPageRoute<void>(
                             builder: (_) => HomeAccountGuard(
                               controller: controller,
-                              child: HomeSignalDetailPage(
-                                controller: controller,
-                                signal: signal,
-                              ),
+                              child: signal == HomeSignal.sleep
+                                  ? SleepPage(
+                                      date: controller.date,
+                                      demo: controller.demoData,
+                                    )
+                                  : HomeSignalDetailPage(
+                                      controller: controller,
+                                      signal: signal,
+                                    ),
                             ),
                           ),
                         ),

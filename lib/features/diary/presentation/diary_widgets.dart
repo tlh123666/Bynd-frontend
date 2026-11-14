@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../design_system/design_system.dart';
 import '../../../design_system/tokens/app_diary_style.dart';
 import '../domain/diary_models.dart';
-import '../../../shared/widgets/app_sheet_controls.dart';
 
 String diaryText(BuildContext c, String pt, String en) =>
     Localizations.localeOf(c).languageCode == 'en' ? en : pt;
@@ -33,7 +32,7 @@ class DiarySection extends StatelessWidget {
   final Widget? trailing;
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(top: 36, bottom: 14),
+    padding: const EdgeInsets.only(top: 30, bottom: 12),
     child: Row(
       children: [
         if (icon != null) ...[
@@ -54,6 +53,8 @@ class DiaryRecordRow extends StatelessWidget {
     this.subtitle,
     this.value,
     this.selected = false,
+    this.negative = false,
+    this.onNegative,
     this.onTap,
     this.onToggle,
     this.showIcon = true,
@@ -62,6 +63,8 @@ class DiaryRecordRow extends StatelessWidget {
   final String title, icon;
   final String? subtitle, value;
   final bool selected;
+  final bool negative;
+  final VoidCallback? onNegative;
   final bool showIcon;
   final VoidCallback? onTap, onToggle;
   @override
@@ -99,14 +102,38 @@ class DiaryRecordRow extends StatelessWidget {
                   style: AppDiaryStyle.section.copyWith(fontSize: 17),
                 ),
               ),
+            if (onNegative != null)
+              SizedBox(
+                width: 40,
+                child: IconButton(
+                  onPressed: onNegative,
+                  tooltip: diaryText(
+                    context,
+                    'Não aconteceu: $title',
+                    'Did not happen: $title',
+                  ),
+                  icon: Icon(
+                    Icons.close,
+                    size: 20,
+                    color: negative
+                        ? AppColors.textPrimary
+                        : AppDiaryStyle.faint,
+                  ),
+                ),
+              ),
             if (onToggle != null)
-              IconButton(
-                onPressed: onToggle,
-                tooltip: diaryText(context, 'Marcar $title', 'Toggle $title'),
-                icon: Icon(
-                  selected ? Icons.check_circle : Icons.radio_button_unchecked,
-                  size: 22,
-                  color: selected ? AppColors.textPrimary : AppDiaryStyle.faint,
+              SizedBox(
+                width: 40,
+                child: IconButton(
+                  onPressed: onToggle,
+                  tooltip: diaryText(context, 'Marcar $title', 'Toggle $title'),
+                  icon: Icon(
+                    Icons.check,
+                    size: 22,
+                    color: selected
+                        ? AppColors.textPrimary
+                        : AppDiaryStyle.faint,
+                  ),
                 ),
               ),
           ],
@@ -147,7 +174,7 @@ class DiaryCapturePanel extends StatelessWidget {
         children: [
           Row(
             children: [
-              const DiaryIcon('estrela', size: 18),
+              const AppSvgIcon('assets/icons/site/diary-ai.svg', size: 18),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -167,24 +194,33 @@ class DiaryCapturePanel extends StatelessWidget {
             style: AppDiaryStyle.caption,
           ),
           const SizedBox(height: 14),
-          Row(
-            children: [
-              Expanded(
-                child: AppSheetActionButton(
-                  label: diaryText(context, 'Escrever', 'Write'),
-                  iconAsset: 'assets/icons/site/diary-nota.svg',
-                  onPressed: onWrite,
+          SizedBox(
+            width: double.infinity,
+            child: Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                SizedBox(
+                  width: 132,
+                  height: 48,
+                  child: AppGlassPill(
+                    label: diaryText(context, 'Escrever', 'Write'),
+                    leading: 'assets/icons/site/diary-nota.svg',
+                    onPressed: onWrite,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: AppSheetActionButton(
-                  label: diaryText(context, 'Falar', 'Speak'),
-                  iconAsset: 'assets/icons/site/diary-mic.svg',
-                  onPressed: onSpeak,
+                SizedBox(
+                  width: 132,
+                  height: 48,
+                  child: AppButton(
+                    label: diaryText(context, 'Falar', 'Speak'),
+                    iconAsset: 'assets/icons/site/diary-mic.svg',
+                    onPressed: onSpeak,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
@@ -243,15 +279,6 @@ class DiaryTimelineTile extends StatelessWidget {
                         children: [
                           Row(
                             children: [
-                              if (moment.automatic) ...[
-                                Image.asset(
-                                  'assets/images/diary-band.png',
-                                  width: 14,
-                                  height: 16,
-                                  fit: BoxFit.contain,
-                                ),
-                                const SizedBox(width: 6),
-                              ],
                               Expanded(
                                 child: Text(
                                   moment.label,
@@ -266,7 +293,13 @@ class DiaryTimelineTile extends StatelessWidget {
                             runSpacing: 5,
                             children: [
                               Text(
-                                moment.valueLabel,
+                                moment.happened
+                                    ? moment.valueLabel
+                                    : diaryText(
+                                        context,
+                                        'Não aconteceu',
+                                        'Did not happen',
+                                      ),
                                 style: AppDiaryStyle.caption,
                               ),
                               if (moment.kind == 'meal' &&
@@ -299,5 +332,84 @@ class DiaryTimelineTile extends StatelessWidget {
         ),
       ],
     ),
+  );
+}
+
+/// The original photo and its masks scroll with the diary content.
+class DiaryPhotoBackground extends StatelessWidget {
+  const DiaryPhotoBackground({super.key});
+  @override
+  Widget build(BuildContext context) => IgnorePointer(
+    child: ShaderMask(
+      blendMode: BlendMode.dstIn,
+      shaderCallback: (rect) => const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [Colors.white, Colors.white, Colors.transparent],
+        stops: [0, .65, 1],
+      ).createShader(rect),
+      child: SizedBox(
+        height: MediaQuery.sizeOf(context).height * .9,
+        width: double.infinity,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Image.asset(
+              AppDiaryStyle.backgroundImage,
+              fit: BoxFit.cover,
+              alignment: Alignment.topCenter,
+              excludeFromSemantics: true,
+            ),
+            const DecoratedBox(
+              decoration: BoxDecoration(gradient: AppDiaryStyle.photoVeil),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+/// Keeps the photo behind the header while moving it with the active page.
+class DiaryScrollingBackground extends StatefulWidget {
+  const DiaryScrollingBackground({required this.child, super.key});
+  final Widget child;
+  @override
+  State<DiaryScrollingBackground> createState() =>
+      _DiaryScrollingBackgroundState();
+}
+
+class _DiaryScrollingBackgroundState extends State<DiaryScrollingBackground> {
+  final _offset = ValueNotifier<double>(0);
+  @override
+  void dispose() {
+    _offset.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Stack(
+    children: [
+      Positioned(
+        left: 0,
+        right: 0,
+        top: 0,
+        child: ValueListenableBuilder<double>(
+          valueListenable: _offset,
+          builder: (_, offset, child) =>
+              Transform.translate(offset: Offset(0, -offset), child: child),
+          child: const DiaryPhotoBackground(),
+        ),
+      ),
+      NotificationListener<ScrollNotification>(
+        onNotification: (n) {
+          if (n.depth == 0 && n.metrics.axis == Axis.vertical) {
+            _offset.value = n.metrics.pixels.clamp(0, double.infinity);
+          }
+          return false;
+        },
+        child: widget.child,
+      ),
+    ],
   );
 }

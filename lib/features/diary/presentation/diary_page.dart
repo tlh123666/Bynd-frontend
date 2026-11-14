@@ -20,12 +20,14 @@ class DiaryPage extends StatefulWidget {
     this.repository,
     this.date,
     this.openRecord = false,
+    this.timeline = false,
     this.initialTracker,
     super.key,
   });
   final DiaryRepository? repository;
   final DateTime? date;
   final bool openRecord;
+  final bool timeline;
   final String? initialTracker;
   @override
   State<DiaryPage> createState() => _DiaryPageState();
@@ -49,7 +51,8 @@ class _DiaryPageState extends State<DiaryPage> {
   DiaryDay? _data;
   Object? _error;
   int _request = 0;
-  bool _loading = true, _opened = false;
+  bool _loading = true, _opened = false, _pending = false;
+  int _generation = 0;
   final _session = AuthSession.instance;
   final String? _token = AuthSession.instance.accessToken;
   DateTime get _date {
@@ -82,6 +85,7 @@ class _DiaryPageState extends State<DiaryPage> {
   Future<void> _load() async {
     final request = ++_request;
     setState(() {
+      _generation++;
       _loading = true;
       _error = null;
       _data = null;
@@ -127,7 +131,10 @@ class _DiaryPageState extends State<DiaryPage> {
       ),
     );
     if (!mounted || result == null) return;
-    setState(() => _data = result);
+    setState(() {
+      _data = result;
+      _generation++;
+    });
     AppNotice.show(
       context,
       kind: AppNoticeKind.success,
@@ -147,240 +154,310 @@ class _DiaryPageState extends State<DiaryPage> {
   Widget build(BuildContext context) => Stack(
     fit: StackFit.expand,
     children: [
-      Scaffold(
-        extendBody: true,
-        backgroundColor: AppColors.homeCanvas,
-        body: AppDetailBackground(
-          gradient: AppDiaryStyle.background,
-          headerWash: AppDiaryStyle.headerWash,
-          child: SafeArea(
-            bottom: false,
-            minimum: const EdgeInsets.only(top: 31),
-            child: Column(
-              children: [
-                AppPageHeader(
-                  height: 49,
-                  actionWidth: 96,
-                  padding: EdgeInsets.zero,
-                  leading: IconButton(
-                    tooltip: MaterialLocalizations.of(
-                      context,
-                    ).backButtonTooltip,
-                    onPressed: () => Navigator.pop(context),
-                    icon: const DiaryIcon('volta', size: 22),
-                  ),
-                  title: Text(
-                    diaryText(context, 'Di\u00e1rio', 'Diary'),
-                    style: AppTypography.detailBody.copyWith(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        tooltip: diaryText(
+      PopScope(
+        canPop: !_pending,
+        child: Scaffold(
+          extendBody: true,
+          backgroundColor: AppColors.homeCanvas,
+          body: AppDetailBackground(
+            gradient: AppDiaryStyle.background,
+            headerWash: AppDiaryStyle.headerWash,
+            child: DiaryScrollingBackground(
+              child: SafeArea(
+                bottom: false,
+                minimum: const EdgeInsets.only(top: 31),
+                child: Column(
+                  children: [
+                    AppPageHeader(
+                      height: 49,
+                      actionWidth: 96,
+                      padding: EdgeInsets.zero,
+                      leading: IconButton(
+                        tooltip: MaterialLocalizations.of(
                           context,
-                          'Seus cap\u00edtulos',
-                          'Your chapters',
+                        ).backButtonTooltip,
+                        onPressed: _pending
+                            ? null
+                            : () => Navigator.pop(context),
+                        icon: const DiaryIcon('volta', size: 22),
+                      ),
+                      title: Text(
+                        widget.timeline
+                            ? diaryText(context, 'Linha do tempo', 'Timeline')
+                            : diaryText(context, 'Di\u00e1rio', 'Diary'),
+                        style: AppDiaryStyle.label.copyWith(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w500,
                         ),
-                        onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute<void>(
-                            builder: (_) => DiarySessionGuard(
-                              token: _token,
-                              child: DiaryChaptersPage(repository: _repo),
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            tooltip: diaryText(
+                              context,
+                              'Seus cap\u00edtulos',
+                              'Your chapters',
                             ),
-                          ),
-                        ),
-                        icon: const DiaryIcon('livro', size: 22),
-                      ),
-                      IconButton(
-                        tooltip: diaryText(context, 'Registrar', 'Record'),
-                        onPressed: _data?.editable == true
-                            ? () => _record()
-                            : null,
-                        icon: const DiaryIcon('mais', size: 22),
-                      ),
-                    ],
-                  ),
-                ),
-                DayStrip(
-                  day: _day,
-                  daysCount: 365,
-                  onDayChanged: (d) {
-                    setState(() => _day = d);
-                    unawaited(_load());
-                  },
-                ),
-                Expanded(
-                  child: _loading
-                      ? const Center(child: AppLoadingIndicator())
-                      : _error != null
-                      ? Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(24),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  '$_error',
-                                  textAlign: TextAlign.center,
-                                  style: AppDiaryStyle.caption,
-                                ),
-                                const SizedBox(height: 16),
-                                AppGlassPill(
-                                  label: diaryText(
+                            onPressed: _pending
+                                ? null
+                                : () => Navigator.push(
                                     context,
-                                    'Tentar novamente',
-                                    'Retry',
-                                  ),
-                                  onPressed: _load,
-                                ),
-                              ],
-                            ),
-                          ),
-                        )
-                      : RefreshIndicator(
-                          onRefresh: _load,
-                          child: ListView(
-                            padding: const EdgeInsets.fromLTRB(20, 40, 6, 160),
-                            children: [
-                              Text(
-                                _day == 0
-                                    ? diaryText(
-                                        context,
-                                        'O que aconteceu hoje?',
-                                        'What happened today?',
-                                      )
-                                    : _day == 1
-                                    ? diaryText(
-                                        context,
-                                        'O que aconteceu ontem?',
-                                        'What happened yesterday?',
-                                      )
-                                    : diaryText(
-                                        context,
-                                        'Como foi o dia ${_date.day}?',
-                                        'How was ${diaryDate(_date)}?',
+                                    MaterialPageRoute<void>(
+                                      builder: (_) => DiarySessionGuard(
+                                        token: _token,
+                                        child: DiaryChaptersPage(
+                                          repository: _repo,
+                                        ),
                                       ),
-                                style: AppDiaryStyle.title,
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                diaryText(
-                                  context,
-                                  '${_data!.automatic.length} da pulseira · ${_data!.events.length} registros seus',
-                                  '${_data!.automatic.length} from your band · ${_data!.events.length} your entries',
-                                ),
-                                style: AppDiaryStyle.caption.copyWith(
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                              DiarySection(
-                                _day == 0
-                                    ? diaryText(context, 'Hoje', 'Today')
-                                    : _day == 1
-                                    ? diaryText(context, 'Ontem', 'Yesterday')
-                                    : diaryDate(_date),
-                                icon: 'relo',
-                                trailing: Text(
-                                  '${_data!.timeline.length} ${diaryText(context, 'momentos', 'moments')}',
-                                  style: AppDiaryStyle.caption,
-                                ),
-                              ),
-                              const SizedBox(height: 14),
-                              if (_data!.timeline.isEmpty)
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 36,
-                                  ),
-                                  child: Text(
-                                    diaryText(
-                                      context,
-                                      'Seu dia começa com um registro.',
-                                      'Your day begins with an entry.',
-                                    ),
-                                    style: AppDiaryStyle.caption,
-                                  ),
-                                ),
-                              for (final m in _data!.timeline)
-                                DiaryTimelineTile(
-                                  moment: m,
-                                  onTap: m.automatic || !_data!.editable
-                                      ? null
-                                      : () => _record(selected: m),
-                                ),
-                              if (_data!.note.isNotEmpty) ...[
-                                DiarySection(
-                                  diaryText(context, 'Notas', 'Notes'),
-                                  icon: 'nota',
-                                ),
-                                DiarySurface(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(18),
-                                    child: Text(
-                                      _data!.note,
-                                      style: AppDiaryStyle.label,
                                     ),
                                   ),
-                                ),
-                              ],
-                              if (!_data!.editable)
-                                Text(
-                                  diaryText(
-                                    context,
-                                    'Você pode editar os últimos 7 dias.',
-                                    'You can edit the past 7 days.',
-                                  ),
-                                  style: AppDiaryStyle.caption,
-                                ),
-                              if (_data!.editable)
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 28),
-                                  child: Center(
-                                    child: AppGlassPill(
+                            icon: const DiaryIcon('livro', size: 22),
+                          ),
+                          if (!widget.timeline)
+                            IconButton(
+                              tooltip: diaryText(
+                                context,
+                                'Linha do tempo',
+                                'Timeline',
+                              ),
+                              onPressed: _pending
+                                  ? null
+                                  : () async {
+                                      await Navigator.push(
+                                        context,
+                                        MaterialPageRoute<void>(
+                                          builder: (_) => DiaryPage(
+                                            repository: _repo,
+                                            date: _date,
+                                            timeline: true,
+                                          ),
+                                        ),
+                                      );
+                                      if (mounted) unawaited(_load());
+                                    },
+                              icon: const AppSvgIcon(
+                                'assets/icons/site/diary-history.svg',
+                                size: 22,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    DayStrip(
+                      day: _day,
+                      daysCount: 365,
+                      onDayChanged: (d) {
+                        if (_pending) return;
+                        setState(() => _day = d);
+                        unawaited(_load());
+                      },
+                    ),
+                    Expanded(
+                      child: _loading
+                          ? const Center(child: AppLoadingIndicator())
+                          : _error != null
+                          ? Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(24),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      '$_error',
+                                      textAlign: TextAlign.center,
+                                      style: AppDiaryStyle.caption,
+                                    ),
+                                    const SizedBox(height: 16),
+                                    AppGlassPill(
                                       label: diaryText(
                                         context,
-                                        'Registrar o dia',
-                                        'Record your day',
+                                        'Tentar novamente',
+                                        'Retry',
                                       ),
-                                      onPressed: () => _record(),
+                                      onPressed: _load,
                                     ),
-                                  ),
+                                  ],
                                 ),
-                            ],
-                          ),
-                        ),
+                              ),
+                            )
+                          : !widget.timeline
+                          ? DiaryRecordSheet(
+                              key: ValueKey('diary-inline-$_day-$_generation'),
+                              repository: _repo,
+                              day: _data!,
+                              embedded: true,
+                              onPendingChanged: (pending) {
+                                if (mounted) setState(() => _pending = pending);
+                              },
+                              onSaved: (day) {
+                                if (mounted) setState(() => _data = day);
+                              },
+                            )
+                          : RefreshIndicator(
+                              onRefresh: _load,
+                              child: SingleChildScrollView(
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                child: Stack(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                        20,
+                                        40,
+                                        6,
+                                        160,
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.stretch,
+                                        children: [
+                                          Text(
+                                            _day == 0
+                                                ? diaryText(
+                                                    context,
+                                                    'O que aconteceu hoje?',
+                                                    'What happened today?',
+                                                  )
+                                                : _day == 1
+                                                ? diaryText(
+                                                    context,
+                                                    'O que aconteceu ontem?',
+                                                    'What happened yesterday?',
+                                                  )
+                                                : diaryText(
+                                                    context,
+                                                    'Como foi o dia ${_date.day}?',
+                                                    'How was ${diaryDate(_date)}?',
+                                                  ),
+                                            style: AppDiaryStyle.title,
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            diaryText(
+                                              context,
+                                              '${_data!.automatic.length} da pulseira · ${_data!.events.length} registros seus',
+                                              '${_data!.automatic.length} from your band · ${_data!.events.length} your entries',
+                                            ),
+                                            style: AppDiaryStyle.caption
+                                                .copyWith(
+                                                  color:
+                                                      AppColors.textSecondary,
+                                                ),
+                                          ),
+                                          DiarySection(
+                                            _day == 0
+                                                ? diaryText(
+                                                    context,
+                                                    'Hoje',
+                                                    'Today',
+                                                  )
+                                                : _day == 1
+                                                ? diaryText(
+                                                    context,
+                                                    'Ontem',
+                                                    'Yesterday',
+                                                  )
+                                                : diaryDate(_date),
+                                            icon: 'relo',
+                                            trailing: Text(
+                                              '${_data!.timeline.length} ${diaryText(context, 'momentos', 'moments')}',
+                                              style: AppDiaryStyle.caption,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 14),
+                                          if (_data!.timeline.isEmpty)
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    vertical: 36,
+                                                  ),
+                                              child: Text(
+                                                diaryText(
+                                                  context,
+                                                  'Seu dia começa com um registro.',
+                                                  'Your day begins with an entry.',
+                                                ),
+                                                style: AppDiaryStyle.caption,
+                                              ),
+                                            ),
+                                          for (final m in _data!.timeline)
+                                            DiaryTimelineTile(
+                                              moment: m,
+                                              onTap:
+                                                  m.automatic ||
+                                                      !_data!.editable
+                                                  ? null
+                                                  : () => _record(selected: m),
+                                            ),
+                                          if (_data!.note.isNotEmpty) ...[
+                                            DiarySection(
+                                              diaryText(
+                                                context,
+                                                'Notas',
+                                                'Notes',
+                                              ),
+                                              icon: 'nota',
+                                            ),
+                                            DiarySurface(
+                                              child: Padding(
+                                                padding: const EdgeInsets.all(
+                                                  18,
+                                                ),
+                                                child: Text(
+                                                  _data!.note,
+                                                  style: AppDiaryStyle.label,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                          if (!_data!.editable)
+                                            Text(
+                                              diaryText(
+                                                context,
+                                                'Você pode editar os últimos 7 dias.',
+                                                'You can edit the past 7 days.',
+                                              ),
+                                              style: AppDiaryStyle.caption,
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
-        ),
-        bottomNavigationBar: AppBottomNav(
-          selectedIndex: null,
-          moreButtonKey: _moreKey,
-          moreOpen: _quickOpen,
-          onDestinationSelected: (index) {
-            if (index == 0) {
-              Navigator.popUntil(context, (r) => r.isFirst);
-            } else {
-              AppNotice.show(
-                context,
-                kind: AppNoticeKind.info,
-                message: context.l10n.sectionComingSoon,
-              );
-            }
-          },
-          onMorePressed: () {
-            final box = _moreKey.currentContext?.findRenderObject();
-            if (box is! RenderBox) return;
-            setState(() {
-              _origin = box.localToGlobal(Offset.zero) & box.size;
-              _quickOpen = true;
-            });
-          },
+          bottomNavigationBar: AppBottomNav(
+            selectedIndex: null,
+            moreButtonKey: _moreKey,
+            moreOpen: _quickOpen,
+            onDestinationSelected: (index) {
+              if (_pending) return;
+              if (index == 0) {
+                Navigator.popUntil(context, (r) => r.isFirst);
+              } else {
+                AppNotice.show(
+                  context,
+                  kind: AppNoticeKind.info,
+                  message: context.l10n.sectionComingSoon,
+                );
+              }
+            },
+            onMorePressed: () {
+              if (_pending) return;
+              final box = _moreKey.currentContext?.findRenderObject();
+              if (box is! RenderBox) return;
+              setState(() {
+                _origin = box.localToGlobal(Offset.zero) & box.size;
+                _quickOpen = true;
+              });
+            },
+          ),
         ),
       ),
       if (_quickOpen)

@@ -34,13 +34,14 @@ class DeviceManagementChannelHandler(private val activity: Activity) : MethodCha
             }
             "capabilities" -> result.success(mapOf(
                 "scan" to true, "connect" to true, "readStatus" to true,
+                "readSleepHistory" to true,
                 "restart" to false, "eraseUnsyncedData" to false, "installFirmware" to false,
             ))
             // A reset-to-factory command is NOT an erase-unsynced-data command.
             // The old V8 jar has no verified OTA transport/signature pipeline.
             "restart", "eraseUnsyncedData", "installFirmware" ->
                 result.error("unsupported_operation", "No verified vendor implementation for this operation.", null)
-            "scanDevices", "connect", "readStatus", "disconnect" -> withPermissions(call, result)
+            "scanDevices", "connect", "readStatus", "readSleepHistory", "disconnect" -> withPermissions(call, result)
             else -> result.notImplemented()
         }
     }
@@ -105,6 +106,17 @@ class DeviceManagementChannelHandler(private val activity: Activity) : MethodCha
                     controller.ensureManagementConnection(address, object : ForwardResult(result) {
                         override fun success(value: Any?) {
                             controller.readManagementStatus(call.argument<String>("serialNumber"), result)
+                        }
+                    })
+                }
+                "readSleepHistory" -> {
+                    controller.ensureManagementConnection(call.argument<String>("deviceId"), object : ForwardResult(result) {
+                        override fun success(value: Any?) {
+                            controller.readManagementStatus(call.argument<String>("serialNumber"), object : ForwardResult(result) {
+                                override fun success(value: Any?) {
+                                    controller.fetchLatestMetrics(result)
+                                }
+                            })
                         }
                     })
                 }
