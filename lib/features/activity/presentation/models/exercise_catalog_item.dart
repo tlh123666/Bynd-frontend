@@ -9,8 +9,13 @@ class ExerciseCatalogItem {
     required this.muscles,
     required this.equipment,
     required this.group,
+    required this.tip,
+    required this.level,
+    required this.unit,
+    required this.bodyweight,
   });
-  final String id, name, equipment, group;
+  final String id, name, equipment, group, tip, level, unit;
+  final bool bodyweight;
   final List<String> muscles;
 
   /// 编译时包含目录，避免开发服务器或离线缓存遗漏新资源导致加载失败。

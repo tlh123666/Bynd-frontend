@@ -75,6 +75,7 @@ flutter:
     - assets/icons/site/
     - assets/images/
     - assets/images/diary/
+    - assets/images/exercise_anatomy/
   fonts:
     - family: Geist
       fonts:
