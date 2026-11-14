@@ -29,7 +29,7 @@ class _DiaryCatalogSheetState extends State<DiaryCatalogSheet> {
   Future<void> _load() async {
     try {
       final items = await widget.repository.catalog();
-      if (mounted) setState(() => _items = items);
+      if (mounted) setState(() => _items = diaryDisplayCatalog(items));
     } catch (e) {
       if (mounted) setState(() => _error = e);
     }
@@ -58,8 +58,7 @@ class _DiaryCatalogSheetState extends State<DiaryCatalogSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final candidates =
-        _items?.where((e) => !e.meal && e.key != 'gripe').toList() ?? [];
+    final candidates = _items?.where((e) => e.diaryHabit).toList() ?? [];
     final visible = candidates
         .where(
           (e) =>
@@ -286,38 +285,28 @@ class _DiaryCustomTrackerSheetState extends State<DiaryCustomTrackerSheet> {
                 onChanged: (_) => setState(() {}),
                 decoration: InputDecoration(
                   labelText: diaryText(context, 'Nome do hábito', 'Habit name'),
+                  filled: true,
+                  fillColor: AppDiaryStyle.surface,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(24),
+                    borderSide: const BorderSide(color: AppDiaryStyle.line),
+                  ),
                 ),
               ),
               DiarySection(
                 diaryText(context, 'Como responder', 'Response type'),
               ),
-              SegmentedButton<String>(
-                style: ButtonStyle(
-                  backgroundColor: WidgetStateProperty.resolveWith(
-                    (states) => states.contains(WidgetState.selected)
-                        ? AppColors.glass
-                        : Colors.transparent,
-                  ),
-                  foregroundColor: const WidgetStatePropertyAll(
-                    AppColors.textPrimary,
-                  ),
-                  side: const WidgetStatePropertyAll(
-                    BorderSide(color: AppDiaryStyle.line),
-                  ),
+              for (final kind in ['boolean', 'quantity'])
+                DiaryRecordRow(
+                  title: kind == 'boolean'
+                      ? diaryText(context, 'Sim ou n\u00e3o', 'Yes or no')
+                      : diaryText(context, 'Quantidade', 'Quantity'),
+                  icon: 'ok',
+                  showIcon: false,
+                  selected: _kind == kind,
+                  onTap: () => setState(() => _kind = kind),
+                  onToggle: () => setState(() => _kind = kind),
                 ),
-                segments: [
-                  ButtonSegment(
-                    value: 'boolean',
-                    label: Text(diaryText(context, 'Sim ou não', 'Yes or no')),
-                  ),
-                  ButtonSegment(
-                    value: 'quantity',
-                    label: Text(diaryText(context, 'Quantidade', 'Quantity')),
-                  ),
-                ],
-                selected: {_kind},
-                onSelectionChanged: (v) => setState(() => _kind = v.first),
-              ),
               if (_kind == 'quantity')
                 Padding(
                   padding: const EdgeInsets.only(top: 24),

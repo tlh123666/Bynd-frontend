@@ -481,6 +481,22 @@
       "url": "https://bynd-app.vercel.app/img/pulseira-mini.png",
       "path": "assets/images/diary-band.png",
       "sha256": "3067abc7566a24980c7805382dc88492fe8584fb9e65b2caed6509cf7ea9c3fa"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/img/diario-montanha.webp",
+      "path": "assets/images/diary-background.webp",
+      "sha256": "f347a8f6e3f163c3ce259bf89e09161a09e88b011ea3f66524fd3cd6c918feaa"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/diario.html",
+      "path": "assets/icons/site/diary-ai.svg",
+      "sha256": "3076d22abade0197b973e57dd41eade456b8d263f2e28ac1464ba14e40afddc2"
+    },
+    {
+      "url": "https://bynd-app.vercel.app/cartoes-oura/final/diario.html",
+      "path": "assets/icons/site/diary-history.svg",
+      "sha256": "8f2bb79e5212ed58957502ec2b038de7c899104c01f0ad5fae97ac131d82d0d8"
     }
-  ]
+  ],
+  "updatedAt": "2026-11-14"
 }

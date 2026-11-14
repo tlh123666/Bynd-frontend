@@ -64,10 +64,12 @@ class _ByndAppState extends State<ByndApp> {
       return;
     }
     _lastRootBackAt = now;
-    final isPt = Localizations.localeOf(context).languageCode == 'pt';
+    final isPt = _legacyLocale.locale.languageCode == 'pt';
     _messengerKey.currentState?.showSnackBar(
       SnackBar(
-        content: Text(isPt ? 'Toque em voltar de novo para sair' : 'Tap back again to exit'),
+        content: Text(
+          isPt ? 'Toque em voltar de novo para sair' : 'Tap back again to exit',
+        ),
         duration: const Duration(milliseconds: 1500),
         behavior: SnackBarBehavior.floating,
       ),
