@@ -26,6 +26,12 @@
         android:allowBackup="false"
         android:enableOnBackInvokedCallback="true"
         android:networkSecurityConfig="@xml/network_security_config">
+        <!-- 关闭 Impeller，回退 Skia 渲染：Android Impeller 在销毁含模糊/
+             渐变/裁剪的复杂浮层路由时会把渲染表面搞坏（Atlas 下滑关闭
+             后全屏黑屏，真机连续踩中三次）。稳定后再评估切回。 -->
+        <meta-data
+            android:name="io.flutter.embedding.android.EnableImpeller"
+            android:value="false" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

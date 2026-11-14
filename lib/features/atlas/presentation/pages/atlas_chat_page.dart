@@ -1,7 +1,10 @@
-import 'dart:ui';
+import 'dart:io' show Platform;
+import 'dart:ui' show ImageFilter;
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../design_system/design_system.dart';
 import '../../../../l10n/app_localizations_context.dart';
@@ -11,6 +14,7 @@ import '../../application/atlas_scope.dart';
 import '../../data/models/conversation.dart';
 import 'atlas_conversations_sheet.dart';
 import 'atlas_memory_page.dart';
+import 'system_gesture_zone.dart';
 
 /// ATLAS 对话浮层 —— 按 BYND UI 源码复刻（src/screens/Assistente.jsx +
 /// src/styles/atlas-caixa.css 的 folha 模式）：
@@ -34,7 +38,7 @@ class AtlasSheetRoute extends PageRouteBuilder<void> {
         transitionDuration: const Duration(milliseconds: 420),
         reverseTransitionDuration: const Duration(milliseconds: 380),
         pageBuilder: (_, _, _) =>
-            const _AtlasSheetBackdrop(child: AtlasChatPage()),
+            const AtlasChatPage(),
         transitionsBuilder: (_, animation, _, child) => SlideTransition(
           position: Tween(begin: const Offset(0, 1), end: Offset.zero).animate(
             CurvedAnimation(
@@ -47,24 +51,24 @@ class AtlasSheetRoute extends PageRouteBuilder<void> {
       );
 }
 
-/// `.atlas-embaca`：浮层升起时底部页面被遮罩模糊（含 tabbar）。
-class _AtlasSheetBackdrop extends StatelessWidget {
-  const _AtlasSheetBackdrop({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) => ColoredBox(
-    color: const Color(0x590A0E14), // rgba(8,10,14,.35)
-    child: BackdropFilter(
-      filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
-      child: child,
-    ),
-  );
-}
+/// 源码的 Memória 脑图标（Assistente.jsx `IC.lampada`，24 viewBox 描边）。
+const String _memoriaBrainSvg =
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"'
+    ' stroke="#F4F5F7" stroke-width="1.7" stroke-linecap="round"'
+    ' stroke-linejoin="round"><path d="M12 5.2a3 3 0 0 0-5.7 1.3A3 3 0 0 0 '
+    '4.2 11a3.2 3.2 0 0 0 1.6 5.4A3 3 0 0 0 12 18.4z"/><path d="M12 5.2a3 3 '
+    '0 0 1 5.7 1.3 3 3 0 0 1 2.1 4.5 3.2 3.2 0 0 1-1.6 5.4A3 3 0 0 1 12 '
+    '18.4z"/><path d="M12 5.2v13.2M8.3 9.6c.9 0 1.6.6 1.6 1.4M15.7 9.6c-.9 0 '
+    '-1.6.6-1.6 1.4M7.6 14.2h1.6M14.8 14.2h1.6"/></svg>';
 
 /// 客户源码里的定稿色值（atlas-caixa.css），集中放这里避免散落的魔法数。
 class _AtlasCss {
+  /// Android 上禁用 BackdropFilter：Impeller Vulkan（Flutter 3.47 已无法
+  /// 通过 manifest opt-out）对「透明路由跨层背景采样」有黑帧 bug——真机
+  /// (2510DRK44C / Android 16 / Adreno Vulkan) 实测全屏与露出条两种范围
+  /// 均复现黑屏（应用仍在前台、无异常）。iOS/macOS/web 保留真毛玻璃。
+  static final bool canBlur = kIsWeb || !Platform.isAndroid;
+
   static const bgTop = Color(0xFF222C38);
   static const bgMid = Color(0xFF1A2029);
   static const bgBottom = Color(0xFF121418);
@@ -93,9 +97,106 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
   final _input = TextEditingController();
   final _scroll = ScrollController();
   bool _atBottom = true;
+  bool _listAtTop = true;
 
   /// Memória 子层是否展开（脑图标切换；‹/下滑收回）。
   bool _memoryOpen = false;
+
+  // ── 整卡跟手下滑关闭（源码 useFolha：头部或列表在顶部时可拖）──────
+  double _dragDy = 0;
+  bool _dragging = false;
+  bool _dragArmed = false;
+  double _velocity = 0;
+  Duration? _lastMoveAt;
+  double? _lastMoveDy;
+
+  void _onSheetPointerDown(PointerDownEvent event) {
+    _dragDy = 0;
+    _dragging = false;
+    _velocity = 0;
+    _lastMoveAt = null;
+    _lastMoveDy = null;
+    // 系统手势区（左右边缘/底部）内不起手：同一次滑动会被系统判定为
+    // 返回/回桌面，卡片刚关掉应用就被退到后台（黑屏之谜的真相）。
+    final inGestureZone = pointerStartsInSystemGestureZone(event, context);
+    // 从头部（含把手）按下即可拖；列表区域只有在顶部才可拖
+    _dragArmed = !inGestureZone && _listAtTop;
+  }
+
+  void _onSheetPointerMove(PointerMoveEvent event) {
+    if (_memoryOpen || !_dragArmed) return;
+    final delta = event.delta.dy;
+    if (delta <= 0 && _dragDy <= 0) return;
+    final dt = _lastMoveAt == null
+        ? null
+        : (event.timeStamp - _lastMoveAt!).inMicroseconds / 1e6;
+    if (dt != null && dt > 0 && _lastMoveDy != null) {
+      _velocity = (delta - _lastMoveDy!) / dt;
+    }
+    _lastMoveAt = event.timeStamp;
+    _lastMoveDy = delta;
+    if (delta > 0 || _dragDy > 0) {
+      setState(() {
+        _dragging = true;
+        _dragDy = (_dragDy + delta).clamp(0.0, double.infinity);
+      });
+    }
+  }
+
+  /// Memória 子层的拖拽量上移：宿主平移整张卡（含子层），滑动过程中
+  /// 露出的就是上一页背景（暗纱随 _veilFade 渐隐）。
+  void _memoryDragMove(double dy) {
+    setState(() {
+      _dragging = true;
+      _dragDy = dy.clamp(0.0, double.infinity);
+    });
+  }
+
+  /// Memória 子层松手结算：关闭=整卡滑出；否则整卡弹回原位。
+  void _memoryDragEnd(bool close) {
+    if (close) {
+      _closeSheet();
+    } else {
+      setState(() {
+        _dragging = false;
+        _dragDy = 0;
+      });
+    }
+  }
+
+  /// 整卡下滑关闭：卡片先滑出屏幕（跟手动画的延续），再关路由（路由
+  /// 自身的下滑退场动画此刻作用在已离屏的卡片上，不可见，不会双重动画）。
+  /// 主卡片的下滑与 Memória 子层的下滑关闭共用。
+  ///
+  /// 注意不要动 _memoryOpen：从 Memória 下滑时若把它置回 false，子层会
+  /// 往右滑走、露出对话页——用户要的是整张卡片（带着 Memória）直接
+  /// 下滑、露出上一页背景。pop 本身会丢弃一切状态，无需复位。
+  void _closeSheet() {
+    setState(() {
+      _dragging = false;
+      _dragDy = 1400;
+    });
+    Future.delayed(const Duration(milliseconds: 240), () {
+      if (mounted) Navigator.of(context).pop();
+    });
+  }
+
+  void _onSheetPointerUp() {
+    if (_memoryOpen || !_dragging) return;
+    // 阈值故意调低（源码 useFolha 更宽松）：滑动起手若落在屏幕底部系统
+    // 手势条（约 27 逻辑 px）会被 MIUI 整个吃掉、卡片纹丝不动，用户会
+    // 反复重试并触发「上滑清理」杀进程（黑屏真因，logcat 五次实锤），
+    // 因此让第一次有效滑动尽量容易成功。
+    final close = _dragDy > 110 || _velocity > 700;
+    if (close) {
+      _closeSheet();
+    } else {
+      setState(() {
+        _dragging = false;
+        _dragDy = 0;
+      });
+    }
+  }
 
   /// 麦克风的「语音输入」演示（源码 ouvir）：逐字把默认问题写进输入框
   /// 再发送；进行中动作钮变停止方块。
@@ -143,93 +244,151 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
   Widget build(BuildContext context) {
     final strings = context.l10n;
     final media = MediaQuery.of(context);
-    // .page.chat.folha：顶部 = max(安全区, 47) + 34（源码 --folha-topo 规则）
-    final sheetTop = (media.padding.top > 47 ? media.padding.top : 47.0) + 34;
+    // .page.chat.folha：顶部 = max(安全区, 47) + 间距（源码 --folha-topo
+    // 为 34；按反馈两轮收窄到 12，卡片更高）。
+    final sheetTop = (media.padding.top > 47 ? media.padding.top : 47.0) + 12;
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: Padding(
-        padding: EdgeInsets.only(top: sheetTop),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: .5),
-                blurRadius: 40,
-                offset: const Offset(0, -10),
-              ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-            child: ColoredBox(
-              color: _AtlasCss.bgBottom,
-              child: DecoratedBox(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    stops: [0, 0.2, 0.55],
-                    colors: [
-                      _AtlasCss.bgTop,
-                      _AtlasCss.bgMid,
-                      _AtlasCss.bgBottom,
-                    ],
-                  ),
-                ),
-                child: Stack(
-                  children: [
-                    // 主对话 tela：Memória 打开时左移淡出（源码 .at-tela.atras：
-                    // translateX(-22%) + opacity 0），不可点
-                    IgnorePointer(
-                      ignoring: _memoryOpen,
-                      child: AnimatedOpacity(
-                        opacity: _memoryOpen ? 0 : 1,
-                        duration: const Duration(milliseconds: 300),
-                        child: AnimatedSlide(
-                          offset: _memoryOpen
-                              ? const Offset(-0.22, 0)
-                              : Offset.zero,
-                          duration: const Duration(milliseconds: 420),
-                          curve: const Cubic(0.32, 0.72, 0, 1),
-                          child: Column(
-                            children: [
-                              _buildHeader(strings),
-                              Expanded(
-                                child: AnimatedBuilder(
-                                  animation: _controller,
-                                  builder: (context, _) => _buildList(strings),
-                                ),
-                              ),
-                              _buildSuggestions(strings),
-                              _buildComposer(strings),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    // Memória 子 tela：从右滑入盖住对话（源码 at-sub 从
-                    // translateX(100%) 归位）；关闭由 ‹/下滑触发
-                    AnimatedSlide(
-                      offset: _memoryOpen ? Offset.zero : const Offset(1, 0),
-                      duration: const Duration(milliseconds: 420),
-                      curve: const Cubic(0.32, 0.72, 0, 1),
-                      child: IgnorePointer(
-                        ignoring: !_memoryOpen,
-                        child: AtlasMemoryLayer(
-                          onClose: () => setState(() => _memoryOpen = false),
-                        ),
-                      ),
-                    ),
-                  ],
+      body: Listener(
+        onPointerDown: _onSheetPointerDown,
+        onPointerMove: _onSheetPointerMove,
+        onPointerUp: (_) => _onSheetPointerUp(),
+        onPointerCancel: (_) => _onSheetPointerUp(),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // .atlas-embaca：盖住底后景的暗纱（含首页 tabbar），随卡片下滑
+            // 衰减，露出上一个页面（源码 .atlas-embaca { opacity:0 }）。
+            // Android 无真模糊，用略深的暗纱营造层次（黑帧 bug 见
+            // _AtlasCss.canBlur 注释）。
+            Positioned.fill(
+              child: ColoredBox(
+                color: const Color(0xFF0A0E14).withValues(
+                  alpha: (_AtlasCss.canBlur ? 0.55 : 0.72) * _veilFade,
                 ),
               ),
             ),
-          ),
+            if (_AtlasCss.canBlur)
+              Positioned(
+                left: 0,
+                right: 0,
+                top: 0,
+                height: sheetTop + 8,
+                child: ClipRect(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(
+                      sigmaX: _veilSigma,
+                      sigmaY: _veilSigma,
+                    ),
+                    child: const SizedBox.expand(),
+                  ),
+                ),
+              ),
+            Padding(
+              padding: EdgeInsets.only(top: sheetTop),
+              child: AnimatedSlide(
+                duration: _dragging
+                    ? Duration.zero
+                    : const Duration(milliseconds: 240),
+                curve: Curves.easeOut,
+                offset: Offset(0, _dragDy / media.size.height),
+                child: DecoratedBox(
+                  // 注意：这里刻意不加 BoxShadow/模糊——大半径模糊阴影在
+                  // 拖动与退场动画期间每帧重画，是 Android Impeller 黑屏
+                  // 的触发源（真机踩过两次）；层次感由遮罩层提供。
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(28),
+                    ),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(28),
+                    ),
+                    child: ColoredBox(
+                      color: _AtlasCss.bgBottom,
+                      child: DecoratedBox(
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            stops: [0, 0.2, 0.55],
+                            colors: [
+                              _AtlasCss.bgTop,
+                              _AtlasCss.bgMid,
+                              _AtlasCss.bgBottom,
+                            ],
+                          ),
+                        ),
+                        child: Stack(
+                          children: [
+                            // 主对话 tela：Memória 打开时左移淡出
+                            IgnorePointer(
+                              ignoring: _memoryOpen,
+                              child: AnimatedOpacity(
+                                opacity: _memoryOpen ? 0 : 1,
+                                duration: const Duration(milliseconds: 300),
+                                child: AnimatedSlide(
+                                  offset: _memoryOpen
+                                      ? const Offset(-0.22, 0)
+                                      : Offset.zero,
+                                  duration: const Duration(milliseconds: 420),
+                                  curve: const Cubic(0.32, 0.72, 0, 1),
+                                  child: Column(
+                                    children: [
+                                      _buildHeader(strings),
+                                      Expanded(
+                                        child: AnimatedBuilder(
+                                          animation: _controller,
+                                          builder: (context, _) =>
+                                              _buildList(strings),
+                                        ),
+                                      ),
+                                      _buildSuggestions(strings),
+                                      _buildComposer(strings),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            // Memória 子 tela：从右滑入盖住对话
+                            AnimatedSlide(
+                              offset: _memoryOpen
+                                  ? Offset.zero
+                                  : const Offset(1, 0),
+                              duration: const Duration(milliseconds: 420),
+                              curve: const Cubic(0.32, 0.72, 0, 1),
+                              child: IgnorePointer(
+                                ignoring: !_memoryOpen,
+                                child: AtlasMemoryLayer(
+                                  onClose: () =>
+                                      setState(() => _memoryOpen = false),
+                                  onDragMove: _memoryDragMove,
+                                  onDragEnd: _memoryDragEnd,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
+
+  /// `.atlas-embaca`：静止时毛玻璃 sigma 与暗色 tint 都取满值；拖动中随
+  /// 位移衰减（>300px 全清），卡片滑走时直接露出清晰的上一个页面。
+  double get _veilFade => (1 - _dragDy / 300).clamp(0.0, 1.0);
+  double get _veilSigma => 12 * _veilFade;
+
+  /// 头部拖拽起手是否被系统手势区拦下（X 按钮贴着左边缘，易误触系统返回）。
+  bool _headerDragBlocked = false;
 
   /// `.at-cab`：把手居中、X 左、Atlas 中、Memória 右；头部支持下滑关闭
   /// （useFolha：alça/头部拖拽，往下甩出即关）。
@@ -239,9 +398,36 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
   Widget _buildHeader(AppLocalizations strings) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
+      onVerticalDragStart: (details) =>
+          _headerDragBlocked = offsetInSystemGestureZone(
+            details.globalPosition,
+            context,
+          ),
+      onVerticalDragUpdate: (details) {
+        if (_headerDragBlocked || _memoryOpen) return;
+        final delta = details.primaryDelta ?? 0;
+        if (delta > 0 || _dragDy > 0) {
+          setState(() {
+            _dragging = true;
+            _dragDy = (_dragDy + delta).clamp(0.0, double.infinity);
+          });
+        }
+      },
       onVerticalDragEnd: (details) {
         final velocity = details.primaryVelocity ?? 0;
-        if (velocity > 600) Navigator.of(context).pop();
+        if (_headerDragBlocked || _memoryOpen) {
+          _headerDragBlocked = false;
+          return;
+        }
+        final close = _dragDy > 110 || velocity > 700;
+        if (close) {
+          _closeSheet();
+        } else {
+          setState(() {
+            _dragging = false;
+            _dragDy = 0;
+          });
+        }
       },
       child: Column(
         children: [
@@ -282,9 +468,16 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
                 // 子层在浮层内从右滑入）
                 IconButton(
                   tooltip: strings.memoriaTitle,
-                  icon: const Icon(Icons.psychology_outlined, size: 24),
-                  color: _AtlasCss.textFull.withValues(alpha: .85),
                   onPressed: () => setState(() => _memoryOpen = true),
+                  icon: SvgPicture.string(
+                    _memoriaBrainSvg,
+                    width: 24,
+                    height: 24,
+                    colorFilter: const ColorFilter.mode(
+                      Color(0xD9F4F5F7),
+                      BlendMode.srcIn,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -301,6 +494,8 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
         final metrics = notification.metrics;
         final far = metrics.maxScrollExtent - metrics.pixels > 160;
         if (far != _atBottom) setState(() => _atBottom = !far);
+        final atTop = metrics.pixels <= 0.5;
+        if (atTop != _listAtTop) setState(() => _listAtTop = atTop);
         return false;
       },
       child: ListView(
@@ -410,7 +605,7 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
       padding: EdgeInsets.only(
         left: 12,
         right: 12,
-        top: 2,
+        top: 10,
         bottom: MediaQuery.of(context).padding.bottom + 8,
       ),
       child: _ComposerBox(

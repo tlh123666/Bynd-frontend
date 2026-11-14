@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart' show SpringDescription, SpringSimulation;
 
 import '../../../../l10n/app_localizations_context.dart';
 import '../../../../l10n/generated/app_localizations.dart';
+import 'system_gesture_zone.dart';
 
 /// Memória 子层 —— 按客户源码复刻（Assistente.jsx 的 `at-tela at-sub` 区 +
 /// atlas-caixa.css `.at-heroi/.at-faixa/.at-lem` 定稿）。
@@ -22,10 +24,23 @@ import '../../../../l10n/generated/app_localizations.dart';
 /// ⚠️ 数据现状：后端尚无记忆端点，这里用与原型 Clara 场景一致的演示
 /// 夹具撑起 UI；端点就绪后把 [_fixture] 换成接口数据即可，界面不动。
 class AtlasMemoryLayer extends StatefulWidget {
-  const AtlasMemoryLayer({required this.onClose, super.key});
+  const AtlasMemoryLayer({
+    required this.onClose,
+    this.onDragMove,
+    this.onDragEnd,
+    super.key,
+  });
 
-  /// 返回对话（‹ 按钮与下滑共用）。
+  /// 返回对话（‹ 按钮）。
   final VoidCallback onClose;
+
+  /// 拖拽量上移给宿主：子层只报告位移，由宿主平移整张卡（含子层），
+  /// 滑动过程中露出的就是上一页背景——若子层自己在卡内滑动，只会露出
+  /// 卡片自身底色。
+  final ValueChanged<double>? onDragMove;
+
+  /// 松手结算：true=关闭整个 Atlas 浮层，false=弹回原位。
+  final ValueChanged<bool>? onDragEnd;
 
   @override
   State<AtlasMemoryLayer> createState() => _AtlasMemoryLayerState();
@@ -104,6 +119,74 @@ class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
   final ScrollController _tabScroll = ScrollController();
   int _active = 0;
 
+  // ── 下滑关闭（拖拽量上移给宿主，整卡跟手）──────────────────────────
+  // 用裸 Listener 而不是手势 arena：内层 ListView 的纵向滚动不与之竞争。
+  // 只有列表处于顶部时才累积位移（否则是正常滚动列表内容）。
+  // 子层自身不平移（offset 恒为 0）——位移由宿主作用在整张卡上，滑动
+  // 过程中露出的才是上一页背景而不是卡片底色。_dragDy 仅用于速度与
+  // 关闭阈值判定。
+  double _dragDy = 0;
+  bool _listAtTop = true;
+  Duration? _lastMoveAt;
+  double? _lastMoveDy;
+  double _velocity = 0;
+
+  void _onPointerDown(PointerDownEvent event) {
+    _dragDy = 0;
+    _velocity = 0;
+    _lastMoveAt = null;
+    _lastMoveDy = null;
+    // 系统手势区内不起手（避免与系统返回/回桌面手势叠加，详见
+    // system_gesture_zone.dart 的注释）。
+    _dragBlocked = pointerStartsInSystemGestureZone(event, context);
+  }
+
+  bool _dragBlocked = false;
+
+  void _onPointerMove(PointerMoveEvent event) {
+    if (_dragBlocked || !_listAtTop) return;
+    final delta = event.delta.dy;
+    if (delta <= 0 && _dragDy <= 0) return;
+    // 速度估计（px/s），用于松手时的甩动判定
+    final dt = _lastMoveAt == null
+        ? null
+        : (event.timeStamp - _lastMoveAt!).inMicroseconds / 1e6;
+    if (dt != null && dt > 0 && _lastMoveDy != null) {
+      _velocity = (delta - _lastMoveDy!) / dt;
+    }
+    _lastMoveAt = event.timeStamp;
+    _lastMoveDy = delta;
+    if (delta > 0 || _dragDy > 0) {
+      _dragDy = (_dragDy + delta).clamp(0.0, double.infinity);
+      widget.onDragMove?.call(_dragDy);
+    }
+  }
+
+  void _onPointerUp() {
+    if (_dragBlocked) {
+      _dragBlocked = false;
+      return;
+    }
+    final shouldClose = _dragDy > 90 || _velocity > 650;
+    final dy = _dragDy;
+    _dragDy = 0;
+    _velocity = 0;
+    if (widget.onDragEnd != null) {
+      widget.onDragEnd!(shouldClose);
+    } else if (shouldClose) {
+      widget.onClose();
+    } else if (dy > 0) {
+      // 无宿主回调时的兜底：无动画直接回弹（正常挂载不会走到）
+      setState(() {});
+    }
+  }
+
+  bool _onListScroll(ScrollNotification notification) {
+    final atTop = notification.metrics.pixels <= 0.5;
+    if (atTop != _listAtTop) setState(() => _listAtTop = atTop);
+    return false;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -140,6 +223,11 @@ class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
     });
   }
 
+  /// 吸附物理上报目标档位 → 立即高亮（松手瞬间切换，无 ~1s 滞后）。
+  void _onSnapTarget(int index) {
+    if (index != _active && mounted) setState(() => _active = index);
+  }
+
   /// 源码 rolouAbas：拖动松手时，吸附到离中心最近的 tab。
   void _onTabStripScroll() {
     if (!_tabScroll.hasClients) return;
@@ -155,84 +243,99 @@ class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
   @override
   Widget build(BuildContext context) {
     final strings = context.l10n;
-    return ColoredBox(
-      color: _MemCss.bgBottom,
-      child: DecoratedBox(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            stops: [0, 0.2, 0.55],
-            colors: [_MemCss.bgTop, _MemCss.bgMid, _MemCss.bgBottom],
+    // 下滑关闭：裸 Listener 追踪下拖位移（不与内层列表滚动手势竞争），
+    // 列表在顶部时才累积；位移经 onDragMove 上移给宿主平移整张卡，
+    // 松手超过阈值或快速下甩 → onDragEnd(true) 关闭整个浮层，否则弹回。
+    // 子层自身不再平移（宿主的 AnimatedSlide 负责全部位移）。
+    return Listener(
+      onPointerDown: _onPointerDown,
+      onPointerMove: _onPointerMove,
+      onPointerUp: (_) => _onPointerUp(),
+      onPointerCancel: (_) => _onPointerUp(),
+      child: ColoredBox(
+        color: _MemCss.bgBottom,
+        child: DecoratedBox(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              stops: [0, 0.2, 0.55],
+              colors: [_MemCss.bgTop, _MemCss.bgMid, _MemCss.bgBottom],
+            ),
+          ),
+          child: Column(
+              children: [
+                _buildHeader(strings),
+                Expanded(
+                  child: NotificationListener<ScrollNotification>(
+                    onNotification: _onListScroll,
+                    child: ListView(
+                      padding: const EdgeInsets.fromLTRB(21, 8, 21, 40),
+                      children: [
+                        // .at-heroi
+                        Text(
+                          strings.memoriaHeroTitle,
+                          style: const TextStyle(
+                            color: _MemCss.textFull,
+                            fontSize: 30,
+                            fontWeight: FontWeight.w200,
+                            height: 1.1,
+                            letterSpacing: -0.01,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 6),
+                          child: Text(
+                            strings.memoriaHeroSub,
+                            style: const TextStyle(
+                              color: _MemCss.text2,
+                              fontSize: 13.5,
+                            ),
+                          ),
+                        ),
+                        // kicker：O QUE ELE GUARDOU
+                        Padding(
+                          padding: const EdgeInsets.only(top: 26),
+                          child: Text(
+                            strings.memoriaKicker.toUpperCase(),
+                            style: const TextStyle(
+                              color: _MemCss.text3,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: .16,
+                            ),
+                          ),
+                        ),
+                        _buildTabs(strings),
+                        for (final item in _visibleItems(_tabs[_active]))
+                          _MemoryCard(
+                            item: item,
+                            onDelete: () => _remove(_tabs[_active], item),
+                          ),
+                        if (_visibleItems(_tabs[_active]).isEmpty)
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 24),
+                            child: Text(
+                              'Nada guardado aqui.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: _MemCss.text3,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-        child: Column(
-          children: [
-            _buildHeader(strings),
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(21, 8, 21, 40),
-                children: [
-                  // .at-heroi
-                  Text(
-                    strings.memoriaHeroTitle,
-                    style: const TextStyle(
-                      color: _MemCss.textFull,
-                      fontSize: 30,
-                      fontWeight: FontWeight.w200,
-                      height: 1.1,
-                      letterSpacing: -0.01,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 6),
-                    child: Text(
-                      strings.memoriaHeroSub,
-                      style: const TextStyle(
-                        color: _MemCss.text2,
-                        fontSize: 13.5,
-                      ),
-                    ),
-                  ),
-                  // kicker：O QUE ELE GUARDOU
-                  Padding(
-                    padding: const EdgeInsets.only(top: 26),
-                    child: Text(
-                      strings.memoriaKicker.toUpperCase(),
-                      style: const TextStyle(
-                        color: _MemCss.text3,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: .16,
-                      ),
-                    ),
-                  ),
-                  _buildTabs(strings),
-                  for (final item in _visibleItems(_tabs[_active]))
-                    _MemoryCard(
-                      item: item,
-                      onDelete: () => _remove(_tabs[_active], item),
-                    ),
-                  if (_visibleItems(_tabs[_active]).isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 24),
-                      child: Text(
-                        'Nada guardado aqui.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: _MemCss.text3, fontSize: 14),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
   /// `.at-subcab`：‹ 返回（左）/ Memória（中）；头部下滑返回对话
-  /// （源码 useFolha 对 alça/头部的拖拽语义）。
   Widget _buildHeader(AppLocalizations strings) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -282,7 +385,7 @@ class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
         builder: (context, constraints) {
           final third = constraints.maxWidth / 3;
           return SizedBox(
-            height: 46,
+            height: 54,
             child: Stack(
               alignment: Alignment.bottomCenter,
               children: [
@@ -297,29 +400,33 @@ class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
                   child: ListView(
                     controller: _tabScroll,
                     scrollDirection: Axis.horizontal,
-                    physics: const NeverScrollableScrollPhysics(),
+                    physics: _TabSnapPhysics(
+                      step: third,
+                      onSnapTarget: _onSnapTarget,
+                    ),
                     children: [
-                      SizedBox(width: third, height: 46), // <i> 首占位
+                      SizedBox(width: third, height: 54), // <i> 首占位
                       for (var i = 0; i < _tabs.length; i++)
                         GestureDetector(
                           onTap: () => _selectTab(i),
                           behavior: HitTestBehavior.opaque,
                           child: Container(
                             width: third,
-                            height: 46,
-                            alignment: Alignment.center,
+                            height: 54,
+                            alignment: Alignment.topCenter,
+                            padding: const EdgeInsets.only(top: 10),
                             child: Text(
                               _tabs[i],
                               style: TextStyle(
                                 color: i == _active
                                     ? _MemCss.textFull
                                     : _MemCss.text42,
-                                fontSize: 15,
+                                fontSize: 16,
                               ),
                             ),
                           ),
                         ),
-                      SizedBox(width: third, height: 46), // <i> 尾占位
+                      SizedBox(width: third, height: 54), // <i> 尾占位
                     ],
                   ),
                 ),
@@ -368,6 +475,66 @@ class _NotchPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// 吸附物理：松手（含快速滑动）后弹簧滑到最近的整数档位——档位 = 条带宽
+/// 的 1/3（与 tab/spacer 同宽）。保证松手时必有一个 tab 与 marca 对齐，
+/// 下划线永远不可能停在两个 tab 之间。快速滑动按速度方向多走一档。
+class _TabSnapPhysics extends ScrollPhysics {
+  // 非常量构造：携带吸附目标回调（函数字段无法 const）
+  // ignore: prefer_const_constructors_in_immutables
+  _TabSnapPhysics({
+    required this.step,
+    required this.onSnapTarget,
+    super.parent,
+  });
+
+  final double step;
+  final ValueChanged<int> onSnapTarget;
+
+  // 弹簧比默认更硬：吸附到位 ~0.25s（默认要 ~1s）
+  @override
+  SpringDescription get spring =>
+      SpringDescription(damping: 30, stiffness: 280, mass: 1);
+
+  @override
+  _TabSnapPhysics applyTo(ScrollPhysics? ancestor) => _TabSnapPhysics(
+    step: step,
+    onSnapTarget: onSnapTarget,
+    parent: buildParent(ancestor),
+  );
+
+  double _snapTarget(double pixels, double velocity, double maxExtent) {
+    final base = pixels / step;
+    final maxSteps = (maxExtent / step).round();
+    int index;
+    if (velocity > minFlingVelocity) {
+      index = base.ceil();
+    } else if (velocity < -minFlingVelocity) {
+      index = base.floor();
+    } else {
+      index = base.round();
+    }
+    return index.clamp(0, maxSteps) * step;
+  }
+
+  @override
+  SpringSimulation? createBallisticSimulation(
+    ScrollMetrics position,
+    double velocity,
+  ) {
+    final target = _snapTarget(
+      position.pixels,
+      velocity,
+      position.maxScrollExtent,
+    ).clamp(position.minScrollExtent, position.maxScrollExtent);
+    // 吸附目标一出就高亮对应 tab——不等弹簧停完（此前高亮滞后 ~1s 的根因）
+    onSnapTarget((target / step).round());
+    if ((target - position.pixels).abs() < toleranceFor(position).distance) {
+      return null;
+    }
+    return SpringSimulation(spring, position.pixels, target, velocity);
+  }
 }
 
 /// `.at-lem`：记忆卡片。
