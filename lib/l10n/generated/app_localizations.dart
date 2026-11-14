@@ -99,6 +99,216 @@ abstract class AppLocalizations {
     Locale('pt', 'BR'),
   ];
 
+  /// No description provided for @exerciseConfirmEmpty.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Confirmar'**
+  String get exerciseConfirmEmpty;
+
+  /// No description provided for @exerciseSelectorTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Selecionar exercícios'**
+  String get exerciseSelectorTitle;
+
+  /// No description provided for @exerciseSearch.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Buscar exercício ou músculo'**
+  String get exerciseSearch;
+
+  /// No description provided for @exerciseAll.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Todos'**
+  String get exerciseAll;
+
+  /// No description provided for @exerciseMark.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Marque os exercícios'**
+  String get exerciseMark;
+
+  /// No description provided for @exerciseAdd.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Adicionar ({count})'**
+  String exerciseAdd(int count);
+
+  /// No description provided for @exerciseCount.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'{count} exercícios'**
+  String exerciseCount(int count);
+
+  /// No description provided for @exerciseEmpty.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Nenhum exercício encontrado.'**
+  String get exerciseEmpty;
+
+  /// No description provided for @exerciseLoadError.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Não foi possível carregar os exercícios.'**
+  String get exerciseLoadError;
+
+  /// No description provided for @exerciseRetry.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Tentar novamente'**
+  String get exerciseRetry;
+
+  /// No description provided for @exerciseSelectedCount.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'{count} exercícios selecionados · demonstração'**
+  String exerciseSelectedCount(int count);
+
+  /// No description provided for @exerciseDraftNote.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Prévia local · ainda não é possível salvar o treino'**
+  String get exerciseDraftNote;
+
+  /// No description provided for @exerciseAddMore.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Adicionar exercício'**
+  String get exerciseAddMore;
+
+  /// No description provided for @workoutBuilderTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Montar treino'**
+  String get workoutBuilderTitle;
+
+  /// No description provided for @workoutBuilderWeight.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'kg levantados'**
+  String get workoutBuilderWeight;
+
+  /// No description provided for @workoutBuilderEmptyCount.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'0 EXERCÍCIOS · 0 SÉRIES'**
+  String get workoutBuilderEmptyCount;
+
+  /// No description provided for @workoutBuilderName.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'NOME DO TREINO'**
+  String get workoutBuilderName;
+
+  /// No description provided for @workoutBuilderNameHint.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Treino de força'**
+  String get workoutBuilderNameHint;
+
+  /// No description provided for @workoutBuilderEmptyTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Monte o seu treino'**
+  String get workoutBuilderEmptyTitle;
+
+  /// No description provided for @workoutBuilderEmptyHint.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Toque no + e escolha entre 218 exercícios.'**
+  String get workoutBuilderEmptyHint;
+
+  /// No description provided for @workoutBuilderAdd.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Adicionar exercícios'**
+  String get workoutBuilderAdd;
+
+  /// No description provided for @workoutBuilderUnavailable.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'O catálogo de exercícios ainda não está conectado.'**
+  String get workoutBuilderUnavailable;
+
+  /// No description provided for @workoutBuilderStart.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Começar'**
+  String get workoutBuilderStart;
+
+  /// No description provided for @strengthDemoNote.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Modelos de demonstração · não são treinos salvos'**
+  String get strengthDemoNote;
+
+  /// No description provided for @strengthDemoUnavailable.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Os modelos e o editor ainda não estão conectados.'**
+  String get strengthDemoUnavailable;
+
+  /// No description provided for @strengthDemoName1.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Demonstração'**
+  String get strengthDemoName1;
+
+  /// No description provided for @strengthDemoName2.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Pernas e glúteos'**
+  String get strengthDemoName2;
+
+  /// No description provided for @strengthDemoName3.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Superiores'**
+  String get strengthDemoName3;
+
+  /// No description provided for @strengthDemoName4.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Corpo todo'**
+  String get strengthDemoName4;
+
+  /// No description provided for @strengthDemoName5.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Pernas'**
+  String get strengthDemoName5;
+
+  /// No description provided for @strengthDemoName6.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Superiores e core'**
+  String get strengthDemoName6;
+
+  /// No description provided for @strengthDemoName7.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Treino leve · mobilidade'**
+  String get strengthDemoName7;
+
+  /// No description provided for @strengthExerciseCount.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'{exercises} exercícios · {sets} séries'**
+  String strengthExerciseCount(int exercises, int sets);
+
+  /// No description provided for @strengthCreateHint.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'escolher exercícios, séries e carga'**
+  String get strengthCreateHint;
+
+  /// No description provided for @strengthOptions.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Opções de {name}'**
+  String strengthOptions(String name);
+
   /// No description provided for @activityRegistrationPreview.
   ///
   /// In pt_BR, this message translates to:

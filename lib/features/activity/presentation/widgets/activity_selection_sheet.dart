@@ -16,15 +16,21 @@ class ActivitySelectionSheet extends StatefulWidget {
   final String? title;
 
   /// 展示可拖动的全高活动面板，选中后将稳定活动类型返回调用方。
-  static Future<ActivityType?> show(BuildContext context, {String? title}) {
-    return Navigator.of(context).push<ActivityType>(
-      _ActivitySelectionRoute(
-        title: title,
-        routeBarrierLabel: MaterialLocalizations.of(
-          context,
-        ).modalBarrierDismissLabel,
-      ),
+  static Future<ActivityType?> show(
+    BuildContext context, {
+    String? title,
+    bool waitForExit = false,
+  }) async {
+    final route = _ActivitySelectionRoute(
+      title: title,
+      routeBarrierLabel: MaterialLocalizations.of(
+        context,
+      ).modalBarrierDismissLabel,
     );
+    final selected = await Navigator.of(context).push<ActivityType>(route);
+    // 需要切换到另一张叶片时，等待退场动画和遮罩彻底结束。
+    if (waitForExit) await route.completed;
+    return selected;
   }
 
   @override

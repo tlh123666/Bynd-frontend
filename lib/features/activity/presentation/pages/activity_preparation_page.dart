@@ -7,10 +7,10 @@ import '../../../../l10n/app_localizations_context.dart';
 import '../../../../design_system/tokens/app_colors.dart';
 import '../../../../design_system/tokens/app_dimensions.dart';
 import '../../../../design_system/tokens/app_typography.dart';
-import '../../../../design_system/components/app_page_header.dart';
 import '../../domain/models/activity_type.dart';
 import '../localization/activity_type_localizations.dart';
 import '../widgets/activity_selection_sheet.dart';
+import '../widgets/strength_workout_sheet.dart';
 
 /// 活动准备页的安全基础版：先复现主布局，不生成演示指标或会话。
 class ActivityPreparationPage extends StatefulWidget {
@@ -28,16 +28,15 @@ class _ActivityPreparationPageState extends State<ActivityPreparationPage> {
   bool _routeRecordingEnabled = false;
 
   Future<void> _changeActivity() async {
-    final selected = await ActivitySelectionSheet.show(context);
+    final selected = await ActivitySelectionSheet.show(
+      context,
+      waitForExit: true,
+    );
     if (!mounted || selected == null) return;
 
     if (selected.id == 'musculacao') {
-      await Navigator.of(context).push<void>(
-        MaterialPageRoute<void>(
-          builder: (_) => StrengthStartPage(activity: selected),
-        ),
-      );
-      return;
+      final start = await StrengthWorkoutSheet.show(context, selected);
+      if (!mounted || !start) return;
     }
 
     setState(() {
@@ -370,176 +369,5 @@ class _StatusLine extends StatelessWidget {
         ),
       ),
     ],
-  );
-}
-
-/// 保留原型训练选择页的区块顺序，但不把 Clara 演示模板展示成用户数据。
-class StrengthStartPage extends StatelessWidget {
-  const StrengthStartPage({required this.activity, super.key});
-
-  final ActivityType activity;
-
-  @override
-  Widget build(BuildContext context) {
-    final strings = context.l10n;
-    final activityName = activityTypeLocalizedName(activity, strings);
-
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Column(
-          children: [
-            AppPageHeader(
-              title: Text(
-                activityName,
-                style: const TextStyle(
-                  fontFamily: AppFontFamilies.geist,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              leading: IconButton(
-                tooltip: strings.close,
-                onPressed: () => Navigator.of(context).pop(),
-                icon: const Icon(Icons.close),
-              ),
-            ),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.lg,
-                  AppSpacing.sm,
-                  AppSpacing.lg,
-                  AppSpacing.xl,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      strings.howToStart,
-                      style: AppTypography.title.copyWith(
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    _StrengthOption(
-                      icon: Icons.play_arrow,
-                      title: strings.startWithoutPlan,
-                      detail: strings.exercisesCanBeAddedLater,
-                      onTap: () => Navigator.of(context).push<void>(
-                        MaterialPageRoute<void>(
-                          builder: (_) => ActivityPreparationPage(
-                            initialActivity: activity,
-                          ),
-                        ),
-                      ),
-                    ),
-                    _StrengthSectionHeading(title: strings.yourWorkouts),
-                    _StatusLine(
-                      icon: Icons.fitness_center,
-                      title: strings.savedWorkoutsUnavailable,
-                      detail: strings.savedWorkoutsNotConnected,
-                    ),
-                    _StrengthSectionHeading(title: strings.otherWays),
-                    _StrengthOption(
-                      icon: Icons.add,
-                      title: strings.buildWorkout,
-                      detail: strings.workoutEditorNotIntegrated,
-                      onTap: null,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _StrengthSectionHeading extends StatelessWidget {
-  const _StrengthSectionHeading({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.fromLTRB(4, AppSpacing.lg, 4, AppSpacing.xs),
-    child: Text(
-      title.toUpperCase(),
-      style: AppTypography.caption.copyWith(
-        color: AppColors.textMuted,
-        letterSpacing: 1.5,
-      ),
-    ),
-  );
-}
-
-class _StrengthOption extends StatelessWidget {
-  const _StrengthOption({
-    required this.icon,
-    required this.title,
-    required this.detail,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String title;
-  final String detail;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) => Material(
-    color: AppColors.surface,
-    borderRadius: AppRadii.controlBorder,
-    child: InkWell(
-      onTap: onTap,
-      borderRadius: AppRadii.controlBorder,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: 68),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.sm,
-          ),
-          child: Row(
-            children: [
-              Icon(icon, color: AppColors.textSecondary),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: AppTypography.body.copyWith(
-                        color: onTap == null
-                            ? AppColors.textMuted
-                            : AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.xxs),
-                    Text(
-                      detail,
-                      style: AppTypography.caption.copyWith(
-                        color: AppColors.textMuted,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.chevron_right,
-                color: onTap == null
-                    ? AppColors.menuChevron
-                    : AppColors.textMuted,
-              ),
-            ],
-          ),
-        ),
-      ),
-    ),
   );
 }

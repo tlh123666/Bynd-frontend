@@ -9,6 +9,126 @@ class AppLocalizationsPt extends AppLocalizations {
   AppLocalizationsPt([String locale = 'pt']) : super(locale);
 
   @override
+  String get exerciseConfirmEmpty => 'Confirmar';
+
+  @override
+  String get exerciseSelectorTitle => 'Selecionar exercícios';
+
+  @override
+  String get exerciseSearch => 'Buscar exercício ou músculo';
+
+  @override
+  String get exerciseAll => 'Todos';
+
+  @override
+  String get exerciseMark => 'Marque os exercícios';
+
+  @override
+  String exerciseAdd(int count) {
+    return 'Adicionar ($count)';
+  }
+
+  @override
+  String exerciseCount(int count) {
+    return '$count exercícios';
+  }
+
+  @override
+  String get exerciseEmpty => 'Nenhum exercício encontrado.';
+
+  @override
+  String get exerciseLoadError => 'Não foi possível carregar os exercícios.';
+
+  @override
+  String get exerciseRetry => 'Tentar novamente';
+
+  @override
+  String exerciseSelectedCount(int count) {
+    return '$count exercícios selecionados · demonstração';
+  }
+
+  @override
+  String get exerciseDraftNote =>
+      'Prévia local · ainda não é possível salvar o treino';
+
+  @override
+  String get exerciseAddMore => 'Adicionar exercício';
+
+  @override
+  String get workoutBuilderTitle => 'Montar treino';
+
+  @override
+  String get workoutBuilderWeight => 'kg levantados';
+
+  @override
+  String get workoutBuilderEmptyCount => '0 EXERCÍCIOS · 0 SÉRIES';
+
+  @override
+  String get workoutBuilderName => 'NOME DO TREINO';
+
+  @override
+  String get workoutBuilderNameHint => 'Treino de força';
+
+  @override
+  String get workoutBuilderEmptyTitle => 'Monte o seu treino';
+
+  @override
+  String get workoutBuilderEmptyHint =>
+      'Toque no + e escolha entre 218 exercícios.';
+
+  @override
+  String get workoutBuilderAdd => 'Adicionar exercícios';
+
+  @override
+  String get workoutBuilderUnavailable =>
+      'O catálogo de exercícios ainda não está conectado.';
+
+  @override
+  String get workoutBuilderStart => 'Começar';
+
+  @override
+  String get strengthDemoNote =>
+      'Modelos de demonstração · não são treinos salvos';
+
+  @override
+  String get strengthDemoUnavailable =>
+      'Os modelos e o editor ainda não estão conectados.';
+
+  @override
+  String get strengthDemoName1 => 'Demonstração';
+
+  @override
+  String get strengthDemoName2 => 'Pernas e glúteos';
+
+  @override
+  String get strengthDemoName3 => 'Superiores';
+
+  @override
+  String get strengthDemoName4 => 'Corpo todo';
+
+  @override
+  String get strengthDemoName5 => 'Pernas';
+
+  @override
+  String get strengthDemoName6 => 'Superiores e core';
+
+  @override
+  String get strengthDemoName7 => 'Treino leve · mobilidade';
+
+  @override
+  String strengthExerciseCount(int exercises, int sets) {
+    return '$exercises exercícios · $sets séries';
+  }
+
+  @override
+  String get strengthCreateHint => 'escolher exercícios, séries e carga';
+
+  @override
+  String strengthOptions(String name) {
+    return 'Opções de $name';
+  }
+
+  @override
   String get activityRegistrationPreview =>
       'Prévia · dados simulados · não salvo';
 
@@ -1480,6 +1600,126 @@ class AppLocalizationsPt extends AppLocalizations {
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
 class AppLocalizationsPtBr extends AppLocalizationsPt {
   AppLocalizationsPtBr() : super('pt_BR');
+
+  @override
+  String get exerciseConfirmEmpty => 'Confirmar';
+
+  @override
+  String get exerciseSelectorTitle => 'Selecionar exercícios';
+
+  @override
+  String get exerciseSearch => 'Buscar exercício ou músculo';
+
+  @override
+  String get exerciseAll => 'Todos';
+
+  @override
+  String get exerciseMark => 'Marque os exercícios';
+
+  @override
+  String exerciseAdd(int count) {
+    return 'Adicionar ($count)';
+  }
+
+  @override
+  String exerciseCount(int count) {
+    return '$count exercícios';
+  }
+
+  @override
+  String get exerciseEmpty => 'Nenhum exercício encontrado.';
+
+  @override
+  String get exerciseLoadError => 'Não foi possível carregar os exercícios.';
+
+  @override
+  String get exerciseRetry => 'Tentar novamente';
+
+  @override
+  String exerciseSelectedCount(int count) {
+    return '$count exercícios selecionados · demonstração';
+  }
+
+  @override
+  String get exerciseDraftNote =>
+      'Prévia local · ainda não é possível salvar o treino';
+
+  @override
+  String get exerciseAddMore => 'Adicionar exercício';
+
+  @override
+  String get workoutBuilderTitle => 'Montar treino';
+
+  @override
+  String get workoutBuilderWeight => 'kg levantados';
+
+  @override
+  String get workoutBuilderEmptyCount => '0 EXERCÍCIOS · 0 SÉRIES';
+
+  @override
+  String get workoutBuilderName => 'NOME DO TREINO';
+
+  @override
+  String get workoutBuilderNameHint => 'Treino de força';
+
+  @override
+  String get workoutBuilderEmptyTitle => 'Monte o seu treino';
+
+  @override
+  String get workoutBuilderEmptyHint =>
+      'Toque no + e escolha entre 218 exercícios.';
+
+  @override
+  String get workoutBuilderAdd => 'Adicionar exercícios';
+
+  @override
+  String get workoutBuilderUnavailable =>
+      'O catálogo de exercícios ainda não está conectado.';
+
+  @override
+  String get workoutBuilderStart => 'Começar';
+
+  @override
+  String get strengthDemoNote =>
+      'Modelos de demonstração · não são treinos salvos';
+
+  @override
+  String get strengthDemoUnavailable =>
+      'Os modelos e o editor ainda não estão conectados.';
+
+  @override
+  String get strengthDemoName1 => 'Demonstração';
+
+  @override
+  String get strengthDemoName2 => 'Pernas e glúteos';
+
+  @override
+  String get strengthDemoName3 => 'Superiores';
+
+  @override
+  String get strengthDemoName4 => 'Corpo todo';
+
+  @override
+  String get strengthDemoName5 => 'Pernas';
+
+  @override
+  String get strengthDemoName6 => 'Superiores e core';
+
+  @override
+  String get strengthDemoName7 => 'Treino leve · mobilidade';
+
+  @override
+  String strengthExerciseCount(int exercises, int sets) {
+    return '$exercises exercícios · $sets séries';
+  }
+
+  @override
+  String get strengthCreateHint => 'escolher exercícios, séries e carga';
+
+  @override
+  String strengthOptions(String name) {
+    return 'Opções de $name';
+  }
 
   @override
   String get activityRegistrationPreview =>
