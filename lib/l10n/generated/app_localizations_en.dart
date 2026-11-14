@@ -9,6 +9,123 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get exerciseConfirmEmpty => 'Confirm';
+
+  @override
+  String get exerciseSelectorTitle => 'Select exercises';
+
+  @override
+  String get exerciseSearch => 'Search exercise or muscle';
+
+  @override
+  String get exerciseAll => 'All';
+
+  @override
+  String get exerciseMark => 'Select exercises';
+
+  @override
+  String exerciseAdd(int count) {
+    return 'Add ($count)';
+  }
+
+  @override
+  String exerciseCount(int count) {
+    return '$count exercises';
+  }
+
+  @override
+  String get exerciseEmpty => 'No exercises found.';
+
+  @override
+  String get exerciseLoadError => 'Could not load exercises.';
+
+  @override
+  String get exerciseRetry => 'Try again';
+
+  @override
+  String exerciseSelectedCount(int count) {
+    return '$count exercises selected · demo';
+  }
+
+  @override
+  String get exerciseDraftNote => 'Local preview · saving is not connected yet';
+
+  @override
+  String get exerciseAddMore => 'Add exercise';
+
+  @override
+  String get workoutBuilderTitle => 'Build workout';
+
+  @override
+  String get workoutBuilderWeight => 'kg lifted';
+
+  @override
+  String get workoutBuilderEmptyCount => '0 EXERCISES · 0 SETS';
+
+  @override
+  String get workoutBuilderName => 'WORKOUT NAME';
+
+  @override
+  String get workoutBuilderNameHint => 'Strength workout';
+
+  @override
+  String get workoutBuilderEmptyTitle => 'Build your workout';
+
+  @override
+  String get workoutBuilderEmptyHint => 'Tap + to choose from 218 exercises.';
+
+  @override
+  String get workoutBuilderAdd => 'Add exercises';
+
+  @override
+  String get workoutBuilderUnavailable =>
+      'The exercise catalog is not connected yet.';
+
+  @override
+  String get workoutBuilderStart => 'Start';
+
+  @override
+  String get strengthDemoNote => 'Demo templates · not saved workouts';
+
+  @override
+  String get strengthDemoUnavailable =>
+      'Workout templates and the editor are not connected yet.';
+
+  @override
+  String get strengthDemoName1 => 'Demo';
+
+  @override
+  String get strengthDemoName2 => 'Legs and glutes';
+
+  @override
+  String get strengthDemoName3 => 'Upper body';
+
+  @override
+  String get strengthDemoName4 => 'Full body';
+
+  @override
+  String get strengthDemoName5 => 'Legs';
+
+  @override
+  String get strengthDemoName6 => 'Upper body and core';
+
+  @override
+  String get strengthDemoName7 => 'Light workout · mobility';
+
+  @override
+  String strengthExerciseCount(int exercises, int sets) {
+    return '$exercises exercises · $sets sets';
+  }
+
+  @override
+  String get strengthCreateHint => 'choose exercises, sets and weight';
+
+  @override
+  String strengthOptions(String name) {
+    return 'Options for $name';
+  }
+
+  @override
   String get activityRegistrationPreview =>
       'Preview · simulated data · not saved';
 

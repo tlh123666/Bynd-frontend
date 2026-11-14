@@ -225,12 +225,20 @@ void main() {
     await tester.tap(find.text('Musculação').last);
     await tester.pumpAndSettle();
 
-    expect(find.text('Como deseja começar?'), findsOneWidget);
-    expect(find.text('Treinos salvos ainda não disponíveis'), findsOneWidget);
+    expect(
+      find.text('Modelos de demonstração · não são treinos salvos'),
+      findsOneWidget,
+    );
     expect(find.text('SEUS TREINOS'), findsOneWidget);
+    expect(find.text('Demonstração'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Montar treino novo'),
+      200,
+      scrollable: find.byType(Scrollable).last,
+    );
     expect(find.text('OUTRAS FORMAS'), findsOneWidget);
-    expect(find.text('Montar treino novo'), findsOneWidget);
-
+    await tester.drag(find.byType(Scrollable).last, const Offset(0, 1000));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Começar sem plano'));
     await tester.pumpAndSettle();
 
