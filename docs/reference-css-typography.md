@@ -1,5 +1,9 @@
 # BYND 原站字体对照
 
+## 心率页面（2026-11-14）
+
+`coracao.html?app&p=coracao` 最终生效字体为 **Geist**，详见 `AppHeartStyle`。主数值 64px/200（间距 -2.56），标题 28px/300（间距 -.56），卡片数值 34px/300，正文 15px/400、行高1.5，说明13px/400、行高1.4，标签11px/500、间距1.54。按 computed style 核对，不能采用后续已被覆盖的旧声明。
+
 来源：[原站 CSS](https://bynd-app.vercel.app/assets/main-BSoQRcP6.css) 及页面计算样式（2026-11-07）。全局字体在 `lib/design_system/tokens/app_typography.dart` 定义，页面局部的字号和字重按对应 CSS 选择器覆盖。
 
 | 位置 | 字体 | 大小 | 字重 | 其他 |

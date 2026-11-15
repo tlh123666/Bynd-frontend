@@ -1,5 +1,7 @@
 # new_jcvital
 
+心率已接入首页「FC repouso」及「Saúde → Coração e corpo」入口，右下角「更多 → Fazer ECG」打开采集。包含总览、日/周/月趋势、设置、日记问题、历史记录与 PDF/CSV；接口、目录和真机能力见 [心率功能](docs/heart.md)。后端新增迁移 `000064_heart_experience`，原生变更需完整重启应用。当前 V8 原始通道是 PPG，报告按实际信号标识，不虚构 ECG 节律分类。
+
 登录已接入邮箱验证码、首次建号同意、Android Google 登录、会话恢复及退出。原站没有登录页面，界面沿用其照片、字体、磨砂和灰白按钮；结构、接口与平台配置见 [登录说明](docs/auth.md)。
 
 日记现已独立为 `features/diary` 模块，包含时间线、记录弹层、习惯、评分、餐食和章节。目录、CSS 依据、接口及后端迁移步骤见 [日记实现说明](docs/diary.md)。
@@ -77,6 +79,8 @@ AppCard(
 首页读取现有后端的方向、健康汇总、资料、Mapa 与日记接口，缺失的读数显示空态。后端新增五个可选健康指标，部署时需要执行 `000060_home_signal_measurements` 迁移；不自动填入演示数据。首页照片与信号偏好可保存，演示预览使用 `config/demo.json`。底栏的其他主标签仍只切换选中态；未接入的快捷操作保留“即将提供”提示。配色与字体依据见 [CSS 配色对照](docs/reference-css-colors.md)、[字体对照](docs/reference-css-typography.md)和[首页文档](docs/home.md)。SVG 通过 `flutter_svg` 渲染。
 
 ## 运行
+
+睡眠页面已接入首页 Sono 卡片，包含阶段详情、历史趋势、目标规划、提醒与日记问题。真实数据、迁移和平台说明见 [睡眠功能](docs/sleep.md)；后端需执行新增的 `000063_sleep_display_preferences` 迁移。
 
 ```sh
 flutter run

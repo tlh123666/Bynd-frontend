@@ -45,6 +45,10 @@ abstract final class AppSvgAssets {
   static const homeDirection = 'assets/icons/site/home-direction.svg';
   static const homeCustomize = 'assets/icons/site/home-customize.svg';
   static const homeBrain = 'assets/icons/site/home-brain.svg';
+  static const sleepBack = 'assets/icons/site/sleep-back.svg';
+  static const sleepSettings = 'assets/icons/site/sleep-settings.svg';
+  static const heartBack = 'assets/icons/site/heart-back.svg';
+  static const heartSettings = 'assets/icons/site/heart-settings.svg';
 }
 
 class AppSvgIcon extends StatelessWidget {

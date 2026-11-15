@@ -92,8 +92,12 @@ class ApiClient {
     Map<String, dynamic>? body,
     Map<String, String>? queryParameters,
     bool requiresAuth = true,
+    String? expectedAccessToken,
   }) async {
     final token = requiresAuth ? await tokenProvider() : null;
+    if (expectedAccessToken != null && token != expectedAccessToken) {
+      throw const ApiException('Account changed', code: 'account_changed');
+    }
     if (requiresAuth && (token == null || token.isEmpty)) {
       throw const ApiException(
         'Entre na sua conta para continuar.',

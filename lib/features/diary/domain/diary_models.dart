@@ -1,5 +1,22 @@
 import 'dart:math';
 import 'dart:typed_data';
+import 'diary_catalog_policy.dart';
+
+String diaryCanonicalKey(String key) => DiaryCatalogPolicy.aliases[key] ?? key;
+
+List<DiaryTracker> diaryDisplayCatalog(List<DiaryTracker> items) {
+  final enabled = items
+      .where((t) => t.enabled)
+      .map((t) => diaryCanonicalKey(t.key))
+      .toSet();
+  return items
+      .map(
+        (t) => t.enable(
+          t.key == diaryCanonicalKey(t.key) && enabled.contains(t.key),
+        ),
+      )
+      .toList();
+}
 
 String diaryDate(DateTime d) =>
     '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
@@ -20,11 +37,20 @@ class DiaryTracker {
   String get prompt => json['prompt'] as String? ?? label;
   String get kind => json['kind'] as String? ?? 'boolean';
   String get icon => json['icon'] as String? ?? 'ok';
-  String get group => json['group'] as String? ?? 'Seus hábitos';
+  String get group =>
+      DiaryCatalogPolicy.groups[key] ??
+      json['group'] as String? ??
+      'Seus hábitos';
   String get category => json['category'] as String? ?? 'custom';
   String get unit => json['unit'] as String? ?? '';
   bool get meal => json['meal'] == true || kind == 'meal';
   bool get enabled => json['enabled'] == true;
+  bool get diaryHabit =>
+      key == diaryCanonicalKey(key) &&
+      !meal &&
+      group != 'Alimentação' &&
+      group != 'Bebidas' &&
+      key != 'gripe';
   List<double> get values => (json['values'] as List? ?? [])
       .whereType<num>()
       .map((e) => e.toDouble())
@@ -49,6 +75,7 @@ class DiaryMoment {
       (json['details'] as Map?)?.cast<String, dynamic>() ?? {};
   String get icon => details['icon'] as String? ?? 'nota';
   String get kind => details['kind'] as String? ?? 'boolean';
+  bool get happened => details['answer'] != false;
   double? get value => (json['numericValue'] as num?)?.toDouble();
   String get unit => json['unit'] as String? ?? '';
   DateTime? get time => DateTime.tryParse('${json['occurredAt']}')?.toLocal();
@@ -56,6 +83,7 @@ class DiaryMoment {
       ? ''
       : '${time!.hour.toString().padLeft(2, '0')}:${time!.minute.toString().padLeft(2, '0')}';
   String get valueLabel {
+    if (!happened) return 'Não aconteceu';
     if (kind == 'quantity' && value == null) return timeLabel;
     if (kind == 'meal') {
       return details['calories'] == null

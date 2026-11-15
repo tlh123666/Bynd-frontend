@@ -1,3 +1,4 @@
+import '../../shared/navigation/app_quick_action_navigation.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../core/config/app_config.dart';
@@ -193,8 +194,26 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     );
   }
 
+  void _featureDestination(int index) {
+    Navigator.of(context).popUntil((r) => r.isFirst);
+    if (index == 1) {
+      _openAtlasSheet();
+      return;
+    }
+    setState(() => _selectedIndex = index);
+  }
+
   Future<void> _handleQuickAction(AppQuickAction action) async {
     setState(() => _quickActionsOpen = false);
+    if (AppQuickActionNavigation.open(
+      context,
+      action,
+      demo: _home.demoData,
+      date: _home.date,
+      onDestinationSelected: _featureDestination,
+    )) {
+      return;
+    }
     if (action == AppQuickAction.startActivity) {
       final selectedIndex = await Navigator.of(context).push<int>(
         MaterialPageRoute<int>(
@@ -252,9 +271,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 onProfile: _openSettings,
                 onDevice: _openDevice,
                 onMapa: _openMapa,
+                onDestinationSelected: _featureDestination,
               ),
               HomeAccountGuard(controller: _home, child: const CommunityPage()),
-              HomeSignalsPage(controller: _home, showClose: false),
+              HomeSignalsPage(
+                controller: _home,
+                showClose: false,
+                onDestinationSelected: _featureDestination,
+              ),
             ],
           ),
           bottomNavigationBar: AppBottomNav(
