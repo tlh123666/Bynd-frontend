@@ -1,3 +1,4 @@
+import '../../../l10n/app_localizations_context.dart';
 import '../../../core/auth/auth_session.dart';
 import 'diary_page.dart';
 import 'package:flutter/material.dart';
@@ -46,11 +47,7 @@ class _DiaryCatalogSheetState extends State<DiaryCatalogSheet> {
         AppNotice.show(
           context,
           kind: AppNoticeKind.error,
-          message: diaryText(
-            context,
-            'Não foi possível salvar. Tente novamente.',
-            'Could not save. Try again.',
-          ),
+          message: context.l10n.diaryUiCouldNotSaveTryAgain,
         );
       }
     }
@@ -63,23 +60,21 @@ class _DiaryCatalogSheetState extends State<DiaryCatalogSheet> {
         .where(
           (e) =>
               (_group.isEmpty || e.group == _group) &&
-              ('${e.label} ${e.prompt}'.toLowerCase().contains(
-                _search.toLowerCase(),
-              )),
+              ('${diaryTrackerLabel(context, e)} ${diaryTrackerPrompt(context, e)} ${e.label} ${e.prompt}'
+                  .toLowerCase()
+                  .contains(_search.toLowerCase())),
         )
         .toList();
     return Column(
       children: [
-        AppSheetHeader(
-          title: diaryText(context, 'O que acompanhar', 'What to track'),
-        ),
+        AppSheetHeader(title: context.l10n.diaryUiWhatToTrack),
         if (_items == null)
           Expanded(
             child: Center(
               child: _error == null
                   ? const AppLoadingIndicator()
                   : AppGlassPill(
-                      label: diaryText(context, 'Tentar novamente', 'Retry'),
+                      label: context.l10n.diaryUiRetry,
                       onPressed: _load,
                     ),
             ),
@@ -93,11 +88,7 @@ class _DiaryCatalogSheetState extends State<DiaryCatalogSheet> {
               style: AppDiaryStyle.label,
               decoration: InputDecoration(
                 prefixIcon: const Icon(Icons.search),
-                hintText: diaryText(
-                  context,
-                  'Buscar entre ${candidates.length}',
-                  'Search ${candidates.length} behaviors',
-                ),
+                hintText: context.l10n.diaryCatalogSearch(candidates.length),
                 filled: true,
                 fillColor: AppDiaryStyle.surface,
                 border: OutlineInputBorder(
@@ -126,8 +117,8 @@ class _DiaryCatalogSheetState extends State<DiaryCatalogSheet> {
                       side: const BorderSide(color: AppDiaryStyle.line),
                       label: Text(
                         group.isEmpty
-                            ? diaryText(context, 'Todos', 'All')
-                            : group,
+                            ? context.l10n.diaryUiAll
+                            : diaryGroupLabel(context, group),
                         style: AppDiaryStyle.caption.copyWith(
                           color: AppColors.textPrimary,
                         ),
@@ -151,11 +142,7 @@ class _DiaryCatalogSheetState extends State<DiaryCatalogSheet> {
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       child: AppGlassPill(
-                        label: diaryText(
-                          c,
-                          'Criar o seu hábito',
-                          'Create your habit',
-                        ),
+                        label: c.l10n.diaryUiCreateYourHabit,
                         onPressed: () async {
                           final created =
                               await showAppContentSheet<DiaryTracker>(
@@ -179,9 +166,9 @@ class _DiaryCatalogSheetState extends State<DiaryCatalogSheet> {
                   }
                   final t = visible[i];
                   return DiaryRecordRow(
-                    title: t.label,
+                    title: diaryTrackerLabel(context, t),
                     icon: t.icon,
-                    subtitle: t.prompt,
+                    subtitle: diaryTrackerPrompt(context, t),
                     selected: t.enabled,
                     onTap: () => _toggle(t),
                     onToggle: () => _toggle(t),
@@ -191,7 +178,7 @@ class _DiaryCatalogSheetState extends State<DiaryCatalogSheet> {
             ),
           ),
           AppSheetSaveButton(
-            label: diaryText(context, 'Salvar', 'Save'),
+            label: context.l10n.diaryUiSave,
             loading: _saving,
             onPressed: _dirty ? _save : null,
           ),
@@ -220,8 +207,18 @@ class DiaryCustomTrackerSheet extends StatefulWidget {
 }
 
 class _DiaryCustomTrackerSheetState extends State<DiaryCustomTrackerSheet> {
-  final _name = TextEditingController(),
-      _unit = TextEditingController(text: 'vezes');
+  final _name = TextEditingController(), _unit = TextEditingController();
+  bool _unitInitialized = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_unitInitialized) {
+      _unit.text = context.l10n.diaryValueTimes;
+      _unitInitialized = true;
+    }
+  }
+
   String _kind = 'boolean';
   bool _saving = false;
   @override
@@ -247,11 +244,7 @@ class _DiaryCustomTrackerSheetState extends State<DiaryCustomTrackerSheet> {
         AppNotice.show(
           context,
           kind: AppNoticeKind.error,
-          message: diaryText(
-            context,
-            'Não foi possível criar o hábito. Tente novamente.',
-            'Could not create this habit. Try again.',
-          ),
+          message: context.l10n.diaryUiCouldNotCreateThisHabitTryAgain,
         );
       }
     }
@@ -262,19 +255,13 @@ class _DiaryCustomTrackerSheetState extends State<DiaryCustomTrackerSheet> {
     padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
     child: Column(
       children: [
-        AppSheetHeader(
-          title: diaryText(context, 'Criar o seu hábito', 'Create your habit'),
-        ),
+        AppSheetHeader(title: context.l10n.diaryUiCreateYourHabit),
         Expanded(
           child: ListView(
             padding: const EdgeInsets.all(20),
             children: [
               Text(
-                diaryText(
-                  context,
-                  'O que você quer acompanhar?',
-                  'What would you like to track?',
-                ),
+                context.l10n.diaryUiWhatWouldYouLikeToTrack,
                 style: AppDiaryStyle.title,
               ),
               const SizedBox(height: 24),
@@ -284,7 +271,7 @@ class _DiaryCustomTrackerSheetState extends State<DiaryCustomTrackerSheet> {
                 maxLength: 40,
                 onChanged: (_) => setState(() {}),
                 decoration: InputDecoration(
-                  labelText: diaryText(context, 'Nome do hábito', 'Habit name'),
+                  labelText: context.l10n.diaryUiHabitName,
                   filled: true,
                   fillColor: AppDiaryStyle.surface,
                   border: OutlineInputBorder(
@@ -293,14 +280,12 @@ class _DiaryCustomTrackerSheetState extends State<DiaryCustomTrackerSheet> {
                   ),
                 ),
               ),
-              DiarySection(
-                diaryText(context, 'Como responder', 'Response type'),
-              ),
+              DiarySection(context.l10n.diaryUiResponseType),
               for (final kind in ['boolean', 'quantity'])
                 DiaryRecordRow(
                   title: kind == 'boolean'
-                      ? diaryText(context, 'Sim ou n\u00e3o', 'Yes or no')
-                      : diaryText(context, 'Quantidade', 'Quantity'),
+                      ? context.l10n.diaryUiYesOrNo
+                      : context.l10n.diaryUiQuantity,
                   icon: 'ok',
                   showIcon: false,
                   selected: _kind == kind,
@@ -314,11 +299,7 @@ class _DiaryCustomTrackerSheetState extends State<DiaryCustomTrackerSheet> {
                     controller: _unit,
                     maxLength: 24,
                     decoration: InputDecoration(
-                      labelText: diaryText(
-                        context,
-                        'Unidade (ml, min, vezes…)',
-                        'Unit (ml, min, times…)',
-                      ),
+                      labelText: context.l10n.diaryUiUnitMlMinTimes,
                     ),
                   ),
                 ),
@@ -326,7 +307,7 @@ class _DiaryCustomTrackerSheetState extends State<DiaryCustomTrackerSheet> {
           ),
         ),
         AppSheetSaveButton(
-          label: diaryText(context, 'Criar hábito', 'Create habit'),
+          label: context.l10n.diaryUiCreateHabit,
           loading: _saving,
           onPressed: _name.text.trim().isEmpty ? null : _save,
         ),
