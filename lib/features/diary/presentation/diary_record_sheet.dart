@@ -1,3 +1,4 @@
+import '../../../l10n/app_localizations_context.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -257,16 +258,10 @@ class _DiaryRecordSheetState extends State<DiaryRecordSheet> {
         context,
         kind: AppNoticeKind.error,
         message: conflict
-            ? diaryText(
-                context,
-                'Este dia foi alterado em outro lugar. Feche e atualize antes de salvar.',
-                'This day changed elsewhere. Close and refresh before saving.',
-              )
-            : diaryText(
-                context,
-                'Não foi possível salvar. Seu rascunho continua aqui.',
-                'Could not save. Your draft is still here.',
-              ),
+            ? context
+                  .l10n
+                  .diaryUiThisDayChangedElsewhereCloseAndRefreshBeforeSaving
+            : context.l10n.diaryUiCouldNotSaveYourDraftIsStillHere,
       );
     }
   }
@@ -287,13 +282,9 @@ class _DiaryRecordSheetState extends State<DiaryRecordSheet> {
     final editable = widget.day.editable;
     final content = <Widget>[
       Text(
-        diaryText(
-          context,
-          diaryDate(widget.day.date) == diaryDate(DateTime.now())
-              ? 'O que aconteceu hoje?'
-              : 'O que aconteceu neste dia?',
-          'What happened on this day?',
-        ),
+        diaryDate(widget.day.date) == diaryDate(DateTime.now())
+            ? context.l10n.diaryUiWhatHappenedToday
+            : context.l10n.diaryWhatHappenedOnThisDay,
         style: AppDiaryStyle.title,
       ),
       if (editable) ...[
@@ -304,10 +295,10 @@ class _DiaryRecordSheetState extends State<DiaryRecordSheet> {
         ),
       ],
       DiarySection(
-        diaryText(context, 'Seus hábitos', 'Your habits'),
+        context.l10n.diaryUiYourHabits,
         icon: 'estrela',
         trailing: Text(
-          '${habits.where((t) => _events.any((e) => diaryCanonicalKey(e.key) == t.key)).length} ${diaryText(context, 'de', 'of')} ${habits.length}',
+          '${habits.where((t) => _events.any((e) => diaryCanonicalKey(e.key) == t.key)).length} ${context.l10n.diaryUiOf} ${habits.length}',
           style: AppDiaryStyle.caption,
         ),
       ),
@@ -319,33 +310,27 @@ class _DiaryRecordSheetState extends State<DiaryRecordSheet> {
             Padding(
               padding: EdgeInsets.zero,
               child: DiaryRecordRow(
-                title: diaryText(context, 'Adicionar hábito', 'Add habit'),
+                title: context.l10n.diaryUiAddHabit,
                 icon: 'mais',
-                subtitle: diaryText(
-                  context,
-                  'Escolha entre ${_catalog?.where((t) => t.diaryHabit).length ?? 0}',
-                  'Choose what to track',
+                subtitle: context.l10n.diaryChooseCount(
+                  _catalog?.where((t) => t.diaryHabit).length ?? 0,
                 ),
                 onTap: _catalogSheet,
               ),
             ),
         ],
       ),
-      DiarySection(
-        diaryText(context, 'Como foi o dia', 'How was your day'),
-        icon: 'nota',
-      ),
+      DiarySection(context.l10n.diaryUiHowWasYourDay, icon: 'nota'),
       DiaryRecordRow(
-        title: _note.isEmpty
-            ? diaryText(context, 'Como foi o seu dia', 'How was your day')
-            : _note,
+        title: _note.isEmpty ? context.l10n.diaryUiHowWasYourDay2 : _note,
         subtitle: scores.isEmpty
-            ? diaryText(
-                context,
-                'Humor, disposição, estresse e uma frase',
-                'Mood, energy, stress and a sentence',
-              )
-            : scores.map((e) => '${e.label} ${e.valueLabel}').join(' · '),
+            ? context.l10n.diaryUiMoodEnergyStressAndASentence
+            : scores
+                  .map(
+                    (e) =>
+                        '${diaryMomentLabel(context, e)} ${diaryMomentValue(context, e)}',
+                  )
+                  .join(' · '),
         icon: 'nota',
         onTap: _reviewDay,
       ),
@@ -353,11 +338,7 @@ class _DiaryRecordSheetState extends State<DiaryRecordSheet> {
         Padding(
           padding: const EdgeInsets.only(top: 24),
           child: Text(
-            diaryText(
-              context,
-              'Este dia já fechou. Dá para mudar só até 7 dias depois.',
-              'This day is closed. You can edit up to 7 days later.',
-            ),
+            context.l10n.diaryUiThisDayIsClosedYouCanEditUpTo7DaysLater,
             style: AppDiaryStyle.caption,
           ),
         ),
@@ -367,7 +348,7 @@ class _DiaryRecordSheetState extends State<DiaryRecordSheet> {
             child: _error == null
                 ? const AppLoadingIndicator()
                 : AppGlassPill(
-                    label: diaryText(context, 'Tentar novamente', 'Retry'),
+                    label: context.l10n.diaryUiRetry,
                     onPressed: _load,
                   ),
           )
@@ -406,7 +387,7 @@ class _DiaryRecordSheetState extends State<DiaryRecordSheet> {
         children: [
           if (!widget.embedded)
             AppSheetHeader(
-              title: diaryText(context, 'Registrar', 'Record'),
+              title: context.l10n.diaryUiRecord,
               canClose: !_saving,
             ),
           if (widget.embedded && _dirty && _error != null)
@@ -417,11 +398,9 @@ class _DiaryRecordSheetState extends State<DiaryRecordSheet> {
                 child: Column(
                   children: [
                     Text(
-                      diaryText(
-                        context,
-                        'Não foi possível salvar. Suas alterações continuam aqui. Tente novamente ou descarte para sair.',
-                        'Could not save. Your changes are kept here. Retry or discard to leave.',
-                      ),
+                      context
+                          .l10n
+                          .diaryUiCouldNotSaveYourChangesAreKeptHereRetryOrDiscardToLeave,
                       style: AppDiaryStyle.caption,
                     ),
                     Wrap(
@@ -429,9 +408,7 @@ class _DiaryRecordSheetState extends State<DiaryRecordSheet> {
                       children: [
                         TextButton(
                           onPressed: _save,
-                          child: Text(
-                            diaryText(context, 'Tentar novamente', 'Retry'),
-                          ),
+                          child: Text(context.l10n.diaryUiRetry),
                         ),
                         TextButton(
                           onPressed: () {
@@ -445,9 +422,7 @@ class _DiaryRecordSheetState extends State<DiaryRecordSheet> {
                             });
                             widget.onPendingChanged?.call(false);
                           },
-                          child: Text(
-                            diaryText(context, 'Descartar', 'Discard'),
-                          ),
+                          child: Text(context.l10n.diaryUiDiscard),
                         ),
                       ],
                     ),
@@ -466,7 +441,7 @@ class _DiaryRecordSheetState extends State<DiaryRecordSheet> {
           ),
           if (!widget.embedded)
             AppSheetSaveButton(
-              label: diaryText(context, 'Salvar', 'Save'),
+              label: context.l10n.diaryUiSave,
               loading: _saving,
               onPressed: _dirty ? _save : null,
             ),
@@ -480,21 +455,21 @@ class _DiaryRecordSheetState extends State<DiaryRecordSheet> {
         .where((e) => diaryCanonicalKey(e.key) == t.key)
         .firstOrNull;
     final mealSubtitle = t.kind == 'meal' && e != null
-        ? '${e.timeLabel} · ${(e.details['portion'] ?? 'Normal').toString().toLowerCase()}${e.note.isEmpty ? '' : ', ${e.note.split('\n').first}'}'
+        ? '${e.timeLabel} · ${diaryPortionLabel(context, (e.details['portion'] ?? 'Normal').toString()).toLowerCase()}${e.note.isEmpty ? '' : ', ${e.note.split('\n').first}'}'
         : null;
     return DiaryRecordRow(
       key: ValueKey('diary-tracker-${t.key}'),
-      title: t.label,
+      title: diaryTrackerLabel(context, t),
       icon: t.icon,
       subtitle:
           mealSubtitle ??
           (e == null
-              ? t.prompt
+              ? diaryTrackerPrompt(context, t)
               : !e.happened
-              ? diaryText(context, 'N\u00e3o', 'No')
+              ? context.l10n.diaryUiNo
               : t.kind == 'boolean'
-              ? diaryText(context, 'Sim', 'Yes')
-              : e.valueLabel),
+              ? context.l10n.diaryUiYes
+              : diaryMomentValue(context, e)),
       selected: e != null && e.happened,
       negative: e != null && !e.happened,
       onNegative: widget.day.editable ? () => _answer(t, false) : null,
@@ -540,6 +515,15 @@ class _DiaryDayReviewSheetState extends State<DiaryDayReviewSheet> {
     super.dispose();
   }
 
+  String _scoreLabel(DiaryTracker t) {
+    final moment = _scores
+        .where((e) => diaryCanonicalKey(e.key) == t.key)
+        .firstOrNull;
+    return moment == null
+        ? context.l10n.diaryUiAnswer
+        : diaryMomentValue(context, moment);
+  }
+
   Future<void> _rate(DiaryTracker t) async {
     final old = _scores
         .where((e) => diaryCanonicalKey(e.key) == t.key)
@@ -568,9 +552,7 @@ class _DiaryDayReviewSheetState extends State<DiaryDayReviewSheet> {
   @override
   Widget build(BuildContext context) => Column(
     children: [
-      AppSheetHeader(
-        title: diaryText(context, 'Como foi o dia', 'How was your day'),
-      ),
+      AppSheetHeader(title: context.l10n.diaryUiHowWasYourDay),
       Expanded(
         child: SingleChildScrollView(
           padding: EdgeInsets.fromLTRB(
@@ -585,23 +567,14 @@ class _DiaryDayReviewSheetState extends State<DiaryDayReviewSheet> {
               for (final t in widget.catalog)
                 DiaryRecordRow(
                   key: ValueKey('diary-tracker-${t.key}'),
-                  title: t.label,
+                  title: diaryTrackerLabel(context, t),
                   icon: t.icon,
-                  subtitle: t.prompt,
-                  value:
-                      _scores
-                          .where((e) => diaryCanonicalKey(e.key) == t.key)
-                          .firstOrNull
-                          ?.valueLabel ??
-                      diaryText(context, 'Responder', 'Answer'),
+                  subtitle: diaryTrackerPrompt(context, t),
+                  value: _scoreLabel(t),
                   onTap: widget.readOnly ? null : () => _rate(t),
                 ),
               DiarySection(
-                diaryText(
-                  context,
-                  'Uma frase sobre o dia',
-                  'A sentence about your day',
-                ),
+                context.l10n.diaryUiASentenceAboutYourDay,
                 icon: 'nota',
               ),
               TextField(
@@ -613,11 +586,7 @@ class _DiaryDayReviewSheetState extends State<DiaryDayReviewSheet> {
                 maxLines: 8,
                 style: AppDiaryStyle.label,
                 decoration: InputDecoration(
-                  hintText: diaryText(
-                    context,
-                    'Só você vê. Como foi seu dia?',
-                    'Only you can see this. How was your day?',
-                  ),
+                  hintText: context.l10n.diaryUiOnlyYouCanSeeThisHowWasYourDay,
                   border: InputBorder.none,
                 ),
               ),
@@ -627,7 +596,7 @@ class _DiaryDayReviewSheetState extends State<DiaryDayReviewSheet> {
       ),
       if (!widget.readOnly)
         AppSheetSaveButton(
-          label: diaryText(context, 'Salvar', 'Save'),
+          label: context.l10n.diaryUiSave,
           onPressed: () =>
               Navigator.pop(context, (scores: _scores, note: _text.text)),
         ),
@@ -655,7 +624,7 @@ class _DiaryNoteEditorState extends State<DiaryNoteEditor> {
     padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
     child: Column(
       children: [
-        AppSheetHeader(title: diaryText(context, 'Notas', 'Notes')),
+        AppSheetHeader(title: context.l10n.diaryUiNotes),
         Expanded(
           child: Padding(
             padding: const EdgeInsets.all(20),
@@ -668,18 +637,14 @@ class _DiaryNoteEditorState extends State<DiaryNoteEditor> {
               textAlignVertical: TextAlignVertical.top,
               style: AppDiaryStyle.label,
               decoration: InputDecoration(
-                hintText: diaryText(
-                  context,
-                  'Só você vê. Como foi seu dia?',
-                  'Only you can see this. How was your day?',
-                ),
+                hintText: context.l10n.diaryUiOnlyYouCanSeeThisHowWasYourDay,
                 border: InputBorder.none,
               ),
             ),
           ),
         ),
         AppSheetSaveButton(
-          label: diaryText(context, 'Concluir', 'Done'),
+          label: context.l10n.diaryUiDone,
           onPressed: () => Navigator.pop(context, _text.text),
         ),
       ],

@@ -1,3 +1,6 @@
+import '../../../l10n/app_localizations_context.dart';
+import 'localization/diary_localizations.dart';
+export 'localization/diary_localizations.dart';
 import '../domain/diary_media.dart';
 import 'package:flutter/material.dart';
 import '../../../design_system/design_system.dart';
@@ -107,11 +110,7 @@ class DiaryRecordRow extends StatelessWidget {
                 width: 40,
                 child: IconButton(
                   onPressed: onNegative,
-                  tooltip: diaryText(
-                    context,
-                    'Não aconteceu: $title',
-                    'Did not happen: $title',
-                  ),
+                  tooltip: context.l10n.diaryDidNotHappenAction(title),
                   icon: Icon(
                     Icons.close,
                     size: 20,
@@ -126,7 +125,7 @@ class DiaryRecordRow extends StatelessWidget {
                 width: 40,
                 child: IconButton(
                   onPressed: onToggle,
-                  tooltip: diaryText(context, 'Marcar $title', 'Toggle $title'),
+                  tooltip: context.l10n.diaryToggleAction(title),
                   icon: Icon(
                     Icons.check,
                     size: 22,
@@ -178,7 +177,7 @@ class DiaryCapturePanel extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  diaryText(context, 'Registrar com a IA', 'Record with AI'),
+                  context.l10n.diaryUiRecordWithAI,
                   style: AppDiaryStyle.label,
                 ),
               ),
@@ -186,11 +185,7 @@ class DiaryCapturePanel extends StatelessWidget {
           ),
           const SizedBox(height: 5),
           Text(
-            diaryText(
-              context,
-              'Conte como foi. Ela marca tudo aqui para você.',
-              'Tell us about your day. Review before saving.',
-            ),
+            context.l10n.diaryUiTellUsAboutYourDayReviewBeforeSaving,
             style: AppDiaryStyle.caption,
           ),
           const SizedBox(height: 14),
@@ -205,7 +200,7 @@ class DiaryCapturePanel extends StatelessWidget {
                   width: 132,
                   height: 48,
                   child: AppGlassPill(
-                    label: diaryText(context, 'Escrever', 'Write'),
+                    label: context.l10n.diaryUiWrite,
                     leading: 'assets/icons/site/diary-nota.svg',
                     onPressed: onWrite,
                   ),
@@ -214,7 +209,7 @@ class DiaryCapturePanel extends StatelessWidget {
                   width: 132,
                   height: 48,
                   child: AppButton(
-                    label: diaryText(context, 'Falar', 'Speak'),
+                    label: context.l10n.diaryUiSpeak,
                     iconAsset: 'assets/icons/site/diary-mic.svg',
                     onPressed: onSpeak,
                   ),
@@ -281,7 +276,7 @@ class DiaryTimelineTile extends StatelessWidget {
                             children: [
                               Expanded(
                                 child: Text(
-                                  moment.label,
+                                  diaryMomentLabel(context, moment),
                                   style: AppDiaryStyle.label,
                                 ),
                               ),
@@ -294,18 +289,14 @@ class DiaryTimelineTile extends StatelessWidget {
                             children: [
                               Text(
                                 moment.happened
-                                    ? moment.valueLabel
-                                    : diaryText(
-                                        context,
-                                        'Não aconteceu',
-                                        'Did not happen',
-                                      ),
+                                    ? diaryMomentValue(context, moment)
+                                    : context.l10n.diaryUiDidNotHappen,
                                 style: AppDiaryStyle.caption,
                               ),
                               if (moment.kind == 'meal' &&
                                   moment.details['protein'] != null)
                                 Text(
-                                  'P ${moment.details['protein']} g \u00b7 C ${moment.details['carbs']} g \u00b7 G ${moment.details['fat']} g',
+                                  'P ${moment.details['protein']} g \u00b7 C ${moment.details['carbs']} g \u00b7 ${context.l10n.diaryFatAbbreviation} ${moment.details['fat']} g',
                                   style: AppDiaryStyle.caption,
                                 ),
                             ],

@@ -1,3 +1,4 @@
+import '../../../l10n/app_localizations_context.dart';
 import 'package:flutter/material.dart';
 import '../../../design_system/design_system.dart';
 import '../../../design_system/tokens/app_diary_style.dart';
@@ -13,13 +14,21 @@ class DiaryChaptersPage extends StatefulWidget {
 }
 
 class _DiaryChaptersPageState extends State<DiaryChaptersPage> {
-  late Future<List<Map<String, dynamic>>> _future = _load();
-  int _selected = 0;
-  Future<List<Map<String, dynamic>>> _load() async {
-    final data = await widget.repository.chapters();
-    _selected = (data.length - 1).clamp(0, 1000);
-    return data;
+  late Future<List<Map<String, dynamic>>> _future;
+  Locale? _locale;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final locale = Localizations.localeOf(context);
+    if (_locale != locale) {
+      _locale = locale;
+      _future = _load();
+    }
   }
+
+  int? _selected;
+  Future<List<Map<String, dynamic>>> _load() => widget.repository.chapters();
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -34,7 +43,7 @@ class _DiaryChaptersPageState extends State<DiaryChaptersPage> {
             AppPageHeader(
               height: 49,
               title: Text(
-                diaryText(context, 'Seus capítulos', 'Your chapters'),
+                context.l10n.diaryUiYourChapters,
                 style: AppTypography.detailBody.copyWith(
                   fontSize: 17,
                   fontWeight: FontWeight.w500,
@@ -56,7 +65,7 @@ class _DiaryChaptersPageState extends State<DiaryChaptersPage> {
                   if (s.hasError) {
                     return Center(
                       child: AppGlassPill(
-                        label: diaryText(c, 'Tentar novamente', 'Retry'),
+                        label: c.l10n.diaryUiRetry,
                         onPressed: () => setState(() => _future = _load()),
                       ),
                     );
@@ -67,18 +76,20 @@ class _DiaryChaptersPageState extends State<DiaryChaptersPage> {
                       padding: const EdgeInsets.all(24),
                       child: Center(
                         child: Text(
-                          diaryText(
-                            c,
-                            'Seus capítulos vão aparecer conforme você registra seus dias.',
-                            'Your chapters will appear as you record your days.',
-                          ),
+                          c
+                              .l10n
+                              .diaryUiYourChaptersWillAppearAsYouRecordYourDays,
                           style: AppDiaryStyle.section,
                           textAlign: TextAlign.center,
                         ),
                       ),
                     );
                   }
-                  final chapter = data[_selected];
+                  final selected = (_selected ?? data.length - 1).clamp(
+                    0,
+                    data.length - 1,
+                  );
+                  final chapter = diaryReferenceChapter(c, data[selected]);
                   final highlights = (chapter['highlights'] as List? ?? [])
                       .map(
                         (e) => DiaryMoment(Map<String, dynamic>.from(e as Map)),
@@ -88,7 +99,7 @@ class _DiaryChaptersPageState extends State<DiaryChaptersPage> {
                     children: [
                       CenteredTabStrip(
                         itemCount: data.length,
-                        selectedIndex: _selected,
+                        selectedIndex: selected,
                         onSelectedIndexChanged: (i) =>
                             setState(() => _selected = i),
                         onItemTap: (i) => setState(() => _selected = i),
@@ -96,9 +107,9 @@ class _DiaryChaptersPageState extends State<DiaryChaptersPage> {
                           width: w,
                           child: Center(
                             child: Text(
-                              '${diaryText(c, 'Capítulo', 'Chapter')} ${i + 1}',
+                              '${c.l10n.diaryUiChapter} ${i + 1}',
                               style: AppDiaryStyle.caption.copyWith(
-                                color: i == _selected
+                                color: i == selected
                                     ? AppColors.textPrimary
                                     : AppColors.textMuted,
                               ),
@@ -114,7 +125,7 @@ class _DiaryChaptersPageState extends State<DiaryChaptersPage> {
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 Text(
-                                  '${_selected + 1}',
+                                  '${selected + 1}',
                                   style: AppTypography.hero.copyWith(
                                     height: .95,
                                   ),
@@ -127,17 +138,15 @@ class _DiaryChaptersPageState extends State<DiaryChaptersPage> {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Text(
-                                        diaryText(
-                                          c,
-                                          'de ${data.length} capítulos',
-                                          'of ${data.length} chapters',
-                                        ),
+                                        c.l10n.diaryChapterCount(data.length),
                                         style: AppDiaryStyle.caption,
                                       ),
                                       const SizedBox(height: 3),
                                       Text(
-                                        '${chapter['period'] ?? '${chapter['startDate']} a ${chapter['endDate']}'}'
-                                            .toUpperCase(),
+                                        diaryChapterPeriod(
+                                          c,
+                                          chapter,
+                                        ).toUpperCase(),
                                         style: AppTypography.kicker.copyWith(
                                           color: AppColors.textMuted,
                                         ),
@@ -161,7 +170,7 @@ class _DiaryChaptersPageState extends State<DiaryChaptersPage> {
                               ),
                             ),
                             DiarySection(
-                              diaryText(c, 'Em números', 'By the numbers'),
+                              c.l10n.diaryUiByTheNumbers,
                               icon: 'relo',
                             ),
                             if (chapter['sections'] != null)
@@ -172,24 +181,20 @@ class _DiaryChaptersPageState extends State<DiaryChaptersPage> {
                                   Expanded(
                                     child: _stat(
                                       '${chapter['days']}',
-                                      diaryText(
-                                        c,
-                                        'Dias registrados',
-                                        'Recorded days',
-                                      ),
+                                      c.l10n.diaryUiRecordedDays,
                                     ),
                                   ),
                                   Expanded(
                                     child: _stat(
                                       '${chapter['moments']}',
-                                      diaryText(c, 'Momentos', 'Moments'),
+                                      c.l10n.diaryUiMoments,
                                     ),
                                   ),
                                 ],
                               ),
                             if (chapter['sections'] == null)
                               DiarySection(
-                                diaryText(c, 'Momentos', 'Moments'),
+                                c.l10n.diaryUiMoments,
                                 trailing: Text(
                                   '${highlights.length}',
                                   style: AppDiaryStyle.caption,
@@ -198,10 +203,10 @@ class _DiaryChaptersPageState extends State<DiaryChaptersPage> {
                             if (chapter['sections'] == null)
                               for (final m in highlights)
                                 DiaryRecordRow(
-                                  title: m.label,
+                                  title: diaryMomentLabel(c, m),
                                   icon: m.icon,
                                   subtitle:
-                                      '${m.time == null ? '' : diaryDate(m.time!)} · ${m.valueLabel}',
+                                      '${m.time == null ? '' : diaryDate(m.time!)} · ${diaryMomentValue(c, m)}',
                                 ),
                           ],
                         ),
@@ -241,8 +246,8 @@ class _DiaryChaptersPageState extends State<DiaryChaptersPage> {
         if (i > 0)
           DiarySection(
             i == 1
-                ? diaryText(context, 'Conquistas', 'Achievements')
-                : diaryText(context, 'Momentos', 'Moments'),
+                ? context.l10n.diaryUiAchievements
+                : context.l10n.diaryUiMoments,
             icon: i == 1 ? 'estrela' : 'alvo',
             trailing: Text(
               '${(sections[i] as List).length}',
@@ -252,7 +257,16 @@ class _DiaryChaptersPageState extends State<DiaryChaptersPage> {
         for (final raw in sections[i] as List)
           DiaryRecordRow(
             showIcon: i != 0,
-            title: '${raw['label']}',
+            title: raw['valueKey'] == null
+                ? '${raw['label']}'
+                : diaryMomentLabel(
+                    context,
+                    DiaryMoment({
+                      'id': '',
+                      'valueKey': raw['valueKey'],
+                      'label': raw['label'],
+                    }),
+                  ),
             icon:
                 raw['icon'] as String? ??
                 (i == 0

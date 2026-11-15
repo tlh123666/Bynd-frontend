@@ -1,3 +1,4 @@
+import '../../../l10n/app_localizations_context.dart';
 import 'package:flutter/material.dart';
 import '../../../core/network/api_client.dart';
 import '../../../design_system/design_system.dart';
@@ -101,11 +102,7 @@ class _DiaryQuickQuestionsState extends State<DiaryQuickQuestions> {
         AppNotice.show(
           context,
           kind: AppNoticeKind.error,
-          message: diaryText(
-            context,
-            'Não foi possível salvar. Tente novamente.',
-            'Could not save. Please try again.',
-          ),
+          message: context.l10n.diaryUiCouldNotSavePleaseTryAgain,
         );
       }
     } finally {
@@ -122,17 +119,14 @@ class _DiaryQuickQuestionsState extends State<DiaryQuickQuestions> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          diaryText(context, 'Seu Diário', 'Your diary').toUpperCase(),
+          context.l10n.diaryUiYourDiary.toUpperCase(),
           style: widget.kickerStyle ?? AppTypography.caption,
         ),
         const SizedBox(height: 14),
         if (_day == null && _error == null)
           const Center(child: AppLoadingIndicator())
         else if (_day == null)
-          AppGlassPill(
-            label: diaryText(context, 'Tentar novamente', 'Retry'),
-            onPressed: _load,
-          )
+          AppGlassPill(label: context.l10n.diaryUiRetry, onPressed: _load)
         else ...[
           for (final q in widget.questions) ...[
             const SizedBox(height: 14),
@@ -193,11 +187,7 @@ class _DiaryQuickQuestionsState extends State<DiaryQuickQuestions> {
           ],
           if (!_day!.editable)
             Text(
-              diaryText(
-                context,
-                'Este dia está fechado para edição.',
-                'This day is read only.',
-              ),
+              context.l10n.diaryUiThisDayIsReadOnly,
               style: widget.captionStyle ?? AppTypography.caption,
             ),
           if (_busy)
