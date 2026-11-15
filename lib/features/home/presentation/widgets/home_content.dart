@@ -1,5 +1,4 @@
-import '../../domain/home_models.dart';
-import '../../../sleep/presentation/pages/sleep_page.dart';
+import '../home_signal_destination.dart';
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
@@ -9,7 +8,6 @@ import '../../../../shared/widgets/day_strip.dart';
 import '../../application/home_controller.dart';
 import '../../home_sky_background.dart';
 import '../pages/home_signals_page.dart';
-import '../pages/home_signal_detail_page.dart';
 import '../pages/home_diary_page.dart';
 import 'home_direction_hero.dart';
 import 'home_direction_sheet.dart';
@@ -25,9 +23,11 @@ class HomeContent extends StatelessWidget {
     required this.onProfile,
     required this.onDevice,
     required this.onMapa,
+    this.onDestinationSelected,
     super.key,
   });
   final HomeController controller;
+  final ValueChanged<int>? onDestinationSelected;
   final VoidCallback onMenu, onProfile, onDevice, onMapa;
   Future<void> _photo(BuildContext context) async {
     try {
@@ -243,15 +243,11 @@ class HomeContent extends StatelessWidget {
                           MaterialPageRoute<void>(
                             builder: (_) => HomeAccountGuard(
                               controller: controller,
-                              child: signal == HomeSignal.sleep
-                                  ? SleepPage(
-                                      date: controller.date,
-                                      demo: controller.demoData,
-                                    )
-                                  : HomeSignalDetailPage(
-                                      controller: controller,
-                                      signal: signal,
-                                    ),
+                              child: homeSignalDestination(
+                                controller,
+                                signal,
+                                onDestinationSelected: onDestinationSelected,
+                              ),
                             ),
                           ),
                         ),
@@ -267,7 +263,10 @@ class HomeContent extends StatelessWidget {
                           MaterialPageRoute<void>(
                             builder: (_) => HomeAccountGuard(
                               controller: controller,
-                              child: HomeSignalsPage(controller: controller),
+                              child: HomeSignalsPage(
+                                controller: controller,
+                                onDestinationSelected: onDestinationSelected,
+                              ),
                             ),
                           ),
                         ),

@@ -1,3 +1,4 @@
+import '../../../../shared/navigation/app_quick_action_navigation.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -36,6 +37,7 @@ class _ActivityHistoryPageState extends State<ActivityHistoryPage> {
 
   void _onQuickAction(AppQuickAction action) {
     setState(() => _menuOpen = false);
+    if(AppQuickActionNavigation.open(context,action))return;
     if (action == AppQuickAction.startActivity) {
       openActivitySelection(context);
     } else if (action == AppQuickAction.dayReview ||

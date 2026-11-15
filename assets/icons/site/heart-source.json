@@ -1,0 +1,27 @@
+{
+  "checkedAt": "2026-11-14",
+  "assets": [
+    {
+      "file": "heart-back.svg",
+      "source": "https://bynd-app.vercel.app/coracao.html?app&p=coracao",
+      "selector": "#voltar svg",
+      "sha256": "9517723701c9ac64ad941745ac02eb4d6b288804eb3ae40416c4f77566f4757b"
+    },
+    {
+      "file": "heart-settings.svg",
+      "source": "https://bynd-app.vercel.app/coracao.html?app&p=coracao",
+      "selector": "#bt-aj svg (AJ_ENGRENAGEM)",
+      "sha256": "69bad96cd74f147a1839d006529211fc32395736e1969a9a01ad5664aab303b0"
+    },
+    {
+      "file": "assets/images/heart-ecg-band.png",
+      "source": "https://bynd-app.vercel.app/img/pulseira-ecg.png",
+      "sha256": "c54d0f9c1eab70e45632fdb3c062e1e991bcb6975603001991028258bb0398e3"
+    },
+    {
+      "file": "assets/data/heart-demo.json",
+      "source": "https://bynd-app.vercel.app/coracao.html?app&p=coracao (generated reference persona; demo only)",
+      "sha256": "fcfa2c10d58837641d80053490f5727a5837aed3f1d42259a3446d337239120a"
+    }
+  ]
+}
