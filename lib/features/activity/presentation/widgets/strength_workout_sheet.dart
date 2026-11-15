@@ -3,6 +3,8 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../../../design_system/design_system.dart';
+import '../../../../core/auth/auth_scope.dart';
+import '../../data/local_workout_store.dart';
 import '../../../../l10n/app_localizations_context.dart';
 import '../../domain/models/activity_type.dart';
 import '../localization/activity_type_localizations.dart';
@@ -12,32 +14,71 @@ import 'activity_frosted_sheet_header.dart';
 
 /// 力量训练选择叶片；模板仅用于还原示例，不代表用户已保存的训练。
 class StrengthWorkoutSheet extends StatefulWidget {
-  const StrengthWorkoutSheet({required this.activity, super.key});
+  const StrengthWorkoutSheet({
+    required this.activity,
+    this.localPlans = const [],
+    this.loadFailed = false,
+    super.key,
+  });
   final ActivityType activity;
+  final List<LocalWorkoutPlan> localPlans;
+  final bool loadFailed;
 
   /// 选择新建时先关闭本叶片；编辑器关闭后恢复训练列表。
-  static Future<bool> show(BuildContext context, ActivityType activity) async {
-    while (true) {
-      if (!context.mounted) return false;
+  static Future<StrengthWorkoutResult?> show(
+    BuildContext context,
+    ActivityType activity,
+  ) async {
+    // 按登录用户隔离本地模板，访客使用独立命名空间。
+    final store = LocalWorkoutStore(AuthScope.maybeOf(context)?.userId);
+    while (context.mounted) {
+      List<LocalWorkoutPlan> plans = [];
+      var loadFailed = false;
+      try {
+        plans = await store.load();
+      } catch (_) {
+        loadFailed = true;
+      }
+      if (!context.mounted) return null;
       final action = await AppFrostedModalSheet.show<_StrengthAction>(
         context,
         topInset: math.max(MediaQuery.viewPaddingOf(context).top, 20) + 34,
         showHandle: false,
         barrierColor: AppColors.contentSheetVeil,
         waitForExit: true,
-        builder: (_) => StrengthWorkoutSheet(activity: activity),
+        builder: (_) => StrengthWorkoutSheet(
+          activity: activity,
+          localPlans: plans,
+          loadFailed: loadFailed,
+        ),
       );
-      if (!context.mounted || action == null) return false;
-      if (action == _StrengthAction.start) return true;
-      await WorkoutBuilderSheet.show(context);
+      if (!context.mounted || action == null) return null;
+      if (action.kind == _StrengthActionKind.start) {
+        return StrengthWorkoutResult(action.plan?.copy());
+      }
+      final plan = await WorkoutBuilderSheet.show(context, store: store);
+      if (!context.mounted) return null;
+      if (plan != null) return StrengthWorkoutResult(plan);
     }
+    return null;
   }
 
   @override
   State<StrengthWorkoutSheet> createState() => _StrengthWorkoutSheetState();
 }
 
-enum _StrengthAction { start, build }
+class StrengthWorkoutResult {
+  const StrengthWorkoutResult(this.plan);
+  final LocalWorkoutPlan? plan;
+}
+
+enum _StrengthActionKind { start, build }
+
+class _StrengthAction {
+  const _StrengthAction(this.kind, [this.plan]);
+  final _StrengthActionKind kind;
+  final LocalWorkoutPlan? plan;
+}
 
 class _StrengthWorkoutSheetState extends State<StrengthWorkoutSheet> {
   bool _showUnavailable = false;
@@ -83,9 +124,47 @@ class _StrengthWorkoutSheetState extends State<StrengthWorkoutSheet> {
                   ),
                   title: s.startWithoutPlan,
                   subtitle: s.exercisesCanBeAddedLater,
-                  onTap: () => Navigator.pop(context, _StrengthAction.start),
+                  onTap: () => Navigator.pop(
+                    context,
+                    const _StrengthAction(_StrengthActionKind.start),
+                  ),
                 ),
-                _SectionLabel(label: s.yourWorkouts, count: workouts.length),
+                _SectionLabel(
+                  label: s.yourWorkouts,
+                  count: workouts.length + widget.localPlans.length,
+                ),
+                if (widget.loadFailed)
+                  Text(
+                    s.workoutLoadError,
+                    style: AppTypography.caption.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                if (widget.localPlans.isNotEmpty)
+                  Text(
+                    s.workoutLocalNote,
+                    style: AppTypography.caption.copyWith(
+                      color: AppColors.textMuted,
+                      fontSize: 11,
+                    ),
+                  ),
+                for (final plan in widget.localPlans)
+                  _WorkoutRow(
+                    icon: ActivityTypeIcon(
+                      type: widget.activity,
+                      fallback: Icons.fitness_center,
+                      size: 20,
+                    ),
+                    title: plan.name,
+                    subtitle: s.strengthExerciseCount(
+                      plan.exercises.length,
+                      plan.setCount,
+                    ),
+                    onTap: () => Navigator.pop(
+                      context,
+                      _StrengthAction(_StrengthActionKind.start, plan),
+                    ),
+                  ),
                 // 提醒示例来源，避免将原型模板误认为账号中的真实训练。
                 Text(
                   s.strengthDemoNote,
@@ -126,7 +205,10 @@ class _StrengthWorkoutSheetState extends State<StrengthWorkoutSheet> {
                   ),
                   title: s.buildWorkout,
                   subtitle: s.strengthCreateHint,
-                  onTap: () => Navigator.pop(context, _StrengthAction.build),
+                  onTap: () => Navigator.pop(
+                    context,
+                    const _StrengthAction(_StrengthActionKind.build),
+                  ),
                 ),
               ],
             ),

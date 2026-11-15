@@ -8,15 +8,21 @@ import '../../../../design_system/tokens/app_colors.dart';
 import '../../../../design_system/tokens/app_dimensions.dart';
 import '../../../../design_system/tokens/app_typography.dart';
 import '../../domain/models/activity_type.dart';
+import '../../data/local_workout_store.dart';
 import '../localization/activity_type_localizations.dart';
 import '../widgets/activity_selection_sheet.dart';
 import '../widgets/strength_workout_sheet.dart';
 
 /// 活动准备页的安全基础版：先复现主布局，不生成演示指标或会话。
 class ActivityPreparationPage extends StatefulWidget {
-  const ActivityPreparationPage({required this.initialActivity, super.key});
+  const ActivityPreparationPage({
+    required this.initialActivity,
+    this.initialWorkout,
+    super.key,
+  });
 
   final ActivityType initialActivity;
+  final LocalWorkoutPlan? initialWorkout;
 
   @override
   State<ActivityPreparationPage> createState() =>
@@ -25,6 +31,7 @@ class ActivityPreparationPage extends StatefulWidget {
 
 class _ActivityPreparationPageState extends State<ActivityPreparationPage> {
   late ActivityType _activity = widget.initialActivity;
+  late LocalWorkoutPlan? _workout = widget.initialWorkout?.copy();
   bool _routeRecordingEnabled = false;
 
   Future<void> _changeActivity() async {
@@ -34,13 +41,16 @@ class _ActivityPreparationPageState extends State<ActivityPreparationPage> {
     );
     if (!mounted || selected == null) return;
 
+    LocalWorkoutPlan? workout;
     if (selected.id == 'musculacao') {
       final start = await StrengthWorkoutSheet.show(context, selected);
-      if (!mounted || !start) return;
+      if (!mounted || start == null) return;
+      workout = start.plan;
     }
 
     setState(() {
       _activity = selected;
+      _workout = workout?.copy();
       _routeRecordingEnabled = false;
     });
   }
@@ -76,6 +86,32 @@ class _ActivityPreparationPageState extends State<ActivityPreparationPage> {
                 onClose: () => Navigator.of(context).pop(),
                 onChangeActivity: _changeActivity,
               ),
+              if (_workout != null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 8,
+                  ),
+                  child: Column(
+                    children: [
+                      Text(_workout!.name, style: AppTypography.title),
+                      const SizedBox(height: 4),
+                      Text(
+                        strings.strengthExerciseCount(
+                          _workout!.exercises.length,
+                          _workout!.setCount,
+                        ),
+                        style: AppTypography.caption,
+                      ),
+                      Text(
+                        strings.workoutPlanPreview,
+                        style: AppTypography.caption.copyWith(
+                          color: AppColors.textMuted,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               if (_activity.hasRouteToggle)
                 _RouteRecordingToggle(
                   enabled: _routeRecordingEnabled,

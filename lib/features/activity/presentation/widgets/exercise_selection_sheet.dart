@@ -279,18 +279,30 @@ class _ExerciseSelectionSheetState extends State<ExerciseSelectionSheet> {
 
   Widget _chip(String label, bool selected, VoidCallback onTap) => Padding(
     padding: const EdgeInsets.only(right: 6),
-    child: ChoiceChip(
-      label: Text(label),
-      selected: selected,
-      onSelected: (_) => onTap(),
-      selectedColor: const Color(0xfff4f5f7),
-      backgroundColor: const Color(0x12ffffff),
-      side: BorderSide.none,
-      labelStyle: TextStyle(
-        fontSize: 13,
-        color: selected ? const Color(0xff121418) : AppColors.textPrimary,
+    child: Align(
+      widthFactor: 1,
+      child: SizedBox(
+        height: 34,
+        child: ChoiceChip(
+          label: Text(label),
+          selected: selected,
+          onSelected: (_) => onTap(),
+          // 原型以背景色表示选中，不显示也不预留 Material 勾号空间。
+          showCheckmark: false,
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          labelPadding: EdgeInsets.zero,
+          visualDensity: VisualDensity.compact,
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          selectedColor: const Color(0xfff4f5f7),
+          backgroundColor: const Color(0x0fffffff),
+          side: BorderSide.none,
+          labelStyle: TextStyle(
+            fontSize: 13,
+            color: selected ? const Color(0xff121418) : AppColors.textPrimary,
+          ),
+          shape: const StadiumBorder(),
+        ),
       ),
-      shape: const StadiumBorder(),
     ),
   );
 }

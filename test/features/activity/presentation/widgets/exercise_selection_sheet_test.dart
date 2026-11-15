@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:new_jcvital/design_system/theme/app_theme.dart';
 import 'package:new_jcvital/features/activity/presentation/models/exercise_catalog_item.dart';
 import 'package:new_jcvital/features/activity/presentation/widgets/exercise_selection_sheet.dart';
 import 'package:new_jcvital/features/activity/presentation/widgets/exercise_detail_sheet.dart';
@@ -346,4 +347,63 @@ void main() {
     );
     expect(tester.takeException(), isNull);
   });
+  for (final viewportWidth in [320.0, 400.0]) {
+    testWidgets('分类选中前后居中且不跳动（$viewportWidth px）', (tester) async {
+      tester.view.physicalSize = Size(viewportWidth, 804);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.dark,
+          locale: const Locale('pt', 'BR'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => TextButton(
+                onPressed: () => ExerciseSelectionSheet.show(context),
+                child: const Text('Abrir'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('Abrir'));
+      await tester.pumpAndSettle();
+      Finder chip(String label) => find.ancestor(
+        of: find.text(label),
+        matching: find.byType(ChoiceChip),
+      );
+      void expectCentered(String label) {
+        final chipRect = tester.getRect(chip(label));
+        final textRect = tester.getRect(
+          find.descendant(of: chip(label), matching: find.text(label)),
+        );
+        expect((chipRect.center.dx - textRect.center.dx).abs(), lessThan(1));
+        expect(chipRect.height, closeTo(34, 0.1));
+        expect(tester.widget<ChoiceChip>(chip(label)).showCheckmark, isFalse);
+      }
+
+      expectCentered('Todos');
+      await tester.tap(find.text('Supino reto com barra'));
+      await tester.pumpAndSettle();
+      expect(find.text('Adicionar (1)'), findsOneWidget);
+      final widthBefore = tester.getSize(chip('Peito')).width;
+      await tester.tap(find.text('Peito'));
+      await tester.pumpAndSettle();
+      expectCentered('Peito');
+      expect(tester.getSize(chip('Peito')).width, closeTo(widthBefore, 0.1));
+      expect(tester.widget<ChoiceChip>(chip('Peito')).selected, isTrue);
+      expect(tester.widget<ChoiceChip>(chip('Todos')).selected, isFalse);
+      expect(find.text('218 exercícios'), findsNothing);
+      expect(find.text('Adicionar (1)'), findsOneWidget);
+      await tester.tap(find.text('Todos'));
+      await tester.pumpAndSettle();
+      expectCentered('Todos');
+      expect(find.text('218 exercícios'), findsOneWidget);
+      expect(find.text('Adicionar (1)'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  }
 }

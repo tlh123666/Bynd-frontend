@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../data/local_workout_store.dart';
 import 'pages/activity_preparation_page.dart';
 import 'widgets/activity_selection_sheet.dart';
 import 'widgets/strength_workout_sheet.dart';
@@ -12,13 +13,18 @@ Future<void> openActivitySelection(BuildContext context) async {
   );
   if (!context.mounted || selected == null) return;
 
+  LocalWorkoutPlan? plan;
   if (selected.id == 'musculacao') {
     final start = await StrengthWorkoutSheet.show(context, selected);
-    if (!context.mounted || !start) return;
+    if (!context.mounted || start == null) return;
+    plan = start.plan;
   }
   await Navigator.of(context).push<void>(
     MaterialPageRoute<void>(
-      builder: (_) => ActivityPreparationPage(initialActivity: selected),
+      builder: (_) => ActivityPreparationPage(
+        initialActivity: selected,
+        initialWorkout: plan,
+      ),
     ),
   );
 }

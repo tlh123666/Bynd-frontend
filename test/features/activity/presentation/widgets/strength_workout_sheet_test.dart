@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:new_jcvital/design_system/components/app_frosted_modal_sheet.dart';
 import 'package:new_jcvital/features/activity/presentation/activity_selection_flow.dart';
 import 'package:new_jcvital/features/activity/presentation/pages/activity_preparation_page.dart';
@@ -7,9 +8,13 @@ import 'package:new_jcvital/features/activity/presentation/widgets/activity_sele
 import 'package:new_jcvital/features/activity/presentation/widgets/strength_workout_sheet.dart';
 import 'package:new_jcvital/features/activity/presentation/widgets/workout_builder_sheet.dart';
 import 'package:new_jcvital/features/activity/presentation/widgets/exercise_selection_sheet.dart';
+import 'package:new_jcvital/features/activity/presentation/widgets/exercise_anatomy.dart';
 import 'package:new_jcvital/l10n/generated/app_localizations.dart';
 
 void main() {
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
   testWidgets('运动列表退出后才打开训练磨砂叶片，无计划开始进入准备页', (tester) async {
     tester.view.physicalSize = const Size(400, 804);
     tester.view.devicePixelRatio = 1;
@@ -178,11 +183,18 @@ void main() {
     await tester.tap(find.text('Adicionar (2)'));
     await tester.pumpAndSettle();
     expect(find.byType(WorkoutBuilderSheet), findsOneWidget);
-    expect(
-      find.text('2 exercícios selecionados · demonstração'),
-      findsOneWidget,
-    );
+    expect(find.text('2 EXERCÍCIOS · 6 SÉRIES'), findsOneWidget);
     expect(find.text('Supino reto com barra'), findsOneWidget);
+    expect(find.text('600'), findsOneWidget);
+    expect(find.text('3 séries · 10 × 10 kg'), findsNWidgets(2));
+    expect(find.byType(ExerciseAnatomy), findsNWidgets(2));
+    await tester.tap(find.text('Adicionar exercício'));
+    await tester.pumpAndSettle();
+    expect(find.byType(ExerciseSelectionSheet), findsOneWidget);
+    await tester.tap(find.text('Adicionar (2)'));
+    await tester.pumpAndSettle();
+    expect(find.text('600'), findsOneWidget);
+    expect(find.text('2 EXERCÍCIOS · 6 SÉRIES'), findsOneWidget);
     expect(
       tester.widget<TextField>(find.byType(TextField)).controller!.text.length,
       40,
@@ -222,6 +234,68 @@ void main() {
     await tester.tap(find.text('Abrir'));
     await tester.pumpAndSettle();
     expect(find.byType(WorkoutBuilderSheet), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+  testWidgets('保存后列表可重新选择，并将计划带到准备页', (tester) async {
+    tester.view.physicalSize = const Size(400, 804);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('pt', 'BR'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => TextButton(
+              onPressed: () => openActivitySelection(context),
+              child: const Text('Abrir'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('Abrir'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Musculação').first);
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Montar treino novo'),
+      200,
+      scrollable: find
+          .descendant(
+            of: find.byType(StrengthWorkoutSheet),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
+    await tester.tap(find.text('Montar treino novo'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'Treino local');
+    tester.testTextInput.hide();
+    await tester.pumpAndSettle();
+    await tester.tap(find.bySemanticsLabel('Adicionar exercícios').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Supino reto com barra'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Adicionar (1)'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Salvar'));
+    await tester.pumpAndSettle();
+    expect(find.text('Treino local'), findsOneWidget);
+    expect(
+      find.text('Salvo apenas neste dispositivo · não sincronizado'),
+      findsOneWidget,
+    );
+    await tester.tap(find.text('Treino local'));
+    await tester.pumpAndSettle();
+    expect(find.byType(ActivityPreparationPage), findsOneWidget);
+    expect(find.text('Treino local'), findsOneWidget);
+    expect(
+      find.text('Plano local · atividade ainda não iniciada'),
+      findsOneWidget,
+    );
     expect(tester.takeException(), isNull);
   });
 }
