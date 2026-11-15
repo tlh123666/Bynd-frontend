@@ -1,3 +1,4 @@
+import '../../../l10n/app_localizations_context.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_to_text.dart';
@@ -31,9 +32,9 @@ class _DiaryCaptureSheetState extends State<DiaryCaptureSheet> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_locale != null) return;
+    final first = _locale == null;
     _locale = Localizations.localeOf(context).toLanguageTag();
-    if (widget.startVoice) {
+    if (first && widget.startVoice) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) unawaited(_listen());
       });
@@ -52,11 +53,9 @@ class _DiaryCaptureSheetState extends State<DiaryCaptureSheet> {
           if (mounted) {
             setState(() {
               _listening = false;
-              _error = diaryText(
-                context,
-                'Não foi possível ouvir. Você pode escrever abaixo.',
-                'Could not hear you. You can type below.',
-              );
+              _error = e.errorMsg.startsWith('error_language_')
+                  ? context.l10n.diarySpeechLanguageUnavailable
+                  : context.l10n.diaryUiCouldNotHearYouYouCanTypeBelow;
             });
           }
         },
@@ -67,17 +66,22 @@ class _DiaryCaptureSheetState extends State<DiaryCaptureSheet> {
       if (!mounted) return;
       if (!ready) {
         setState(
-          () => _error = diaryText(
-            context,
-            'A fala não está disponível ou a permissão foi negada. Você pode escrever.',
-            'Speech is unavailable or permission was denied. You can type.',
-          ),
+          () => _error = context
+              .l10n
+              .diaryUiSpeechIsUnavailableOrPermissionWasDeniedYouCanType,
         );
         return;
       }
+      final locales = await _speech.locales();
+      if (!mounted) return;
+      final speechLocale =
+          diarySpeechLocale(_locale!, locales.map((l) => l.localeId)) ??
+          _locale!;
+      // Android's locale list can omit online recognition languages. In that
+      // case request the app language explicitly and let the engine decide.
       _voice = true;
       await _speech.listen(
-        listenOptions: SpeechListenOptions(localeId: _locale),
+        listenOptions: SpeechListenOptions(localeId: speechLocale),
         onResult: (r) {
           if (mounted) setState(() => _text.text = r.recognizedWords);
         },
@@ -85,11 +89,7 @@ class _DiaryCaptureSheetState extends State<DiaryCaptureSheet> {
     } catch (e) {
       if (mounted) {
         setState(
-          () => _error = diaryText(
-            context,
-            'Não foi possível iniciar a fala. Você pode escrever.',
-            'Could not start speech. You can type.',
-          ),
+          () => _error = context.l10n.diaryUiCouldNotStartSpeechYouCanType,
         );
       }
     }
@@ -114,11 +114,9 @@ class _DiaryCaptureSheetState extends State<DiaryCaptureSheet> {
     } catch (e) {
       if (mounted) {
         setState(
-          () => _error = diaryText(
-            context,
-            'Não foi possível interpretar. Tente novamente. Seu texto está salvo aqui.',
-            'Could not interpret this. Try again. Your text is still here.',
-          ),
+          () => _error = context
+              .l10n
+              .diaryUiCouldNotInterpretThisTryAgainYourTextIsStillHere,
         );
       }
     } finally {
@@ -138,34 +136,22 @@ class _DiaryCaptureSheetState extends State<DiaryCaptureSheet> {
     padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
     child: Column(
       children: [
-        AppSheetHeader(
-          title: diaryText(context, 'Registrar com a IA', 'Record with AI'),
-        ),
+        AppSheetHeader(title: context.l10n.diaryUiRecordWithAI),
         Expanded(
           child: ListView(
             padding: const EdgeInsets.all(20),
             children: [
               Text(
                 _review == null
-                    ? diaryText(
-                        context,
-                        'Conte como foi o seu dia.',
-                        'Tell us about your day.',
-                      )
-                    : diaryText(
-                        context,
-                        'Confira antes de adicionar.',
-                        'Review before adding.',
-                      ),
+                    ? context.l10n.diaryUiTellUsAboutYourDay
+                    : context.l10n.diaryUiReviewBeforeAdding,
                 style: AppDiaryStyle.title,
               ),
               const SizedBox(height: 14),
               Text(
-                diaryText(
-                  context,
-                  'A IA pode errar. Revise os registros e remova o que não aconteceu.',
-                  'AI can make mistakes. Review the entries and remove anything that did not happen.',
-                ),
+                context
+                    .l10n
+                    .diaryUiAICanMakeMistakesReviewTheEntriesAndRemoveAnythingThatDidNotHappen,
                 style: AppDiaryStyle.caption,
               ),
               const SizedBox(height: 24),
@@ -177,38 +163,36 @@ class _DiaryCaptureSheetState extends State<DiaryCaptureSheet> {
                 onChanged: (_) => setState(() => _review = null),
                 style: AppDiaryStyle.label,
                 decoration: InputDecoration(
-                  hintText: diaryText(
-                    context,
-                    'Tomei 2 cafés e caminhei por 20 minutos…',
-                    'I had 2 coffees and walked for 20 minutes…',
-                  ),
+                  hintText:
+                      context.l10n.diaryUiIHad2CoffeesAndWalkedFor20Minutes,
                 ),
               ),
               const SizedBox(height: 12),
               AppGlassPill(
                 label: _listening
-                    ? diaryText(context, 'Parar de ouvir', 'Stop listening')
-                    : diaryText(context, 'Falar', 'Speak'),
+                    ? context.l10n.diaryUiStopListening
+                    : context.l10n.diaryUiSpeak,
                 onPressed: _listen,
               ),
               if (_review != null) ...[
                 const SizedBox(height: 24),
                 if (_review!.isEmpty)
                   Text(
-                    diaryText(
-                      context,
-                      'Nenhum registro identificado. Tente descrever de outra forma.',
-                      'No entries identified. Try describing it differently.',
-                    ),
+                    context
+                        .l10n
+                        .diaryUiNoEntriesIdentifiedTryDescribingItDifferently,
                     style: AppDiaryStyle.caption,
                   ),
                 for (final m in _review!)
                   DiarySurface(
                     child: ListTile(
-                      title: Text(m.label, style: AppDiaryStyle.label),
+                      title: Text(
+                        diaryMomentLabel(context, m),
+                        style: AppDiaryStyle.label,
+                      ),
                       subtitle: Text(m.note, style: AppDiaryStyle.caption),
                       trailing: IconButton(
-                        tooltip: diaryText(context, 'Remover', 'Remove'),
+                        tooltip: context.l10n.diaryUiRemove,
                         onPressed: () => setState(() => _review!.remove(m)),
                         icon: const Icon(Icons.close, size: 18),
                       ),
@@ -230,8 +214,8 @@ class _DiaryCaptureSheetState extends State<DiaryCaptureSheet> {
         ),
         AppSheetSaveButton(
           label: _review == null
-              ? diaryText(context, 'Revisar registros', 'Review entries')
-              : diaryText(context, 'Adicionar ao dia', 'Add to day'),
+              ? context.l10n.diaryUiReviewEntries
+              : context.l10n.diaryUiAddToDay,
           loading: _loading,
           onPressed: _review == null
               ? _parse

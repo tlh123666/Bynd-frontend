@@ -74,11 +74,7 @@ class _DiaryPageState extends State<DiaryPage> {
       setState(() {
         _data = null;
         _loading = false;
-        _error = diaryText(
-          context,
-          'Sua conta mudou. Abra o Diário novamente.',
-          'Your account changed. Reopen the diary.',
-        );
+        _error = 'account_changed';
       });
     }
   }
@@ -139,7 +135,7 @@ class _DiaryPageState extends State<DiaryPage> {
     AppNotice.show(
       context,
       kind: AppNoticeKind.success,
-      message: diaryText(context, 'Dia salvo', 'Day saved'),
+      message: context.l10n.diaryUiDaySaved,
     );
   }
 
@@ -184,8 +180,8 @@ class _DiaryPageState extends State<DiaryPage> {
                       ),
                       title: Text(
                         widget.timeline
-                            ? diaryText(context, 'Linha do tempo', 'Timeline')
-                            : diaryText(context, 'Di\u00e1rio', 'Diary'),
+                            ? context.l10n.diaryUiTimeline
+                            : context.l10n.diaryUiDiary,
                         style: AppDiaryStyle.label.copyWith(
                           fontSize: 17,
                           fontWeight: FontWeight.w500,
@@ -195,11 +191,7 @@ class _DiaryPageState extends State<DiaryPage> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                            tooltip: diaryText(
-                              context,
-                              'Seus cap\u00edtulos',
-                              'Your chapters',
-                            ),
+                            tooltip: context.l10n.diaryUiYourChapters,
                             onPressed: _pending
                                 ? null
                                 : () => Navigator.push(
@@ -217,11 +209,7 @@ class _DiaryPageState extends State<DiaryPage> {
                           ),
                           if (!widget.timeline)
                             IconButton(
-                              tooltip: diaryText(
-                                context,
-                                'Linha do tempo',
-                                'Timeline',
-                              ),
+                              tooltip: context.l10n.diaryUiTimeline,
                               onPressed: _pending
                                   ? null
                                   : () async {
@@ -265,17 +253,17 @@ class _DiaryPageState extends State<DiaryPage> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(
-                                      '$_error',
+                                      _error == 'account_changed'
+                                          ? context
+                                                .l10n
+                                                .diaryUiYourAccountChangedReopenTheDiary
+                                          : context.l10n.diaryLoadFailed,
                                       textAlign: TextAlign.center,
                                       style: AppDiaryStyle.caption,
                                     ),
                                     const SizedBox(height: 16),
                                     AppGlassPill(
-                                      label: diaryText(
-                                        context,
-                                        'Tentar novamente',
-                                        'Retry',
-                                      ),
+                                      label: context.l10n.diaryUiRetry,
                                       onPressed: _load,
                                     ),
                                   ],
@@ -314,30 +302,26 @@ class _DiaryPageState extends State<DiaryPage> {
                                         children: [
                                           Text(
                                             _day == 0
-                                                ? diaryText(
-                                                    context,
-                                                    'O que aconteceu hoje?',
-                                                    'What happened today?',
-                                                  )
+                                                ? context
+                                                      .l10n
+                                                      .diaryUiWhatHappenedToday
                                                 : _day == 1
-                                                ? diaryText(
-                                                    context,
-                                                    'O que aconteceu ontem?',
-                                                    'What happened yesterday?',
-                                                  )
-                                                : diaryText(
-                                                    context,
-                                                    'Como foi o dia ${_date.day}?',
-                                                    'How was ${diaryDate(_date)}?',
+                                                ? context
+                                                      .l10n
+                                                      .diaryUiWhatHappenedYesterday
+                                                : context.l10n.diaryHowWasDate(
+                                                    diaryDisplayDate(
+                                                      context,
+                                                      _date,
+                                                    ),
                                                   ),
                                             style: AppDiaryStyle.title,
                                           ),
                                           const SizedBox(height: 8),
                                           Text(
-                                            diaryText(
-                                              context,
-                                              '${_data!.automatic.length} da pulseira · ${_data!.events.length} registros seus',
-                                              '${_data!.automatic.length} from your band · ${_data!.events.length} your entries',
+                                            context.l10n.diaryBandAndEntries(
+                                              _data!.automatic.length,
+                                              _data!.events.length,
                                             ),
                                             style: AppDiaryStyle.caption
                                                 .copyWith(
@@ -347,21 +331,13 @@ class _DiaryPageState extends State<DiaryPage> {
                                           ),
                                           DiarySection(
                                             _day == 0
-                                                ? diaryText(
-                                                    context,
-                                                    'Hoje',
-                                                    'Today',
-                                                  )
+                                                ? context.l10n.diaryUiToday
                                                 : _day == 1
-                                                ? diaryText(
-                                                    context,
-                                                    'Ontem',
-                                                    'Yesterday',
-                                                  )
+                                                ? context.l10n.diaryUiYesterday
                                                 : diaryDate(_date),
                                             icon: 'relo',
                                             trailing: Text(
-                                              '${_data!.timeline.length} ${diaryText(context, 'momentos', 'moments')}',
+                                              '${_data!.timeline.length} ${context.l10n.diaryUiMoments2}',
                                               style: AppDiaryStyle.caption,
                                             ),
                                           ),
@@ -373,11 +349,9 @@ class _DiaryPageState extends State<DiaryPage> {
                                                     vertical: 36,
                                                   ),
                                               child: Text(
-                                                diaryText(
-                                                  context,
-                                                  'Seu dia começa com um registro.',
-                                                  'Your day begins with an entry.',
-                                                ),
+                                                context
+                                                    .l10n
+                                                    .diaryUiYourDayBeginsWithAnEntry,
                                                 style: AppDiaryStyle.caption,
                                               ),
                                             ),
@@ -392,11 +366,7 @@ class _DiaryPageState extends State<DiaryPage> {
                                             ),
                                           if (_data!.note.isNotEmpty) ...[
                                             DiarySection(
-                                              diaryText(
-                                                context,
-                                                'Notas',
-                                                'Notes',
-                                              ),
+                                              context.l10n.diaryUiNotes,
                                               icon: 'nota',
                                             ),
                                             DiarySurface(
@@ -413,11 +383,9 @@ class _DiaryPageState extends State<DiaryPage> {
                                           ],
                                           if (!_data!.editable)
                                             Text(
-                                              diaryText(
-                                                context,
-                                                'Você pode editar os últimos 7 dias.',
-                                                'You can edit the past 7 days.',
-                                              ),
+                                              context
+                                                  .l10n
+                                                  .diaryUiYouCanEditThePast7Days,
                                               style: AppDiaryStyle.caption,
                                             ),
                                         ],
@@ -468,7 +436,13 @@ class _DiaryPageState extends State<DiaryPage> {
             onClose: () => setState(() => _quickOpen = false),
             onActionSelected: (action) {
               setState(() => _quickOpen = false);
-              if(AppQuickActionNavigation.open(context,action, demo:_repo is DemoDiaryRepository))return;
+              if (AppQuickActionNavigation.open(
+                context,
+                action,
+                demo: _repo is DemoDiaryRepository,
+              )) {
+                return;
+              }
               if (action == AppQuickAction.dayReview ||
                   action == AppQuickAction.meal) {
                 _record(
@@ -520,17 +494,13 @@ class DiarySessionGuard extends StatelessWidget {
               child: Column(
                 children: [
                   AppDetailHeader(
-                    title: diaryText(context, 'Diário', 'Diary'),
+                    title: context.l10n.diaryUiDiary,
                     onClose: () => Navigator.pop(context),
                   ),
                   Expanded(
                     child: Center(
                       child: Text(
-                        diaryText(
-                          context,
-                          'Sua conta mudou. Abra o Diário novamente.',
-                          'Your account changed. Reopen the diary.',
-                        ),
+                        context.l10n.diaryUiYourAccountChangedReopenTheDiary,
                         style: AppDiaryStyle.caption,
                       ),
                     ),

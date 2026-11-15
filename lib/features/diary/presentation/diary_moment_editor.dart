@@ -1,3 +1,4 @@
+import '../../../l10n/app_localizations_context.dart';
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -46,6 +47,17 @@ class _DiaryMomentEditorState extends State<DiaryMomentEditor> {
     widget.moment.time ??
         DateTime(widget.date.year, widget.date.month, widget.date.day, 12),
   );
+  String? _displayedLabel;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_displayedLabel == null || _label.text == _displayedLabel) {
+      _displayedLabel = diaryMomentLabel(context, widget.moment);
+      _label.text = _displayedLabel!;
+    }
+  }
+
   bool _uploading = false;
   String? _validation;
   bool get _meal => widget.moment.kind == 'meal';
@@ -82,11 +94,7 @@ class _DiaryMomentEditorState extends State<DiaryMomentEditor> {
         AppNotice.show(
           context,
           kind: AppNoticeKind.error,
-          message: diaryText(
-            context,
-            'Não foi possível adicionar a foto. Use uma imagem JPG/PNG de até 2 MB.',
-            'Could not attach the photo. Use a JPG/PNG up to 2 MB.',
-          ),
+          message: context.l10n.diaryUiCouldNotAttachThePhotoUseAJPGPNGUpTo2MB,
         );
       }
     } finally {
@@ -123,13 +131,7 @@ class _DiaryMomentEditorState extends State<DiaryMomentEditor> {
 
   void _save() {
     if (_label.text.trim().isEmpty) {
-      setState(
-        () => _validation = diaryText(
-          context,
-          'Informe o nome.',
-          'Enter a name.',
-        ),
-      );
+      setState(() => _validation = context.l10n.diaryUiEnterAName);
       return;
     }
     final details = {..._details};
@@ -143,11 +145,7 @@ class _DiaryMomentEditorState extends State<DiaryMomentEditor> {
         final v = double.tryParse(entry.value.text.replaceAll(',', '.'));
         if (v == null || !v.isFinite || v < 0 || v > 100000) {
           setState(
-            () => _validation = diaryText(
-              context,
-              'Confira os valores nutricionais.',
-              'Check the nutrition values.',
-            ),
+            () => _validation = context.l10n.diaryUiCheckTheNutritionValues,
           );
           return;
         }
@@ -164,7 +162,9 @@ class _DiaryMomentEditorState extends State<DiaryMomentEditor> {
     Navigator.pop(
       context,
       widget.moment.copy({
-        'label': _label.text.trim(),
+        'label': _label.text == _displayedLabel
+            ? widget.moment.label
+            : _label.text.trim(),
         'note': _meal
             ? _foods.text.characters.take(500).toString()
             : _note.text,
@@ -181,7 +181,7 @@ class _DiaryMomentEditorState extends State<DiaryMomentEditor> {
   @override
   Widget build(BuildContext context) {
     final kind = widget.moment.kind;
-    final labels = widget.tracker?.scaleLabels ?? [];
+    final labels = diaryScaleLabels(context, widget.tracker);
     final scoreLabel = labels.isEmpty
         ? ''
         : labels[((_value - 1) / 2).floor().clamp(0, labels.length - 1)];
@@ -196,14 +196,10 @@ class _DiaryMomentEditorState extends State<DiaryMomentEditor> {
       child: Column(
         children: [
           AppSheetHeader(
-            title: widget.moment.label,
+            title: diaryMomentLabel(context, widget.moment),
             trailing: widget.canDelete
                 ? IconButton(
-                    tooltip: diaryText(
-                      context,
-                      'Excluir registro',
-                      'Delete entry',
-                    ),
+                    tooltip: context.l10n.diaryUiDeleteEntry,
                     onPressed: _uploading
                         ? null
                         : () => Navigator.pop(
@@ -220,7 +216,9 @@ class _DiaryMomentEditorState extends State<DiaryMomentEditor> {
               children: [
                 if (kind == 'scale') ...[
                   Text(
-                    widget.tracker?.prompt ?? widget.moment.label,
+                    widget.tracker == null
+                        ? diaryMomentLabel(context, widget.moment)
+                        : diaryTrackerPrompt(context, widget.tracker!),
                     style: AppDiaryStyle.title,
                     textAlign: TextAlign.center,
                   ),
@@ -262,7 +260,9 @@ class _DiaryMomentEditorState extends State<DiaryMomentEditor> {
                   ),
                 ] else if (kind == 'quantity' && times.isNotEmpty) ...[
                   Text(
-                    widget.tracker?.prompt ?? widget.moment.label,
+                    widget.tracker == null
+                        ? diaryMomentLabel(context, widget.moment)
+                        : diaryTrackerPrompt(context, widget.tracker!),
                     style: AppDiaryStyle.title,
                     textAlign: TextAlign.center,
                   ),
@@ -295,7 +295,9 @@ class _DiaryMomentEditorState extends State<DiaryMomentEditor> {
                   ),
                 ] else if (kind == 'quantity') ...[
                   Text(
-                    widget.tracker?.prompt ?? widget.moment.label,
+                    widget.tracker == null
+                        ? diaryMomentLabel(context, widget.moment)
+                        : diaryTrackerPrompt(context, widget.tracker!),
                     style: AppDiaryStyle.title,
                     textAlign: TextAlign.center,
                   ),
@@ -315,7 +317,7 @@ class _DiaryMomentEditorState extends State<DiaryMomentEditor> {
                         for (final v in values)
                           Center(
                             child: Text(
-                              '${DiaryMoment.number(v)} ${widget.moment.unit}',
+                              '${diaryNumber(context, v)} ${widget.tracker?.json['custom'] == true ? widget.moment.unit : diaryUnit(context, widget.moment.unit)}',
                               style: AppDiaryStyle.section.copyWith(
                                 fontSize: 27,
                               ),
@@ -337,16 +339,12 @@ class _DiaryMomentEditorState extends State<DiaryMomentEditor> {
                       ),
                     ),
                   Text(
-                    diaryText(
-                      context,
-                      'O que você comeu?',
-                      'What did you eat?',
-                    ),
+                    context.l10n.diaryUiWhatDidYouEat,
                     style: AppDiaryStyle.title,
                   ),
                   const SizedBox(height: 16),
                   AppGlassPill(
-                    label: diaryText(context, 'Buscar refeição', 'Find a meal'),
+                    label: context.l10n.diaryUiFindAMeal,
                     onPressed: _mealTemplate,
                   ),
                   const SizedBox(height: 16),
@@ -356,11 +354,7 @@ class _DiaryMomentEditorState extends State<DiaryMomentEditor> {
                     maxLength: 1000,
                     style: AppDiaryStyle.label,
                     decoration: InputDecoration(
-                      labelText: diaryText(
-                        context,
-                        'Alimentos e quantidades',
-                        'Foods and amounts',
-                      ),
+                      labelText: context.l10n.diaryUiFoodsAndAmounts,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -375,7 +369,7 @@ class _DiaryMomentEditorState extends State<DiaryMomentEditor> {
                               backgroundColor: Colors.transparent,
                               showCheckmark: false,
                               side: const BorderSide(color: AppDiaryStyle.line),
-                              label: Text(portion),
+                              label: Text(diaryPortionLabel(context, portion)),
                               selected:
                                   (_details['portion'] ?? 'Normal') == portion,
                               onSelected: (_) =>
@@ -385,15 +379,11 @@ class _DiaryMomentEditorState extends State<DiaryMomentEditor> {
                         ),
                     ],
                   ),
-                  DiarySection(
-                    diaryText(context, 'Informações nutricionais', 'Nutrition'),
-                  ),
+                  DiarySection(context.l10n.diaryUiNutrition),
                   Text(
-                    diaryText(
-                      context,
-                      'Valores informados por você ou pela refeição escolhida. Ajuste conforme a porção.',
-                      'Values entered by you or from the selected meal. Adjust for your portion.',
-                    ),
+                    context
+                        .l10n
+                        .diaryUiValuesEnteredByYouOrFromTheSelectedMealAdjustForYourPortion,
                     style: AppDiaryStyle.caption,
                   ),
                   const SizedBox(height: 16),
@@ -412,21 +402,9 @@ class _DiaryMomentEditorState extends State<DiaryMomentEditor> {
                             decoration: InputDecoration(
                               labelText: switch (entry.key) {
                                 'calories' => 'kcal',
-                                'protein' => diaryText(
-                                  context,
-                                  'Proteína (g)',
-                                  'Protein (g)',
-                                ),
-                                'carbs' => diaryText(
-                                  context,
-                                  'Carboidratos (g)',
-                                  'Carbs (g)',
-                                ),
-                                _ => diaryText(
-                                  context,
-                                  'Gordura (g)',
-                                  'Fat (g)',
-                                ),
+                                'protein' => context.l10n.diaryUiProteinG,
+                                'carbs' => context.l10n.diaryUiCarbsG,
+                                _ => context.l10n.diaryUiFatG,
                               },
                             ),
                           ),
@@ -458,9 +436,7 @@ class _DiaryMomentEditorState extends State<DiaryMomentEditor> {
                         _details.remove('photoUrl');
                         _details.remove('photoKey');
                       }),
-                      child: Text(
-                        diaryText(context, 'Remover foto', 'Remove photo'),
-                      ),
+                      child: Text(context.l10n.diaryUiRemovePhoto),
                     ),
                   ],
                   if (_uploading)
@@ -471,15 +447,11 @@ class _DiaryMomentEditorState extends State<DiaryMomentEditor> {
                       runSpacing: 10,
                       children: [
                         AppGlassPill(
-                          label: diaryText(
-                            context,
-                            'Tirar foto',
-                            'Take a photo',
-                          ),
+                          label: context.l10n.diaryUiTakeAPhoto,
                           onPressed: () => _photo(ImageSource.camera),
                         ),
                         AppGlassPill(
-                          label: diaryText(context, 'Galeria', 'Gallery'),
+                          label: context.l10n.diaryUiGallery,
                           onPressed: () => _photo(ImageSource.gallery),
                         ),
                       ],
@@ -489,7 +461,7 @@ class _DiaryMomentEditorState extends State<DiaryMomentEditor> {
                     controller: _label,
                     maxLength: 80,
                     decoration: InputDecoration(
-                      labelText: diaryText(context, 'Registro', 'Entry'),
+                      labelText: context.l10n.diaryUiEntry,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -498,14 +470,14 @@ class _DiaryMomentEditorState extends State<DiaryMomentEditor> {
                     maxLength: 500,
                     maxLines: 5,
                     decoration: InputDecoration(
-                      labelText: diaryText(context, 'Detalhes', 'Details'),
+                      labelText: context.l10n.diaryUiDetails,
                     ),
                   ),
                 ],
                 if (kind != 'scale') ...[
                   const SizedBox(height: 20),
                   DiaryRecordRow(
-                    title: diaryText(context, 'Horário', 'Time'),
+                    title: context.l10n.diaryUiTime,
                     icon: 'relo',
                     value: _time.format(context),
                     onTap: _timePicker,
@@ -522,7 +494,7 @@ class _DiaryMomentEditorState extends State<DiaryMomentEditor> {
             ),
           ),
           AppSheetSaveButton(
-            label: diaryText(context, 'Concluir', 'Done'),
+            label: context.l10n.diaryUiDone,
             loading: _uploading,
             onPressed: _uploading ? null : _save,
           ),
@@ -546,16 +518,14 @@ class _DiaryMealSearchSheetState extends State<DiaryMealSearchSheet> {
   @override
   Widget build(BuildContext context) => Column(
     children: [
-      AppSheetHeader(
-        title: diaryText(context, 'Buscar refeição', 'Find a meal'),
-      ),
+      AppSheetHeader(title: context.l10n.diaryUiFindAMeal),
       Padding(
         padding: const EdgeInsets.all(20),
         child: TextField(
           onChanged: (v) => setState(() => _search = v.toLowerCase()),
           decoration: InputDecoration(
             prefixIcon: const Icon(Icons.search),
-            hintText: diaryText(context, 'Buscar alimentos', 'Search foods'),
+            hintText: context.l10n.diaryUiSearchFoods,
           ),
         ),
       ),
@@ -566,6 +536,7 @@ class _DiaryMealSearchSheetState extends State<DiaryMealSearchSheet> {
             if (!s.hasData) return const Center(child: AppLoadingIndicator());
             final items = s.data!
                 .cast<Map>()
+                .map((m) => diaryMealTemplate(context, m))
                 .where((m) => '${m['it']}'.toLowerCase().contains(_search))
                 .toList();
             return ListView.builder(
@@ -590,7 +561,7 @@ class _DiaryMealSearchSheetState extends State<DiaryMealSearchSheet> {
                   ),
                   title: Text(title, style: AppDiaryStyle.label),
                   subtitle: Text(
-                    'P ${m['p']} g · C ${m['c']} g · G ${m['g']} g',
+                    'P ${m['p']} g · C ${m['c']} g · ${context.l10n.diaryFatAbbreviation} ${m['g']} g',
                     style: AppDiaryStyle.caption,
                   ),
                   onTap: () =>
