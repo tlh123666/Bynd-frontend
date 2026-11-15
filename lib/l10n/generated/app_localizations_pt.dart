@@ -9,6 +9,53 @@ class AppLocalizationsPt extends AppLocalizations {
   AppLocalizationsPt([String locale = 'pt']) : super(locale);
 
   @override
+  String get exerciseDetailCountAs => 'Conta como';
+
+  @override
+  String get exerciseDetailSeconds => 'segundos';
+
+  @override
+  String get exerciseDetailMinutes => 'minutos';
+
+  @override
+  String get exerciseDetailRepsBody => 'repetições (peso do corpo)';
+
+  @override
+  String get exerciseDetailRepsWeight => 'repetições × carga';
+
+  @override
+  String get exerciseDetailTitle => 'Exercício';
+
+  @override
+  String exerciseDetailHow(String name) {
+    return 'Como fazer: $name';
+  }
+
+  @override
+  String get exerciseDetailMark => 'Marcar para adicionar';
+
+  @override
+  String get exerciseDetailMuscles => 'Músculos';
+
+  @override
+  String get exerciseDetailEquipment => 'Equipamento';
+
+  @override
+  String get exerciseDetailGroup => 'Grupo';
+
+  @override
+  String get exerciseDetailLevel => 'Nível';
+
+  @override
+  String exerciseDetailAnimation(String name) {
+    return 'Animação: $name';
+  }
+
+  @override
+  String get exerciseDetailNoAnimation =>
+      'Animação não disponível para este exercício.';
+
+  @override
   String get exerciseConfirmEmpty => 'Confirmar';
 
   @override
@@ -1600,6 +1647,53 @@ class AppLocalizationsPt extends AppLocalizations {
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
 class AppLocalizationsPtBr extends AppLocalizationsPt {
   AppLocalizationsPtBr() : super('pt_BR');
+
+  @override
+  String get exerciseDetailCountAs => 'Conta como';
+
+  @override
+  String get exerciseDetailSeconds => 'segundos';
+
+  @override
+  String get exerciseDetailMinutes => 'minutos';
+
+  @override
+  String get exerciseDetailRepsBody => 'repetições (peso do corpo)';
+
+  @override
+  String get exerciseDetailRepsWeight => 'repetições × carga';
+
+  @override
+  String get exerciseDetailTitle => 'Exercício';
+
+  @override
+  String exerciseDetailHow(String name) {
+    return 'Como fazer: $name';
+  }
+
+  @override
+  String get exerciseDetailMark => 'Marcar para adicionar';
+
+  @override
+  String get exerciseDetailMuscles => 'Músculos';
+
+  @override
+  String get exerciseDetailEquipment => 'Equipamento';
+
+  @override
+  String get exerciseDetailGroup => 'Grupo';
+
+  @override
+  String get exerciseDetailLevel => 'Nível';
+
+  @override
+  String exerciseDetailAnimation(String name) {
+    return 'Animação: $name';
+  }
+
+  @override
+  String get exerciseDetailNoAnimation =>
+      'Animação não disponível para este exercício.';
 
   @override
   String get exerciseConfirmEmpty => 'Confirmar';
