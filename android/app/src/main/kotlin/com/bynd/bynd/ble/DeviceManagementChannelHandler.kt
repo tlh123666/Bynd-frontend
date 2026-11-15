@@ -9,21 +9,53 @@ import android.os.Build
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
+import io.flutter.plugin.common.EventChannel
 
 /** Adapts the refactored device contract to JCVital's real JStyle V8 driver. */
 class DeviceManagementChannelHandler(private val activity: Activity) : MethodChannel.MethodCallHandler {
-    private val controller = JStyleBleController(context = activity, enableRealtimeMeasurements = false)
+    private var heartSink: EventChannel.EventSink? = null
+    private var heartActive = false
+    private var heartEvents: EventChannel? = null
+    private val controller = JStyleBleController(context = activity, enableRealtimeMeasurements = false,
+        onEcgEvent = { raw ->
+            val event = raw.toMutableMap()
+            when (raw["event"]) {
+                "ecg_started" -> heartActive = true
+                "ecg_completed", "ecg_cancelled", "ecg_failed" -> heartActive = false
+            }
+            // This vendor path is DeviceConst.PPG / arrayPpgRawData. Never
+            // relabel its optical pulse wave as an electrical ECG.
+            if (raw["event"] == "ecg_waveform") event["waveformKind"] = "ppg"
+            activity.runOnUiThread { heartSink?.success(event) }
+        })
     private var channel: MethodChannel? = null
     private var awaitingPermission: Pair<MethodCall, MethodChannel.Result>? = null
     private var closed = false
+    private var heartGeneration = 0L
+
+    private fun cancelPendingHeartStart() {
+        heartGeneration++
+        if (awaitingPermission?.first?.method == "startHeartRecording") {
+            awaitingPermission?.second?.error("cancelled", "Recording was cancelled.", null)
+            awaitingPermission = null
+        }
+    }
 
     fun register(messenger: BinaryMessenger) {
         channel = MethodChannel(messenger, "com.bynd/device_management").also { it.setMethodCallHandler(this) }
+        heartEvents = EventChannel(messenger, "com.bynd/heart_events").also { it.setStreamHandler(object : EventChannel.StreamHandler {
+            override fun onListen(arguments: Any?, sink: EventChannel.EventSink) { heartSink = sink }
+            override fun onCancel(arguments: Any?) { heartSink = null; cancelPendingHeartStart(); controller.stopEcgMeasurement() }
+        }) }
     }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         if (closed) { result.error("disposed", "Bluetooth driver is closed.", null); return }
+        if (heartActive && call.method in setOf("scanDevices", "connect", "readStatus", "readSleepHistory", "readHeartHistory", "disconnect")) {
+            result.error("busy", "A heart recording is in progress.", null); return
+        }
         when (call.method) {
+            "stopHeartRecording" -> { cancelPendingHeartStart(); controller.stopEcgMeasurement(result) }
             "close" -> { controller.close(); result.success(null) }
             "stopScan" -> {
                 if (awaitingPermission?.first?.method == "scanDevices") {
@@ -34,14 +66,14 @@ class DeviceManagementChannelHandler(private val activity: Activity) : MethodCha
             }
             "capabilities" -> result.success(mapOf(
                 "scan" to true, "connect" to true, "readStatus" to true,
-                "readSleepHistory" to true,
+                "readSleepHistory" to true, "readHeartHistory" to true, "heartRecording" to true, "electricalECG" to false,
                 "restart" to false, "eraseUnsyncedData" to false, "installFirmware" to false,
             ))
             // A reset-to-factory command is NOT an erase-unsynced-data command.
             // The old V8 jar has no verified OTA transport/signature pipeline.
             "restart", "eraseUnsyncedData", "installFirmware" ->
                 result.error("unsupported_operation", "No verified vendor implementation for this operation.", null)
-            "scanDevices", "connect", "readStatus", "readSleepHistory", "disconnect" -> withPermissions(call, result)
+            "scanDevices", "connect", "readStatus", "readSleepHistory", "readHeartHistory", "startHeartRecording", "disconnect" -> withPermissions(call, result)
             else -> result.notImplemented()
         }
     }
@@ -109,12 +141,26 @@ class DeviceManagementChannelHandler(private val activity: Activity) : MethodCha
                         }
                     })
                 }
-                "readSleepHistory" -> {
+                "readSleepHistory", "readHeartHistory" -> {
                     controller.ensureManagementConnection(call.argument<String>("deviceId"), object : ForwardResult(result) {
                         override fun success(value: Any?) {
                             controller.readManagementStatus(call.argument<String>("serialNumber"), object : ForwardResult(result) {
                                 override fun success(value: Any?) {
                                     controller.fetchLatestMetrics(result)
+                                }
+                            })
+                        }
+                    })
+                }
+                "startHeartRecording" -> {
+                    val generation = heartGeneration
+                    controller.ensureManagementConnection(call.argument<String>("deviceId"), object : ForwardResult(result) {
+                        override fun success(value: Any?) {
+                            if (closed || generation != heartGeneration) { result.error("cancelled", "Recording was cancelled.", null); return }
+                            controller.readManagementStatus(call.argument<String>("serialNumber"), object : ForwardResult(result) {
+                                override fun success(value: Any?) {
+                                    if (closed || generation != heartGeneration) { result.error("cancelled", "Recording was cancelled.", null); return }
+                                    controller.startEcgMeasurement(call.argument<String>("deviceId"), call.argument<Int>("durationSeconds") ?: 30, result)
                                 }
                             })
                         }
@@ -140,6 +186,9 @@ class DeviceManagementChannelHandler(private val activity: Activity) : MethodCha
         closed = true
         awaitingPermission?.second?.error("disposed", "Activity was destroyed.", null)
         awaitingPermission = null
+        heartSink = null
+        heartEvents?.setStreamHandler(null)
+        heartEvents = null
         channel?.setMethodCallHandler(null)
         channel = null
         controller.close()

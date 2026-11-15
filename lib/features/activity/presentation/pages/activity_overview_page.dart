@@ -1,3 +1,4 @@
+import '../../../../shared/navigation/app_quick_action_navigation.dart';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -182,6 +183,7 @@ class _ActivityOverviewPageState extends State<ActivityOverviewPage> {
               onClose: () => setState(() => _quickActionsOpen = false),
               onActionSelected: (action) {
                 setState(() => _quickActionsOpen = false);
+                if(AppQuickActionNavigation.open(context,action))return;
                 if (action == AppQuickAction.startActivity) {
                   openActivitySelection(context);
                 } else if (action == AppQuickAction.dayReview ||

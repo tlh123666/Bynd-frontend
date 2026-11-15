@@ -1,3 +1,4 @@
+import '../../../../shared/navigation/app_quick_action_navigation.dart';
 import 'package:flutter/foundation.dart';
 import '../../../device/application/device_scope.dart';
 import '../../../device/presentation/pages/device_management_page.dart';
@@ -375,6 +376,14 @@ class _SleepPageState extends State<SleepPage> {
                   onClose: () => setState(() => _more = false),
                   onActionSelected: (action) {
                     setState(() => _more = false);
+                    if (AppQuickActionNavigation.open(
+                      context,
+                      action,
+                      demo: widget.demo,
+                      date: _controller.date,
+                    )) {
+                      return;
+                    }
                     if (action == AppQuickAction.dayReview ||
                         action == AppQuickAction.meal) {
                       _journal(meal: action == AppQuickAction.meal);

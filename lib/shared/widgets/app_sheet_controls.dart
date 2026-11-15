@@ -6,11 +6,13 @@ class AppSheetHeader extends StatelessWidget {
     required this.title,
     this.trailing,
     this.canClose = true,
+    this.onClose,
     super.key,
   });
   final String title;
   final Widget? trailing;
   final bool canClose;
+  final VoidCallback? onClose;
   @override
   Widget build(BuildContext context) => SizedBox(
     height: 48,
@@ -18,7 +20,9 @@ class AppSheetHeader extends StatelessWidget {
       children: [
         IconButton(
           tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
-          onPressed: canClose ? () => Navigator.pop(context) : null,
+          onPressed: canClose
+              ? (onClose ?? () => Navigator.pop(context))
+              : null,
           icon: const Icon(Icons.close, size: 22),
         ),
         Expanded(

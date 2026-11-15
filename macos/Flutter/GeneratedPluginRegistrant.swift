@@ -10,6 +10,8 @@ import flutter_local_notifications
 import flutter_secure_storage_darwin
 import flutter_timezone
 import google_sign_in_ios
+import printing
+import share_plus
 import shared_preferences_foundation
 import speech_to_text
 
@@ -19,6 +21,8 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   FlutterSecureStorageDarwinPlugin.register(with: registry.registrar(forPlugin: "FlutterSecureStorageDarwinPlugin"))
   FlutterTimezonePlugin.register(with: registry.registrar(forPlugin: "FlutterTimezonePlugin"))
   FLTGoogleSignInPlugin.register(with: registry.registrar(forPlugin: "FLTGoogleSignInPlugin"))
+  PrintingPlugin.register(with: registry.registrar(forPlugin: "PrintingPlugin"))
+  SharePlusMacosPlugin.register(with: registry.registrar(forPlugin: "SharePlusMacosPlugin"))
   SharedPreferencesPlugin.register(with: registry.registrar(forPlugin: "SharedPreferencesPlugin"))
   SpeechToTextPlugin.register(with: registry.registrar(forPlugin: "SpeechToTextPlugin"))
 }

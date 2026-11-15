@@ -840,11 +840,11 @@ class JStyleBleController(
                 onEcgEvent?.invoke(
                     mapOf(
                         "event" to "ecg_metrics",
-                        "heartRate" to heartRate.takeIf { it > 0 },
-                        "hrv" to hrv.takeIf { it > 0 },
-                        "stress" to stress.takeIf { it > 0 },
-                        "systolicBloodPressure" to highBloodPressure.takeIf { it > 0 },
-                        "diastolicBloodPressure" to lowBloodPressure.takeIf { it > 0 },
+                        "heartRate" to entry.intValue(DeviceKey.ECGHrValue),
+                        "hrv" to entry.intValue(DeviceKey.ECGHrvValue),
+                        "stress" to entry.intValue(DeviceKey.ECGStreesValue),
+                        "systolicBloodPressure" to entry.intValue(DeviceKey.ECGhighBpValue),
+                        "diastolicBloodPressure" to entry.intValue(DeviceKey.ECGLowBpValue),
                         "respiratoryRate" to entry.intValue(DeviceKey.ECGBreathValue),
                     ),
                 )
@@ -1001,11 +1001,11 @@ class JStyleBleController(
                     onEcgEvent?.invoke(
                         mapOf(
                             "event" to "ecg_metrics",
-                            "heartRate" to heartRate.takeIf { it > 0 },
-                            "hrv" to hrv.takeIf { it > 0 },
-                            "stress" to stress.takeIf { it > 0 },
-                            "systolicBloodPressure" to highBloodPressure.takeIf { it > 0 },
-                            "diastolicBloodPressure" to lowBloodPressure.takeIf { it > 0 },
+                            "heartRate" to entry.intValue(DeviceKey.HeartRate),
+                            "hrv" to entry.intValue(DeviceKey.HRV),
+                            "stress" to entry.intValue(DeviceKey.Stress),
+                            "systolicBloodPressure" to entry.intValue(DeviceKey.highBP),
+                            "diastolicBloodPressure" to entry.intValue(DeviceKey.lowBP),
                             "respiratoryRate" to entry.intValue(DeviceKey.ECGBreathValue),
                         ),
                     )

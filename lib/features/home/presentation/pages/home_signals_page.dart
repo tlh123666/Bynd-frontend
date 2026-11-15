@@ -1,4 +1,4 @@
-import '../../../sleep/presentation/pages/sleep_page.dart';
+import '../home_signal_destination.dart';
 import 'package:flutter/material.dart';
 import '../../../../design_system/design_system.dart';
 import '../../../../l10n/app_localizations_context.dart';
@@ -6,7 +6,6 @@ import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../shared/widgets/day_strip.dart';
 import '../../application/home_controller.dart';
 import '../../domain/home_models.dart';
-import 'home_signal_detail_page.dart';
 import '../widgets/home_account_guard.dart';
 
 /// Saúde（Sinais）tab —— 按 BYND UI 源码复刻（public/sinais.html，modelo B：
@@ -25,12 +24,14 @@ class HomeSignalsPage extends StatelessWidget {
   const HomeSignalsPage({
     required this.controller,
     this.showClose = true,
+    this.onDestinationSelected,
     super.key,
   });
   final HomeController controller;
 
   /// 作为底部 tab 根时没有上一页可关，隐藏头部关闭钮。
   final bool showClose;
+  final ValueChanged<int>? onDestinationSelected;
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -86,6 +87,7 @@ class HomeSignalsPage extends StatelessWidget {
                                 title: group.title,
                                 cards: group.cards,
                                 controller: controller,
+                                onDestinationSelected: onDestinationSelected,
                               ),
                           ],
                         ),
@@ -172,11 +174,13 @@ class _SignalGroup extends StatelessWidget {
     required this.title,
     required this.cards,
     required this.controller,
+    this.onDestinationSelected,
   });
 
   final String title;
   final List<Measurement> cards;
   final HomeController controller;
+  final ValueChanged<int>? onDestinationSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -218,7 +222,11 @@ class _SignalGroup extends StatelessWidget {
                 children: [
                   for (final card in row)
                     Expanded(
-                      child: _SignalCard(card: card, controller: controller),
+                      child: _SignalCard(
+                        card: card,
+                        controller: controller,
+                        onDestinationSelected: onDestinationSelected,
+                      ),
                     ),
                 ],
               ),
@@ -231,7 +239,12 @@ class _SignalGroup extends StatelessWidget {
 
 /// `.c`：170 高卡片，label + 状态词 + 大数字，点击进该信号的详情页。
 class _SignalCard extends StatelessWidget {
-  const _SignalCard({required this.card, required this.controller});
+  const _SignalCard({
+    required this.card,
+    required this.controller,
+    this.onDestinationSelected,
+  });
+  final ValueChanged<int>? onDestinationSelected;
 
   final Measurement card;
   final HomeController controller;
@@ -254,15 +267,11 @@ class _SignalCard extends StatelessWidget {
             MaterialPageRoute<void>(
               builder: (_) => HomeAccountGuard(
                 controller: controller,
-                child: card.signal == HomeSignal.sleep
-                    ? SleepPage(
-                        date: controller.date,
-                        demo: controller.demoData,
-                      )
-                    : HomeSignalDetailPage(
-                        controller: controller,
-                        signal: card.signal,
-                      ),
+                child: homeSignalDestination(
+                  controller,
+                  card.signal,
+                  onDestinationSelected: onDestinationSelected,
+                ),
               ),
             ),
           ),

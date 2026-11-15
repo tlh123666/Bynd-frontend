@@ -1,3 +1,4 @@
+import '../../../shared/navigation/app_quick_action_navigation.dart';
 import '../../../l10n/app_localizations_context.dart';
 import '../../activity/presentation/pages/activity_overview_page.dart';
 import 'dart:async';
@@ -467,6 +468,7 @@ class _DiaryPageState extends State<DiaryPage> {
             onClose: () => setState(() => _quickOpen = false),
             onActionSelected: (action) {
               setState(() => _quickOpen = false);
+              if(AppQuickActionNavigation.open(context,action, demo:_repo is DemoDiaryRepository))return;
               if (action == AppQuickAction.dayReview ||
                   action == AppQuickAction.meal) {
                 _record(

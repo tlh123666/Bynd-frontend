@@ -1,3 +1,4 @@
+import '../../shared/navigation/app_quick_action_navigation.dart';
 import '../diary/presentation/diary_page.dart';
 import 'package:flutter/material.dart';
 
@@ -29,6 +30,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _handleQuickAction(AppQuickAction action) async {
     setState(() => _quickActionsOpen = false);
+    if (AppQuickActionNavigation.open(context, action)) return;
     if (action == AppQuickAction.startActivity) {
       final selectedIndex = await Navigator.of(context).push<int>(
         MaterialPageRoute<int>(

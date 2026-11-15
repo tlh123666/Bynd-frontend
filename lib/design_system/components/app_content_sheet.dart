@@ -12,6 +12,8 @@ Future<T?> showAppContentSheet<T>(
   WidgetBuilder builder, {
   double heightFactor = .936,
   bool glass = false,
+  bool dismissible = true,
+  bool enableDrag = true,
 }) {
   final navigator = Navigator.of(context);
   Widget surface(Widget child) => glass
@@ -69,6 +71,8 @@ Future<T?> showAppContentSheet<T>(
       isScrollControlled: true,
       useSafeArea: true,
       showDragHandle: false,
+      isDismissible: dismissible,
+      enableDrag: enableDrag,
       backgroundColor: glass ? Colors.transparent : AppColors.homeCanvas,
       modalBarrierColor: AppColors.contentSheetVeil,
       shape: const RoundedRectangleBorder(
@@ -93,6 +97,8 @@ class _BlurredContentSheetRoute<T> extends ModalBottomSheetRoute<T> {
     super.barrierLabel,
     super.useSafeArea,
     super.showDragHandle,
+    super.isDismissible,
+    super.enableDrag,
     super.backgroundColor,
     super.modalBarrierColor,
     super.shape,
