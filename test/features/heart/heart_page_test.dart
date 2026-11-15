@@ -9,7 +9,11 @@ import 'package:new_jcvital/features/heart/presentation/sheets/heart_detail_shee
 import 'package:new_jcvital/features/heart/presentation/sheets/heart_settings_sheet.dart';
 import 'package:new_jcvital/features/heart/presentation/sheets/heart_recording_report.dart';
 import 'package:new_jcvital/l10n/generated/app_localizations.dart';
+import 'package:new_jcvital/features/device/application/device_controller.dart';
+import 'package:new_jcvital/features/device/application/device_scope.dart';
+import 'package:new_jcvital/features/device/domain/device_models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../device/device_test_support.dart';
 import 'heart_test_support.dart';
 
 Future<void> mountHeart(
@@ -51,6 +55,104 @@ Future<void> mountHeart(
 
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
+  testWidgets(
+    'backgrounding during connection cancels capture and ignores late start',
+    (t) async {
+      final repo = MemoryHeartRepository();
+      final gateway = FakeHeartGateway()..startWait = Completer<void>();
+      t.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      addTearDown(() {
+        if (!gateway.startWait!.isCompleted) gateway.startWait!.complete();
+        t.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      });
+      await mountHeart(
+        t,
+        repo,
+        child: Scaffold(
+          body: HeartRecordingPage(
+            repository: repo,
+            demo: true,
+            gateway: gateway,
+          ),
+        ),
+      );
+      await t.tap(find.text('Start'));
+      await t.pump();
+      expect(gateway.startedDevices.length, 1);
+      t.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      await t.runAsync(() => Future<void>.delayed(Duration.zero));
+      await t.pump();
+      expect(gateway.stops, greaterThan(0));
+      gateway.startWait!.complete();
+      await t.pumpAndSettle();
+      gateway.emit({
+        'event': 'ecg_waveform',
+        'samples': [1, 2, 3],
+      });
+      gateway.emit({'event': 'ecg_completed', 'durationMillis': 30000});
+      t.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await t.pumpAndSettle();
+      expect(repo.creates, 0);
+      expect(gateway.startedDevices.length, 1);
+      expect(find.text('Start'), findsOneWidget);
+    },
+  );
+  testWidgets(
+    'retry on the same page connects the replacement band and saves its serial',
+    (t) async {
+      final repo = MemoryHeartRepository(), gateway = FakeHeartGateway();
+      final devices =
+          DeviceController(
+              repository: TestDeviceRepository(testDeviceStore()),
+              gateway: TestDeviceGateway(),
+              isDemo: false,
+            )
+            ..device = const DeviceSnapshot(
+              id: 'cloud-a',
+              serialNumber: 'B1',
+              connected: true,
+              transportId: 'BLE-A',
+            );
+      addTearDown(devices.dispose);
+      await mountHeart(
+        t,
+        repo,
+        child: DeviceScope(
+          controller: devices,
+          child: Scaffold(
+            body: HeartRecordingPage(
+              repository: repo,
+              demo: false,
+              gateway: gateway,
+            ),
+          ),
+        ),
+      );
+      await t.tap(find.text('Start'));
+      await t.pumpAndSettle();
+      gateway.emit({'event': 'ecg_failed'});
+      await t.runAsync(() => Future<void>.delayed(Duration.zero));
+      await t.pumpAndSettle();
+      devices.device = const DeviceSnapshot(
+        id: 'cloud-b',
+        serialNumber: 'B2',
+        connected: true,
+        transportId: 'BLE-B',
+      );
+      await t.tap(find.text('Start'));
+      await t.pumpAndSettle();
+      expect(gateway.startedDevices.last.transportId, 'BLE-B');
+      gateway.emit({
+        'event': 'ecg_waveform',
+        'samples': [1, 2, 3],
+        'waveformKind': 'ppg',
+      });
+      gateway.emit({'event': 'ecg_completed', 'durationMillis': 30000});
+      await t.pumpAndSettle();
+      expect(repo.payloads.single['deviceSerial'], 'B2');
+      expect(t.takeException(), isNull);
+    },
+  );
   testWidgets(
     'quick recording opens before an offline overview request finishes',
     (t) async {

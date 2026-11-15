@@ -13,7 +13,96 @@ const device = DeviceSnapshot(
   transportId: 'BLE-ID',
   connected: true,
 );
+
+class LateStartGateway extends FakeHeartGateway {
+  final firstStart = Completer<void>();
+  @override
+  Future<void> start(DeviceSnapshot device) async {
+    startedDevices.add(device);
+    if (startedDevices.length == 1) {
+      await firstStart.future;
+    } else {
+      emit({'event': 'ecg_started'});
+    }
+  }
+}
+
 void main() {
+  test(
+    'a cancelled start returning late cannot stop its replacement',
+    () async {
+      final gateway = LateStartGateway();
+      final c = HeartRecordingController(
+        repository: MemoryHeartRepository(),
+        gateway: gateway,
+        device: device,
+      );
+      addTearDown(c.dispose);
+      final oldStart = c.start();
+      await Future<void>.delayed(Duration.zero);
+      await c.cancel();
+      await c.start();
+      final stops = gateway.stops;
+      gateway.firstStart.complete();
+      await oldStart;
+      expect(gateway.stops, stops);
+      expect(c.status, HeartRecordingStatus.measuring);
+    },
+  );
+  test(
+    'retry waits for old cancellation and uses the current device snapshot',
+    () async {
+      final repo = MemoryHeartRepository(), gateway = FakeHeartGateway();
+      final c = HeartRecordingController(
+        repository: repo,
+        gateway: gateway,
+        device: device,
+      );
+      addTearDown(c.dispose);
+      await c.start();
+      gateway.stopWait = Completer<void>();
+      final cancel = c.cancel();
+      const replacement = DeviceSnapshot(
+        id: 'cloud-b',
+        serialNumber: 'B2',
+        transportId: 'NEW-BLE',
+        connected: true,
+      );
+      final retry = c.start(device: replacement);
+      await Future<void>.delayed(Duration.zero);
+      expect(gateway.startedDevices.length, 1);
+      gateway.stopWait!.complete();
+      await cancel;
+      await retry;
+      expect(gateway.startedDevices.last.transportId, 'NEW-BLE');
+      gateway.emit({
+        'event': 'ecg_waveform',
+        'samples': [1, 2, 3],
+        'waveformKind': 'ppg',
+      });
+      gateway.emit({'event': 'ecg_completed', 'durationMillis': 30000});
+      await Future<void>.delayed(Duration.zero);
+      expect(repo.payloads.single['deviceSerial'], 'B2');
+      expect(c.status, HeartRecordingStatus.complete);
+    },
+  );
+  test(
+    'immediate cancellation never starts native collection after an await',
+    () async {
+      final gateway = FakeHeartGateway();
+      final c = HeartRecordingController(
+        repository: MemoryHeartRepository(),
+        gateway: gateway,
+        device: device,
+      );
+      addTearDown(c.dispose);
+      final start = c.start();
+      await c.cancel();
+      await start;
+      expect(gateway.startedDevices, isEmpty);
+      expect(c.status, HeartRecordingStatus.cancelled);
+    },
+  );
   test(
     'real waveform kind and fresh metrics are preserved; retry uses the same idempotency key',
     () async {

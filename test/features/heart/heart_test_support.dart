@@ -184,8 +184,10 @@ class MemoryHeartDiary extends DemoDiaryRepository {
 class FakeHeartGateway implements HeartBandGateway {
   final stream = StreamController<Map<String, dynamic>>.broadcast(sync: true);
   int stops = 0;
+  final startedDevices = <DeviceSnapshot>[];
   bool disposed = false;
   Completer<void>? startWait;
+  Completer<void>? stopWait;
   Map<String, dynamic> history = {};
   @override
   bool get supported => true;
@@ -197,6 +199,7 @@ class FakeHeartGateway implements HeartBandGateway {
 
   @override
   Future<void> start(DeviceSnapshot device) async {
+    startedDevices.add(device);
     if (startWait != null) await startWait!.future;
     emit({'event': 'ecg_started'});
   }
@@ -204,6 +207,7 @@ class FakeHeartGateway implements HeartBandGateway {
   @override
   Future<void> stop() async {
     stops++;
+    if (stopWait != null) await stopWait!.future;
   }
 
   @override

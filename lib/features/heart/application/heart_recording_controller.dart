@@ -25,7 +25,7 @@ class HeartRecordingController extends ChangeNotifier {
   HeartRecordingController({
     required this.repository,
     required this.gateway,
-    required this.device,
+    required this._device,
     AuthSession? session,
     DateTime Function()? clock,
     this.stallTimeout = const Duration(seconds: 10),
@@ -36,7 +36,8 @@ class HeartRecordingController extends ChangeNotifier {
   }
   final HeartRepository repository;
   final HeartBandGateway gateway;
-  final DeviceSnapshot device;
+  DeviceSnapshot _device;
+  DeviceSnapshot get device => _device;
   final AuthSession? _session;
   final String? _token;
   final DateTime Function() _clock;
@@ -53,6 +54,7 @@ class HeartRecordingController extends ChangeNotifier {
   int elapsedSeconds = 0;
   StreamSubscription<Map<String, dynamic>>? _subscription;
   Timer? _watchdog;
+  Future<void> _cleanup = Future.value();
   bool _disposed = false, _saving = false;
   int _generation = 0;
   bool get busy => [
@@ -79,20 +81,22 @@ class HeartRecordingController extends ChangeNotifier {
     }
   }
 
-  Future<void> start() async {
+  Future<void> start({DeviceSnapshot? device}) async {
     if (busy || !_sameAccount || _disposed) return;
+    final captureDevice = device ?? _device;
     if (!gateway.supported) {
       errorCode = 'unsupported_platform';
       status = HeartRecordingStatus.failed;
       _emit();
       return;
     }
-    if (!device.connected || device.transportId == null) {
+    if (!captureDevice.connected || captureDevice.transportId == null) {
       errorCode = 'device_not_connected';
       status = HeartRecordingStatus.failed;
       _emit();
       return;
     }
+    _device = captureDevice;
     final generation = ++_generation;
     samples = [];
     metrics = {};
@@ -106,15 +110,26 @@ class HeartRecordingController extends ChangeNotifier {
     errorCode = null;
     status = HeartRecordingStatus.starting;
     _emit();
-    await _subscription?.cancel();
-    _subscription = gateway.events.listen(
-      _event,
-      onError: (Object e) => _fail('capture_failed'),
-    );
     try {
-      await gateway.start(device).timeout(const Duration(seconds: 20));
+      // A retry must not race the previous native stop/EventChannel cancel.
+      await _cleanup;
+      if (_disposed || generation != _generation || !_sameAccount) return;
+      final previous = _subscription;
+      _subscription = null;
+      await previous?.cancel();
+      if (_disposed || generation != _generation || !_sameAccount) return;
+      _subscription = gateway.events.listen(
+        (event) {
+          if (generation == _generation) _event(event);
+        },
+        onError: (Object e) {
+          if (generation == _generation) _fail('capture_failed');
+        },
+      );
+      await gateway.start(captureDevice).timeout(const Duration(seconds: 20));
       if (_disposed || generation != _generation || !_sameAccount) {
-        await gateway.stop();
+        // Cancellation already stopped this generation. A late response must
+        // never stop a newer recording that has since started.
         return;
       }
       if (status == HeartRecordingStatus.starting) {
@@ -226,7 +241,7 @@ class HeartRecordingController extends ChangeNotifier {
     errorCode = code;
     status = HeartRecordingStatus.failed;
     _watchdog?.cancel();
-    unawaited(gateway.stop().catchError((Object _) {}));
+    unawaited(_endCapture());
     _emit();
   }
 
@@ -254,13 +269,19 @@ class HeartRecordingController extends ChangeNotifier {
     }
   }
 
-  Future<void> _endCapture() async {
+  Future<void> _endCapture() {
     _watchdog?.cancel();
-    try {
-      await gateway.stop();
-    } catch (_) {}
-    await _subscription?.cancel();
+    _watchdog = null;
+    final subscription = _subscription;
     _subscription = null;
+    return _cleanup = _cleanup.then((_) async {
+      try {
+        await gateway.stop();
+      } catch (_) {}
+      try {
+        await subscription?.cancel();
+      } catch (_) {}
+    });
   }
 
   Future<void> cancel() async {

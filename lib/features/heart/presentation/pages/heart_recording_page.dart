@@ -35,9 +35,15 @@ class _HeartRecordingPageState extends State<HeartRecordingPage>
       (widget.demo ? DemoHeartBandGateway() : NativeHeartBandGateway());
   HeartRecordingController? _controller;
   bool _closing = false;
+  bool _foreground = true;
   @override
   void initState() {
     super.initState();
+    _foreground = ![
+      AppLifecycleState.paused,
+      AppLifecycleState.hidden,
+      AppLifecycleState.detached,
+    ].contains(WidgetsBinding.instance.lifecycleState);
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -55,10 +61,17 @@ class _HeartRecordingPageState extends State<HeartRecordingPage>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if ((state == AppLifecycleState.paused ||
-            state == AppLifecycleState.detached) &&
-        _controller?.status == HeartRecordingStatus.measuring) {
-      unawaited(_controller!.cancel());
+    if (state == AppLifecycleState.resumed) {
+      _foreground = true;
+    }
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden ||
+        state == AppLifecycleState.detached) {
+      _foreground = false;
+      if (_controller?.status == HeartRecordingStatus.starting ||
+          _controller?.status == HeartRecordingStatus.measuring) {
+        unawaited(_controller!.cancel());
+      }
     }
   }
 
@@ -67,7 +80,7 @@ class _HeartRecordingPageState extends State<HeartRecordingPage>
   }
 
   Future<void> _start() async {
-    if (_controller?.busy == true) return;
+    if (!_foreground || _closing || _controller?.busy == true) return;
     final device = widget.demo
         ? const DeviceSnapshot(
             id: 'demo',
@@ -101,7 +114,7 @@ class _HeartRecordingPageState extends State<HeartRecordingPage>
       device: device!,
       session: AuthSession.instance,
     )..addListener(_changed);
-    await _controller!.start();
+    await _controller!.start(device: device);
   }
 
   Future<void> _close() async {
