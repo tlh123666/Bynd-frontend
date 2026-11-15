@@ -27,6 +27,7 @@ class RemoteDiaryRepository implements DiaryRepository {
       method,
       '/me/diary$path',
       body: body,
+      expectedAccessToken: _token,
       queryParameters: method == 'GET' ? {'timezone': _timezone()} : null,
     );
     _check();

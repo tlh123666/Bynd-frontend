@@ -18,12 +18,19 @@ class DiaryQuickQuestions extends StatefulWidget {
     this.kickerStyle,
     this.keyPrefix = 'diary-habit',
     this.iconAnswers = false,
+    this.ratingKey,
+    this.ratingQuestion,
+    this.ratingLowLabel,
+    this.ratingHighLabel,
+    this.onOpenDiary,
     super.key,
   });
   final List<(String, String, String)> questions;
   final TextStyle? bodyStyle, captionStyle, kickerStyle;
   final String keyPrefix;
   final bool iconAnswers;
+  final String? ratingKey, ratingQuestion, ratingLowLabel, ratingHighLabel;
+  final VoidCallback? onOpenDiary;
   final DiaryRepository repository;
   final DateTime date;
   final ValueChanged<bool> onBusyChanged;
@@ -36,6 +43,16 @@ class _DiaryQuickQuestionsState extends State<DiaryQuickQuestions> {
   List<DiaryTracker>? _catalog;
   Object? _error;
   bool _busy = false;
+  double? _ratingChoice(double? value) {
+    if (value == null || !value.isFinite || value < 1 || value > 10) {
+      return null;
+    }
+    return const [1.0, 3.0, 5.0, 8.0, 10.0][((value - 1) / 2).floor().clamp(
+      0,
+      4,
+    )];
+  }
+
   @override
   void initState() {
     super.initState();
@@ -60,7 +77,7 @@ class _DiaryQuickQuestionsState extends State<DiaryQuickQuestions> {
     }
   }
 
-  Future<void> _answer(String key, bool answer) async {
+  Future<void> _answer(String key, bool answer, {double? score}) async {
     if (_busy || _day?.editable != true) return;
     final tracker = _catalog!.where((t) => t.key == key).firstOrNull;
     if (tracker == null) return;
@@ -75,11 +92,13 @@ class _DiaryQuickQuestionsState extends State<DiaryQuickQuestions> {
       final events = base.events
           .where((e) => diaryCanonicalKey(e.key) != key)
           .toList();
-      if (existing == null || existing.happened != answer) {
+      if (existing == null ||
+          existing.happened != answer ||
+          (score != null && _ratingChoice(existing.value) != score)) {
         final record = existing ?? DiaryMoment.forTracker(tracker, widget.date);
         events.add(
           record.copy({
-            'numericValue': null,
+            'numericValue': score,
             'details': {...record.details, 'answer': answer},
           }),
         );
@@ -118,9 +137,20 @@ class _DiaryQuickQuestionsState extends State<DiaryQuickQuestions> {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          context.l10n.diaryUiYourDiary.toUpperCase(),
-          style: widget.kickerStyle ?? AppTypography.caption,
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                context.l10n.diaryUiYourDiary.toUpperCase(),
+                style: widget.kickerStyle ?? AppTypography.caption,
+              ),
+            ),
+            if (widget.onOpenDiary != null)
+              TextButton(
+                onPressed: _busy ? null : widget.onOpenDiary,
+                child: Text(context.l10n.diary),
+              ),
+          ],
         ),
         const SizedBox(height: 14),
         if (_day == null && _error == null)
@@ -128,6 +158,68 @@ class _DiaryQuickQuestionsState extends State<DiaryQuickQuestions> {
         else if (_day == null)
           AppGlassPill(label: context.l10n.diaryUiRetry, onPressed: _load)
         else ...[
+          if (widget.ratingKey != null) ...[
+            Text(
+              widget.ratingQuestion ?? '',
+              style: widget.bodyStyle ?? AppTypography.body,
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                for (final (index, score) in const [
+                  1.0,
+                  3.0,
+                  5.0,
+                  8.0,
+                  10.0,
+                ].indexed)
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 3),
+                      child: OutlinedButton(
+                        key: ValueKey(
+                          '${widget.keyPrefix}-rating-${index + 1}',
+                        ),
+                        onPressed: _busy || !_day!.editable
+                            ? null
+                            : () => _answer(
+                                widget.ratingKey!,
+                                true,
+                                score: score,
+                              ),
+                        style: OutlinedButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          minimumSize: const Size(0, 40),
+                          backgroundColor:
+                              _day!.events.any(
+                                (e) =>
+                                    e.key == widget.ratingKey &&
+                                    e.happened &&
+                                    _ratingChoice(e.value) == score,
+                              )
+                              ? AppColors.glass
+                              : Colors.transparent,
+                        ),
+                        child: Text('${index + 1}'),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  widget.ratingLowLabel ?? '',
+                  style: widget.captionStyle ?? AppTypography.caption,
+                ),
+                Text(
+                  widget.ratingHighLabel ?? '',
+                  style: widget.captionStyle ?? AppTypography.caption,
+                ),
+              ],
+            ),
+          ],
           for (final q in widget.questions) ...[
             const SizedBox(height: 14),
             Text(

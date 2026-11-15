@@ -2018,5 +2018,191 @@
     }
   },
   "diarySpeechLanguageUnavailable": "Speech recognition in this language is unavailable on this device. You can type instead.",
-  "diaryWhatHappenedOnThisDay": "What happened on this day?"
+  "diaryWhatHappenedOnThisDay": "What happened on this day?",
+  "vitalityRecovery": "Recovery",
+  "vitalityEnergy": "Energy",
+  "vitalityMissing": "No reading",
+  "vitalityLow": "Low",
+  "vitalityGood": "Good",
+  "vitalityGreat": "Great",
+  "vitalityAttention": "Attention",
+  "vitalityTodayRecovery": "Today's recovery",
+  "vitalityEnergyDay": "Energy throughout the day",
+  "vitalityForecastRecovery": "Recovery outlook",
+  "vitalityForecastEnergy": "Next hours",
+  "vitalityYesterday": "Yesterday",
+  "vitalityNormal": "Your normal",
+  "vitalityAverage7": "7-day average",
+  "vitalityAverage": "average",
+  "vitalityToday": "today",
+  "vitalityTomorrow": "tomorrow",
+  "vitalityNow": "now",
+  "vitalityDetails": "View details",
+  "vitalitySettings": "Settings",
+  "vitalityRecoverySettings": "What Recovery considers and shows you.",
+  "vitalityEnergySettings": "Your movement goals and Energy notices.",
+  "vitalityCalculation": "How it is calculated",
+  "vitalityTrainingSetting": "Consider yesterday's training",
+  "vitalityTrainingHint": "Load estimated from recorded workout duration and heart rate.",
+  "vitalityShowPage": "Show on this page",
+  "vitalityFactors": "Today's contributing factors",
+  "vitalityFactorsHint": "HRV, heart rate, sleep and load",
+  "vitalityShowForecast": "Tomorrow's outlook",
+  "vitalityShowWindows": "Energy windows",
+  "vitalityWindowsHint": "Peaks observed in this day's syncs",
+  "vitalityNotices": "In-page notices",
+  "vitalityLowNotice": "Low recovery",
+  "vitalityMorningNotice": "Morning summary",
+  "vitalityMovementNotice": "Time to move",
+  "vitalityGoalNotice": "Goal reached",
+  "vitalityNoticeHint": "Notices shown when you open this page; these are not background notifications.",
+  "vitalityGoals": "Goals",
+  "vitalityStepsGoal": "Step goal",
+  "vitalityActiveGoal": "Active minutes",
+  "vitalityPerDay": "per day",
+  "vitalityData": "Data",
+  "vitalityCalendar": "Calendar",
+  "vitalityShare": "Share",
+  "vitalityExport": "Export data",
+  "vitalitySave": "Save",
+  "vitalitySaved": "Preferences saved.",
+  "vitalitySaveFailed": "Could not save. Your changes are still here.",
+  "vitalityLoadingFailed": "Could not load. Please try again.",
+  "vitalityRetry": "Retry",
+  "vitalityAccountChanged": "Your account changed. Reopen this page.",
+  "vitalityNoData": "Sync your band to see this day's signals.",
+  "vitalityNoBaseline": "Your normal appears after 7 valid days in the previous 28 days.",
+  "vitalityNoCurve": "There are not enough synced estimates in this day for a curve yet.",
+  "vitalityNoForecast": "There is not enough history for an outlook yet.",
+  "vitalityEstimated": "Estimate based on your data",
+  "vitalityEstimateExplanation": "This is a wellness estimate calculated from available signals. It is not a direct measurement or a diagnosis.",
+  "vitalityForecastExplanation": "An evolution scenario, not a guarantee. New readings can change the estimate.",
+  "vitalityCurveExplanation": "Points captured at real syncs. Gaps without readings remain blank.",
+  "vitalityDemo": "Demo · reference data",
+  "vitalityRecoveryReady": "Your body is ready for a strong day.",
+  "vitalityRecoveryLow": "Your body is still recovering. Take it easy today.",
+  "vitalityRecoveryRest": "Your body is asking for rest today.",
+  "vitalityEnergyReady": "A good morning peak. Now, conserve your energy.",
+  "vitalityEnergyLow": "Lower energy today. Do the important things early.",
+  "vitalityEnergyRest": "Little energy today. Prioritize rest.",
+  "vitalityRecoveryAnalysis": "HRV, stress and recorded workouts contribute to this estimate. Compare the signals below and follow the trend rather than drawing conclusions from a single day.",
+  "vitalityEnergyAnalysis": "Verified sleep, stress, HRV and steps contribute to this estimate. The curve shows only the points captured during syncs.",
+  "vitalityMetrics": "Key metrics",
+  "vitalityRecoveryMetrics": "What today's recovery means for your day.",
+  "vitalityEnergyMetrics": "What affects your energy today.",
+  "vitalityTraining": "Training load",
+  "vitalityStress": "Stress",
+  "vitalityHRV": "HRV",
+  "vitalityRHR": "Resting heart rate",
+  "vitalityVO2": "VO₂ Max",
+  "vitalitySleep": "Sleep",
+  "vitalityTemperature": "Temperature",
+  "vitalityBreathing": "Breathing",
+  "vitalitySteps": "Steps",
+  "vitalityActiveMinutes": "Active min.",
+  "vitalityCalories": "Calories",
+  "vitalitySignals": "Signals in this reading",
+  "vitalityRecoveryWeek": "Recovery in the last 7 days",
+  "vitalityEnergyWeek": "Energy in the last 7 days",
+  "vitalityWeek": "Week",
+  "vitalityMonth": "Month",
+  "vitalityDay": "Day",
+  "vitalityMetricDetails": "About this reading",
+  "vitalityMissingMetric": "This signal was not measured or synced on this day.",
+  "vitalityWeekExplanation": "Averages use only days with data. Missing days are not counted as zero.",
+  "vitalityDiary": "Your Diary",
+  "vitalityDiaryHint": "One tap each. Saved straight to your Diary to help Atlas understand your day.",
+  "vitalityWakeQuestion": "How did you wake up?",
+  "vitalityEnergyQuestion": "How is your energy?",
+  "vitalitySoreness": "Do your muscles feel sore?",
+  "vitalityFlu": "Any flu symptoms?",
+  "vitalityBreakfast": "Did you have breakfast?",
+  "vitalityNap": "Did you nap today?",
+  "vitalityScaleBad": "Very bad",
+  "vitalityScaleGood": "Very good",
+  "vitalityScaleLow": "Very low",
+  "vitalityScaleHigh": "Very good",
+  "vitalityMore": "Show more",
+  "vitalityLess": "Show less",
+  "vitalityAskAtlas": "Talk to Atlas",
+  "vitalityShareFailed": "Could not share or export. Please retry.",
+  "vitalityPremium": "30-day history requires Premium.",
+  "vitalityGoalReached": "You reached your step goal on this day.",
+  "vitalityMovementHint": "Check your active minutes and find a break to move.",
+  "vitalityOpenDiary": "Open Diary",
+  "vitalitySyncTime": "Last sync",
+  "vitalityInfo": "How it works",
+  "vitalityScoreSummary": "{score} out of 100 · {status}",
+  "vitalityComparedWeek": "{delta} compared with the previous week",
+  "vitalityPeakAt": "Observed peak: {score} at {time}",
+  "vitalitySelectedPoint": "{date} · {score}",
+  "@vitalityScoreSummary": {
+    "placeholders": {
+      "score": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "@vitalityComparedWeek": {
+    "placeholders": {
+      "delta": {
+        "type": "String"
+      }
+    }
+  },
+  "@vitalityPeakAt": {
+    "placeholders": {
+      "score": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@vitalitySelectedPoint": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "score": {
+        "type": "String"
+      }
+    }
+  },
+  "vitalityEnergyPeakForecast": "Peak {peak} at {peakTime} · outlook {forecast} at {forecastTime}",
+  "@vitalityEnergyPeakForecast": {
+    "placeholders": {
+      "peak": {
+        "type": "String"
+      },
+      "peakTime": {
+        "type": "String"
+      },
+      "forecast": {
+        "type": "String"
+      },
+      "forecastTime": {
+        "type": "String"
+      }
+    }
+  },
+  "vitalityRecoveryWeekUp": "Your recovery improved this week.",
+  "vitalityRecoveryWeekDown": "Your recovery dipped a little this week.",
+  "vitalityEnergyWeekUp": "Your energy improved this week.",
+  "vitalityEnergyWeekDown": "Your energy dipped a little this week.",
+  "vitalityWeekSummary": "The last 7 days averaged {average}, {delta} compared with the previous week.",
+  "@vitalityWeekSummary": {
+    "placeholders": {
+      "average": {
+        "type": "String"
+      },
+      "delta": {
+        "type": "String"
+      }
+    }
+  }
 }
