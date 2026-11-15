@@ -101,6 +101,72 @@ class AppLocalizationsEn extends AppLocalizations {
   String get exerciseAddMore => 'Add exercise';
 
   @override
+  String get workoutLocalNote => 'Stored on this device only · not synced';
+
+  @override
+  String get workoutDefaultsNote => 'Example starting values';
+
+  @override
+  String get workoutSaveError =>
+      'Could not save on this device. Please try again.';
+
+  @override
+  String get workoutLoadError => 'Could not load local workouts.';
+
+  @override
+  String get workoutEditSets => 'Edit sets';
+
+  @override
+  String get workoutShowExercise => 'View exercise';
+
+  @override
+  String get workoutRemoveExercise => 'Remove exercise';
+
+  @override
+  String get workoutDuplicateExercise => 'Duplicate exercise';
+
+  @override
+  String get workoutRemoveSet => 'Remove set';
+
+  @override
+  String get workoutAddSet => 'Add set';
+
+  @override
+  String get workoutSet => 'Set';
+
+  @override
+  String get workoutAmount => 'Repetitions / time';
+
+  @override
+  String get workoutWeightKg => 'Weight (kg)';
+
+  @override
+  String get workoutDone => 'Done';
+
+  @override
+  String get workoutCancel => 'Cancel';
+
+  @override
+  String get workoutInvalidSet => 'Enter valid values.';
+
+  @override
+  String get workoutPlanPreview => 'Local plan · activity not started';
+
+  @override
+  String get workoutReorder => 'Reorder exercises';
+
+  @override
+  String get workoutMoveUp => 'Move up';
+
+  @override
+  String get workoutMoveDown => 'Move down';
+
+  @override
+  String workoutSuggestedName(String group) {
+    return 'Workout: $group';
+  }
+
+  @override
   String get workoutBuilderTitle => 'Build workout';
 
   @override

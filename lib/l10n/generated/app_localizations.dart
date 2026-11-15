@@ -261,6 +261,132 @@ abstract class AppLocalizations {
   /// **'Adicionar exercício'**
   String get exerciseAddMore;
 
+  /// No description provided for @workoutLocalNote.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Salvo apenas neste dispositivo · não sincronizado'**
+  String get workoutLocalNote;
+
+  /// No description provided for @workoutDefaultsNote.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Valores iniciais de exemplo'**
+  String get workoutDefaultsNote;
+
+  /// No description provided for @workoutSaveError.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Não foi possível salvar neste dispositivo. Tente novamente.'**
+  String get workoutSaveError;
+
+  /// No description provided for @workoutLoadError.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Não foi possível carregar os treinos locais.'**
+  String get workoutLoadError;
+
+  /// No description provided for @workoutEditSets.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Editar séries'**
+  String get workoutEditSets;
+
+  /// No description provided for @workoutShowExercise.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Ver como fazer'**
+  String get workoutShowExercise;
+
+  /// No description provided for @workoutRemoveExercise.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Remover exercício'**
+  String get workoutRemoveExercise;
+
+  /// No description provided for @workoutDuplicateExercise.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Duplicar exercício'**
+  String get workoutDuplicateExercise;
+
+  /// No description provided for @workoutRemoveSet.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Remover série'**
+  String get workoutRemoveSet;
+
+  /// No description provided for @workoutAddSet.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Adicionar série'**
+  String get workoutAddSet;
+
+  /// No description provided for @workoutSet.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Série'**
+  String get workoutSet;
+
+  /// No description provided for @workoutAmount.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Repetições / tempo'**
+  String get workoutAmount;
+
+  /// No description provided for @workoutWeightKg.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Peso (kg)'**
+  String get workoutWeightKg;
+
+  /// No description provided for @workoutDone.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Concluir'**
+  String get workoutDone;
+
+  /// No description provided for @workoutCancel.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Cancelar'**
+  String get workoutCancel;
+
+  /// No description provided for @workoutInvalidSet.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Informe valores válidos.'**
+  String get workoutInvalidSet;
+
+  /// No description provided for @workoutPlanPreview.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Plano local · atividade ainda não iniciada'**
+  String get workoutPlanPreview;
+
+  /// No description provided for @workoutReorder.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Reordenar exercícios'**
+  String get workoutReorder;
+
+  /// No description provided for @workoutMoveUp.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Mover para cima'**
+  String get workoutMoveUp;
+
+  /// No description provided for @workoutMoveDown.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Mover para baixo'**
+  String get workoutMoveDown;
+
+  /// No description provided for @workoutSuggestedName.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Treino de {group}'**
+  String workoutSuggestedName(String group);
+
   /// No description provided for @workoutBuilderTitle.
   ///
   /// In pt_BR, this message translates to:

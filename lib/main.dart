@@ -64,6 +64,7 @@ class _ByndAppState extends State<ByndApp> {
       return;
     }
     _lastRootBackAt = now;
+    // 根组件位于 MaterialApp 之上，直接使用当前语言控制器。
     final isPt = _legacyLocale.locale.languageCode == 'pt';
     _messengerKey.currentState?.showSnackBar(
       SnackBar(
