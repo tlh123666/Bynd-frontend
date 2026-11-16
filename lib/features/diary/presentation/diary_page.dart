@@ -1,6 +1,9 @@
 import '../../../shared/navigation/app_quick_action_navigation.dart';
 import '../../../l10n/app_localizations_context.dart';
 import '../../activity/presentation/pages/activity_overview_page.dart';
+import '../../atlas/application/atlas_greeting_store.dart';
+import '../../atlas/application/atlas_scope.dart';
+import '../../atlas/presentation/pages/atlas_chat_page.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../../core/auth/auth_session.dart';
@@ -35,6 +38,15 @@ class DiaryPage extends StatefulWidget {
 }
 
 class _DiaryPageState extends State<DiaryPage> {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 日记页的开场白在本页加载时预取：点开 Atlas 弹窗之前就绪。
+    unawaited(
+      AtlasGreetingStore.instance.prepare('diary', AtlasScope.of(context)),
+    );
+  }
+
   late final DiaryRepository _repo =
       widget.repository ??
       (AppConfig.current.demoData
@@ -409,6 +421,12 @@ class _DiaryPageState extends State<DiaryPage> {
               if (_pending) return;
               if (index == 0) {
                 Navigator.popUntil(context, (r) => r.isFirst);
+              } else if (index == 1) {
+                // Atlas：与首页底栏同款，滑出对话浮层；来源=diary，
+                // 开场白按日记上下文生成（此前误报 coming soon）
+                Navigator.of(
+                  context,
+                ).push<void>(AtlasSheetRoute(origin: 'diary'));
               } else {
                 AppNotice.show(
                   context,

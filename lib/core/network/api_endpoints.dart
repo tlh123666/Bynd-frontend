@@ -292,6 +292,7 @@ class ApiEndpoints {
   /// 后端已在服务端过滤候选态与过期条目并隐藏读取窗口参数，客户端不要再传
   /// windowDays —— 传了也会被忽略。
   static const String insights = '/api/v1/me/insights';
+  static const String assistantGreeting = '/api/v1/me/ai/greeting';
   static const String assistantSettings = '/api/v1/me/ai/settings';
   static const String assistantConsents = '/api/v1/me/ai/consents';
   static const String assistantMemories = '/api/v1/me/ai/memories';

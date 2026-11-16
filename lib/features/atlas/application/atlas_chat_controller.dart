@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import '../../../core/network/api_client.dart';
 import '../data/atlas_repository.dart';
 import '../data/models/conversation.dart';
+import 'atlas_greeting_store.dart';
 
 /// ATLAS 聊天的状态机。
 ///
@@ -21,9 +22,14 @@ import '../data/models/conversation.dart';
 ///   归一化过），取消接口必须用同一个值；
 /// * error 事件里带业务码（如每日配额），必须透传给 UI，不能吞成「生成失败」。
 class AtlasChatController extends ChangeNotifier {
-  AtlasChatController(this._repository);
+  AtlasChatController(this._repository, {this.origin = 'home'});
 
   final AtlasRepository _repository;
+
+  /// 打开来源（home/diary/community/signals）：发送首条消息时把该来源的
+  /// 开场白并入对话历史。
+  final String origin;
+
   StreamSubscription<String>? _subscription;
 
   String? _conversationId;
@@ -85,6 +91,22 @@ class AtlasChatController extends ChangeNotifier {
     final text = content.trim();
     if (text.isEmpty || isStreaming) return;
     _error = null;
+    // 开场白并入对话历史：与源码一致，问候就是第一条助手消息。开场白
+    // 来自页面级预取缓存（AtlasGreetingStore），点开之前就已存在。
+    final greeting = AtlasGreetingStore.instance.greetingFor(origin);
+    if (greeting != null && _messages.isEmpty) {
+      AtlasGreetingStore.instance.completeTyping(origin);
+      _messages.insert(
+        0,
+        AtlasMessage(
+          id: 'greeting-${greeting.context}',
+          role: 'assistant',
+          content: greeting.asMessageText,
+          status: 'completed',
+          createdAt: DateTime.now().toUtc().toIso8601String(),
+        ),
+      );
+    }
     try {
       _conversationId ??= (await _repository.createConversation()).id;
     } on ApiException catch (error) {
