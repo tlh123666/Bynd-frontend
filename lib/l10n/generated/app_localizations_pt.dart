@@ -102,6 +102,73 @@ class AppLocalizationsPt extends AppLocalizations {
   String get exerciseAddMore => 'Adicionar exercício';
 
   @override
+  String get workoutLocalNote =>
+      'Salvo apenas neste dispositivo · não sincronizado';
+
+  @override
+  String get workoutDefaultsNote => 'Valores iniciais de exemplo';
+
+  @override
+  String get workoutSaveError =>
+      'Não foi possível salvar neste dispositivo. Tente novamente.';
+
+  @override
+  String get workoutLoadError => 'Não foi possível carregar os treinos locais.';
+
+  @override
+  String get workoutEditSets => 'Editar séries';
+
+  @override
+  String get workoutShowExercise => 'Ver como fazer';
+
+  @override
+  String get workoutRemoveExercise => 'Remover exercício';
+
+  @override
+  String get workoutDuplicateExercise => 'Duplicar exercício';
+
+  @override
+  String get workoutRemoveSet => 'Remover série';
+
+  @override
+  String get workoutAddSet => 'Adicionar série';
+
+  @override
+  String get workoutSet => 'Série';
+
+  @override
+  String get workoutAmount => 'Repetições / tempo';
+
+  @override
+  String get workoutWeightKg => 'Peso (kg)';
+
+  @override
+  String get workoutDone => 'Concluir';
+
+  @override
+  String get workoutCancel => 'Cancelar';
+
+  @override
+  String get workoutInvalidSet => 'Informe valores válidos.';
+
+  @override
+  String get workoutPlanPreview => 'Plano local · atividade ainda não iniciada';
+
+  @override
+  String get workoutReorder => 'Reordenar exercícios';
+
+  @override
+  String get workoutMoveUp => 'Mover para cima';
+
+  @override
+  String get workoutMoveDown => 'Mover para baixo';
+
+  @override
+  String workoutSuggestedName(String group) {
+    return 'Treino de $group';
+  }
+
+  @override
   String get workoutBuilderTitle => 'Montar treino';
 
   @override
@@ -6275,6 +6342,73 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get exerciseAddMore => 'Adicionar exercício';
+
+  @override
+  String get workoutLocalNote =>
+      'Salvo apenas neste dispositivo · não sincronizado';
+
+  @override
+  String get workoutDefaultsNote => 'Valores iniciais de exemplo';
+
+  @override
+  String get workoutSaveError =>
+      'Não foi possível salvar neste dispositivo. Tente novamente.';
+
+  @override
+  String get workoutLoadError => 'Não foi possível carregar os treinos locais.';
+
+  @override
+  String get workoutEditSets => 'Editar séries';
+
+  @override
+  String get workoutShowExercise => 'Ver como fazer';
+
+  @override
+  String get workoutRemoveExercise => 'Remover exercício';
+
+  @override
+  String get workoutDuplicateExercise => 'Duplicar exercício';
+
+  @override
+  String get workoutRemoveSet => 'Remover série';
+
+  @override
+  String get workoutAddSet => 'Adicionar série';
+
+  @override
+  String get workoutSet => 'Série';
+
+  @override
+  String get workoutAmount => 'Repetições / tempo';
+
+  @override
+  String get workoutWeightKg => 'Peso (kg)';
+
+  @override
+  String get workoutDone => 'Concluir';
+
+  @override
+  String get workoutCancel => 'Cancelar';
+
+  @override
+  String get workoutInvalidSet => 'Informe valores válidos.';
+
+  @override
+  String get workoutPlanPreview => 'Plano local · atividade ainda não iniciada';
+
+  @override
+  String get workoutReorder => 'Reordenar exercícios';
+
+  @override
+  String get workoutMoveUp => 'Mover para cima';
+
+  @override
+  String get workoutMoveDown => 'Mover para baixo';
+
+  @override
+  String workoutSuggestedName(String group) {
+    return 'Treino de $group';
+  }
 
   @override
   String get workoutBuilderTitle => 'Montar treino';

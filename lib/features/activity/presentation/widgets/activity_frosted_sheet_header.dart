@@ -8,10 +8,12 @@ class ActivityFrostedSheetHeader extends StatelessWidget {
   const ActivityFrostedSheetHeader({
     required this.title,
     this.height = 62,
+    this.trailing,
     super.key,
   });
   final String title;
   final double height;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) =>
@@ -66,7 +68,7 @@ class ActivityFrostedSheetHeader extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 56),
+                    SizedBox(width: 56, child: trailing),
                   ],
                 ),
               ),

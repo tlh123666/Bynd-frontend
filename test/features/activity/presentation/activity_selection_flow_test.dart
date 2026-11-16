@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:new_jcvital/design_system/components/app_bottom_nav.dart';
 import 'package:new_jcvital/features/activity/presentation/pages/activity_overview_page.dart';
@@ -11,6 +12,7 @@ import 'package:new_jcvital/features/home/home_sky_background.dart';
 import 'package:new_jcvital/features/profile/profile_page.dart';
 
 void main() {
+  setUp(() => SharedPreferences.setMockInitialValues({}));
   // IndexedStack 现在包含 ATLAS 会话页（didChangeDependencies 里取 AtlasScope），
   // 与真实树一致：auth_gate 用 AtlasScope 包住整个 app。
   Future<void> pumpHome(WidgetTester tester) async {
