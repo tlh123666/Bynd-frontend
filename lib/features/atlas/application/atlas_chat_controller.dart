@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import '../../../core/network/api_client.dart';
 import '../data/atlas_repository.dart';
 import '../data/models/conversation.dart';
+import '../data/models/greeting.dart';
 
 /// ATLAS 聊天的状态机。
 ///
@@ -33,6 +34,63 @@ class AtlasChatController extends ChangeNotifier {
   String _phase = 'idle';
   String? _error;
   bool _loadingHistory = false;
+
+  // 页面上下文开场白：按打开来源（home/diary/community/signals）拉取，
+  // 打字机逐字渲染；用户发出第一条消息时并入对话历史（与源码一致：
+  // 开场白就是第一条助手消息）。
+  AtlasGreeting? _greeting;
+  int _greetingReveal = 0;
+  Timer? _typeTimer;
+
+  AtlasGreeting? get greeting => _greeting;
+  bool get hasGreeting => _greeting != null;
+  bool get greetingReady {
+    final greeting = _greeting;
+    return greeting != null && _greetingReveal >= greeting.summary.length;
+  }
+  String get greetingRevealedSummary {
+    final summary = _greeting?.summary ?? '';
+    return summary.substring(0, _greetingReveal.clamp(0, summary.length));
+  }
+
+  /// 拉取并开始打字机渲染。失败静默——弹窗不能因为开场白挂掉。
+  Future<void> loadGreeting(String origin) async {
+    if (_subscription != null || _messages.isNotEmpty || hasGreeting) return;
+    try {
+      final greeting = await _repository.fetchGreeting(context: origin);
+      if (greeting == null || _messages.isNotEmpty || isStreaming) return;
+      _greeting = greeting;
+      _greetingReveal = 0;
+      _typeTimer?.cancel();
+      _typeTimer = Timer.periodic(const Duration(milliseconds: 18), (timer) {
+        final current = _greeting;
+        if (current == null) {
+          timer.cancel();
+          return;
+        }
+        final total = current.summary.length;
+        if (_greetingReveal >= total) {
+          timer.cancel();
+          notifyListeners();
+          return;
+        }
+        _greetingReveal = (_greetingReveal + 1).clamp(0, total);
+        notifyListeners();
+      });
+      notifyListeners();
+    } on ApiException {
+      // 静默降级：没有问候语也能正常聊天。
+    }
+  }
+
+  /// 把打字机进度直接拉满（发送前并入历史时用）。
+  void _finalizeGreetingTyping() {
+    _typeTimer?.cancel();
+    final greeting = _greeting;
+    if (greeting != null) {
+      _greetingReveal = greeting.summary.length;
+    }
+  }
 
   List<AtlasMessage> get messages => List.unmodifiable(_messages);
   String get streamingText => _streamingText;
@@ -85,6 +143,22 @@ class AtlasChatController extends ChangeNotifier {
     final text = content.trim();
     if (text.isEmpty || isStreaming) return;
     _error = null;
+    // 开场白并入对话历史：与源码一致，问候就是第一条助手消息。
+    if (_greeting != null && _messages.isEmpty) {
+      _finalizeGreetingTyping();
+      _messages.insert(
+        0,
+        AtlasMessage(
+          id: 'greeting-${_greeting!.context}',
+          role: 'assistant',
+          content: _greeting!.asMessageText,
+          status: 'completed',
+          createdAt: DateTime.now().toUtc().toIso8601String(),
+        ),
+      );
+      _typeTimer?.cancel();
+      _greeting = null;
+    }
     try {
       _conversationId ??= (await _repository.createConversation()).id;
     } on ApiException catch (error) {
@@ -237,6 +311,7 @@ class AtlasChatController extends ChangeNotifier {
   @override
   void dispose() {
     _subscription?.cancel();
+    _typeTimer?.cancel();
     super.dispose();
   }
 }

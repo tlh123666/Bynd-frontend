@@ -31,14 +31,13 @@ import 'system_gesture_zone.dart';
 ///   白圆 38 —— 空文案=麦克风、有文案=上箭头、流式=停止方块；
 /// * 反应 `.reac`：复制/赞/踩，灰 45%，选中变白。
 class AtlasSheetRoute extends PageRouteBuilder<void> {
-  AtlasSheetRoute()
+  AtlasSheetRoute({this.origin = 'home'})
     : super(
         opaque: false,
         barrierDismissible: false,
         transitionDuration: const Duration(milliseconds: 420),
         reverseTransitionDuration: const Duration(milliseconds: 380),
-        pageBuilder: (_, _, _) =>
-            const AtlasChatPage(),
+        pageBuilder: (_, _, _) => AtlasChatPage(origin: origin),
         transitionsBuilder: (_, animation, _, child) => SlideTransition(
           position: Tween(begin: const Offset(0, 1), end: Offset.zero).animate(
             CurvedAnimation(
@@ -49,6 +48,10 @@ class AtlasSheetRoute extends PageRouteBuilder<void> {
           child: child,
         ),
       );
+
+  /// 打开来源（home / diary / community / signals）：决定弹窗按哪个页面
+  /// 的上下文生成开场白。
+  final String origin;
 }
 
 /// 源码的 Memória 脑图标（Assistente.jsx `IC.lampada`，24 viewBox 描边）。
@@ -85,7 +88,10 @@ class _AtlasCss {
 }
 
 class AtlasChatPage extends StatefulWidget {
-  const AtlasChatPage({super.key});
+  const AtlasChatPage({this.origin = 'home', super.key});
+
+  /// 打开来源：决定开场白按哪个页面的上下文生成。
+  final String origin;
 
   @override
   State<AtlasChatPage> createState() => _AtlasChatPageState();
@@ -210,6 +216,8 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
     if (!_controllerReady) {
       _controller = AtlasChatController(AtlasScope.of(context));
       _controllerReady = true;
+      // 按打开来源拉取页面上下文开场白（打字机渲染）。
+      _controller.loadGreeting(widget.origin);
     }
   }
 
@@ -264,7 +272,7 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
             Positioned.fill(
               child: ColoredBox(
                 color: const Color(0xFF0A0E14).withValues(
-                  alpha: (_AtlasCss.canBlur ? 0.55 : 0.85) * _veilFade,
+                  alpha: (_AtlasCss.canBlur ? 0.55 : 0.75) * _veilFade,
                 ),
               ),
             ),
@@ -502,6 +510,12 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
         controller: _scroll,
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
         children: [
+          // 页面上下文开场白：打字机逐字出现，完成后带反应行；用户发出
+          // 第一条消息时它并入对话历史成为第一条助手消息。
+          if (controller.hasGreeting &&
+              controller.messages.isEmpty &&
+              !controller.loadingHistory)
+            _GreetingBlock(controller: controller),
           if (controller.error != null)
             _ErrorBanner(message: controller.error!),
           if (controller.loadingHistory)
@@ -631,6 +645,57 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
     if (conversation == null) return;
     await _controller.openConversation(conversation.id);
     _jumpToBottom(smooth: false);
+  }
+}
+
+/// 页面上下文开场白：标题 + 打字机正文（_AtlasCss 同款排版），完成后
+/// 出现反应行。渲染数据全部来自 controller（外层 AnimatedBuilder 已随
+/// 打字机 tick 重建）。
+class _GreetingBlock extends StatelessWidget {
+  const _GreetingBlock({required this.controller});
+
+  final AtlasChatController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final greeting = controller.greeting!;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (greeting.title.isNotEmpty)
+              SelectableText(
+                greeting.title,
+                style: const TextStyle(
+                  color: _AtlasCss.text,
+                  fontSize: 15.5,
+                  height: 1.6,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            if (controller.greetingRevealedSummary.isNotEmpty)
+              SelectableText(
+                controller.greetingRevealedSummary,
+                style: const TextStyle(
+                  color: _AtlasCss.text,
+                  fontSize: 15.5,
+                  height: 1.6,
+                ),
+              ),
+            if (controller.greetingReady)
+              _ReactionRow(content: greeting.asMessageText)
+            else
+              const Padding(
+                padding: EdgeInsets.only(top: 3),
+                child: _CursorDot(),
+              ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

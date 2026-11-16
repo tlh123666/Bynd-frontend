@@ -80,8 +80,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   };
 
   /// 底部 tab 的 Atlas：滑出对话浮层（Assistente.jsx 的 folha 模式）。
+  /// 打开来源跟随当前 tab——开场白按所在页面生成（home/community/signals）。
   void _openAtlasSheet() {
-    Navigator.of(context).push<void>(AtlasSheetRoute());
+    final origin = switch (_selectedIndex) {
+      2 => 'community',
+      3 => 'signals',
+      _ => 'home',
+    };
+    Navigator.of(context).push<void>(AtlasSheetRoute(origin: origin));
   }
 
   void _openQuickActions() {

@@ -2,6 +2,7 @@ import '../../../core/network/api_client.dart';
 import '../../../core/network/api_endpoints.dart';
 import 'models/capabilities.dart';
 import 'models/conversation.dart';
+import 'models/greeting.dart';
 import 'models/insight.dart';
 import 'models/mapa.dart';
 import 'models/workspace.dart';
@@ -149,6 +150,24 @@ class AtlasRepository {
       body: {'locale': defaultLocale, 'scope': ?scope},
     );
     return AtlasConversation.fromJson(data);
+  }
+
+  /// 按页面上下文取 Atlas 开场白。data 为 null（无可用内容）时返回 null。
+  Future<AtlasGreeting?> fetchGreeting({
+    required String context,
+    String? statDate,
+  }) async {
+    // ApiClient 已把 `data:null` 归一成空 map；fromJson 对空 map 返回 null
+    // （无可用内容 = 不渲染问候），与 workspace 的空态约定一致。
+    final data = await _get(
+      ApiEndpoints.assistantGreeting,
+      query: {
+        'context': context,
+        'timezone': defaultTimezone,
+        'statDate': ?statDate,
+      },
+    );
+    return AtlasGreeting.fromJson(data);
   }
 
   Future<AtlasConversationPage> fetchConversations({int limit = 20}) async {

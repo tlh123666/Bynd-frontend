@@ -411,9 +411,11 @@ class _DiaryPageState extends State<DiaryPage> {
               if (index == 0) {
                 Navigator.popUntil(context, (r) => r.isFirst);
               } else if (index == 1) {
-                // Atlas：与首页底栏同款，滑出对话浮层（日记页此前误报
-                // coming soon）
-                Navigator.of(context).push<void>(AtlasSheetRoute());
+                // Atlas：与首页底栏同款，滑出对话浮层；来源=diary，
+                // 开场白按日记上下文生成（此前误报 coming soon）
+                Navigator.of(
+                  context,
+                ).push<void>(AtlasSheetRoute(origin: 'diary'));
               } else {
                 AppNotice.show(
                   context,
