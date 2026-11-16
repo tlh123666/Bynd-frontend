@@ -54,6 +54,7 @@ class _ByndAppState extends State<ByndApp> {
   final GlobalKey<ScaffoldMessengerState> _messengerKey =
       GlobalKey<ScaffoldMessengerState>();
   DateTime? _lastRootBackAt;
+  DateTime? _lastTipAt;
 
   void _onRootBackInvoked(bool didPop, Object? result) {
     if (didPop) return;
@@ -64,6 +65,13 @@ class _ByndAppState extends State<ByndApp> {
       return;
     }
     _lastRootBackAt = now;
+    // 提示限频：误触边缘返回手势很频繁（卡片下滑、滑动起手贴边都会触发
+    // MIUI 返回），30 秒内不重复弹提示；拦截本身始终生效。
+    if (_lastTipAt != null &&
+        now.difference(_lastTipAt!) < const Duration(seconds: 30)) {
+      return;
+    }
+    _lastTipAt = now;
     // 根组件位于 MaterialApp 之上，直接使用当前语言控制器。
     final isPt = _legacyLocale.locale.languageCode == 'pt';
     _messengerKey.currentState?.showSnackBar(

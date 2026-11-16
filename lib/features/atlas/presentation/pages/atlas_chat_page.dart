@@ -259,12 +259,12 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
           children: [
             // .atlas-embaca：盖住底后景的暗纱（含首页 tabbar），随卡片下滑
             // 衰减，露出上一个页面（源码 .atlas-embaca { opacity:0 }）。
-            // Android 无真模糊，用略深的暗纱营造层次（黑帧 bug 见
-            // _AtlasCss.canBlur 注释）。
+            // Android 无真模糊（黑帧 bug，见 _AtlasCss.canBlur），暗纱加深
+            // 到 0.85 补偿——亮色页面（如日记）下 0.72 会明显透底。
             Positioned.fill(
               child: ColoredBox(
                 color: const Color(0xFF0A0E14).withValues(
-                  alpha: (_AtlasCss.canBlur ? 0.55 : 0.72) * _veilFade,
+                  alpha: (_AtlasCss.canBlur ? 0.55 : 0.85) * _veilFade,
                 ),
               ),
             ),

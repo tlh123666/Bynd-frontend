@@ -1,6 +1,7 @@
 import '../../../shared/navigation/app_quick_action_navigation.dart';
 import '../../../l10n/app_localizations_context.dart';
 import '../../activity/presentation/pages/activity_overview_page.dart';
+import '../../atlas/presentation/pages/atlas_chat_page.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../../core/auth/auth_session.dart';
@@ -409,6 +410,10 @@ class _DiaryPageState extends State<DiaryPage> {
               if (_pending) return;
               if (index == 0) {
                 Navigator.popUntil(context, (r) => r.isFirst);
+              } else if (index == 1) {
+                // Atlas：与首页底栏同款，滑出对话浮层（日记页此前误报
+                // coming soon）
+                Navigator.of(context).push<void>(AtlasSheetRoute());
               } else {
                 AppNotice.show(
                   context,
