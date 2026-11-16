@@ -17,6 +17,8 @@ import 'presentation/widgets/home_account_guard.dart';
 import '../profile/profile_page.dart';
 import '../activity/presentation/pages/activity_overview_page.dart';
 import '../atlas/presentation/pages/mapa_page.dart';
+import '../atlas/application/atlas_greeting_store.dart';
+import '../atlas/application/atlas_scope.dart';
 import '../atlas/presentation/pages/atlas_chat_page.dart';
 import 'presentation/pages/home_signals_page.dart';
 import '../device/presentation/pages/device_management_page.dart';
@@ -54,7 +56,21 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     scheduleMicrotask(() {
       if (mounted) unawaited(_home.setLocale(locale));
     });
+    // 当前 tab 的开场白在页面层预取：用户点开 Atlas 弹窗之前就绪。
+    unawaited(
+      AtlasGreetingStore.instance.prepare(
+        _originForTab(_selectedIndex),
+        AtlasScope.of(context),
+      ),
+    );
   }
+
+  /// 底部 tab → 开场白上下文（home / community / signals）。
+  String _originForTab(int index) => switch (index) {
+    2 => 'community',
+    3 => 'signals',
+    _ => 'home',
+  };
 
   @override
   void dispose() {
@@ -82,12 +98,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   /// 底部 tab 的 Atlas：滑出对话浮层（Assistente.jsx 的 folha 模式）。
   /// 打开来源跟随当前 tab——开场白按所在页面生成（home/community/signals）。
   void _openAtlasSheet() {
-    final origin = switch (_selectedIndex) {
-      2 => 'community',
-      3 => 'signals',
-      _ => 'home',
-    };
-    Navigator.of(context).push<void>(AtlasSheetRoute(origin: origin));
+    Navigator.of(
+      context,
+    ).push<void>(AtlasSheetRoute(origin: _originForTab(_selectedIndex)));
   }
 
   void _openQuickActions() {
@@ -207,6 +220,13 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       return;
     }
     setState(() => _selectedIndex = index);
+    // 切 tab 即预取对应模块的开场白。
+    unawaited(
+      AtlasGreetingStore.instance.prepare(
+        _originForTab(index),
+        AtlasScope.of(context),
+      ),
+    );
   }
 
   Future<void> _handleQuickAction(AppQuickAction action) async {

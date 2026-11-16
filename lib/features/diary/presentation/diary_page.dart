@@ -1,6 +1,8 @@
 import '../../../shared/navigation/app_quick_action_navigation.dart';
 import '../../../l10n/app_localizations_context.dart';
 import '../../activity/presentation/pages/activity_overview_page.dart';
+import '../../atlas/application/atlas_greeting_store.dart';
+import '../../atlas/application/atlas_scope.dart';
 import '../../atlas/presentation/pages/atlas_chat_page.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -36,6 +38,15 @@ class DiaryPage extends StatefulWidget {
 }
 
 class _DiaryPageState extends State<DiaryPage> {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 日记页的开场白在本页加载时预取：点开 Atlas 弹窗之前就绪。
+    unawaited(
+      AtlasGreetingStore.instance.prepare('diary', AtlasScope.of(context)),
+    );
+  }
+
   late final DiaryRepository _repo =
       widget.repository ??
       (AppConfig.current.demoData

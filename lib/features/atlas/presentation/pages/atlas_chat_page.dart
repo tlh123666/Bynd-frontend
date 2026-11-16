@@ -10,6 +10,7 @@ import '../../../../design_system/design_system.dart';
 import '../../../../l10n/app_localizations_context.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../application/atlas_chat_controller.dart';
+import '../../application/atlas_greeting_store.dart';
 import '../../application/atlas_scope.dart';
 import '../../data/models/conversation.dart';
 import 'atlas_conversations_sheet.dart';
@@ -214,10 +215,14 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
     // 取 InheritedWidget 只能在这里，不能在 initState：那时祖先还没挂稳。
     // AtlasScope.repository 由 auth_gate 创建、应用生命周期内不变，这里只取一次。
     if (!_controllerReady) {
-      _controller = AtlasChatController(AtlasScope.of(context));
+      _controller = AtlasChatController(
+        AtlasScope.of(context),
+        origin: widget.origin,
+      );
       _controllerReady = true;
-      // 按打开来源拉取页面上下文开场白（打字机渲染）。
-      _controller.loadGreeting(widget.origin);
+      // 开场白已在宿主页面预取（AtlasGreetingStore）；万一还没就绪，这里
+      // 兜底触发一次 prepare。
+      AtlasGreetingStore.instance.prepare(widget.origin, AtlasScope.of(context));
     }
   }
 
@@ -347,7 +352,12 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
                                       _buildHeader(strings),
                                       Expanded(
                                         child: AnimatedBuilder(
-                                          animation: _controller,
+                                          // 开场白打字机在 AtlasGreetingStore
+                                          // 里跑，列表要随它一起重建。
+                                          animation: Listenable.merge([
+                                            _controller,
+                                            AtlasGreetingStore.instance,
+                                          ]),
                                           builder: (context, _) =>
                                               _buildList(strings),
                                         ),
@@ -496,6 +506,7 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
   }
 
   Widget _buildList(AppLocalizations strings) {
+    final greeting = AtlasGreetingStore.instance.greetingFor(widget.origin);
     final controller = _controller;
     return NotificationListener<ScrollNotification>(
       onNotification: (notification) {
@@ -510,12 +521,13 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
         controller: _scroll,
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
         children: [
-          // 页面上下文开场白：打字机逐字出现，完成后带反应行；用户发出
-          // 第一条消息时它并入对话历史成为第一条助手消息。
-          if (controller.hasGreeting &&
+          // 页面上下文开场白：宿主页面预取（AtlasGreetingStore），点开时
+          // 已存在/已在打字；用户发出第一条消息时并入对话历史成为第一条
+          // 助手消息。空态默认文本（chatEmptyHint）随开场白移除。
+          if (greeting != null &&
               controller.messages.isEmpty &&
               !controller.loadingHistory)
-            _GreetingBlock(controller: controller),
+            _GreetingBlock(origin: widget.origin),
           if (controller.error != null)
             _ErrorBanner(message: controller.error!),
           if (controller.loadingHistory)
@@ -523,7 +535,7 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
           else if (controller.messages.isEmpty &&
               controller.streamingText.isEmpty &&
               !controller.isStreaming)
-            _EmptyState(hint: strings.chatEmptyHint)
+            const SizedBox.shrink()
           else ...[
             for (final message in controller.messages) ...[
               if (message.isUser)
@@ -652,13 +664,14 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
 /// 出现反应行。渲染数据全部来自 controller（外层 AnimatedBuilder 已随
 /// 打字机 tick 重建）。
 class _GreetingBlock extends StatelessWidget {
-  const _GreetingBlock({required this.controller});
+  const _GreetingBlock({required this.origin});
 
-  final AtlasChatController controller;
+  final String origin;
 
   @override
   Widget build(BuildContext context) {
-    final greeting = controller.greeting!;
+    final store = AtlasGreetingStore.instance;
+    final greeting = store.greetingFor(origin)!;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Align(
@@ -676,16 +689,16 @@ class _GreetingBlock extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-            if (controller.greetingRevealedSummary.isNotEmpty)
+            if (store.revealedSummaryFor(origin).isNotEmpty)
               SelectableText(
-                controller.greetingRevealedSummary,
+                store.revealedSummaryFor(origin),
                 style: const TextStyle(
                   color: _AtlasCss.text,
                   fontSize: 15.5,
                   height: 1.6,
                 ),
               ),
-            if (controller.greetingReady)
+            if (store.isReady(origin))
               _ReactionRow(content: greeting.asMessageText)
             else
               const Padding(
@@ -1213,18 +1226,3 @@ class _ErrorBanner extends StatelessWidget {
   );
 }
 
-class _EmptyState extends StatelessWidget {
-  const _EmptyState({required this.hint});
-
-  final String hint;
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
-    child: Text(
-      hint,
-      textAlign: TextAlign.center,
-      style: const TextStyle(color: _AtlasCss.textDim, fontSize: 14.5),
-    ),
-  );
-}
