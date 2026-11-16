@@ -6,14 +6,26 @@
   "exerciseDetailRepsWeight": "repetitions × weight",
   "exerciseDetailTitle": "Exercise",
   "exerciseDetailHow": "How to do: {name}",
-  "@exerciseDetailHow": { "placeholders": { "name": { "type": "String" } } },
+  "@exerciseDetailHow": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "exerciseDetailMark": "Mark to add",
   "exerciseDetailMuscles": "Muscles",
   "exerciseDetailEquipment": "Equipment",
   "exerciseDetailGroup": "Group",
   "exerciseDetailLevel": "Level",
   "exerciseDetailAnimation": "Animation: {name}",
-  "@exerciseDetailAnimation": { "placeholders": { "name": { "type": "String" } } },
+  "@exerciseDetailAnimation": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "exerciseDetailNoAnimation": "Animation not available for this exercise.",
   "exerciseConfirmEmpty": "Confirm",
   "exerciseSelectorTitle": "Select exercises",
@@ -21,14 +33,32 @@
   "exerciseAll": "All",
   "exerciseMark": "Select exercises",
   "exerciseAdd": "Add ({count})",
-  "@exerciseAdd": { "placeholders": { "count": { "type": "int" } } },
+  "@exerciseAdd": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "exerciseCount": "{count} exercises",
-  "@exerciseCount": { "placeholders": { "count": { "type": "int" } } },
+  "@exerciseCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "exerciseEmpty": "No exercises found.",
   "exerciseLoadError": "Could not load exercises.",
   "exerciseRetry": "Try again",
   "exerciseSelectedCount": "{count} exercises selected · demo",
-  "@exerciseSelectedCount": { "placeholders": { "count": { "type": "int" } } },
+  "@exerciseSelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "exerciseDraftNote": "Local preview · saving is not connected yet",
   "exerciseAddMore": "Add exercise",
   "workoutLocalNote": "Stored on this device only · not synced",
@@ -52,7 +82,13 @@
   "workoutMoveUp": "Move up",
   "workoutMoveDown": "Move down",
   "workoutSuggestedName": "Workout: {group}",
-  "@workoutSuggestedName": { "placeholders": { "group": { "type": "String" } } },
+  "@workoutSuggestedName": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
   "workoutBuilderTitle": "Build workout",
   "workoutBuilderWeight": "kg lifted",
   "workoutBuilderEmptyCount": "0 EXERCISES · 0 SETS",
@@ -73,10 +109,25 @@
   "strengthDemoName6": "Upper body and core",
   "strengthDemoName7": "Light workout · mobility",
   "strengthExerciseCount": "{exercises} exercises · {sets} sets",
-  "@strengthExerciseCount": { "placeholders": { "exercises": { "type": "int" }, "sets": { "type": "int" } } },
+  "@strengthExerciseCount": {
+    "placeholders": {
+      "exercises": {
+        "type": "int"
+      },
+      "sets": {
+        "type": "int"
+      }
+    }
+  },
   "strengthCreateHint": "choose exercises, sets and weight",
   "strengthOptions": "Options for {name}",
-  "@strengthOptions": { "placeholders": { "name": { "type": "String" } } },
+  "@strengthOptions": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "activityRegistrationPreview": "Preview · simulated data · not saved",
   "activityDetailHighIntensity": "High intensity",
   "activityDetailEffortPeaks": "Effort peaks",
@@ -632,6 +683,7 @@
   "chatHistoryTitle": "Conversations",
   "chatHistoryEmpty": "No conversations yet.",
   "chatHistoryUntitled": "Untitled conversation",
+  "chatContinueLast": "Continue last conversation",
   "healthGroupSleep": "Sleep",
   "healthGroupEnergy": "Energy",
   "healthGroupMetabolism": "Metabolism",

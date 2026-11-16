@@ -1657,6 +1657,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chatHistoryUntitled => 'Untitled conversation';
 
   @override
+  String get chatContinueLast => 'Continue last conversation';
+
+  @override
   String get healthGroupSleep => 'Sleep';
 
   @override

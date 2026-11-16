@@ -3147,6 +3147,12 @@ abstract class AppLocalizations {
   /// **'Conversa sem título'**
   String get chatHistoryUntitled;
 
+  /// No description provided for @chatContinueLast.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Continuar última conversa'**
+  String get chatContinueLast;
+
   /// No description provided for @healthGroupSleep.
   ///
   /// In pt_BR, this message translates to:

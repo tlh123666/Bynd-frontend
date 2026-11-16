@@ -31,28 +31,28 @@ import 'system_gesture_zone.dart';
 /// * 输入区 `.gx-caixa`：圆角 26、两团蓝光叠深底；动作钮 `.gx-acao`：
 ///   白圆 38 —— 空文案=麦克风、有文案=上箭头、流式=停止方块；
 /// * 反应 `.reac`：复制/赞/踩，灰 45%，选中变白。
-class AtlasSheetRoute extends PageRouteBuilder<void> {
-  AtlasSheetRoute({this.origin = 'home'})
-    : super(
-        opaque: false,
-        barrierDismissible: false,
-        transitionDuration: const Duration(milliseconds: 420),
-        reverseTransitionDuration: const Duration(milliseconds: 380),
-        pageBuilder: (_, _, _) => AtlasChatPage(origin: origin),
-        transitionsBuilder: (_, animation, _, child) => SlideTransition(
-          position: Tween(begin: const Offset(0, 1), end: Offset.zero).animate(
-            CurvedAnimation(
-              parent: animation,
-              curve: const Cubic(0.32, 0.72, 0, 1),
-            ),
-          ),
-          child: child,
-        ),
-      );
+/// Opens Atlas in the authenticated app shell instead of a transparent route.
+/// That keeps the source page and its blur in one composited widget tree.
+class AtlasOverlayScope extends InheritedWidget {
+  const AtlasOverlayScope({
+    required this.open,
+    required super.child,
+    super.key,
+  });
 
-  /// 打开来源（home / diary / community / signals）：决定弹窗按哪个页面
-  /// 的上下文生成开场白。
-  final String origin;
+  final ValueChanged<String> open;
+
+  static void show(BuildContext context, {String origin = 'home'}) {
+    final scope = context
+        .dependOnInheritedWidgetOfExactType<AtlasOverlayScope>();
+    if (scope == null) {
+      throw StateError('AtlasOverlayScope not found above this context.');
+    }
+    scope.open(origin);
+  }
+
+  @override
+  bool updateShouldNotify(AtlasOverlayScope oldWidget) => false;
 }
 
 /// 源码的 Memória 脑图标（Assistente.jsx `IC.lampada`，24 viewBox 描边）。
@@ -73,26 +73,70 @@ class _AtlasCss {
   /// 均复现黑屏（应用仍在前台、无异常）。iOS/macOS/web 保留真毛玻璃。
   static final bool canBlur = kIsWeb || !Platform.isAndroid;
 
-  static const bgTop = Color(0xFF222C38);
-  static const bgMid = Color(0xFF1A2029);
-  static const bgBottom = Color(0xFF121418);
+  // Slightly denser than the 10/11 source glass so content keeps enough
+  // contrast while the parent page's color can still tint Atlas.
+  static const glassSurface = Color(0xCC14181E);
   static const text = Color(0xF2F4F5F7); // rgba(244,245,247,.92)
   static const textFull = Color(0xFFF4F5F7);
   static const textDim = Color(0x73F4F5F7); // rgba(244,245,247,.45)
   static const bubbleMe = Color(0xFF2B2E33);
   static const whiteLine = Color(0x14FFFFFF); // rgba(255,255,255,.08)
   static const chipBg = Color(0x8C282C34); // rgba(40,44,52,.55)
-  static const inputBase = Color(0xE61E222A); // rgba(30,34,42,.9)
-  static const inputGlow = Color(0x593A5270); // rgba(58,82,112,.35)
+  static const inputBase = Color(0x8C1C1F24); // rgba(28,31,36,.55)
+  static const inputGlow = Color(0x00000000);
   static const cursorBlue = Color(0xFF8FBCF0);
   static const handle = Color(0x47FFFFFF); // rgba(255,255,255,.28)
 }
 
+class _AtlasGlassSurface extends StatelessWidget {
+  const _AtlasGlassSurface({required this.blur, required this.child});
+
+  final bool blur;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final surface = ColoredBox(
+      color: _AtlasCss.glassSurface,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          child,
+          const IgnorePointer(
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  border: Border(top: BorderSide(color: Color(0x1AFFFFFF))),
+                ),
+                child: SizedBox(width: double.infinity, height: 1),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (!blur) return surface;
+    return BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+      child: surface,
+    );
+  }
+}
+
 class AtlasChatPage extends StatefulWidget {
-  const AtlasChatPage({this.origin = 'home', super.key});
+  const AtlasChatPage({
+    this.origin = 'home',
+    this.onClose,
+    this.onBackgroundBlurChanged,
+    super.key,
+  });
 
   /// 打开来源：决定开场白按哪个页面的上下文生成。
   final String origin;
+  final VoidCallback? onClose;
+  final ValueChanged<double>? onBackgroundBlurChanged;
 
   @override
   State<AtlasChatPage> createState() => _AtlasChatPageState();
@@ -106,6 +150,10 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
   bool _atBottom = true;
   bool _listAtTop = true;
 
+  /// 「继续上次对话」入口的数据源：打开浮层时拉一次会话列表，
+  /// 取最近更新的一段；没有历史时该入口不渲染。
+  Future<List<AtlasConversation>>? _recentConversations;
+
   /// Memória 子层是否展开（脑图标切换；‹/下滑收回）。
   bool _memoryOpen = false;
 
@@ -116,6 +164,11 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
   double _velocity = 0;
   Duration? _lastMoveAt;
   double? _lastMoveDy;
+
+  double get _backgroundBlurFactor => (1 - _dragDy / 300).clamp(0.0, 1.0);
+
+  void _updateBackgroundBlur() =>
+      widget.onBackgroundBlurChanged?.call(_backgroundBlurFactor);
 
   void _onSheetPointerDown(PointerDownEvent event) {
     _dragDy = 0;
@@ -147,6 +200,7 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
         _dragging = true;
         _dragDy = (_dragDy + delta).clamp(0.0, double.infinity);
       });
+      _updateBackgroundBlur();
     }
   }
 
@@ -157,6 +211,7 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
       _dragging = true;
       _dragDy = dy.clamp(0.0, double.infinity);
     });
+    _updateBackgroundBlur();
   }
 
   /// Memória 子层松手结算：关闭=整卡滑出；否则整卡弹回原位。
@@ -168,6 +223,7 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
         _dragging = false;
         _dragDy = 0;
       });
+      _updateBackgroundBlur();
     }
   }
 
@@ -183,8 +239,14 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
       _dragging = false;
       _dragDy = 1400;
     });
+    _updateBackgroundBlur();
     Future.delayed(const Duration(milliseconds: 240), () {
-      if (mounted) Navigator.of(context).pop();
+      if (!mounted) return;
+      if (widget.onClose != null) {
+        widget.onClose!();
+      } else {
+        Navigator.of(context).pop();
+      }
     });
   }
 
@@ -202,6 +264,7 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
         _dragging = false;
         _dragDy = 0;
       });
+      _updateBackgroundBlur();
     }
   }
 
@@ -220,9 +283,16 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
         origin: widget.origin,
       );
       _controllerReady = true;
+      // 「继续上次对话」：打开浮层时取一次最近会话（轻量 GET，失败静默）。
+      _recentConversations = _controller.loadHistory().catchError((_) {
+        return const <AtlasConversation>[];
+      });
       // 开场白已在宿主页面预取（AtlasGreetingStore）；万一还没就绪，这里
       // 兜底触发一次 prepare。
-      AtlasGreetingStore.instance.prepare(widget.origin, AtlasScope.of(context));
+      AtlasGreetingStore.instance.prepare(
+        widget.origin,
+        AtlasScope.of(context),
+      );
     }
   }
 
@@ -259,7 +329,7 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
     final media = MediaQuery.of(context);
     // .page.chat.folha：顶部 = max(安全区, 47) + 间距（源码 --folha-topo
     // 为 34；按反馈两轮收窄到 12，卡片更高）。
-    final sheetTop = (media.padding.top > 47 ? media.padding.top : 47.0) + 12;
+    final sheetTop = (media.padding.top > 47 ? media.padding.top : 47.0) + 24;
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Listener(
@@ -274,29 +344,6 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
             // 衰减，露出上一个页面（源码 .atlas-embaca { opacity:0 }）。
             // Android 无真模糊（黑帧 bug，见 _AtlasCss.canBlur），暗纱加深
             // 到 0.85 补偿——亮色页面（如日记）下 0.72 会明显透底。
-            Positioned.fill(
-              child: ColoredBox(
-                color: const Color(0xFF0A0E14).withValues(
-                  alpha: (_AtlasCss.canBlur ? 0.55 : 0.75) * _veilFade,
-                ),
-              ),
-            ),
-            if (_AtlasCss.canBlur)
-              Positioned(
-                left: 0,
-                right: 0,
-                top: 0,
-                height: sheetTop + 8,
-                child: ClipRect(
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(
-                      sigmaX: _veilSigma,
-                      sigmaY: _veilSigma,
-                    ),
-                    child: const SizedBox.expand(),
-                  ),
-                ),
-              ),
             Padding(
               padding: EdgeInsets.only(top: sheetTop),
               child: AnimatedSlide(
@@ -318,80 +365,76 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
                     borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(28),
                     ),
-                    child: ColoredBox(
-                      color: _AtlasCss.bgBottom,
-                      child: DecoratedBox(
-                        decoration: const BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            stops: [0, 0.2, 0.55],
-                            colors: [
-                              _AtlasCss.bgTop,
-                              _AtlasCss.bgMid,
-                              _AtlasCss.bgBottom,
-                            ],
-                          ),
-                        ),
-                        child: Stack(
-                          children: [
-                            // 主对话 tela：Memória 打开时左移淡出
-                            IgnorePointer(
-                              ignoring: _memoryOpen,
-                              child: AnimatedOpacity(
-                                opacity: _memoryOpen ? 0 : 1,
-                                duration: const Duration(milliseconds: 300),
-                                child: AnimatedSlide(
-                                  offset: _memoryOpen
-                                      ? const Offset(-0.22, 0)
-                                      : Offset.zero,
-                                  duration: const Duration(milliseconds: 420),
-                                  curve: const Cubic(0.32, 0.72, 0, 1),
-                                  child: Column(
-                                    children: [
-                                      _buildHeader(strings),
-                                      Expanded(
-                                        child: AnimatedBuilder(
-                                          // 开场白打字机在 AtlasGreetingStore
-                                          // 里跑，列表要随它一起重建。
-                                          animation: Listenable.merge([
-                                            _controller,
-                                            AtlasGreetingStore.instance,
-                                          ]),
-                                          builder: (context, _) =>
-                                              _buildList(strings),
-                                        ),
+                    child: _AtlasGlassSurface(
+                      blur: _AtlasCss.canBlur,
+                      child: Stack(
+                        children: [
+                          // 主对话 tela：Memória 打开时左移淡出
+                          IgnorePointer(
+                            ignoring: _memoryOpen,
+                            child: AnimatedOpacity(
+                              opacity: _memoryOpen ? 0 : 1,
+                              duration: const Duration(milliseconds: 300),
+                              child: AnimatedSlide(
+                                offset: _memoryOpen
+                                    ? const Offset(-0.22, 0)
+                                    : Offset.zero,
+                                duration: const Duration(milliseconds: 420),
+                                curve: const Cubic(0.32, 0.72, 0, 1),
+                                child: Column(
+                                  children: [
+                                    _buildHeader(strings),
+                                    Expanded(
+                                      child: AnimatedBuilder(
+                                        // 开场白打字机在 AtlasGreetingStore
+                                        // 里跑，列表要随它一起重建。
+                                        animation: Listenable.merge([
+                                          _controller,
+                                          AtlasGreetingStore.instance,
+                                        ]),
+                                        builder: (context, _) =>
+                                            _buildList(strings),
                                       ),
-                                      _buildSuggestions(strings),
-                                      _buildComposer(strings),
-                                    ],
-                                  ),
+                                    ),
+                                    _buildSuggestions(strings),
+                                    _buildComposer(strings),
+                                  ],
                                 ),
                               ),
                             ),
-                            // Memória 子 tela：从右滑入盖住对话
-                            AnimatedSlide(
-                              offset: _memoryOpen
-                                  ? Offset.zero
-                                  : const Offset(1, 0),
-                              duration: const Duration(milliseconds: 420),
-                              curve: const Cubic(0.32, 0.72, 0, 1),
-                              child: IgnorePointer(
-                                ignoring: !_memoryOpen,
-                                child: AtlasMemoryLayer(
-                                  onClose: () =>
-                                      setState(() => _memoryOpen = false),
-                                  onDragMove: _memoryDragMove,
-                                  onDragEnd: _memoryDragEnd,
-                                ),
+                          ),
+                          // Memória 子 tela：从右滑入盖住对话
+                          AnimatedSlide(
+                            offset: _memoryOpen
+                                ? Offset.zero
+                                : const Offset(1, 0),
+                            duration: const Duration(milliseconds: 420),
+                            curve: const Cubic(0.32, 0.72, 0, 1),
+                            child: IgnorePointer(
+                              ignoring: !_memoryOpen,
+                              child: AtlasMemoryLayer(
+                                onClose: () =>
+                                    setState(() => _memoryOpen = false),
+                                onDragMove: _memoryDragMove,
+                                onDragEnd: _memoryDragEnd,
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 ),
+              ),
+            ),
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: sheetTop,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: _closeSheet,
               ),
             ),
           ],
@@ -402,8 +445,6 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
 
   /// `.atlas-embaca`：静止时毛玻璃 sigma 与暗色 tint 都取满值；拖动中随
   /// 位移衰减（>300px 全清），卡片滑走时直接露出清晰的上一个页面。
-  double get _veilFade => (1 - _dragDy / 300).clamp(0.0, 1.0);
-  double get _veilSigma => 12 * _veilFade;
 
   /// 头部拖拽起手是否被系统手势区拦下（X 按钮贴着左边缘，易误触系统返回）。
   bool _headerDragBlocked = false;
@@ -416,11 +457,8 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
   Widget _buildHeader(AppLocalizations strings) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onVerticalDragStart: (details) =>
-          _headerDragBlocked = offsetInSystemGestureZone(
-            details.globalPosition,
-            context,
-          ),
+      onVerticalDragStart: (details) => _headerDragBlocked =
+          offsetInSystemGestureZone(details.globalPosition, context),
       onVerticalDragUpdate: (details) {
         if (_headerDragBlocked || _memoryOpen) return;
         final delta = details.primaryDelta ?? 0;
@@ -429,6 +467,7 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
             _dragging = true;
             _dragDy = (_dragDy + delta).clamp(0.0, double.infinity);
           });
+          _updateBackgroundBlur();
         }
       },
       onVerticalDragEnd: (details) {
@@ -445,6 +484,7 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
             _dragging = false;
             _dragDy = 0;
           });
+          _updateBackgroundBlur();
         }
       },
       child: Column(
@@ -468,17 +508,21 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
                   tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
                   icon: const Icon(Icons.close, size: 24),
                   color: _AtlasCss.textFull.withValues(alpha: .85),
-                  onPressed: () => Navigator.of(context).pop(),
+                  onPressed: _closeSheet,
                 ),
                 Expanded(
-                  child: Text(
-                    strings.chatTitle,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: _AtlasCss.textFull,
-                      fontSize: 19,
-                      fontWeight: FontWeight.w400,
-                      letterSpacing: -0.01,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: _closeSheet,
+                    child: Text(
+                      strings.chatTitle,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: _AtlasCss.textFull,
+                        fontSize: 19,
+                        fontWeight: FontWeight.w400,
+                        letterSpacing: -0.01,
+                      ),
                     ),
                   ),
                 ),
@@ -528,6 +572,20 @@ class _AtlasChatPageState extends State<AtlasChatPage> {
               controller.messages.isEmpty &&
               !controller.loadingHistory)
             _GreetingBlock(origin: widget.origin),
+          // 继续上次对话：准新对话模型的回补入口——从别的模块回来或想
+          // 接续上一段时，一键回到最近更新的会话（历史列表仍走附件钮）。
+          if (controller.messages.isEmpty &&
+              !controller.hasConversation &&
+              !controller.loadingHistory &&
+              !controller.isStreaming &&
+              _recentConversations != null)
+            _ContinueLastChip(
+              future: _recentConversations!,
+              onOpen: (conversation) async {
+                await _controller.openConversation(conversation.id);
+                _jumpToBottom(smooth: false);
+              },
+            ),
           if (controller.error != null)
             _ErrorBanner(message: controller.error!),
           if (controller.loadingHistory)
@@ -706,6 +764,80 @@ class _GreetingBlock extends StatelessWidget {
                 child: _CursorDot(),
               ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// 「继续上次对话」胶囊：FutureBuilder 拉最近会话，取最近更新的一段；
+/// 没有历史或加载失败时整体不渲染（与空态共存不抢戏）。
+class _ContinueLastChip extends StatelessWidget {
+  const _ContinueLastChip({required this.future, required this.onOpen});
+
+  final Future<List<AtlasConversation>> future;
+  final ValueChanged<AtlasConversation> onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.only(top: 6),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: FutureBuilder<List<AtlasConversation>>(
+          future: future,
+          builder: (context, snapshot) {
+            final items = snapshot.data ?? const <AtlasConversation>[];
+            if (items.isEmpty) return const SizedBox.shrink();
+            // 最近更新优先（忽略置顶：入口语义就是「上次聊到哪了」）。
+            var latest = items.first;
+            for (final conversation in items) {
+              if (conversation.updatedAt.compareTo(latest.updatedAt) > 0) {
+                latest = conversation;
+              }
+            }
+            final label = latest.title.isEmpty
+                ? strings.chatHistoryUntitled
+                : latest.title;
+            return GestureDetector(
+              onTap: () => onOpen(latest),
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.of(context).size.width * 0.86,
+                ),
+                decoration: BoxDecoration(
+                  color: _AtlasCss.chipBg,
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(color: _AtlasCss.whiteLine),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.history,
+                      size: 15,
+                      color: _AtlasCss.textDim,
+                    ),
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
+                        '${strings.chatContinueLast} · $label',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: _AtlasCss.textFull,
+                          fontSize: 13.5,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
@@ -985,7 +1117,7 @@ class _ComposerBox extends StatelessWidget {
           Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(26),
-              border: Border.all(color: _AtlasCss.whiteLine),
+              border: Border.all(color: const Color(0x1AFFFFFF)),
             ),
             padding: const EdgeInsets.fromLTRB(14, 12, 8, 8),
             child: Column(
@@ -1225,4 +1357,3 @@ class _ErrorBanner extends StatelessWidget {
     ),
   );
 }
-

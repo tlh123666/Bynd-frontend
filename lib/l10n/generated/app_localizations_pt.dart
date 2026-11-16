@@ -1666,6 +1666,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get chatHistoryUntitled => 'Conversa sem título';
 
   @override
+  String get chatContinueLast => 'Continuar última conversa';
+
+  @override
   String get healthGroupSleep => 'Sono';
 
   @override
@@ -7491,6 +7494,9 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get chatHistoryUntitled => 'Conversa sem título';
+
+  @override
+  String get chatContinueLast => 'Continuar última conversa';
 
   @override
   String get healthGroupSleep => 'Sono';
