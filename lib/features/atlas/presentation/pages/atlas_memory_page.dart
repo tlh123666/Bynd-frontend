@@ -111,6 +111,38 @@ final Map<String, List<_MemoryItem>> _fixture = {
       passou: true,
     ),
   ],
+  'Humor': [
+    _MemoryItem(
+      'Entrega de projeto na sexta, 30/10',
+      'Tem deitado mais tarde por causa dela.',
+      since: '26 out 2026',
+    ),
+    _MemoryItem(
+      'A semana de entrega de outubro foi a mais pesada',
+      'De 5 a 9/10: 5h47 de sono por noite e 4 cafés por dia.',
+      since: '6 out 2026',
+      passou: true,
+    ),
+    _MemoryItem(
+      'Estresse sobe com sono curto',
+      'Depois de noites abaixo de 6h30, o foco cai 22 pontos.',
+      since: '12 out 2026',
+      percebeu: true,
+    ),
+  ],
+  'Seu jeito': [
+    _MemoryItem(
+      'Respostas curtas, com números',
+      'Quer entender o porquê antes de mudar um hábito.',
+      since: '31 ago 2026',
+    ),
+    _MemoryItem(
+      'Vinho só no fim de semana',
+      'Nos 6 sábados com vinho, a recuperação de domingo caiu em média 21 pontos.',
+      since: '27 set 2026',
+      percebeu: true,
+    ),
+  ],
 };
 
 class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
