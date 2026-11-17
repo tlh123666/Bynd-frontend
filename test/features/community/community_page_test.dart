@@ -61,7 +61,9 @@ Map<String, dynamic> _responses(http.Request request) {
   if (path.contains('/community/groups/g1/goals')) return _goals;
   if (path.contains('/community/groups/g1/atlas')) return _atlas;
   if (path.contains('/community/groups/g1/ranking') ||
-      path.contains('ranking')) return _ranking;
+      path.contains('ranking')) {
+    return _ranking;
+  }
   if (path.contains('/community/groups/g1/messages')) return _messages;
   return const {};
 }
