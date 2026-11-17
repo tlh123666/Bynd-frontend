@@ -264,74 +264,74 @@ class _AtlasMemoryLayerState extends State<AtlasMemoryLayer> {
             ),
           ),
           child: Column(
-              children: [
-                _buildHeader(strings),
-                Expanded(
-                  child: NotificationListener<ScrollNotification>(
-                    onNotification: _onListScroll,
-                    child: ListView(
-                      padding: const EdgeInsets.fromLTRB(21, 8, 21, 40),
-                      children: [
-                        // .at-heroi
-                        Text(
-                          strings.memoriaHeroTitle,
+            children: [
+              _buildHeader(strings),
+              Expanded(
+                child: NotificationListener<ScrollNotification>(
+                  onNotification: _onListScroll,
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(21, 8, 21, 40),
+                    children: [
+                      // .at-heroi
+                      Text(
+                        strings.memoriaHeroTitle,
+                        style: const TextStyle(
+                          color: _MemCss.textFull,
+                          fontSize: 30,
+                          fontWeight: FontWeight.w200,
+                          height: 1.1,
+                          letterSpacing: -0.01,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 6),
+                        child: Text(
+                          strings.memoriaHeroSub,
                           style: const TextStyle(
-                            color: _MemCss.textFull,
-                            fontSize: 30,
-                            fontWeight: FontWeight.w200,
-                            height: 1.1,
-                            letterSpacing: -0.01,
+                            color: _MemCss.text2,
+                            fontSize: 13.5,
                           ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 6),
-                          child: Text(
-                            strings.memoriaHeroSub,
-                            style: const TextStyle(
-                              color: _MemCss.text2,
-                              fontSize: 13.5,
-                            ),
+                      ),
+                      // kicker：O QUE ELE GUARDOU
+                      Padding(
+                        padding: const EdgeInsets.only(top: 26),
+                        child: Text(
+                          strings.memoriaKicker.toUpperCase(),
+                          style: const TextStyle(
+                            color: _MemCss.text3,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: .16,
                           ),
                         ),
-                        // kicker：O QUE ELE GUARDOU
-                        Padding(
-                          padding: const EdgeInsets.only(top: 26),
+                      ),
+                      _buildTabs(strings),
+                      for (final item in _visibleItems(_tabs[_active]))
+                        _MemoryCard(
+                          item: item,
+                          onDelete: () => _remove(_tabs[_active], item),
+                        ),
+                      if (_visibleItems(_tabs[_active]).isEmpty)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 24),
                           child: Text(
-                            strings.memoriaKicker.toUpperCase(),
-                            style: const TextStyle(
+                            'Nada guardado aqui.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
                               color: _MemCss.text3,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w500,
-                              letterSpacing: .16,
+                              fontSize: 14,
                             ),
                           ),
                         ),
-                        _buildTabs(strings),
-                        for (final item in _visibleItems(_tabs[_active]))
-                          _MemoryCard(
-                            item: item,
-                            onDelete: () => _remove(_tabs[_active], item),
-                          ),
-                        if (_visibleItems(_tabs[_active]).isEmpty)
-                          const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 24),
-                            child: Text(
-                              'Nada guardado aqui.',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: _MemCss.text3,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
+      ),
     );
   }
 
@@ -624,9 +624,11 @@ class _MemoryCard extends StatelessWidget {
 
 /// atlas-caixa.css 的定稿色值（与聊天页同一族）。
 class _MemCss {
-  static const bgTop = Color(0xFF222C38);
-  static const bgMid = Color(0xFF1A2029);
-  static const bgBottom = Color(0xFF121418);
+  // This layer sits inside AtlasChatPage's glass surface. Keeping it clear
+  // makes the conversation and Memoria views share exactly the same backdrop.
+  static const bgTop = Color(0x00000000);
+  static const bgMid = Color(0x00000000);
+  static const bgBottom = Color(0x00000000);
   static const textFull = Color(0xFFF4F5F7);
   static const text2 = Color(0xB8F4F5F7);
   static const text3 = Color(0x73F4F5F7);
