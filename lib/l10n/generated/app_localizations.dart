@@ -285,6 +285,18 @@ abstract class AppLocalizations {
   /// **'Não foi possível carregar os treinos locais.'**
   String get workoutLoadError;
 
+  /// No description provided for @workoutReplaceExercise.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Trocar exercício'**
+  String get workoutReplaceExercise;
+
+  /// No description provided for @workoutCloseSets.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Fechar séries'**
+  String get workoutCloseSets;
+
   /// No description provided for @workoutEditSets.
   ///
   /// In pt_BR, this message translates to:
@@ -300,13 +312,13 @@ abstract class AppLocalizations {
   /// No description provided for @workoutRemoveExercise.
   ///
   /// In pt_BR, this message translates to:
-  /// **'Remover exercício'**
+  /// **'Remover'**
   String get workoutRemoveExercise;
 
   /// No description provided for @workoutDuplicateExercise.
   ///
   /// In pt_BR, this message translates to:
-  /// **'Duplicar exercício'**
+  /// **'Duplicar'**
   String get workoutDuplicateExercise;
 
   /// No description provided for @workoutRemoveSet.
@@ -386,6 +398,36 @@ abstract class AppLocalizations {
   /// In pt_BR, this message translates to:
   /// **'Treino de {group}'**
   String workoutSuggestedName(String group);
+
+  /// No description provided for @workoutMenuEdit.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Editar'**
+  String get workoutMenuEdit;
+
+  /// No description provided for @workoutMenuDelete.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Apagar'**
+  String get workoutMenuDelete;
+
+  /// No description provided for @workoutDeleteTitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Apagar treino?'**
+  String get workoutDeleteTitle;
+
+  /// No description provided for @workoutDeleteMessage.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'“{name}” será removido dos treinos locais.'**
+  String workoutDeleteMessage(String name);
+
+  /// No description provided for @workoutActionError.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Não foi possível atualizar os treinos locais.'**
+  String get workoutActionError;
 
   /// No description provided for @workoutBuilderTitle.
   ///

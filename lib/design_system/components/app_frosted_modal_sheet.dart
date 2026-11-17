@@ -13,12 +13,14 @@ class AppFrostedModalSheet extends StatelessWidget {
     required this.child,
     this.showHandle = true,
     this.useSafeArea = true,
+    this.surfaceTint = AppColors.sheetGlassTint,
     super.key,
   });
 
   final Widget child;
   final bool showHandle;
   final bool useSafeArea;
+  final Color surfaceTint;
 
   /// 展示从底部升起的磨砂弹窗，并统一处理背景遮罩和关闭手势。
   static Future<T?> show<T>(
@@ -31,6 +33,8 @@ class AppFrostedModalSheet extends StatelessWidget {
     double maxHeightFraction = .84,
     double? topInset,
     Color barrierColor = AppColors.menuVeil,
+    double barrierBlurSigma = 14,
+    Color surfaceTint = AppColors.sheetGlassTint,
     bool waitForExit = false,
   }) async {
     final motionEnabled = AppMotion.enabled(context);
@@ -67,6 +71,7 @@ class AppFrostedModalSheet extends StatelessWidget {
                 child: AppFrostedModalSheet(
                   showHandle: showHandle,
                   useSafeArea: useSafeArea,
+                  surfaceTint: surfaceTint,
                   child: builder(sheetContext),
                 ),
               ),
@@ -96,7 +101,10 @@ class AppFrostedModalSheet extends StatelessWidget {
                   behavior: HitTestBehavior.opaque,
                   onTap: () => Navigator.of(dialogContext).pop(),
                   child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+                    filter: ImageFilter.blur(
+                      sigmaX: barrierBlurSigma,
+                      sigmaY: barrierBlurSigma,
+                    ),
                     child: ColoredBox(color: barrierColor),
                   ),
                 ),
@@ -127,6 +135,7 @@ class AppFrostedModalSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppFrostedSurface.modalSheet(
+      tintColor: surfaceTint,
       borderRadius: const BorderRadius.vertical(
         top: Radius.circular(AppRadii.sheet),
       ),

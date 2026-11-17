@@ -11,19 +11,28 @@ import 'exercise_detail_sheet.dart';
 
 /// 动作目录叶片：搜索、筛选和多选只作用于当前草稿。
 class ExerciseSelectionSheet extends StatefulWidget {
-  const ExerciseSelectionSheet({this.initialIds = const {}, super.key});
+  const ExerciseSelectionSheet({
+    this.initialIds = const {},
+    this.replaceMode = false,
+    super.key,
+  });
   final Set<String> initialIds;
+  final bool replaceMode;
 
   static Future<List<ExerciseCatalogItem>?> show(
     BuildContext context, {
     Set<String> initialIds = const {},
+    bool replaceMode = false,
   }) => AppFrostedModalSheet.show<List<ExerciseCatalogItem>>(
     context,
     topInset: math.max(MediaQuery.viewPaddingOf(context).top, 20) + 34,
     showHandle: false,
     barrierColor: AppColors.contentSheetVeil,
     waitForExit: true,
-    builder: (_) => ExerciseSelectionSheet(initialIds: initialIds),
+    builder: (_) => ExerciseSelectionSheet(
+      initialIds: initialIds,
+      replaceMode: replaceMode,
+    ),
   );
 
   @override
@@ -80,7 +89,9 @@ class _ExerciseSelectionSheetState extends State<ExerciseSelectionSheet> {
       child: Column(
         children: [
           ActivityFrostedSheetHeader(
-            title: s.exerciseSelectorTitle,
+            title: widget.replaceMode
+                ? s.workoutReplaceExercise
+                : s.exerciseSelectorTitle,
             height: math.min(62, height),
           ),
           Expanded(
@@ -199,6 +210,7 @@ class _ExerciseSelectionSheetState extends State<ExerciseSelectionSheet> {
                               return _ExerciseRow(
                                 item: item,
                                 selected: selected,
+                                replaceMode: widget.replaceMode,
                                 onDetails: () async {
                                   // 从搜索进入详情时先收起键盘，避免遮挡动作示意。
                                   FocusManager.instance.primaryFocus?.unfocus();
@@ -210,17 +222,23 @@ class _ExerciseSelectionSheetState extends State<ExerciseSelectionSheet> {
                                   if (!context.mounted || !marked) return;
                                   setState(() => _selected.add(item.id));
                                 },
-                                onTap: () => setState(() {
-                                  if (selected) {
-                                    _selected.remove(item.id);
-                                  } else {
-                                    _selected.add(item.id);
+                                onTap: () {
+                                  if (widget.replaceMode) {
+                                    Navigator.pop(context, [item]);
+                                    return;
                                   }
-                                }),
+                                  setState(() {
+                                    if (selected) {
+                                      _selected.remove(item.id);
+                                    } else {
+                                      _selected.add(item.id);
+                                    }
+                                  });
+                                },
                               );
                             },
                           ),
-                          if (height >= 180)
+                          if (height >= 180 && !widget.replaceMode)
                             Positioned(
                               left: 16,
                               right: 16,
@@ -311,11 +329,13 @@ class _ExerciseRow extends StatelessWidget {
   const _ExerciseRow({
     required this.item,
     required this.selected,
+    required this.replaceMode,
     required this.onTap,
     required this.onDetails,
   });
   final ExerciseCatalogItem item;
   final bool selected;
+  final bool replaceMode;
   final VoidCallback onTap;
   final VoidCallback onDetails;
   @override
@@ -332,14 +352,18 @@ class _ExerciseRow extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(
-              selected ? Icons.check_circle : Icons.circle_outlined,
-              size: 22,
-              color: selected ? AppColors.textPrimary : AppColors.textMuted,
-            ),
-            const SizedBox(width: 12),
+            if (!replaceMode) ...[
+              Icon(
+                selected ? Icons.check_circle : Icons.circle_outlined,
+                size: 22,
+                color: selected ? AppColors.textPrimary : AppColors.textMuted,
+              ),
+              const SizedBox(width: 12),
+            ],
             Semantics(
-              label: context.l10n.exerciseDetailHow(item.name),
+              label: replaceMode
+                  ? context.l10n.workoutReplaceExercise
+                  : context.l10n.exerciseDetailHow(item.name),
               button: true,
               child: InkWell(
                 onTap: onDetails,
