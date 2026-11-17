@@ -65,10 +65,12 @@
   "workoutDefaultsNote": "Valores iniciais de exemplo",
   "workoutSaveError": "Não foi possível salvar neste dispositivo. Tente novamente.",
   "workoutLoadError": "Não foi possível carregar os treinos locais.",
+  "workoutReplaceExercise": "Trocar exercício",
+  "workoutCloseSets": "Fechar séries",
   "workoutEditSets": "Editar séries",
   "workoutShowExercise": "Ver como fazer",
-  "workoutRemoveExercise": "Remover exercício",
-  "workoutDuplicateExercise": "Duplicar exercício",
+  "workoutRemoveExercise": "Remover",
+  "workoutDuplicateExercise": "Duplicar",
   "workoutRemoveSet": "Remover série",
   "workoutAddSet": "Adicionar série",
   "workoutSet": "Série",
@@ -82,13 +84,13 @@
   "workoutMoveUp": "Mover para cima",
   "workoutMoveDown": "Mover para baixo",
   "workoutSuggestedName": "Treino de {group}",
-  "@workoutSuggestedName": {
-    "placeholders": {
-      "group": {
-        "type": "String"
-      }
-    }
-  },
+  "@workoutSuggestedName": { "placeholders": { "group": { "type": "String" } } },
+  "workoutMenuEdit": "Editar",
+  "workoutMenuDelete": "Apagar",
+  "workoutDeleteTitle": "Apagar treino?",
+  "workoutDeleteMessage": "“{name}” será removido dos treinos locais.",
+  "@workoutDeleteMessage": { "placeholders": { "name": { "type": "String" } } },
+  "workoutActionError": "Não foi possível atualizar os treinos locais.",
   "workoutBuilderTitle": "Montar treino",
   "workoutBuilderWeight": "kg levantados",
   "workoutBuilderEmptyCount": "0 EXERCÍCIOS · 0 SÉRIES",

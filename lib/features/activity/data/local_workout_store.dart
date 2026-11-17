@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -8,7 +9,11 @@ import '../presentation/models/workout_draft_exercise.dart';
 
 /// 保存在当前设备的训练模板，不代表已完成的运动或服务器数据。
 class LocalWorkoutPlan {
-  LocalWorkoutPlan({required this.name, required this.exercises});
+  LocalWorkoutPlan({String? id, required this.name, required this.exercises})
+    : id = id ?? _newId();
+  static String _newId() =>
+      'local:${DateTime.now().microsecondsSinceEpoch}:${Random.secure().nextInt(1 << 32)}';
+  final String id;
   final String name;
   final List<WorkoutDraftExercise> exercises;
 
@@ -17,6 +22,7 @@ class LocalWorkoutPlan {
       exercises.fold(0, (sum, item) => sum + item.liftedWeight);
 
   Map<String, Object> toJson() => {
+    'id': id,
     'name': name,
     'exercises': [
       for (final item in exercises)
@@ -31,8 +37,9 @@ class LocalWorkoutPlan {
   };
 
   /// 保存和开始时复制，避免多个页面共享可变的组数。
-  LocalWorkoutPlan copy() => LocalWorkoutPlan(
-    name: name,
+  LocalWorkoutPlan copy({String? id, String? name}) => LocalWorkoutPlan(
+    id: id ?? this.id,
+    name: name ?? this.name,
     exercises: [for (final item in exercises) item.copy()],
   );
 }
@@ -44,21 +51,44 @@ class LocalWorkoutStore {
   final String _key;
   static Future<void>? _writes;
 
-  Future<List<LocalWorkoutPlan>> load() async {
+  Future<List<dynamic>> _readEntries() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_key);
     if (raw == null) return [];
     final decoded = jsonDecode(raw);
     if (decoded is! List) throw const FormatException('Invalid workout list');
+    return decoded;
+  }
+
+  Future<List<LocalWorkoutPlan>> load() async => (await _readState()).$1;
+  Future<Set<String>> hiddenDemoIds() async => (await _readState()).$2;
+
+  Future<(List<LocalWorkoutPlan>, Set<String>)> _readState() async {
+    final decoded = await _readEntries();
     final catalog = {
       for (final item in await ExerciseCatalogItem.load()) item.id: item,
     };
     final plans = <LocalWorkoutPlan>[];
-    for (final value in decoded) {
+    final hidden = <String>{};
+    final ids = <String>{};
+    for (var index = 0; index < decoded.length; index++) {
+      final value = decoded[index];
+      if (value is Map && value['deleted'] == true) {
+        if (value['id'] is! String ||
+            !(value['id'] as String).startsWith('demo:')) {
+          throw const FormatException('Invalid deleted workout');
+        }
+        hidden.add(value['id'] as String);
+        continue;
+      }
       if (value is! Map ||
           value['name'] is! String ||
           value['exercises'] is! List) {
         throw const FormatException('Invalid workout');
+      }
+      final id = value['id'] ?? 'legacy:$index';
+      if (id is! String || id.isEmpty || !ids.add(id)) {
+        throw const FormatException('Invalid workout id');
       }
       final exercises = <WorkoutDraftExercise>[];
       for (final row in value['exercises'] as List) {
@@ -89,14 +119,87 @@ class LocalWorkoutStore {
       }
       if (exercises.isEmpty) throw const FormatException('Empty workout');
       plans.add(
-        LocalWorkoutPlan(name: value['name'] as String, exercises: exercises),
+        LocalWorkoutPlan(
+          id: id,
+          name: value['name'] as String,
+          exercises: exercises,
+        ),
       );
     }
-    return plans;
+    return (plans, hidden);
   }
 
-  Future<void> add(LocalWorkoutPlan plan) {
+  Future<void> add(LocalWorkoutPlan plan) => save(plan);
+
+  /// 同一标识覆盖已有模板；旧版本无标识数据在首次写入时安全迁移。
+  Future<void> save(LocalWorkoutPlan plan) {
     final snapshot = plan.copy();
+    return _mutate((plans, hidden) {
+      final index = plans.indexWhere((p) => p.id == snapshot.id);
+      if (index < 0) {
+        plans.insert(0, snapshot);
+      } else {
+        plans[index] = snapshot;
+      }
+      hidden.remove(snapshot.id);
+    });
+  }
+
+  /// 编辑已删除的本地模板时拒绝覆盖，避免旧页面重新创建已删除的数据。
+  Future<void> update(LocalWorkoutPlan plan) {
+    final snapshot = plan.copy();
+    return _mutate((plans, hidden) {
+      final index = plans.indexWhere((p) => p.id == snapshot.id);
+      if (index < 0 &&
+          (!snapshot.id.startsWith('demo:') || hidden.contains(snapshot.id))) {
+        throw StateError('Workout no longer exists');
+      }
+      if (index < 0) {
+        plans.insert(0, snapshot);
+      } else {
+        plans[index] = snapshot;
+      }
+    });
+  }
+
+  Future<void> duplicate(LocalWorkoutPlan plan) {
+    final snapshot = plan.copy();
+    return _mutate((plans, hidden) {
+      if (snapshot.id.startsWith('demo:')
+          ? hidden.contains(snapshot.id)
+          : !plans.any((p) => p.id == snapshot.id)) {
+        throw StateError('Workout no longer exists');
+      }
+      final names = plans.map((p) => p.name.trim().toLowerCase()).toSet();
+      var n = 2;
+      var name = '${snapshot.name} ($n)';
+      while (names.contains(name.toLowerCase())) {
+        n++;
+        name = '${snapshot.name} ($n)';
+      }
+      plans.insert(
+        0,
+        LocalWorkoutPlan(
+          name: name,
+          exercises: snapshot.exercises.map((e) => e.copy()).toList(),
+        ),
+      );
+    });
+  }
+
+  Future<void> delete(String id) => _mutate((plans, hidden) {
+    final index = plans.indexWhere((p) => p.id == id);
+    if (index >= 0) plans.removeAt(index);
+    if (id.startsWith('demo:')) {
+      hidden.add(id);
+    } else if (index < 0) {
+      throw StateError('Workout no longer exists');
+    }
+  });
+
+  Future<void> _mutate(
+    void Function(List<LocalWorkoutPlan>, Set<String>) change,
+  ) {
     final result = Completer<void>();
     final finished = Completer<void>();
     // 串行化写入，避免并发保存互相覆盖。
@@ -105,12 +208,15 @@ class LocalWorkoutStore {
     Future<void> write() async {
       try {
         // 原数据读取失败时不能覆盖它，留待用户恢复。
-        final plans = await load();
-        plans.insert(0, snapshot);
+        final (plans, hidden) = await _readState();
+        change(plans, hidden);
         final prefs = await SharedPreferences.getInstance();
         if (!await prefs.setString(
           _key,
-          jsonEncode([for (final item in plans) item.toJson()]),
+          jsonEncode([
+            for (final item in plans) item.toJson(),
+            for (final id in hidden) {'id': id, 'deleted': true},
+          ]),
         )) {
           throw StateError('Unable to save workout');
         }

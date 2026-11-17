@@ -116,16 +116,22 @@ class AppLocalizationsPt extends AppLocalizations {
   String get workoutLoadError => 'Não foi possível carregar os treinos locais.';
 
   @override
+  String get workoutReplaceExercise => 'Trocar exercício';
+
+  @override
+  String get workoutCloseSets => 'Fechar séries';
+
+  @override
   String get workoutEditSets => 'Editar séries';
 
   @override
   String get workoutShowExercise => 'Ver como fazer';
 
   @override
-  String get workoutRemoveExercise => 'Remover exercício';
+  String get workoutRemoveExercise => 'Remover';
 
   @override
-  String get workoutDuplicateExercise => 'Duplicar exercício';
+  String get workoutDuplicateExercise => 'Duplicar';
 
   @override
   String get workoutRemoveSet => 'Remover série';
@@ -167,6 +173,24 @@ class AppLocalizationsPt extends AppLocalizations {
   String workoutSuggestedName(String group) {
     return 'Treino de $group';
   }
+
+  @override
+  String get workoutMenuEdit => 'Editar';
+
+  @override
+  String get workoutMenuDelete => 'Apagar';
+
+  @override
+  String get workoutDeleteTitle => 'Apagar treino?';
+
+  @override
+  String workoutDeleteMessage(String name) {
+    return '“$name” será removido dos treinos locais.';
+  }
+
+  @override
+  String get workoutActionError =>
+      'Não foi possível atualizar os treinos locais.';
 
   @override
   String get workoutBuilderTitle => 'Montar treino';
@@ -5946,16 +5970,22 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get workoutLoadError => 'Não foi possível carregar os treinos locais.';
 
   @override
+  String get workoutReplaceExercise => 'Trocar exercício';
+
+  @override
+  String get workoutCloseSets => 'Fechar séries';
+
+  @override
   String get workoutEditSets => 'Editar séries';
 
   @override
   String get workoutShowExercise => 'Ver como fazer';
 
   @override
-  String get workoutRemoveExercise => 'Remover exercício';
+  String get workoutRemoveExercise => 'Remover';
 
   @override
-  String get workoutDuplicateExercise => 'Duplicar exercício';
+  String get workoutDuplicateExercise => 'Duplicar';
 
   @override
   String get workoutRemoveSet => 'Remover série';
@@ -5997,6 +6027,24 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String workoutSuggestedName(String group) {
     return 'Treino de $group';
   }
+
+  @override
+  String get workoutMenuEdit => 'Editar';
+
+  @override
+  String get workoutMenuDelete => 'Apagar';
+
+  @override
+  String get workoutDeleteTitle => 'Apagar treino?';
+
+  @override
+  String workoutDeleteMessage(String name) {
+    return '“$name” será removido dos treinos locais.';
+  }
+
+  @override
+  String get workoutActionError =>
+      'Não foi possível atualizar os treinos locais.';
 
   @override
   String get workoutBuilderTitle => 'Montar treino';

@@ -114,16 +114,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get workoutLoadError => 'Could not load local workouts.';
 
   @override
+  String get workoutReplaceExercise => 'Replace exercise';
+
+  @override
+  String get workoutCloseSets => 'Close sets';
+
+  @override
   String get workoutEditSets => 'Edit sets';
 
   @override
   String get workoutShowExercise => 'View exercise';
 
   @override
-  String get workoutRemoveExercise => 'Remove exercise';
+  String get workoutRemoveExercise => 'Remove';
 
   @override
-  String get workoutDuplicateExercise => 'Duplicate exercise';
+  String get workoutDuplicateExercise => 'Duplicate';
 
   @override
   String get workoutRemoveSet => 'Remove set';
@@ -165,6 +171,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String workoutSuggestedName(String group) {
     return 'Workout: $group';
   }
+
+  @override
+  String get workoutMenuEdit => 'Edit';
+
+  @override
+  String get workoutMenuDelete => 'Delete';
+
+  @override
+  String get workoutDeleteTitle => 'Delete workout?';
+
+  @override
+  String workoutDeleteMessage(String name) {
+    return '“$name” will be removed from local workouts.';
+  }
+
+  @override
+  String get workoutActionError => 'Could not update local workouts.';
 
   @override
   String get workoutBuilderTitle => 'Build workout';
