@@ -270,28 +270,41 @@ class _CommunityPageState extends State<CommunityPage> {
   }
 
   // FaixaDias：Ontem · Hoje 文字 tab + 固定居中 marca（源码 .hdx-*，
-  // 与 Memória 页 tab 条同族；条带满幅出血 margin 0 -16px）。
+  // 与 Memória 页 tab 条同族；条带满幅出血 margin 0 -16px，同 _covers）。
   Widget _dayStrip(AppLocalizations strings) {
     // 源码渲染顺序：index 0 = Ontem（_day 1），index 1 = Hoje（_day 0）。
     final labels = [
       strings.communityDayYesterday,
       strings.communityDayToday,
     ];
-    return Transform.translate(
-      offset: const Offset(-16, 0),
-      child: SizedBox(
-        width: MediaQuery.sizeOf(context).width,
-        child: DayStrip(
-          labels: labels,
-          selectedIndex: _day == 0 ? 1 : 0,
-          onSelect: (index) => setState(() => _day = index == 1 ? 0 : 1),
+    final screen = MediaQuery.sizeOf(context).width;
+    return SizedBox(
+      height: 52, // DayStrip 自身 46 + 顶部 6
+      child: OverflowBox(
+        maxWidth: screen,
+        alignment: Alignment.topLeft,
+        child: Transform.translate(
+          offset: const Offset(-16, 0),
+          child: SizedBox(
+            width: screen,
+            child: DayStrip(
+              labels: labels,
+              selectedIndex: _day == 0 ? 1 : 0,
+              onSelect: (index) => setState(() => _day = index == 1 ? 0 : 1),
+            ),
+          ),
         ),
       ),
     );
   }
 
   // .cmb-capas：封面轮播（群 + 邀请 + 建群空位）；满幅出血、内衬 16。
+  //
+  // 出血实现：外层 ListView 有水平 16 内衬（tight 宽 = 屏幕-32），直接在里面
+  // 放更宽的子项会拿到「水平视口高度无界」的布局异常（黑屏根因）。所以用
+  // OverflowBox 放宽到屏幕宽、再 Transform 左移 16——布局有界、绘制出血。
   Widget _covers(AppLocalizations strings) {
+    final screen = MediaQuery.sizeOf(context).width;
     final joined = _groups
         .where((g) => g.membershipState == 'joined')
         .toList(growable: false);
@@ -299,39 +312,47 @@ class _CommunityPageState extends State<CommunityPage> {
     if (joined.isNotEmpty && _mine.isNotEmpty) {
       coverChallenge = _mine.first;
     }
-    return Transform.translate(
-      offset: const Offset(-16, 0),
-      child: SizedBox(
-        width: MediaQuery.sizeOf(context).width,
-        child: ListView(
-          scrollDirection: Axis.horizontal,
-          clipBehavior: Clip.none,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          children: [
-            for (final group in _groups)
-              if (group.membershipState == 'joined')
-                _GroupCover(
-                  name: group.name,
-                  memberCount: group.memberCount,
-                  members: group.members,
-                  challenge:
-                      group == joined.firstOrNull ? coverChallenge : null,
-                  myRank: _myRank[group.id],
-                  onTap: () => _openChat(group),
-                )
-              else
-                _PublicCover(
-                  group: group,
-                  onJoin: () => _join(group),
-                ),
-            for (final invitation in _invitations)
-              _InviteCover(
-                invitation: invitation,
-                onAccept: () => _respond(invitation, accept: true),
-                onDecline: () => _respond(invitation, accept: false),
-              ),
-            _NewCover(onTap: _openNew),
-          ],
+    return SizedBox(
+      height: CommunityStyle.coverHeight,
+      child: OverflowBox(
+        maxWidth: screen,
+        alignment: Alignment.centerLeft,
+        child: Transform.translate(
+          offset: const Offset(-16, 0),
+          child: SizedBox(
+            width: screen,
+            height: CommunityStyle.coverHeight,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              clipBehavior: Clip.none,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              children: [
+                for (final group in _groups)
+                  if (group.membershipState == 'joined')
+                    _GroupCover(
+                      name: group.name,
+                      memberCount: group.memberCount,
+                      members: group.members,
+                      challenge:
+                          group == joined.firstOrNull ? coverChallenge : null,
+                      myRank: _myRank[group.id],
+                      onTap: () => _openChat(group),
+                    )
+                  else
+                    _PublicCover(
+                      group: group,
+                      onJoin: () => _join(group),
+                    ),
+                for (final invitation in _invitations)
+                  _InviteCover(
+                    invitation: invitation,
+                    onAccept: () => _respond(invitation, accept: true),
+                    onDecline: () => _respond(invitation, accept: false),
+                  ),
+                _NewCover(onTap: _openNew),
+              ],
+            ),
+          ),
         ),
       ),
     );
