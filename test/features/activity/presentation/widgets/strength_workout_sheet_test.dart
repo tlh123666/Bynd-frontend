@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:new_jcvital/design_system/components/app_frosted_modal_sheet.dart';
+import 'package:new_jcvital/features/activity/data/local_workout_store.dart';
+import 'package:new_jcvital/features/activity/presentation/models/exercise_catalog_item.dart';
+import 'package:new_jcvital/features/activity/presentation/models/workout_draft_exercise.dart';
 import 'package:new_jcvital/features/activity/presentation/activity_selection_flow.dart';
 import 'package:new_jcvital/features/activity/presentation/pages/activity_preparation_page.dart';
 import 'package:new_jcvital/features/activity/presentation/widgets/activity_selection_sheet.dart';
@@ -53,12 +56,13 @@ void main() {
     );
     expect(find.text('Demonstração'), findsOneWidget);
     expect(find.text('4 exercícios · 9 séries'), findsOneWidget);
-    await tester.tap(find.text('Demonstração'));
+    await tester.tap(find.byIcon(Icons.more_horiz).first);
     await tester.pumpAndSettle();
-    expect(
-      find.text('Os modelos e o editor ainda não estão conectados.'),
-      findsOneWidget,
-    );
+    expect(find.text('Editar'), findsOneWidget);
+    expect(find.text('Duplicar'), findsOneWidget);
+    expect(find.text('Apagar'), findsOneWidget);
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Começar sem plano'));
     await tester.pumpAndSettle();
     expect(find.byType(ActivityPreparationPage), findsOneWidget);
@@ -296,6 +300,135 @@ void main() {
       find.text('Plano local · atividade ainda não iniciada'),
       findsOneWidget,
     );
+    expect(tester.takeException(), isNull);
+  });
+  testWidgets('本地训练菜单支持编辑、复制及取消或确认删除', (tester) async {
+    final exercise = (await ExerciseCatalogItem.load()).first;
+    final store = LocalWorkoutStore(null);
+    await store.add(
+      LocalWorkoutPlan(
+        name: 'Treino local',
+        exercises: [WorkoutDraftExercise(exercise)],
+      ),
+    );
+    tester.view.physicalSize = const Size(400, 804);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('pt', 'BR'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => TextButton(
+              onPressed: () => openActivitySelection(context),
+              child: const Text('Abrir'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('Abrir'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Musculação').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.more_horiz).first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Editar'));
+    await tester.pumpAndSettle();
+    expect(find.text('Treino de força'), findsOneWidget);
+    await tester.enterText(find.byType(TextField), 'Treino alterado');
+    tester.testTextInput.hide();
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Salvar'));
+    await tester.pumpAndSettle();
+    expect(find.text('Treino alterado'), findsOneWidget);
+    expect((await store.load()).length, 1);
+    await tester.tap(find.byIcon(Icons.more_horiz).first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Duplicar'));
+    await tester.pumpAndSettle();
+    expect(find.text('Treino alterado (2)'), findsOneWidget);
+    expect((await store.load()).length, 2);
+    await tester.tap(find.byIcon(Icons.more_horiz).first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Apagar'));
+    await tester.pumpAndSettle();
+    expect(find.text('Apagar treino?'), findsOneWidget);
+    await tester.tap(find.text('Cancelar'));
+    await tester.pumpAndSettle();
+    expect((await store.load()).length, 2);
+    await tester.tap(find.byIcon(Icons.more_horiz).first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Apagar'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Apagar').last);
+    await tester.pumpAndSettle();
+    expect(find.text('Treino alterado (2)'), findsNothing);
+    expect((await store.load()).single.name, 'Treino alterado');
+    expect(tester.takeException(), isNull);
+  });
+  testWidgets('示例训练可编辑、复制和删除，重新打开后状态保持', (tester) async {
+    tester.view.physicalSize = const Size(400, 804);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('pt', 'BR'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => TextButton(
+              onPressed: () => openActivitySelection(context),
+              child: const Text('Abrir'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('Abrir'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Musculação').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.more_horiz).first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Editar'));
+    await tester.pumpAndSettle();
+    expect(find.text('4 EXERCÍCIOS · 9 SÉRIES'), findsOneWidget);
+    expect(find.text('Supino reto com barra'), findsOneWidget);
+    await tester.enterText(find.byType(TextField), 'Modelo alterado');
+    tester.testTextInput.hide();
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Salvar'));
+    await tester.pumpAndSettle();
+    expect(find.text('Modelo alterado'), findsOneWidget);
+    expect(find.text('Demonstração'), findsNothing);
+    await tester.tap(find.byIcon(Icons.more_horiz).first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Duplicar'));
+    await tester.pumpAndSettle();
+    expect(find.text('Modelo alterado (2)'), findsOneWidget);
+    await tester.tap(find.byIcon(Icons.more_horiz).at(1));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Apagar'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Apagar').last);
+    await tester.pumpAndSettle();
+    expect(find.text('Modelo alterado'), findsNothing);
+    expect(find.text('Modelo alterado (2)'), findsOneWidget);
+    expect(await LocalWorkoutStore(null).hiddenDemoIds(), contains('demo:0'));
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Abrir'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Musculação').first);
+    await tester.pumpAndSettle();
+    expect(find.text('Demonstração'), findsNothing);
+    expect(find.text('Modelo alterado (2)'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

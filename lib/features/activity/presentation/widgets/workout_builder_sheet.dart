@@ -14,9 +14,14 @@ import '../models/workout_draft_exercise.dart';
 
 /// 新建训练草稿；默认组数和重量为示例，尚不代表完成的运动。
 class WorkoutBuilderSheet extends StatefulWidget {
-  const WorkoutBuilderSheet._({required this._draft, required this._store});
+  const WorkoutBuilderSheet._({
+    required this._draft,
+    required this._store,
+    this._initialId,
+  });
   final _WorkoutDraft _draft;
   final LocalWorkoutStore _store;
+  final String? _initialId;
 
   static Future<LocalWorkoutPlan?> show(
     BuildContext context, {
@@ -37,7 +42,11 @@ class WorkoutBuilderSheet extends StatefulWidget {
         showHandle: false,
         barrierColor: AppColors.contentSheetVeil,
         waitForExit: true,
-        builder: (_) => WorkoutBuilderSheet._(draft: draft, store: localStore),
+        builder: (_) => WorkoutBuilderSheet._(
+          draft: draft,
+          store: localStore,
+          initialId: initialPlan?.id,
+        ),
       );
       if (!context.mounted ||
           action == null ||
@@ -95,6 +104,8 @@ class _WorkoutBuilderSheetState extends State<WorkoutBuilderSheet> {
   bool _saving = false;
   bool _saveError = false;
   bool _reordering = false;
+  bool _setPickerOpen = false;
+  WorkoutDraftExercise? _expandedExercise;
 
   Future<void> _save() async {
     if (_saving || widget._draft.exercises.isEmpty) return;
@@ -104,11 +115,16 @@ class _WorkoutBuilderSheetState extends State<WorkoutBuilderSheet> {
     });
     final name = _name.text.trim();
     final plan = LocalWorkoutPlan(
+      id: widget._initialId,
       name: name.isEmpty ? _suggestedName(context, widget._draft) : name,
       exercises: [for (final item in widget._draft.exercises) item.copy()],
     );
     try {
-      await widget._store.add(plan);
+      if (widget._initialId == null) {
+        await widget._store.add(plan);
+      } else {
+        await widget._store.update(plan);
+      }
       // 用户可能已通过系统返回离开，不能误关闭后来打开的页面。
       if (mounted && ModalRoute.of(context)?.isCurrent == true) {
         Navigator.pop(context, _BuilderAction.saved);
@@ -172,13 +188,17 @@ class _WorkoutBuilderSheetState extends State<WorkoutBuilderSheet> {
         child: Column(
           children: [
             ActivityFrostedSheetHeader(
-              title: s.workoutBuilderTitle,
+              title: widget._initialId == null
+                  ? s.workoutBuilderTitle
+                  : s.workoutBuilderNameHint,
               height: math.min(62, height),
               trailing: exercises.isEmpty
                   ? null
                   : IconButton(
-                      onPressed: () =>
-                          setState(() => _reordering = !_reordering),
+                      onPressed: () => setState(() {
+                        _reordering = !_reordering;
+                        _expandedExercise = null;
+                      }),
                       icon: Semantics(
                         label: _reordering ? s.workoutDone : s.workoutReorder,
                         child: Icon(
@@ -343,6 +363,14 @@ class _WorkoutBuilderSheetState extends State<WorkoutBuilderSheet> {
                     for (final item in exercises)
                       WorkoutExerciseRow(
                         reorderMode: _reordering,
+                        expanded: identical(_expandedExercise, item),
+                        onPickerVisibilityChanged: (open) =>
+                            setState(() => _setPickerOpen = open),
+                        onToggleExpanded: () => setState(() {
+                          _expandedExercise = identical(_expandedExercise, item)
+                              ? null
+                              : item;
+                        }),
                         canMoveUp: exercises.indexOf(item) > 0,
                         canMoveDown:
                             exercises.indexOf(item) < exercises.length - 1,
@@ -364,7 +392,22 @@ class _WorkoutBuilderSheetState extends State<WorkoutBuilderSheet> {
                         item: item,
                         summary: _setSummary(context, item),
                         onChanged: () => setState(() {}),
-                        onRemove: () => setState(() => exercises.remove(item)),
+                        onReplace: (next) => setState(() {
+                          final index = exercises.indexOf(item);
+                          if (index >= 0) {
+                            final replacement = item.replaceWith(next);
+                            exercises[index] = replacement;
+                            if (identical(_expandedExercise, item)) {
+                              _expandedExercise = replacement;
+                            }
+                          }
+                        }),
+                        onRemove: () => setState(() {
+                          exercises.remove(item);
+                          if (identical(_expandedExercise, item)) {
+                            _expandedExercise = null;
+                          }
+                        }),
                         onDuplicate: () => setState(
                           () => exercises.insert(
                             exercises.indexOf(item) + 1,
@@ -407,48 +450,55 @@ class _WorkoutBuilderSheetState extends State<WorkoutBuilderSheet> {
               ),
             // 极小临时视口无法容纳固定底栏，等待窗口恢复后再显示。
             if (height >= 144 && media.size.width >= 100)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 26),
-                child: SizedBox(
-                  width: 272,
-                  height: 48,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: FilledButton(
-                          onPressed: exercises.isEmpty || _saving
-                              ? null
-                              : _save,
-                          style: FilledButton.styleFrom(
-                            backgroundColor: const Color(0xff1a1d22),
-                            foregroundColor: AppColors.textPrimary,
-                            disabledBackgroundColor: const Color(0x1fffffff),
-                            disabledForegroundColor: AppColors.textMuted,
-                            padding: EdgeInsets.zero,
+              Visibility(
+                key: const ValueKey('workout-builder-footer'),
+                visible: !_setPickerOpen,
+                maintainState: true,
+                maintainAnimation: true,
+                maintainSize: true,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 26),
+                  child: SizedBox(
+                    width: 272,
+                    height: 48,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: FilledButton(
+                            onPressed: exercises.isEmpty || _saving
+                                ? null
+                                : _save,
+                            style: FilledButton.styleFrom(
+                              backgroundColor: const Color(0xff1a1d22),
+                              foregroundColor: AppColors.textPrimary,
+                              disabledBackgroundColor: const Color(0x1fffffff),
+                              disabledForegroundColor: AppColors.textMuted,
+                              padding: EdgeInsets.zero,
+                            ),
+                            child: Text(s.registrationSave),
                           ),
-                          child: Text(s.registrationSave),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: FilledButton(
-                          onPressed: exercises.isEmpty || _saving
-                              ? null
-                              : () => Navigator.pop(
-                                  context,
-                                  _BuilderAction.start,
-                                ),
-                          style: FilledButton.styleFrom(
-                            backgroundColor: const Color(0xfff4f5f7),
-                            foregroundColor: const Color(0xff121418),
-                            disabledBackgroundColor: const Color(0x59f4f5f7),
-                            disabledForegroundColor: const Color(0xff121418),
-                            padding: EdgeInsets.zero,
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: FilledButton(
+                            onPressed: exercises.isEmpty || _saving
+                                ? null
+                                : () => Navigator.pop(
+                                    context,
+                                    _BuilderAction.start,
+                                  ),
+                            style: FilledButton.styleFrom(
+                              backgroundColor: const Color(0xfff4f5f7),
+                              foregroundColor: const Color(0xff121418),
+                              disabledBackgroundColor: const Color(0x59f4f5f7),
+                              disabledForegroundColor: const Color(0xff121418),
+                              padding: EdgeInsets.zero,
+                            ),
+                            child: Text(s.workoutBuilderStart),
                           ),
-                          child: Text(s.workoutBuilderStart),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),

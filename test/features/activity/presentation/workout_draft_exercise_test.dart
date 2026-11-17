@@ -37,4 +37,17 @@ void main() {
       expect(timed.liftedWeight, 0);
     }
   });
+  test('替换动作保留组数并按目标单位调整次数和重量', () {
+    final original = WorkoutDraftExercise(exercise());
+    original.sets.first.amount = 8;
+    original.sets.first.weight = 25;
+    final weighted = original.replaceWith(exercise());
+    expect(weighted.sets.first.amount, 8);
+    expect(weighted.sets.first.weight, 25);
+    final timed = original.replaceWith(exercise(unit: 'seg'));
+    expect(timed.sets.length, 3);
+    expect(timed.sets.first.amount, 30);
+    expect(timed.sets.first.weight, 0);
+    expect(timed.liftedWeight, 0);
+  });
 }
