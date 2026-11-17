@@ -1385,6 +1385,14 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get communityCheckinLabel => 'check-in';
+
+  @override
+  String communityRankOf(Object total) {
+    return 'of $total';
+  }
+
+  @override
   String communityDaysTotal(Object days) {
     return '$days-day challenge';
   }

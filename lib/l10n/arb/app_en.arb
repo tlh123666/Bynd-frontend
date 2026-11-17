@@ -84,12 +84,24 @@
   "workoutMoveUp": "Move up",
   "workoutMoveDown": "Move down",
   "workoutSuggestedName": "Workout: {group}",
-  "@workoutSuggestedName": { "placeholders": { "group": { "type": "String" } } },
+  "@workoutSuggestedName": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
   "workoutMenuEdit": "Edit",
   "workoutMenuDelete": "Delete",
   "workoutDeleteTitle": "Delete workout?",
   "workoutDeleteMessage": "“{name}” will be removed from local workouts.",
-  "@workoutDeleteMessage": { "placeholders": { "name": { "type": "String" } } },
+  "@workoutDeleteMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "workoutActionError": "Could not update local workouts.",
   "workoutBuilderTitle": "Build workout",
   "workoutBuilderWeight": "kg lifted",
@@ -551,6 +563,15 @@
   "communityAccept": "Accept",
   "communityDecline": "Decline",
   "communityMemberCount": "{count} members",
+  "communityCheckinLabel": "check-in",
+  "communityRankOf": "of {total}",
+  "@@communityRankOf": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "@@communityMemberCount": {
     "placeholders": {
       "count": {}

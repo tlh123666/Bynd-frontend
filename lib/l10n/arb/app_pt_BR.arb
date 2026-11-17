@@ -84,12 +84,24 @@
   "workoutMoveUp": "Mover para cima",
   "workoutMoveDown": "Mover para baixo",
   "workoutSuggestedName": "Treino de {group}",
-  "@workoutSuggestedName": { "placeholders": { "group": { "type": "String" } } },
+  "@workoutSuggestedName": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
   "workoutMenuEdit": "Editar",
   "workoutMenuDelete": "Apagar",
   "workoutDeleteTitle": "Apagar treino?",
   "workoutDeleteMessage": "“{name}” será removido dos treinos locais.",
-  "@workoutDeleteMessage": { "placeholders": { "name": { "type": "String" } } },
+  "@workoutDeleteMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "workoutActionError": "Não foi possível atualizar os treinos locais.",
   "workoutBuilderTitle": "Montar treino",
   "workoutBuilderWeight": "kg levantados",
@@ -551,6 +563,15 @@
   "communityAccept": "Aceitar",
   "communityDecline": "Recusar",
   "communityMemberCount": "{count} pessoas",
+  "communityCheckinLabel": "check-in",
+  "communityRankOf": "de {total}",
+  "@@communityRankOf": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "@@communityMemberCount": {
     "placeholders": {
       "count": {}

@@ -8,6 +8,7 @@ import '../data/remote_community_repository.dart';
 import '../domain/community_models.dart';
 import 'community_new_page.dart';
 import 'community_style.dart';
+import 'day_strip.dart';
 import 'group_chat_page.dart';
 
 /// 社区主页 —— 逐屏复刻原型 `src/screens/comunidade/Comunidade.jsx`
@@ -235,10 +236,11 @@ class _CommunityPageState extends State<CommunityPage> {
     return today ? diff == 0 : diff == 1;
   }
 
-  // .cm-cab：标题居中 17px w500，右侧 + 进入 Novo。
+  // .cm-cab：grid 40/1fr/40，标题居中 17px w500；右侧 + 为纯图标钮
+  // （源码 .cm-cab button 无底色）。
   Widget _header(AppLocalizations strings) {
     return SizedBox(
-      height: 48,
+      height: 54,
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -254,19 +256,11 @@ class _CommunityPageState extends State<CommunityPage> {
             right: 0,
             child: GestureDetector(
               onTap: _openNew,
-              child: Container(
+              behavior: HitTestBehavior.opaque,
+              child: const SizedBox(
                 width: 40,
                 height: 40,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: CommunityStyle.accentSoft,
-                  border: Border.all(color: const Color(0x73EC7030)),
-                ),
-                child: const Icon(
-                  Icons.add_rounded,
-                  size: 20,
-                  color: CommunityStyle.accent,
-                ),
+                child: Icon(Icons.add_rounded, size: 22),
               ),
             ),
           ),
@@ -275,69 +269,70 @@ class _CommunityPageState extends State<CommunityPage> {
     );
   }
 
-  // FaixaDias：Ontem · Hoje 两段；选中的一段亮底。
+  // FaixaDias：Ontem · Hoje 文字 tab + 固定居中 marca（源码 .hdx-*，
+  // 与 Memória 页 tab 条同族；条带满幅出血 margin 0 -16px）。
   Widget _dayStrip(AppLocalizations strings) {
-    Widget seg(int index, String label) {
-      final on = _day == index;
-      return GestureDetector(
-        onTap: () => setState(() => _day = index),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(999),
-            color: on ? const Color(0xFFC9D6EA) : Colors.transparent,
-          ),
-          child: Text(
-            label,
-            style: AppTypography.caption.copyWith(
-              color: on ? const Color(0xFF14181D) : AppColors.textSecondary,
-              fontWeight: on ? FontWeight.w600 : FontWeight.w400,
-            ),
-          ),
+    // 源码渲染顺序：index 0 = Ontem（_day 1），index 1 = Hoje（_day 0）。
+    final labels = [
+      strings.communityDayYesterday,
+      strings.communityDayToday,
+    ];
+    return Transform.translate(
+      offset: const Offset(-16, 0),
+      child: SizedBox(
+        width: MediaQuery.sizeOf(context).width,
+        child: DayStrip(
+          labels: labels,
+          selectedIndex: _day == 0 ? 1 : 0,
+          onSelect: (index) => setState(() => _day = index == 1 ? 0 : 1),
         ),
-      );
-    }
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        seg(1, strings.communityDayYesterday),
-        const SizedBox(width: 6),
-        seg(0, strings.communityDayToday),
-      ],
+      ),
     );
   }
 
-  // .cmb-capas：封面轮播（群 + 邀请 + 建群空位）。
+  // .cmb-capas：封面轮播（群 + 邀请 + 建群空位）；满幅出血、内衬 16。
   Widget _covers(AppLocalizations strings) {
-    return SizedBox(
-      height: CommunityStyle.coverHeight,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        clipBehavior: Clip.none,
-        children: [
-          for (final group in _groups)
-            if (group.membershipState == 'joined')
-              _GroupCover(
-                name: group.name,
-                memberCount: group.memberCount,
-                members: group.members,
-                myRank: _myRank[group.id],
-                onTap: () => _openChat(group),
-              )
-            else
-              _PublicCover(
-                group: group,
-                onJoin: () => _join(group),
+    final joined = _groups
+        .where((g) => g.membershipState == 'joined')
+        .toList(growable: false);
+    CuratedChallenge? coverChallenge;
+    if (joined.isNotEmpty && _mine.isNotEmpty) {
+      coverChallenge = _mine.first;
+    }
+    return Transform.translate(
+      offset: const Offset(-16, 0),
+      child: SizedBox(
+        width: MediaQuery.sizeOf(context).width,
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          clipBehavior: Clip.none,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          children: [
+            for (final group in _groups)
+              if (group.membershipState == 'joined')
+                _GroupCover(
+                  name: group.name,
+                  memberCount: group.memberCount,
+                  members: group.members,
+                  challenge:
+                      group == joined.firstOrNull ? coverChallenge : null,
+                  myRank: _myRank[group.id],
+                  onTap: () => _openChat(group),
+                )
+              else
+                _PublicCover(
+                  group: group,
+                  onJoin: () => _join(group),
+                ),
+            for (final invitation in _invitations)
+              _InviteCover(
+                invitation: invitation,
+                onAccept: () => _respond(invitation, accept: true),
+                onDecline: () => _respond(invitation, accept: false),
               ),
-          for (final invitation in _invitations)
-            _InviteCover(
-              invitation: invitation,
-              onAccept: () => _respond(invitation, accept: true),
-              onDecline: () => _respond(invitation, accept: false),
-            ),
-          _NewCover(onTap: _openNew),
-        ],
+            _NewCover(onTap: _openNew),
+          ],
+        ),
       ),
     );
   }
@@ -403,12 +398,14 @@ class _CommunityPageState extends State<CommunityPage> {
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: AppColors.surface,
-          borderRadius: BorderRadius.circular(CommunityStyle.cardRadius),
+          borderRadius: BorderRadius.circular(CommunityStyle.surfaceCardRadius),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // .cmb-k：kicker 居左，群名居右
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
@@ -420,18 +417,17 @@ class _CommunityPageState extends State<CommunityPage> {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                if (main != null) ...[
-                  const SizedBox(width: 8),
+                if (main != null)
                   Text(
                     main.name,
                     style: AppTypography.caption.copyWith(
                       color: AppColors.textMuted,
+                      fontSize: 12,
                     ),
                   ),
-                ],
               ],
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
             for (final challenge in _mine)
               _TodayRow(
                 challenge: challenge,
@@ -451,25 +447,34 @@ class _CommunityPageState extends State<CommunityPage> {
     bool today,
   ) {
     return Padding(
-      padding: const EdgeInsets.only(top: 28),
+      padding: const EdgeInsets.only(top: 36),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            today
-                ? strings.communityMuralToday
-                : strings.communityMuralYesterday,
-            style: AppTypography.section.copyWith(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w300,
-              letterSpacing: -0.6,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Text(
+              today
+                  ? strings.communityMuralToday
+                  : strings.communityMuralYesterday,
+              style: const TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 28,
+                fontWeight: FontWeight.w300,
+                letterSpacing: -0.7,
+                height: 1.12,
+              ),
             ),
           ),
-          const SizedBox(height: 6),
-          Text(
-            strings.communityMuralIntro,
-            style: AppTypography.caption.copyWith(
-              color: AppColors.textSecondary,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
+            child: Text(
+              strings.communityMuralIntro,
+              style: AppTypography.caption.copyWith(
+                color: AppColors.textMuted,
+                fontSize: 14,
+                height: 1.5,
+              ),
             ),
           ),
           const SizedBox(height: 14),
@@ -501,7 +506,7 @@ class _CommunityPageState extends State<CommunityPage> {
             child: InkWell(
               onTap: () => _openChat(group),
               child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 14),
+                padding: const EdgeInsets.fromLTRB(4, 14, 4, 14),
                 decoration: const BoxDecoration(
                   border:
                       Border(top: BorderSide(color: CommunityStyle.stroke)),
@@ -538,6 +543,7 @@ class _GroupCover extends StatelessWidget {
     required this.name,
     required this.memberCount,
     required this.members,
+    required this.challenge,
     required this.myRank,
     required this.onTap,
   });
@@ -545,12 +551,15 @@ class _GroupCover extends StatelessWidget {
   final String name;
   final int memberCount;
   final List<CommunityMember> members;
+  final CuratedChallenge? challenge;
   final CommunityRankingEntry? myRank;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final stack = members.take(5).toList();
+    final rank = myRank;
+    final showRank = rank != null && rank.rank > 0 && memberCount > 1;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -575,7 +584,9 @@ class _GroupCover extends StatelessWidget {
             ),
             Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // .cmb-t1：头像堆叠 + 人数
                 Row(
                   children: [
                     Expanded(child: _AvatarStack(members: stack)),
@@ -583,29 +594,85 @@ class _GroupCover extends StatelessWidget {
                       context.l10n.communityMemberCount(memberCount),
                       style: AppTypography.caption.copyWith(
                         color: CommunityStyle.onImage,
+                        fontSize: 12.5,
                       ),
                     ),
                   ],
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                // .cmb-lin：左侧挑战进度，右侧 42px 细体排名
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text(
-                      name,
-                      style: AppTypography.body.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            name,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 21,
+                              fontWeight: FontWeight.w400,
+                              letterSpacing: -0.01,
+                            ),
+                          ),
+                          if (challenge != null) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              context.l10n.communityDayOfTotal(
+                                challenge!.today?.dayNumber ?? 1,
+                                challenge!.durationDays,
+                              ),
+                              style: const TextStyle(
+                                color: CommunityStyle.onImage,
+                                fontSize: 13,
+                                height: 1.4,
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                     ),
-                    if (myRank != null && myRank!.rank > 0)
-                      Text(
-                        context.l10n.communityRankBadge(
-                          myRank!.rank,
-                          memberCount,
-                        ),
-                        style: AppTypography.caption.copyWith(
-                          color: CommunityStyle.onImage,
-                        ),
+                    if (showRank)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${rank.rank}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 42,
+                                  fontWeight: FontWeight.w200,
+                                  height: 0.85,
+                                  letterSpacing: -0.03,
+                                ),
+                              ),
+                              Text(
+                                'º',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 42 * 0.34,
+                                  fontWeight: FontWeight.w300,
+                                  height: 1,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Text(
+                            context
+                                .l10n.communityRankOf(memberCount)
+                                .toUpperCase(),
+                            style: const TextStyle(
+                              color: CommunityStyle.onImage,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: 1.6,
+                            ),
+                          ),
+                        ],
                       ),
                   ],
                 ),
@@ -648,6 +715,7 @@ class _PublicCover extends StatelessWidget {
           ),
           Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
@@ -656,6 +724,7 @@ class _PublicCover extends StatelessWidget {
                     context.l10n.communityMemberCount(group.memberCount),
                     style: AppTypography.caption.copyWith(
                       color: CommunityStyle.onImage,
+                      fontSize: 12.5,
                     ),
                   ),
                 ],
@@ -665,28 +734,29 @@ class _PublicCover extends StatelessWidget {
                 children: [
                   Text(
                     context.l10n.communityPublicGroup,
-                    style: AppTypography.caption.copyWith(
+                    style: const TextStyle(
                       color: CommunityStyle.onImage,
+                      fontSize: 13,
                     ),
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        group.name,
-                        style: AppTypography.body.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      _CoverButton(
-                        label: context.l10n.communityJoin,
-                        filled: true,
-                        onTap: onJoin,
-                      ),
-                    ],
+                  Text(
+                    group.name,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 21,
+                      fontWeight: FontWeight.w400,
+                      letterSpacing: -0.01,
+                    ),
                   ),
                 ],
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: _CoverButton(
+                  label: context.l10n.communityJoin,
+                  filled: true,
+                  onTap: onJoin,
+                ),
               ),
             ],
           ),
@@ -731,41 +801,71 @@ class _InviteCover extends StatelessWidget {
           ),
           Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  context.l10n.communityInviteFromShort(invitation.inviterName),
-                  style: AppTypography.caption.copyWith(
-                    color: CommunityStyle.onImage,
+              // .cmb-t1：成员堆叠 + 「convite de {名}」
+              Row(
+                children: [
+                  Expanded(
+                    child: _AvatarStack(
+                      members: const [],
+                      extraInitial: invitation.inviterName,
+                    ),
                   ),
-                ),
+                  Flexible(
+                    child: Text(
+                      context.l10n.communityInviteFromShort(
+                        invitation.inviterName,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: CommunityStyle.onImage,
+                        fontSize: 12.5,
+                      ),
+                    ),
+                  ),
+                ],
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     invitation.groupName,
-                    style: AppTypography.body.copyWith(
+                    style: const TextStyle(
                       color: Colors.white,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 21,
+                      fontWeight: FontWeight.w400,
+                      letterSpacing: -0.01,
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      _CoverButton(
-                        label: context.l10n.communityDecline,
-                        filled: false,
-                        onTap: onDecline,
-                      ),
-                      const SizedBox(width: 8),
-                      _CoverButton(
-                        label: context.l10n.communityAccept,
-                        filled: true,
-                        onTap: onAccept,
-                      ),
-                    ],
+                  const SizedBox(height: 4),
+                  Text(
+                    context.l10n.communityInviteFromShort(
+                      invitation.inviterName,
+                    ),
+                    style: const TextStyle(
+                      color: CommunityStyle.onImage,
+                      fontSize: 13,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+              // .cmb-bts：Depois / Entrar
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  _CoverButton(
+                    label: context.l10n.communityDecline,
+                    filled: false,
+                    onTap: onDecline,
+                  ),
+                  const SizedBox(width: 6),
+                  _CoverButton(
+                    label: context.l10n.communityAccept,
+                    filled: true,
+                    onTap: onAccept,
                   ),
                 ],
               ),
@@ -819,30 +919,39 @@ class _NewCover extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // .cmb-capa.vazia：宽 180、居中、+ 为 44 圆（白 .08），无边框。
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: CommunityStyle.coverWidth,
+        width: 180,
         height: CommunityStyle.coverHeight,
+        margin: const EdgeInsets.only(right: 10),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(CommunityStyle.coverRadius),
-          border: Border.all(color: CommunityStyle.strokeStrong),
           color: AppColors.surface,
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.add_rounded,
-              size: 26,
-              color: AppColors.textSecondary,
+            Container(
+              width: 44,
+              height: 44,
+              alignment: Alignment.center,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: Color(0x14FFFFFF),
+              ),
+              child: const Icon(Icons.add_rounded, size: 22, color: Colors.white),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 12),
             Text(
               context.l10n.communityNewCover,
               textAlign: TextAlign.center,
               style: AppTypography.label.copyWith(
                 color: AppColors.textSecondary,
+                fontSize: 13.5,
+                height: 1.4,
               ),
             ),
           ],
@@ -853,21 +962,27 @@ class _NewCover extends StatelessWidget {
 }
 
 class _AvatarStack extends StatelessWidget {
-  const _AvatarStack({required this.members});
+  const _AvatarStack({required this.members, this.extraInitial});
 
   final List<CommunityMember> members;
 
+  /// 邀请封面没有成员列表：只渲染邀请人一个头像（源码 Pilha 的单成员形态）。
+  final String? extraInitial;
+
   @override
   Widget build(BuildContext context) {
+    final stack = members.take(5).toList();
     return SizedBox(
       height: 26,
       child: Stack(
         children: [
-          for (var i = members.length - 1; i >= 0; i--)
+          for (var i = stack.length - 1; i >= 0; i--)
             Positioned(
               left: i * 20.0,
-              child: _Avatar(name: members[i].displayName, size: 26),
+              child: _Avatar(name: stack[i].displayName, size: 26),
             ),
+          if (stack.isEmpty && extraInitial != null)
+            _Avatar(name: extraInitial!, size: 26),
         ],
       ),
     );
@@ -888,15 +1003,16 @@ class _Avatar extends StatelessWidget {
       width: size,
       height: size,
       alignment: Alignment.center,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: CommunityStyle.surface2,
+        // .av：背景取 pessoa.cor 色板（按名字稳定取色），字色深灰。
+        color: CommunityStyle.avatarColor(name),
       ),
       child: Text(
         initial,
         style: AppTypography.caption.copyWith(
-          color: AppColors.textSecondary,
-          fontSize: size * 0.38,
+          color: const Color(0xFF1C2026),
+          fontSize: size * 0.37,
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -1008,7 +1124,7 @@ class _AtlasPost extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(CommunityStyle.cardRadius),
+        borderRadius: BorderRadius.circular(CommunityStyle.surfaceCardRadius),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1074,7 +1190,7 @@ class _CheckinPost extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(CommunityStyle.cardRadius),
+        borderRadius: BorderRadius.circular(CommunityStyle.surfaceCardRadius),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1092,10 +1208,13 @@ class _CheckinPost extends StatelessWidget {
                       style: AppTypography.label.copyWith(
                         color: AppColors.textPrimary,
                         fontWeight: FontWeight.w500,
+                        fontSize: 14.5,
                       ),
                     ),
+                    // 源码 cab small：{时间} · check-in
                     Text(
-                      '${message.createdAt.hour.toString().padLeft(2, '0')}:${message.createdAt.minute.toString().padLeft(2, '0')}',
+                      '${message.createdAt.hour.toString().padLeft(2, '0')}:${message.createdAt.minute.toString().padLeft(2, '0')}'
+                      ' · ${context.l10n.communityCheckinLabel}',
                       style: AppTypography.caption.copyWith(
                         color: AppColors.textMuted,
                         fontSize: 12,

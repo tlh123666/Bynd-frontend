@@ -1394,6 +1394,14 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String get communityCheckinLabel => 'check-in';
+
+  @override
+  String communityRankOf(Object total) {
+    return 'de $total';
+  }
+
+  @override
   String communityDaysTotal(Object days) {
     return 'desafio de $days dias';
   }
@@ -7245,6 +7253,14 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   @override
   String communityMemberCount(Object count) {
     return '$count pessoas';
+  }
+
+  @override
+  String get communityCheckinLabel => 'check-in';
+
+  @override
+  String communityRankOf(Object total) {
+    return 'de $total';
   }
 
   @override

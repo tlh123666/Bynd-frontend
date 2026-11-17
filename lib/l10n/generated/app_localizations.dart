@@ -2643,6 +2643,18 @@ abstract class AppLocalizations {
   /// **'{count} pessoas'**
   String communityMemberCount(Object count);
 
+  /// No description provided for @communityCheckinLabel.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'check-in'**
+  String get communityCheckinLabel;
+
+  /// No description provided for @communityRankOf.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'de {total}'**
+  String communityRankOf(Object total);
+
   /// No description provided for @communityDaysTotal.
   ///
   /// In pt_BR, this message translates to:
