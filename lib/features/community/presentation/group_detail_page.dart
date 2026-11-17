@@ -208,6 +208,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
                                       i * 24.0,
                                   child: _Avatar(
                                     name: _members[i].displayName,
+                                    avatarUrl: _members[i].avatarUrl,
                                     size: 34,
                                   ),
                                 ),
@@ -259,6 +260,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
                         for (final member in _members)
                           _MemberRow(
                             name: member.displayName,
+                            avatarUrl: member.avatarUrl,
                             subtitle: member.role == 'admin'
                                 ? strings.communityRoleAdmin
                                 : null,
@@ -380,9 +382,10 @@ class _RowCard extends StatelessWidget {
 }
 
 class _MemberRow extends StatelessWidget {
-  const _MemberRow({required this.name, this.subtitle});
+  const _MemberRow({required this.name, this.avatarUrl, this.subtitle});
 
   final String name;
+  final String? avatarUrl;
   final String? subtitle;
 
   @override
@@ -391,7 +394,7 @@ class _MemberRow extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       child: Row(
         children: [
-          _Avatar(name: name, size: 30),
+          _Avatar(name: name, avatarUrl: avatarUrl, size: 30),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -512,31 +515,47 @@ class _PlacarCard extends StatelessWidget {
 }
 
 class _Avatar extends StatelessWidget {
-  const _Avatar({required this.name, required this.size});
+  const _Avatar({required this.name, required this.size, this.avatarUrl});
 
   final String name;
   final double size;
+  final String? avatarUrl;
 
   @override
   Widget build(BuildContext context) {
     final initial =
         name.isNotEmpty ? name.characters.first.toUpperCase() : '?';
+    final url = avatarUrl;
+    Widget content = Text(
+      initial,
+      style: AppTypography.caption.copyWith(
+        color: const Color(0xFF1C2026),
+        fontSize: size * 0.37,
+        fontWeight: FontWeight.w600,
+      ),
+    );
+    // 有真实头像走网络图，加载失败退回字母头像（.av 的初始+色板形态）。
+    if (url != null && url.isNotEmpty) {
+      content = Image.network(
+        url,
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => content,
+        loadingBuilder: (context, child, progress) =>
+            progress == null ? child : content,
+      );
+    }
     return Container(
       width: size,
       height: size,
       alignment: Alignment.center,
-      decoration: const BoxDecoration(
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: CommunityStyle.surface2,
+        color: CommunityStyle.avatarColor(name),
       ),
-      child: Text(
-        initial,
-        style: AppTypography.caption.copyWith(
-          color: AppColors.textSecondary,
-          fontSize: size * 0.38,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
+      child: content,
     );
   }
 }

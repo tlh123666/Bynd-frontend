@@ -1000,7 +1000,11 @@ class _AvatarStack extends StatelessWidget {
           for (var i = stack.length - 1; i >= 0; i--)
             Positioned(
               left: i * 20.0,
-              child: _Avatar(name: stack[i].displayName, size: 26),
+              child: _Avatar(
+                name: stack[i].displayName,
+                avatarUrl: stack[i].avatarUrl,
+                size: 26,
+              ),
             ),
           if (stack.isEmpty && extraInitial != null)
             _Avatar(name: extraInitial!, size: 26),
@@ -1011,32 +1015,48 @@ class _AvatarStack extends StatelessWidget {
 }
 
 class _Avatar extends StatelessWidget {
-  const _Avatar({required this.name, this.size = 30});
+  const _Avatar({required this.name, this.avatarUrl, this.size = 30});
 
   final String name;
+  final String? avatarUrl;
   final double size;
 
   @override
   Widget build(BuildContext context) {
     final initial =
         name.isNotEmpty ? name.characters.first.toUpperCase() : '?';
+    final url = avatarUrl;
+    Widget content = Text(
+      initial,
+      style: AppTypography.caption.copyWith(
+        color: const Color(0xFF1C2026),
+        fontSize: size * 0.37,
+        fontWeight: FontWeight.w600,
+      ),
+    );
+    // 有真实头像就走网络图，加载失败退回字母头像（.av 的初始+色板形态）。
+    if (url != null && url.isNotEmpty) {
+      content = Image.network(
+        url,
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => content,
+        loadingBuilder: (context, child, progress) =>
+            progress == null ? child : content,
+      );
+    }
     return Container(
       width: size,
       height: size,
       alignment: Alignment.center,
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         // .av：背景取 pessoa.cor 色板（按名字稳定取色），字色深灰。
         color: CommunityStyle.avatarColor(name),
       ),
-      child: Text(
-        initial,
-        style: AppTypography.caption.copyWith(
-          color: const Color(0xFF1C2026),
-          fontSize: size * 0.37,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
+      child: content,
     );
   }
 }
@@ -1218,7 +1238,11 @@ class _CheckinPost extends StatelessWidget {
         children: [
           Row(
             children: [
-              _Avatar(name: message.authorDisplayName, size: 36),
+              _Avatar(
+                name: message.authorDisplayName,
+                avatarUrl: message.authorAvatarUrl,
+                size: 36,
+              ),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(
