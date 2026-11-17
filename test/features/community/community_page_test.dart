@@ -54,7 +54,9 @@ Map<String, dynamic> _responses(http.Request request) {
   final path = request.url.path;
   if (path.endsWith('/community/groups')) return _groups;
   if (path.endsWith('/community/invitations')) return _invitations;
-  if (path.endsWith('/community/challenges/g1-sono')) return _challengeDetail;
+  if (path.endsWith('/community/challenges/g1-sono')) {
+    return _challengeDetail;
+  }
   if (path.endsWith('/community/challenges')) return _challenges;
   if (path.contains('/community/groups/g1/goals')) return _goals;
   if (path.contains('/community/groups/g1/atlas')) return _atlas;
