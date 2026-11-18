@@ -120,4 +120,41 @@ void main() {
       throwsStateError,
     );
   });
+  test('复制避开可见示例重名，副本置顶且组数据独立', () async {
+    final exercise = (await ExerciseCatalogItem.load()).first;
+    final original = LocalWorkoutPlan(
+      name: 'Pernas',
+      exercises: [WorkoutDraftExercise(exercise)],
+    );
+    final occupiedDemo = LocalWorkoutPlan(
+      id: 'demo:5',
+      name: 'Pernas (2)',
+      exercises: [WorkoutDraftExercise(exercise)],
+    );
+    final store = LocalWorkoutStore('alice');
+    await store.add(original);
+    final saved = (await store.load()).single;
+    await store.duplicate(saved, demoPlans: [occupiedDemo]);
+    var plans = await store.load();
+    expect(plans.map((p) => p.name), ['Pernas (3)', 'Pernas']);
+    expect(plans.first.id, isNot(saved.id));
+    expect(plans.first.setCount, saved.setCount);
+    expect(
+      plans.first.exercises.first.sets.first.weight,
+      saved.exercises.first.sets.first.weight,
+    );
+    final copy = plans.first;
+    copy.exercises.first.sets.first.weight = 42.5;
+    await store.update(copy);
+    expect(
+      (await store.load()).last.exercises.first.sets.first.weight,
+      saved.exercises.first.sets.first.weight,
+    );
+    await store.duplicate(saved, demoPlans: [occupiedDemo]);
+    plans = await store.load();
+    expect(plans.map((p) => p.name), ['Pernas (4)', 'Pernas (3)', 'Pernas']);
+    await store.duplicate(plans[1], demoPlans: [occupiedDemo]);
+    expect((await store.load()).first.name, 'Pernas (3) (2)');
+    expect((await LocalWorkoutStore('alice').load()).length, 4);
+  });
 }

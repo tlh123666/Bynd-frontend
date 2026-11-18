@@ -80,6 +80,7 @@
   "workoutCancel": "Cancelar",
   "workoutInvalidSet": "Informe valores válidos.",
   "workoutPlanPreview": "Plano local · atividade ainda não iniciada",
+  "workoutExercisesLabel": "EXERCÍCIOS",
   "workoutReorder": "Reordenar exercícios",
   "workoutMoveUp": "Mover para cima",
   "workoutMoveDown": "Mover para baixo",
@@ -94,7 +95,7 @@
   "workoutMenuEdit": "Editar",
   "workoutMenuDelete": "Apagar",
   "workoutDeleteTitle": "Apagar treino?",
-  "workoutDeleteMessage": "“{name}” será removido dos treinos locais.",
+  "workoutDeleteMessage": "“{name}” sai dos seus treinos salvos. Os treinos que você já fez com ele continuam no histórico.",
   "@workoutDeleteMessage": {
     "placeholders": {
       "name": {

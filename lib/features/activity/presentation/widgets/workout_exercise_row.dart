@@ -23,23 +23,16 @@ class WorkoutExerciseRow extends StatefulWidget {
     required this.onToggleExpanded,
     required this.onPickerVisibilityChanged,
     required this.reorderMode,
-    required this.canMoveUp,
-    required this.canMoveDown,
-    required this.onMoveUp,
-    required this.onMoveDown,
+    required this.dragIndex,
     super.key,
   });
   final WorkoutDraftExercise item;
   final ValueChanged<ExerciseCatalogItem> onReplace;
   final ValueChanged<bool> onPickerVisibilityChanged;
   final String summary;
-  final VoidCallback onChanged,
-      onRemove,
-      onDuplicate,
-      onMoveUp,
-      onMoveDown,
-      onToggleExpanded;
-  final bool expanded, reorderMode, canMoveUp, canMoveDown;
+  final VoidCallback onChanged, onRemove, onDuplicate, onToggleExpanded;
+  final bool expanded, reorderMode;
+  final int dragIndex;
 
   @override
   State<WorkoutExerciseRow> createState() => _WorkoutExerciseRowState();
@@ -114,7 +107,14 @@ class _WorkoutExerciseRowState extends State<WorkoutExerciseRow> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        item.exercise.name,
+                        // 与原型一致隐藏动作名称中的计时单位后缀。
+                        item.exercise.name.replaceFirst(
+                          RegExp(
+                            r'\s*\((segundos|minutos)\)$',
+                            caseSensitive: false,
+                          ),
+                          '',
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: AppTypography.listItem.copyWith(fontSize: 15),
@@ -135,22 +135,23 @@ class _WorkoutExerciseRowState extends State<WorkoutExerciseRow> {
                   ),
                 ),
               ),
-              if (widget.reorderMode) ...[
-                IconButton(
-                  icon: Semantics(
-                    label: s.workoutMoveUp,
-                    child: const Icon(Icons.keyboard_arrow_up),
+              if (widget.reorderMode)
+                Semantics(
+                  label: s.workoutReorder,
+                  child: ReorderableDragStartListener(
+                    index: widget.dragIndex,
+                    child: const SizedBox(
+                      width: 48,
+                      height: 48,
+                      child: Icon(
+                        Icons.drag_handle,
+                        size: 20,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
                   ),
-                  onPressed: widget.canMoveUp ? widget.onMoveUp : null,
-                ),
-                IconButton(
-                  icon: Semantics(
-                    label: s.workoutMoveDown,
-                    child: const Icon(Icons.keyboard_arrow_down),
-                  ),
-                  onPressed: widget.canMoveDown ? widget.onMoveDown : null,
-                ),
-              ] else
+                )
+              else
                 Builder(
                   builder: (buttonContext) => IconButton(
                     icon: Semantics(

@@ -159,6 +159,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get workoutPlanPreview => 'Local plan · activity not started';
 
   @override
+  String get workoutExercisesLabel => 'EXERCISES';
+
+  @override
   String get workoutReorder => 'Reorder exercises';
 
   @override
@@ -183,7 +186,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String workoutDeleteMessage(String name) {
-    return '“$name” will be removed from local workouts.';
+    return '“$name” will be removed from your saved workouts. Workouts you have already completed will remain in your history.';
   }
 
   @override

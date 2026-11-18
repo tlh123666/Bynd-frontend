@@ -375,6 +375,12 @@ abstract class AppLocalizations {
   /// **'Plano local · atividade ainda não iniciada'**
   String get workoutPlanPreview;
 
+  /// No description provided for @workoutExercisesLabel.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'EXERCÍCIOS'**
+  String get workoutExercisesLabel;
+
   /// No description provided for @workoutReorder.
   ///
   /// In pt_BR, this message translates to:
@@ -420,7 +426,7 @@ abstract class AppLocalizations {
   /// No description provided for @workoutDeleteMessage.
   ///
   /// In pt_BR, this message translates to:
-  /// **'“{name}” será removido dos treinos locais.'**
+  /// **'“{name}” sai dos seus treinos salvos. Os treinos que você já fez com ele continuam no histórico.'**
   String workoutDeleteMessage(String name);
 
   /// No description provided for @workoutActionError.
