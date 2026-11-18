@@ -162,15 +162,26 @@ class LocalWorkoutStore {
     });
   }
 
-  Future<void> duplicate(LocalWorkoutPlan plan) {
+  Future<void> duplicate(
+    LocalWorkoutPlan plan, {
+    Iterable<LocalWorkoutPlan> demoPlans = const [],
+  }) {
     final snapshot = plan.copy();
+    final demos = demoPlans.map((p) => p.copy()).toList();
     return _mutate((plans, hidden) {
       if (snapshot.id.startsWith('demo:')
           ? hidden.contains(snapshot.id)
           : !plans.any((p) => p.id == snapshot.id)) {
         throw StateError('Workout no longer exists');
       }
-      final names = plans.map((p) => p.name.trim().toLowerCase()).toSet();
+      // 示例可能已被修改或隐藏，按当前实际可见的训练名称避开重名。
+      final overriddenIds = plans.map((p) => p.id).toSet();
+      final names = {
+        for (final p in plans) p.name.trim().toLowerCase(),
+        for (final p in demos)
+          if (!hidden.contains(p.id) && !overriddenIds.contains(p.id))
+            p.name.trim().toLowerCase(),
+      };
       var n = 2;
       var name = '${snapshot.name} ($n)';
       while (names.contains(name.toLowerCase())) {

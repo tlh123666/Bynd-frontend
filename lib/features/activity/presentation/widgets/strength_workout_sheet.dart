@@ -11,6 +11,7 @@ import '../localization/activity_type_localizations.dart';
 import '../models/demo_workout_plans.dart';
 import 'activity_type_icon.dart';
 import 'workout_builder_sheet.dart';
+import 'workout_delete_confirmation_sheet.dart';
 import 'activity_frosted_sheet_header.dart';
 
 /// 力量训练选择叶片；示例和本地模板分别标记来源。
@@ -159,13 +160,9 @@ class _StrengthWorkoutSheetState extends State<StrengthWorkoutSheet> {
       return;
     }
     if (action == _WorkoutMenuAction.delete) {
-      final confirmed = await AppConfirmationSheet.show(
+      final confirmed = await WorkoutDeleteConfirmationSheet.show(
         context,
-        title: s.workoutDeleteTitle,
-        message: s.workoutDeleteMessage(plan.name),
-        confirmLabel: s.workoutMenuDelete,
-        cancelLabel: s.workoutCancel,
-        danger: true,
+        name: plan.name,
       );
       if (!mounted || !confirmed) return;
     }
@@ -178,7 +175,7 @@ class _StrengthWorkoutSheetState extends State<StrengthWorkoutSheet> {
       if (action == _WorkoutMenuAction.delete) {
         await widget.store.delete(plan.id);
       } else {
-        await widget.store.duplicate(plan);
+        await widget.store.duplicate(plan, demoPlans: widget.demoPlans);
       }
       final plans = await widget.store.load();
       final hidden = await widget.store.hiddenDemoIds();

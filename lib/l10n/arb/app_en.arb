@@ -80,6 +80,7 @@
   "workoutCancel": "Cancel",
   "workoutInvalidSet": "Enter valid values.",
   "workoutPlanPreview": "Local plan · activity not started",
+  "workoutExercisesLabel": "EXERCISES",
   "workoutReorder": "Reorder exercises",
   "workoutMoveUp": "Move up",
   "workoutMoveDown": "Move down",
@@ -94,7 +95,7 @@
   "workoutMenuEdit": "Edit",
   "workoutMenuDelete": "Delete",
   "workoutDeleteTitle": "Delete workout?",
-  "workoutDeleteMessage": "“{name}” will be removed from local workouts.",
+  "workoutDeleteMessage": "“{name}” will be removed from your saved workouts. Workouts you have already completed will remain in your history.",
   "@workoutDeleteMessage": {
     "placeholders": {
       "name": {

@@ -161,6 +161,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get workoutPlanPreview => 'Plano local · atividade ainda não iniciada';
 
   @override
+  String get workoutExercisesLabel => 'EXERCÍCIOS';
+
+  @override
   String get workoutReorder => 'Reordenar exercícios';
 
   @override
@@ -185,7 +188,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String workoutDeleteMessage(String name) {
-    return '“$name” será removido dos treinos locais.';
+    return '“$name” sai dos seus treinos salvos. Os treinos que você já fez com ele continuam no histórico.';
   }
 
   @override
@@ -6023,6 +6026,9 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get workoutPlanPreview => 'Plano local · atividade ainda não iniciada';
 
   @override
+  String get workoutExercisesLabel => 'EXERCÍCIOS';
+
+  @override
   String get workoutReorder => 'Reordenar exercícios';
 
   @override
@@ -6047,7 +6053,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String workoutDeleteMessage(String name) {
-    return '“$name” será removido dos treinos locais.';
+    return '“$name” sai dos seus treinos salvos. Os treinos que você já fez com ele continuam no histórico.';
   }
 
   @override
