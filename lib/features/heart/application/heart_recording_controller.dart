@@ -135,6 +135,8 @@ class HeartRecordingController extends ChangeNotifier {
         return;
       }
       if (status == HeartRecordingStatus.starting) {
+        startedAt = _clock();
+        _lastPacket = startedAt;
         status = HeartRecordingStatus.measuring;
       }
       if (status != HeartRecordingStatus.measuring) return;

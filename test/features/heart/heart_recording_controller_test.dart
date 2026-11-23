@@ -220,7 +220,8 @@ void main() {
       now = now.add(const Duration(seconds: 1));
       await tester.pump(const Duration(seconds: 1));
       expect(c.status, HeartRecordingStatus.measuring);
-      now = now.add(const Duration(seconds: 11));
+      expect(c.elapsedSeconds, 1);
+      now = now.add(c.stallTimeout);
       await tester.pump(const Duration(seconds: 1));
       expect(c.status, HeartRecordingStatus.failed);
       expect(c.errorCode, 'no_waveform');

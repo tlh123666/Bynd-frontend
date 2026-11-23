@@ -2092,5 +2092,191 @@
     }
   },
   "diarySpeechLanguageUnavailable": "O reconhecimento de voz neste idioma não está disponível no aparelho. Você pode escrever.",
-  "diaryWhatHappenedOnThisDay": "O que aconteceu neste dia?"
+  "diaryWhatHappenedOnThisDay": "O que aconteceu neste dia?",
+  "vitalityRecovery": "Recuperação",
+  "vitalityEnergy": "Energia",
+  "vitalityMissing": "Sem leitura",
+  "vitalityLow": "Baixa",
+  "vitalityGood": "Boa",
+  "vitalityGreat": "Ótima",
+  "vitalityAttention": "Atenção",
+  "vitalityTodayRecovery": "Recuperação de hoje",
+  "vitalityEnergyDay": "Energia ao longo do dia",
+  "vitalityForecastRecovery": "Previsão de recuperação",
+  "vitalityForecastEnergy": "Próximas horas",
+  "vitalityYesterday": "Ontem",
+  "vitalityNormal": "Seu normal",
+  "vitalityAverage7": "Média 7 dias",
+  "vitalityAverage": "média",
+  "vitalityToday": "hoje",
+  "vitalityTomorrow": "amanhã",
+  "vitalityNow": "agora",
+  "vitalityDetails": "Ver detalhes",
+  "vitalitySettings": "Ajustes",
+  "vitalityRecoverySettings": "O que a Recuperação considera e mostra para você.",
+  "vitalityEnergySettings": "Suas metas de movimento e os avisos da Energia.",
+  "vitalityCalculation": "Como calcular",
+  "vitalityTrainingSetting": "Considerar o treino de ontem",
+  "vitalityTrainingHint": "Carga estimada a partir de duração e frequência de treinos registrados.",
+  "vitalityShowPage": "Mostrar na página",
+  "vitalityFactors": "O que pesou hoje",
+  "vitalityFactorsHint": "VFC, frequência, sono e carga",
+  "vitalityShowForecast": "Previsão de amanhã",
+  "vitalityShowWindows": "Janelas de energia",
+  "vitalityWindowsHint": "Picos observados nas sincronizações do dia",
+  "vitalityNotices": "Avisos na página",
+  "vitalityLowNotice": "Recuperação baixa",
+  "vitalityMorningNotice": "Resumo da manhã",
+  "vitalityMovementNotice": "Hora de se mexer",
+  "vitalityGoalNotice": "Meta alcançada",
+  "vitalityNoticeHint": "Avisos exibidos ao abrir a página; não são notificações em segundo plano.",
+  "vitalityGoals": "Metas",
+  "vitalityStepsGoal": "Meta de passos",
+  "vitalityActiveGoal": "Minutos ativos",
+  "vitalityPerDay": "por dia",
+  "vitalityData": "Dados",
+  "vitalityCalendar": "Calendário",
+  "vitalityShare": "Compartilhar",
+  "vitalityExport": "Exportar dados",
+  "vitalitySave": "Salvar",
+  "vitalitySaved": "Preferências salvas.",
+  "vitalitySaveFailed": "Não foi possível salvar. Suas alterações continuam aqui.",
+  "vitalityLoadingFailed": "Não foi possível carregar. Tente novamente.",
+  "vitalityRetry": "Tentar novamente",
+  "vitalityAccountChanged": "Sua conta mudou. Reabra esta página.",
+  "vitalityNoData": "Sincronize a pulseira para ver os sinais deste dia.",
+  "vitalityNoBaseline": "Seu normal aparece após 7 dias válidos nos 28 dias anteriores.",
+  "vitalityNoCurve": "Ainda não há estimativas sincronizadas suficientes neste dia para uma curva.",
+  "vitalityNoForecast": "Ainda não há histórico suficiente para uma previsão.",
+  "vitalityEstimated": "Estimativa baseada nos seus dados",
+  "vitalityEstimateExplanation": "Esta nota é uma estimativa de bem-estar calculada a partir dos sinais disponíveis. Não é uma medição direta nem um diagnóstico.",
+  "vitalityForecastExplanation": "Cenário de evolução, não uma garantia. Novas leituras podem mudar a estimativa.",
+  "vitalityCurveExplanation": "Pontos registrados em sincronizações reais. Intervalos sem leituras ficam em branco.",
+  "vitalityDemo": "Demonstração · dados de referência",
+  "vitalityRecoveryReady": "Seu corpo está pronto para um dia forte.",
+  "vitalityRecoveryLow": "Seu corpo ainda está se recuperando. Hoje é dia de pegar leve.",
+  "vitalityRecoveryRest": "Seu corpo pede descanso hoje.",
+  "vitalityEnergyReady": "Bom pico pela manhã. Agora, poupe o corpo.",
+  "vitalityEnergyLow": "Energia mais baixa hoje. Faça o importante cedo.",
+  "vitalityEnergyRest": "Pouca energia hoje. Priorize o descanso.",
+  "vitalityRecoveryAnalysis": "A VFC, o estresse e os treinos registrados ajudam a compor esta estimativa. Compare os sinais abaixo e acompanhe a tendência, sem tirar conclusões a partir de um dia isolado.",
+  "vitalityEnergyAnalysis": "Sono verificado, estresse, VFC e passos contribuem para esta estimativa. A curva mostra apenas os pontos capturados durante as sincronizações.",
+  "vitalityMetrics": "Principais métricas",
+  "vitalityRecoveryMetrics": "O que a recuperação de hoje quer dizer para o seu dia.",
+  "vitalityEnergyMetrics": "O que mexe com a sua energia hoje.",
+  "vitalityTraining": "Carga de treino",
+  "vitalityStress": "Estresse",
+  "vitalityHRV": "VFC",
+  "vitalityRHR": "FC em repouso",
+  "vitalityVO2": "VO₂ Max",
+  "vitalitySleep": "Sono",
+  "vitalityTemperature": "Temperatura",
+  "vitalityBreathing": "Respiração",
+  "vitalitySteps": "Passos",
+  "vitalityActiveMinutes": "Min. ativos",
+  "vitalityCalories": "Calorias",
+  "vitalitySignals": "Sinais desta leitura",
+  "vitalityRecoveryWeek": "Recuperação nos últimos 7 dias",
+  "vitalityEnergyWeek": "Energia nos últimos 7 dias",
+  "vitalityWeek": "Semana",
+  "vitalityMonth": "Mês",
+  "vitalityDay": "Dia",
+  "vitalityMetricDetails": "Sobre esta leitura",
+  "vitalityMissingMetric": "Este sinal não foi medido ou sincronizado neste dia.",
+  "vitalityWeekExplanation": "As médias usam apenas os dias com dados. Dias sem leitura não entram como zero.",
+  "vitalityDiary": "Seu Diário",
+  "vitalityDiaryHint": "Um toque em cada. Vai direto para o seu Diário e ajuda o Atlas a entender o seu dia.",
+  "vitalityWakeQuestion": "Como você acordou?",
+  "vitalityEnergyQuestion": "Como está sua disposição?",
+  "vitalitySoreness": "Está com dor muscular?",
+  "vitalityFlu": "Algum sinal de gripe?",
+  "vitalityBreakfast": "Tomou café da manhã?",
+  "vitalityNap": "Cochilou hoje?",
+  "vitalityScaleBad": "Muito mal",
+  "vitalityScaleGood": "Muito bem",
+  "vitalityScaleLow": "Muito baixa",
+  "vitalityScaleHigh": "Muito boa",
+  "vitalityMore": "Mostrar mais",
+  "vitalityLess": "Mostrar menos",
+  "vitalityAskAtlas": "Conversar com Atlas",
+  "vitalityShareFailed": "Não foi possível compartilhar ou exportar. Tente novamente.",
+  "vitalityPremium": "O histórico de 30 dias requer Premium.",
+  "vitalityGoalReached": "Você alcançou sua meta de passos neste dia.",
+  "vitalityMovementHint": "Veja seus minutos ativos e encontre uma pausa para se movimentar.",
+  "vitalityOpenDiary": "Abrir Diário",
+  "vitalitySyncTime": "Última sincronização",
+  "vitalityInfo": "Como funciona",
+  "vitalityScoreSummary": "{score} de 100 · {status}",
+  "vitalityComparedWeek": "{delta} sobre a semana anterior",
+  "vitalityPeakAt": "Pico observado: {score} às {time}",
+  "vitalitySelectedPoint": "{date} · {score}",
+  "@vitalityScoreSummary": {
+    "placeholders": {
+      "score": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "@vitalityComparedWeek": {
+    "placeholders": {
+      "delta": {
+        "type": "String"
+      }
+    }
+  },
+  "@vitalityPeakAt": {
+    "placeholders": {
+      "score": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@vitalitySelectedPoint": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "score": {
+        "type": "String"
+      }
+    }
+  },
+  "vitalityEnergyPeakForecast": "Pico de {peak} às {peakTime} · previsão de {forecast} às {forecastTime}",
+  "@vitalityEnergyPeakForecast": {
+    "placeholders": {
+      "peak": {
+        "type": "String"
+      },
+      "peakTime": {
+        "type": "String"
+      },
+      "forecast": {
+        "type": "String"
+      },
+      "forecastTime": {
+        "type": "String"
+      }
+    }
+  },
+  "vitalityRecoveryWeekUp": "Sua recuperação subiu nesta semana.",
+  "vitalityRecoveryWeekDown": "Sua recuperação caiu um pouco nesta semana.",
+  "vitalityEnergyWeekUp": "Sua energia subiu nesta semana.",
+  "vitalityEnergyWeekDown": "Sua energia caiu um pouco nesta semana.",
+  "vitalityWeekSummary": "A média dos últimos 7 dias foi {average}, {delta} sobre a semana anterior.",
+  "@vitalityWeekSummary": {
+    "placeholders": {
+      "average": {
+        "type": "String"
+      },
+      "delta": {
+        "type": "String"
+      }
+    }
+  }
 }

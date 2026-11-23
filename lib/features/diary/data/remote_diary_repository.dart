@@ -5,7 +5,7 @@ import '../../../core/network/api_client.dart';
 import '../../../core/utils/local_timezone.dart';
 import '../domain/diary_models.dart';
 
-class RemoteDiaryRepository implements DiaryRepository {
+class RemoteDiaryRepository implements DiaryRepository, DiaryPlanSource {
   RemoteDiaryRepository(
     this.client, {
     AuthSession? session,
@@ -27,6 +27,7 @@ class RemoteDiaryRepository implements DiaryRepository {
       method,
       '/me/diary$path',
       body: body,
+      expectedAccessToken: _token,
       queryParameters: method == 'GET' ? {'timezone': _timezone()} : null,
     );
     _check();
@@ -45,6 +46,41 @@ class RemoteDiaryRepository implements DiaryRepository {
   @override
   Future<DiaryDay> load(DateTime date) async =>
       DiaryDay.fromJson(await _call('GET', '/${diaryDate(date)}/workspace'));
+
+  @override
+  Future<List<String>> planKeys() async {
+    _check();
+    final data = await client.request(
+      'GET',
+      '/me/goals',
+      expectedAccessToken: _token,
+    );
+    _check();
+    final keys = <String>{};
+    for (final goal in (data['items'] as List? ?? []).whereType<Map>()) {
+      // A default recommendation is not an explicitly saved objective.
+      if (goal['enabled'] != true || (goal['id'] ?? '').toString().isEmpty) {
+        continue;
+      }
+      keys.addAll(switch (goal['dimension']) {
+        'sleep' => ['tela', 'luz', 'cafe15', 'ler'],
+        'stress' => [
+          'cafe15',
+          'resp',
+          'medit',
+          'grat',
+          'c_arlivre',
+          'tela',
+          'c_desconect',
+          'c_w_fluxo',
+        ],
+        'cycle' => ['c_menstr', 'c_colica', 'c_tpm', 'c_calorao'],
+        _ => const <String>[],
+      });
+    }
+    return keys.map(diaryCanonicalKey).toSet().toList();
+  }
+
   @override
   Future<DiaryDay> save(
     DiaryDay base,

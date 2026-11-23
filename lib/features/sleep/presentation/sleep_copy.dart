@@ -55,6 +55,7 @@ String sleepMetricTitle(BuildContext c, SleepMetric m) {
     SleepMetric.deep: ('Sono profundo', 'Deep sleep'),
     SleepMetric.rem: ('Sono REM', 'REM sleep'),
     SleepMetric.heartRate: ('Frequência cardíaca', 'Heart rate'),
+    SleepMetric.restingHeartRate: ('FC em repouso', 'Resting heart rate'),
     SleepMetric.hrv: ('VFC', 'HRV'),
     SleepMetric.oxygen: ('Oxigênio', 'Oxygen'),
     SleepMetric.temperature: ('Temperatura', 'Temperature'),

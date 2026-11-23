@@ -179,8 +179,8 @@ void main() {
     'heart chart opens and measured week/month navigate without errors',
     (t) async {
       await mountHeart(t, MemoryHeartRepository());
-      await t.ensureVisible(find.text('HEART RATE TODAY'));
-      await t.tap(find.text('HEART RATE TODAY'));
+      await t.ensureVisible(find.byKey(const ValueKey('heart-signal-pulse')));
+      await t.tap(find.byKey(const ValueKey('heart-signal-pulse')));
       await t.pumpAndSettle();
       expect(find.byType(HeartDetailSheet), findsOneWidget);
       await t.tap(find.byKey(const ValueKey('heart-period-week')));
@@ -195,7 +195,9 @@ void main() {
     (t) async {
       final repo = MemoryHeartRepository()..failSave = true;
       await mountHeart(t, repo);
-      await t.tap(find.byTooltip('Heart settings'));
+      final settings = find.byKey(const Key('heart-settings-entry'));
+      await t.ensureVisible(settings);
+      await t.tap(settings);
       await t.pumpAndSettle();
       await t.tap(
         find.widgetWithText(SwitchListTile, 'Estimated blood pressure'),
@@ -257,14 +259,26 @@ void main() {
         ),
       );
       expect(find.textContaining('Rhythm unclassified'), findsOneWidget);
-      await t.scrollUntilVisible(find.text('After coffee'), 300);
+      await t.scrollUntilVisible(
+        find.text('Log in Diary'),
+        220,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await t.tap(find.text('Log in Diary'));
+      await t.pumpAndSettle();
+      await t.ensureVisible(find.text('After coffee'));
       await t.tap(find.text('After coffee'));
       await t.pumpAndSettle();
-      await t.scrollUntilVisible(find.text('Save observations'), 200);
+      await t.ensureVisible(find.text('Save observations'));
       await t.tap(find.text('Save observations'));
       await t.pumpAndSettle();
       expect(repo.annotations, 0);
       repo.failAnnotation = false;
+      await t.scrollUntilVisible(
+        find.text('Save observations'),
+        180,
+        scrollable: find.byType(Scrollable).first,
+      );
       await t.tap(find.text('Save observations'));
       await t.pumpAndSettle();
       expect(repo.savedRecord.context, 'after_coffee');

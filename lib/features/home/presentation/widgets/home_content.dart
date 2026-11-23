@@ -1,3 +1,4 @@
+import '../../../vitality/presentation/widgets/vitality_entries.dart';
 import '../home_signal_destination.dart';
 import 'dart:async';
 import 'dart:math' as math;
@@ -234,6 +235,11 @@ class HomeContent extends StatelessWidget {
                             ),
                           ),
                         ),
+                      ),
+                      VitalityEntries(
+                        date: controller.date,
+                        demo: controller.demoData,
+                        onDestinationSelected: onDestinationSelected,
                       ),
                       HomeSignalsSection(
                         snapshot: snapshot,

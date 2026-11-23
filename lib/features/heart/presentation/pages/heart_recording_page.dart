@@ -11,8 +11,7 @@ import '../../data/heart_band_gateway.dart';
 import '../../domain/heart_models.dart';
 import '../heart_copy.dart';
 import '../sheets/heart_recording_report.dart';
-import '../widgets/heart_charts.dart';
-import '../widgets/heart_widgets.dart';
+import '../widgets/heart_recording_trace.dart';
 
 class HeartRecordingPage extends StatefulWidget {
   const HeartRecordingPage({
@@ -180,7 +179,7 @@ class _HeartRecordingPageState extends State<HeartRecordingPage>
                 ),
                 Expanded(
                   child: Text(
-                    'ECG',
+                    widget.demo ? 'ECG' : 'PPG',
                     textAlign: TextAlign.center,
                     style: AppHeartStyle.body.copyWith(
                       color: AppColors.textPrimary,
@@ -210,18 +209,15 @@ class _HeartRecordingPageState extends State<HeartRecordingPage>
                     const SizedBox(height: 16),
                   ],
                   if (measuring) ...[
-                    Text(
-                      '${30 - (c?.elapsedSeconds ?? 0)}',
-                      style: AppHeartStyle.number,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      heartText(
+                    AppHealthHero(
+                      value: '${30 - (c?.elapsedSeconds ?? 0)}',
+                      label: heartText(
                         context,
-                        'segundos · faltam para terminar',
-                        'seconds · remaining',
+                        'segundos restantes',
+                        'seconds remaining',
                       ),
-                      style: AppHeartStyle.caption,
+                      status: heartText(context, 'Ao vivo', 'Live'),
+                      color: AppHealthStyle.pulse,
                     ),
                     const SizedBox(height: 22),
                     Text(
@@ -242,10 +238,10 @@ class _HeartRecordingPageState extends State<HeartRecordingPage>
                       style: AppHeartStyle.body,
                     ),
                     const SizedBox(height: 24),
-                    HeartWaveform(
+                    HeartRecordingTrace(
                       samples: c?.samples ?? [],
-                      height: 180,
-                      live: true,
+                      elapsed: (c?.elapsedSeconds ?? 0).toDouble(),
+                      twoRows: true,
                     ),
                     const SizedBox(height: 20),
                     LinearProgressIndicator(
@@ -255,17 +251,6 @@ class _HeartRecordingPageState extends State<HeartRecordingPage>
                       minHeight: 2,
                     ),
                     const SizedBox(height: 20),
-                    HeartStats([
-                      (
-                        heartText(context, 'Batimento', 'Heart rate'),
-                        heartNumber(c?.metrics['heartRate'] as num?),
-                      ),
-                      (
-                        heartText(context, 'Amostras', 'Samples'),
-                        '${c?.samples.length ?? 0}',
-                      ),
-                      (heartText(context, 'Duração', 'Duration'), '30 s'),
-                    ]),
                   ] else if (status == HeartRecordingStatus.saving ||
                       status == HeartRecordingStatus.saveFailed) ...[
                     Text(
@@ -277,7 +262,7 @@ class _HeartRecordingPageState extends State<HeartRecordingPage>
                       style: AppHeartStyle.title,
                     ),
                     const SizedBox(height: 24),
-                    HeartWaveform(samples: c!.samples, height: 170),
+                    HeartRecordingTrace(samples: c!.samples, twoRows: true),
                     const SizedBox(height: 24),
                     if (status == HeartRecordingStatus.saving)
                       const Center(child: AppLoadingIndicator())
@@ -292,15 +277,16 @@ class _HeartRecordingPageState extends State<HeartRecordingPage>
                       ),
                   ] else ...[
                     SizedBox(
-                      height: 230,
+                      height: 124,
                       child: Image.asset(
                         'assets/images/heart-ecg-band.png',
                         fit: BoxFit.contain,
                       ),
                     ),
                     const SizedBox(height: 18),
-                    HeartLabel(
+                    AppHealthSection(
                       heartText(context, 'Como medir', 'How to measure'),
+                      Icons.monitor_heart_outlined,
                     ),
                     const SizedBox(height: 18),
                     for (final row in [
@@ -341,23 +327,8 @@ class _HeartRecordingPageState extends State<HeartRecordingPage>
                         ),
                       ),
                     ])
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              row.$1,
-                              style: AppHeartStyle.body.copyWith(
-                                color: AppColors.textPrimary,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(row.$2, style: AppHeartStyle.caption),
-                          ],
-                        ),
-                      ),
+                      AppHealthRow(label: row.$1, subtitle: row.$2),
+                    const SizedBox(height: 12),
                     if (!widget.demo)
                       Text(
                         heartText(
