@@ -6,6 +6,7 @@ import '../../../l10n/app_localizations_context.dart';
 import '../data/remote_community_repository.dart';
 import '../domain/community_models.dart';
 import 'community_style.dart';
+import 'community_avatar.dart';
 
 /// 群设置 —— 逐屏复刻原型 GrupoChat.jsx 里的 `Ajustes` 面板：
 /// 成员头像区、+Convidar、挑战排名（Placar）、成员列表、通知开关、退群。
@@ -206,8 +207,9 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
                                   left: MediaQuery.of(context).size.width / 2 -
                                       _members.length * 10 +
                                       i * 24.0,
-                                  child: _Avatar(
+                                  child: CommunityAvatar(
                                     name: _members[i].displayName,
+                                    avatarUrl: _members[i].avatarUrl,
                                     size: 34,
                                   ),
                                 ),
@@ -259,6 +261,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
                         for (final member in _members)
                           _MemberRow(
                             name: member.displayName,
+                            avatarUrl: member.avatarUrl,
                             subtitle: member.role == 'admin'
                                 ? strings.communityRoleAdmin
                                 : null,
@@ -380,9 +383,10 @@ class _RowCard extends StatelessWidget {
 }
 
 class _MemberRow extends StatelessWidget {
-  const _MemberRow({required this.name, this.subtitle});
+  const _MemberRow({required this.name, this.avatarUrl, this.subtitle});
 
   final String name;
+  final String? avatarUrl;
   final String? subtitle;
 
   @override
@@ -391,7 +395,7 @@ class _MemberRow extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       child: Row(
         children: [
-          _Avatar(name: name, size: 30),
+          CommunityAvatar(name: name, avatarUrl: avatarUrl, size: 30),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -482,7 +486,7 @@ class _PlacarCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    _Avatar(name: entry.displayName, size: 30),
+                    CommunityAvatar(name: entry.displayName, size: 30),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
@@ -505,36 +509,6 @@ class _PlacarCard extends StatelessWidget {
                 ),
               ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _Avatar extends StatelessWidget {
-  const _Avatar({required this.name, required this.size});
-
-  final String name;
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    final initial =
-        name.isNotEmpty ? name.characters.first.toUpperCase() : '?';
-    return Container(
-      width: size,
-      height: size,
-      alignment: Alignment.center,
-      decoration: const BoxDecoration(
-        shape: BoxShape.circle,
-        color: CommunityStyle.surface2,
-      ),
-      child: Text(
-        initial,
-        style: AppTypography.caption.copyWith(
-          color: AppColors.textSecondary,
-          fontSize: size * 0.38,
-          fontWeight: FontWeight.w600,
         ),
       ),
     );

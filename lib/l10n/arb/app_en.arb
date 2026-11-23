@@ -6,14 +6,26 @@
   "exerciseDetailRepsWeight": "repetitions × weight",
   "exerciseDetailTitle": "Exercise",
   "exerciseDetailHow": "How to do: {name}",
-  "@exerciseDetailHow": { "placeholders": { "name": { "type": "String" } } },
+  "@exerciseDetailHow": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "exerciseDetailMark": "Mark to add",
   "exerciseDetailMuscles": "Muscles",
   "exerciseDetailEquipment": "Equipment",
   "exerciseDetailGroup": "Group",
   "exerciseDetailLevel": "Level",
   "exerciseDetailAnimation": "Animation: {name}",
-  "@exerciseDetailAnimation": { "placeholders": { "name": { "type": "String" } } },
+  "@exerciseDetailAnimation": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "exerciseDetailNoAnimation": "Animation not available for this exercise.",
   "exerciseConfirmEmpty": "Confirm",
   "exerciseSelectorTitle": "Select exercises",
@@ -21,24 +33,44 @@
   "exerciseAll": "All",
   "exerciseMark": "Select exercises",
   "exerciseAdd": "Add ({count})",
-  "@exerciseAdd": { "placeholders": { "count": { "type": "int" } } },
+  "@exerciseAdd": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "exerciseCount": "{count} exercises",
-  "@exerciseCount": { "placeholders": { "count": { "type": "int" } } },
+  "@exerciseCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "exerciseEmpty": "No exercises found.",
   "exerciseLoadError": "Could not load exercises.",
   "exerciseRetry": "Try again",
   "exerciseSelectedCount": "{count} exercises selected · demo",
-  "@exerciseSelectedCount": { "placeholders": { "count": { "type": "int" } } },
+  "@exerciseSelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "exerciseDraftNote": "Local preview · saving is not connected yet",
   "exerciseAddMore": "Add exercise",
   "workoutLocalNote": "Stored on this device only · not synced",
   "workoutDefaultsNote": "Example starting values",
   "workoutSaveError": "Could not save on this device. Please try again.",
   "workoutLoadError": "Could not load local workouts.",
+  "workoutReplaceExercise": "Replace exercise",
+  "workoutCloseSets": "Close sets",
   "workoutEditSets": "Edit sets",
   "workoutShowExercise": "View exercise",
-  "workoutRemoveExercise": "Remove exercise",
-  "workoutDuplicateExercise": "Duplicate exercise",
+  "workoutRemoveExercise": "Remove",
+  "workoutDuplicateExercise": "Duplicate",
   "workoutRemoveSet": "Remove set",
   "workoutAddSet": "Add set",
   "workoutSet": "Set",
@@ -48,11 +80,30 @@
   "workoutCancel": "Cancel",
   "workoutInvalidSet": "Enter valid values.",
   "workoutPlanPreview": "Local plan · activity not started",
+  "workoutExercisesLabel": "EXERCISES",
   "workoutReorder": "Reorder exercises",
   "workoutMoveUp": "Move up",
   "workoutMoveDown": "Move down",
   "workoutSuggestedName": "Workout: {group}",
-  "@workoutSuggestedName": { "placeholders": { "group": { "type": "String" } } },
+  "@workoutSuggestedName": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "workoutMenuEdit": "Edit",
+  "workoutMenuDelete": "Delete",
+  "workoutDeleteTitle": "Delete workout?",
+  "workoutDeleteMessage": "“{name}” will be removed from your saved workouts. Workouts you have already completed will remain in your history.",
+  "@workoutDeleteMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "workoutActionError": "Could not update local workouts.",
   "workoutBuilderTitle": "Build workout",
   "workoutBuilderWeight": "kg lifted",
   "workoutBuilderEmptyCount": "0 EXERCISES · 0 SETS",
@@ -73,10 +124,25 @@
   "strengthDemoName6": "Upper body and core",
   "strengthDemoName7": "Light workout · mobility",
   "strengthExerciseCount": "{exercises} exercises · {sets} sets",
-  "@strengthExerciseCount": { "placeholders": { "exercises": { "type": "int" }, "sets": { "type": "int" } } },
+  "@strengthExerciseCount": {
+    "placeholders": {
+      "exercises": {
+        "type": "int"
+      },
+      "sets": {
+        "type": "int"
+      }
+    }
+  },
   "strengthCreateHint": "choose exercises, sets and weight",
   "strengthOptions": "Options for {name}",
-  "@strengthOptions": { "placeholders": { "name": { "type": "String" } } },
+  "@strengthOptions": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "activityRegistrationPreview": "Preview · simulated data · not saved",
   "activityDetailHighIntensity": "High intensity",
   "activityDetailEffortPeaks": "Effort peaks",
@@ -498,6 +564,15 @@
   "communityAccept": "Accept",
   "communityDecline": "Decline",
   "communityMemberCount": "{count} members",
+  "communityCheckinLabel": "check-in",
+  "communityRankOf": "of {total}",
+  "@@communityRankOf": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "@@communityMemberCount": {
     "placeholders": {
       "count": {}
@@ -632,6 +707,7 @@
   "chatHistoryTitle": "Conversations",
   "chatHistoryEmpty": "No conversations yet.",
   "chatHistoryUntitled": "Untitled conversation",
+  "chatContinueLast": "Continue last conversation",
   "healthGroupSleep": "Sleep",
   "healthGroupEnergy": "Energy",
   "healthGroupMetabolism": "Metabolism",

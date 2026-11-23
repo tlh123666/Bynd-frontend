@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../design_system/design_system.dart';
 import '../../../../l10n/app_localizations_context.dart';
 import '../models/workout_draft_exercise.dart';
 import 'exercise_anatomy.dart';
 import 'exercise_detail_sheet.dart';
+import 'exercise_selection_sheet.dart';
+import 'workout_set_picker_sheet.dart';
+import '../models/exercise_catalog_item.dart';
 
 /// 动作行复用目录插图和动作详情；编辑始终作用于当前训练草稿。
 class WorkoutExerciseRow extends StatefulWidget {
@@ -15,40 +18,61 @@ class WorkoutExerciseRow extends StatefulWidget {
     required this.onChanged,
     required this.onRemove,
     required this.onDuplicate,
+    required this.onReplace,
+    required this.expanded,
+    required this.onToggleExpanded,
+    required this.onPickerVisibilityChanged,
     required this.reorderMode,
-    required this.canMoveUp,
-    required this.canMoveDown,
-    required this.onMoveUp,
-    required this.onMoveDown,
+    required this.dragIndex,
     super.key,
   });
   final WorkoutDraftExercise item;
+  final ValueChanged<ExerciseCatalogItem> onReplace;
+  final ValueChanged<bool> onPickerVisibilityChanged;
   final String summary;
-  final VoidCallback onChanged, onRemove, onDuplicate, onMoveUp, onMoveDown;
-  final bool reorderMode, canMoveUp, canMoveDown;
+  final VoidCallback onChanged, onRemove, onDuplicate, onToggleExpanded;
+  final bool expanded, reorderMode;
+  final int dragIndex;
 
   @override
   State<WorkoutExerciseRow> createState() => _WorkoutExerciseRowState();
 }
 
-enum _Action { edit, detail, duplicate, remove }
+enum _Action { edit, replace, duplicate, detail, remove }
 
 class _WorkoutExerciseRowState extends State<WorkoutExerciseRow> {
-  bool _expanded = false;
-
   Future<void> _editSet(int index) async {
     final set = widget.item.sets[index];
-    final result = await AppFrostedModalSheet.show<(int, double)>(
-      context,
-      barrierColor: AppColors.contentSheetVeil,
-      builder: (_) => _EditSetDialog(item: widget.item, set: set),
-    );
-    if (!mounted || result == null) return;
-    setState(() {
-      set.amount = result.$1;
-      set.weight = result.$2;
-    });
-    widget.onChanged();
+    widget.onPickerVisibilityChanged(true);
+    bool? removed;
+    try {
+      removed = await AppFrostedModalSheet.show<bool>(
+        context,
+        barrierColor: const Color(0x4d080a0e),
+        barrierBlurSigma: 0,
+        // 加深仅此面板的玻璃底色，避免底层文字穿透影响阅读。
+        surfaceTint: const Color(0xe614181e),
+        waitForExit: true,
+        builder: (_) => WorkoutSetPickerSheet(
+          item: widget.item,
+          set: set,
+          number: index + 1,
+          onChanged: () {
+            if (mounted) widget.onChanged();
+          },
+        ),
+      );
+    } finally {
+      if (mounted) widget.onPickerVisibilityChanged(false);
+    }
+    if (!mounted || removed != true) return;
+    // 原型允许移除最后一组；此时同时移除动作。
+    if (widget.item.sets.length == 1) {
+      widget.onRemove();
+    } else {
+      setState(() => widget.item.sets.remove(set));
+      widget.onChanged();
+    }
   }
 
   @override
@@ -74,123 +98,156 @@ class _WorkoutExerciseRowState extends State<WorkoutExerciseRow> {
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item.exercise.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTypography.listItem.copyWith(fontSize: 15),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      widget.summary,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTypography.caption.copyWith(
-                        color: AppColors.textMuted,
-                        fontSize: 13,
+                child: InkWell(
+                  onTap: widget.expanded && !widget.reorderMode
+                      ? widget.onToggleExpanded
+                      : null,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        // 与原型一致隐藏动作名称中的计时单位后缀。
+                        item.exercise.name.replaceFirst(
+                          RegExp(
+                            r'\s*\((segundos|minutos)\)$',
+                            caseSensitive: false,
+                          ),
+                          '',
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.listItem.copyWith(fontSize: 15),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 3),
+                      Text(
+                        widget.expanded && !widget.reorderMode
+                            ? item.exercise.muscles.take(2).join(' · ')
+                            : widget.summary,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.caption.copyWith(
+                          color: AppColors.textMuted,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              if (widget.reorderMode) ...[
-                IconButton(
-                  icon: Semantics(
-                    label: s.workoutMoveUp,
-                    child: const Icon(Icons.keyboard_arrow_up),
-                  ),
-                  onPressed: widget.canMoveUp ? widget.onMoveUp : null,
-                ),
-                IconButton(
-                  icon: Semantics(
-                    label: s.workoutMoveDown,
-                    child: const Icon(Icons.keyboard_arrow_down),
-                  ),
-                  onPressed: widget.canMoveDown ? widget.onMoveDown : null,
-                ),
-              ] else
-                PopupMenuButton<_Action>(
-                  tooltip: '',
-                  icon: Semantics(
-                    label: s.strengthOptions(item.exercise.name),
-                    child: const Icon(
-                      Icons.more_horiz,
-                      color: AppColors.textSecondary,
+              if (widget.reorderMode)
+                Semantics(
+                  label: s.workoutReorder,
+                  child: ReorderableDragStartListener(
+                    index: widget.dragIndex,
+                    child: const SizedBox(
+                      width: 48,
+                      height: 48,
+                      child: Icon(
+                        Icons.drag_handle,
+                        size: 20,
+                        color: AppColors.textMuted,
+                      ),
                     ),
                   ),
-                  onSelected: (action) {
-                    switch (action) {
-                      case _Action.edit:
-                        setState(() => _expanded = !_expanded);
-                      case _Action.detail:
-                        ExerciseDetailSheet.show(
-                          context,
-                          item.exercise,
-                          selected: true,
-                        );
-                      case _Action.duplicate:
-                        widget.onDuplicate();
-                      case _Action.remove:
-                        widget.onRemove();
-                    }
-                  },
-                  itemBuilder: (_) => [
-                    PopupMenuItem(
-                      value: _Action.edit,
-                      child: Text(s.workoutEditSets),
+                )
+              else
+                Builder(
+                  builder: (buttonContext) => IconButton(
+                    icon: Semantics(
+                      label: s.strengthOptions(item.exercise.name),
+                      child: const Icon(
+                        Icons.more_horiz,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
-                    PopupMenuItem(
-                      value: _Action.detail,
-                      child: Text(s.workoutShowExercise),
-                    ),
-                    PopupMenuItem(
-                      value: _Action.duplicate,
-                      child: Text(s.workoutDuplicateExercise),
-                    ),
-                    PopupMenuItem(
-                      value: _Action.remove,
-                      child: Text(s.workoutRemoveExercise),
-                    ),
-                  ],
+                    onPressed: () async {
+                      final box = buttonContext.findRenderObject() as RenderBox;
+                      final overlay =
+                          Navigator.of(
+                                buttonContext,
+                              ).overlay!.context.findRenderObject()
+                              as RenderBox;
+                      final anchor = MatrixUtils.transformRect(
+                        box.getTransformTo(overlay),
+                        Offset.zero & box.size,
+                      );
+                      final action = await AppFrostedContextMenu.show<_Action>(
+                        buttonContext,
+                        anchor: anchor,
+                        items: [
+                          AppFrostedMenuItem(
+                            value: _Action.edit,
+                            label: widget.expanded
+                                ? s.workoutCloseSets
+                                : s.workoutEditSets,
+                            icon: Icons.edit_outlined,
+                          ),
+                          AppFrostedMenuItem(
+                            value: _Action.replace,
+                            label: s.workoutReplaceExercise,
+                            icon: Icons.swap_horiz,
+                          ),
+                          AppFrostedMenuItem(
+                            value: _Action.duplicate,
+                            label: s.workoutDuplicateExercise,
+                            icon: Icons.copy_outlined,
+                          ),
+                          AppFrostedMenuItem(
+                            value: _Action.detail,
+                            label: s.workoutShowExercise,
+                            icon: Icons.play_circle_outline,
+                          ),
+                          AppFrostedMenuItem(
+                            value: _Action.remove,
+                            label: s.workoutRemoveExercise,
+                            icon: Icons.delete_outline,
+                            destructive: true,
+                          ),
+                        ],
+                      );
+                      if (!mounted || action == null) return;
+                      switch (action) {
+                        case _Action.edit:
+                          widget.onToggleExpanded();
+                        case _Action.replace:
+                          final selected = await ExerciseSelectionSheet.show(
+                            this.context,
+                            replaceMode: true,
+                          );
+                          if (!mounted ||
+                              selected == null ||
+                              selected.isEmpty) {
+                            return;
+                          }
+                          widget.onReplace(selected.first);
+                        case _Action.duplicate:
+                          widget.onDuplicate();
+                        case _Action.detail:
+                          ExerciseDetailSheet.show(
+                            this.context,
+                            item.exercise,
+                            selected: true,
+                          );
+                        case _Action.remove:
+                          widget.onRemove();
+                      }
+                    },
+                  ),
                 ),
             ],
           ),
         ),
-        if (_expanded && !widget.reorderMode) ...[
+        if (widget.expanded && !widget.reorderMode) ...[
           for (var i = 0; i < item.sets.length; i++)
-            ListTile(
-              dense: true,
-              contentPadding: const EdgeInsets.only(left: 8),
-              title: Text('${s.workoutSet} ${i + 1}'),
-              subtitle: Text(
-                '${item.sets[i].amount}${item.exercise.unit == 'seg'
-                    ? ' s'
-                    : item.exercise.unit == 'min'
-                    ? ' min'
-                    : item.exercise.bodyweight
-                    ? ''
-                    : ' × ${item.sets[i].weight.toStringAsFixed(item.sets[i].weight.truncateToDouble() == item.sets[i].weight ? 0 : 1)} kg'}',
-              ),
+            _WorkoutSetRow(
+              label: '${s.workoutSet} ${i + 1}',
+              item: item,
+              set: item.sets[i],
               onTap: () => _editSet(i),
-              trailing: item.sets.length > 1
-                  ? IconButton(
-                      icon: Semantics(
-                        label: s.workoutRemoveSet,
-                        child: const Icon(Icons.remove_circle_outline),
-                      ),
-                      onPressed: () {
-                        setState(() => item.sets.removeAt(i));
-                        widget.onChanged();
-                      },
-                    )
-                  : null,
             ),
-          Align(
-            alignment: Alignment.centerLeft,
+          SizedBox(
+            width: double.infinity,
             child: TextButton.icon(
               onPressed: () {
                 final last = item.sets.last;
@@ -201,104 +258,83 @@ class _WorkoutExerciseRowState extends State<WorkoutExerciseRow> {
                 );
                 widget.onChanged();
               },
-              icon: const Icon(Icons.add),
+              icon: const Icon(Icons.add, size: 18),
               label: Text(s.workoutAddSet),
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.textSecondary,
+              ),
             ),
           ),
+          const SizedBox(height: 8),
         ],
       ],
     );
   }
 }
 
-class _EditSetDialog extends StatefulWidget {
-  const _EditSetDialog({required this.item, required this.set});
+/// 与原型一致：每组占一行，数值和单位保持不同层级。
+class _WorkoutSetRow extends StatelessWidget {
+  const _WorkoutSetRow({
+    required this.label,
+    required this.item,
+    required this.set,
+    required this.onTap,
+  });
+  final String label;
   final WorkoutDraftExercise item;
   final WorkoutDraftSet set;
-  @override
-  State<_EditSetDialog> createState() => _EditSetDialogState();
-}
-
-class _EditSetDialogState extends State<_EditSetDialog> {
-  late final _amount = TextEditingController(text: '${widget.set.amount}');
-  late final _weight = TextEditingController(text: '${widget.set.weight}');
-  bool _invalid = false;
-
-  @override
-  void dispose() {
-    _amount.dispose();
-    _weight.dispose();
-    super.dispose();
-  }
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final s = context.l10n;
-    final usesWeight =
-        widget.item.exercise.unit == 'reps' && !widget.item.exercise.bodyweight;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              s.workoutEditSets,
-              textAlign: TextAlign.center,
-              style: AppTypography.title,
-            ),
-            TextField(
-              controller: _amount,
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              decoration: InputDecoration(labelText: s.workoutAmount),
-            ),
-            if (usesWeight)
-              TextField(
-                controller: _weight,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
+    final numberStyle = AppTypography.page.copyWith(
+      fontSize: 17,
+      fontWeight: FontWeight.w300,
+      height: 1,
+    );
+    final unitStyle = AppTypography.caption.copyWith(
+      fontSize: 13,
+      color: AppColors.textMuted,
+    );
+    final number = NumberFormat.decimalPattern(
+      Localizations.localeOf(context).toString(),
+    ).format(set.weight);
+    final unit = item.exercise.unit;
+    final spans = <InlineSpan>[
+      TextSpan(text: '${set.amount}', style: numberStyle),
+      if (unit == 'seg' || unit == 'min')
+        TextSpan(text: unit == 'seg' ? ' s' : ' min', style: unitStyle)
+      else if (item.exercise.bodyweight)
+        TextSpan(
+          text:
+              ' ${Localizations.localeOf(context).languageCode == 'pt' ? 'repetições' : 'reps'}',
+          style: unitStyle,
+        )
+      else ...[
+        TextSpan(text: ' × ', style: unitStyle),
+        TextSpan(text: number, style: numberStyle),
+        TextSpan(text: ' kg', style: unitStyle),
+      ],
+    ];
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        border: Border(top: BorderSide(color: Color(0x0fffffff))),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        child: SizedBox(
+          height: 46,
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  label,
+                  style: AppTypography.listItem.copyWith(fontSize: 15),
                 ),
-                decoration: InputDecoration(labelText: s.workoutWeightKg),
               ),
-            if (_invalid) Text(s.workoutInvalidSet),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text(s.workoutCancel),
-                ),
-                TextButton(
-                  onPressed: () {
-                    final amount = int.tryParse(_amount.text);
-                    final weight = usesWeight
-                        ? double.tryParse(_weight.text.replaceAll(',', '.'))
-                        : 0.0;
-                    final max = widget.item.exercise.unit == 'seg'
-                        ? 300
-                        : widget.item.exercise.unit == 'min'
-                        ? 120
-                        : 50;
-                    if (amount == null ||
-                        amount < 1 ||
-                        amount > max ||
-                        weight == null ||
-                        !weight.isFinite ||
-                        weight < 0 ||
-                        weight > 300) {
-                      setState(() => _invalid = true);
-                      return;
-                    }
-                    Navigator.pop(context, (amount, weight));
-                  },
-                  child: Text(s.workoutDone),
-                ),
-              ],
-            ),
-          ],
+              Text.rich(TextSpan(children: spans), maxLines: 1),
+            ],
+          ),
         ),
       ),
     );

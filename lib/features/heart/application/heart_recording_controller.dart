@@ -28,7 +28,9 @@ class HeartRecordingController extends ChangeNotifier {
     required this._device,
     AuthSession? session,
     DateTime Function()? clock,
-    this.stallTimeout = const Duration(seconds: 10),
+    // 15s：测量结果包（ECGResult）可能在软结束、波形停止之后到达，
+    // 停止窗口最长约 10s，10s 的旧阈值会在结果到达前误判停摆。
+    this.stallTimeout = const Duration(seconds: 15),
   }) : _session = session,
        _token = session?.accessToken,
        _clock = clock ?? DateTime.now {
@@ -144,7 +146,8 @@ class HeartRecordingController extends ChangeNotifier {
           _fail('no_waveform');
           return;
         }
-        if (now.difference(startedAt!) > const Duration(seconds: 40)) {
+        // 75s：原生启动重试最多 ~36s + 手环测量 30s + 结果包，全程覆盖。
+        if (now.difference(startedAt!) > const Duration(seconds: 75)) {
           _fail('capture_timeout');
           return;
         }
@@ -167,6 +170,9 @@ class HeartRecordingController extends ChangeNotifier {
         ].contains(status)) {
       return;
     }
+    // 任何事件（含原生启动重试的 ecg_retry 心跳）都刷新停摆看门狗：
+    // 波形开始前原生会重试启动手环，此期间无波形但会话是活的。
+    _lastPacket = _clock();
     switch (event['event']) {
       case 'ecg_started':
         startedAt = event['startedAtMillis'] is num

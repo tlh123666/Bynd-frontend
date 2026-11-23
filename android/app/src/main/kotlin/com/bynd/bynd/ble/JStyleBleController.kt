@@ -80,6 +80,10 @@ class JStyleBleController(
     private var ecgStartedAtMillis = 0L
     private var ecgDurationSeconds = 0
     private var ecgFinishRunnable: Runnable? = null
+    private var ecgHardTimeoutRunnable: Runnable? = null
+    private var ecgRetryRunnable: Runnable? = null
+    private var ecgHrvRetries = 0
+    private var ecgWaveformSeen = false
 
     private var steps = 0
     private var heartRate = 0
@@ -242,6 +246,7 @@ class JStyleBleController(
     }
 
     fun disconnect(result: MethodChannel.Result? = null) {
+        Log.d(TAG, "disconnect() called from " + Throwable().stackTrace.take(6).joinToString(" <- "))
         cancelScan()
         failManagement("device_disconnected", "The band disconnected.")
         finishMetrics()
@@ -385,6 +390,7 @@ class JStyleBleController(
         durationSeconds: Int,
         result: MethodChannel.Result,
     ) {
+        Log.d(TAG, "ecg start requested deviceId=$deviceId currentDevice=${currentDevice?.id} ready=$connectionReady gatt=${currentGatt != null} active=$ecgActive duration=$durationSeconds")
         if (!ensureConnectPermission(result)) return
         if (!connectionReady || currentGatt == null || currentDevice == null) {
             result.error("disconnected", "The band is not connected.", null)
@@ -415,6 +421,14 @@ class JStyleBleController(
                 "durationSeconds" to durationSeconds,
             ),
         )
+        measurementLoopRunnable?.let { mainHandler.removeCallbacks(it) }
+        measurementLoopRunnable = null
+        // 手环同一时刻只接受一个测量，且对「停止测量」命令（open=false）
+        // 不响应（2026-11-20 实测 ACK 类型字节恒为 0，等于空操作）——无法
+        // 主动清槽。策略：不发无效 OFF，直接启动 HRV/ECG；被拒（无波形）
+        // 时每 3s 重发，最多 12 次（~36s，足够跨过一轮 35s 的心率/血氧
+        // 测量）。波形出现即停重试；测量以手环 ECGResult 结果包为准收尾。
+        heartMeasurementActive = false
         enqueueCommands(
             listOf(
                 BleSDK.SetDeviceMeasurementWithType(
@@ -425,9 +439,43 @@ class JStyleBleController(
                 BleSDK.setECGRealtimeDuringHRVEnabled(true),
             ),
         )
-        ecgFinishRunnable = Runnable { finishEcgMeasurement(cancelled = false) }
-            .also { mainHandler.postDelayed(it, durationSeconds * 1000L + ECG_FINISH_GRACE_MS) }
+        Log.d(TAG, "ecg start command sent: AutoHRV ${durationSeconds * 1000L}ms realtime=true")
+        // 手环可能拒绝 HRV 启动（测量槽被自动监测/刚结束的会话占用，ACK
+        // open=0），且冷却时间不定。波形出现前每 2.5s 重发启动命令，最多
+        // 3 次；波形出现（Getppg）即停。重试窗口在 Dart 侧 15s 停摆阈值内。
+        ecgHrvRetries = 0
+        ecgWaveformSeen = false
+        scheduleEcgStartRetry()
+        // 测量结束以手环的 ECGResult 结果包为准：软结束（发 OFF）在波形
+        // 出现后 duration+grace 才排程（见 Getppg 分支），结果包到达才算
+        // 完成并落值，硬超时兜底。不在启动时就排程——手环侧启动可能晚
+        // 于命令（测量槽被占），按命令时间排程会掐断结果。
         result.success(null)
+    }
+
+    // 波形出现前的启动重试：每 3s 重发 HRV ON + 实时使能，最多 12 次
+    // （~36s，足够跨过一轮 35s 的心率/血氧测量）。每次重试向 Dart 发
+    // ecg_retry 事件刷新其停摆看门狗。波形一旦出现（Getppg）即停止。
+    private fun scheduleEcgStartRetry() {
+        ecgRetryRunnable?.let { mainHandler.removeCallbacks(it) }
+        if (ecgWaveformSeen || !ecgActive || ecgHrvRetries >= ECG_START_MAX_RETRIES) return
+        ecgRetryRunnable = Runnable {
+            if (!ecgActive || ecgWaveformSeen) return@Runnable
+            ecgHrvRetries++
+            Log.d(TAG, "ecg start retry #$ecgHrvRetries (no waveform yet)")
+            enqueueCommands(
+                listOf(
+                    BleSDK.SetDeviceMeasurementWithType(
+                        AutoTestMode.AutoHRV,
+                        ecgDurationSeconds * 1000L,
+                        true,
+                    ),
+                    BleSDK.setECGRealtimeDuringHRVEnabled(true),
+                ),
+            )
+            onEcgEvent?.invoke(mapOf("event" to "ecg_retry", "retry" to ecgHrvRetries))
+            scheduleEcgStartRetry()
+        }.also { mainHandler.postDelayed(it, ECG_START_RETRY_MS) }
     }
 
     fun stopEcgMeasurement(result: MethodChannel.Result? = null) {
@@ -439,10 +487,37 @@ class JStyleBleController(
         result?.success(null)
     }
 
+    // 软结束：测量时长到点，停掉手环侧的 HRV/ECG 会话。结果不依赖推送
+    // （2026-11-20 实测手环不推 ECGResult/状态包，只写进自己的 HRV 历史，
+    // demo「Hrv 数据」读到的带血压行即证据）——发 OFF 后立即读一次 HRV
+    // 历史，读到含血压的最新行（GetHRVData 分支）即完成落值。
+    private fun softFinishEcgMeasurement() {
+        if (!ecgActive) return
+        Log.d(TAG, "ecg soft finish: stopping band session, reading HRV history for result")
+        enqueueCommands(
+            listOf(
+                BleSDK.setECGRealtimeDuringHRVEnabled(false),
+                BleSDK.SetDeviceMeasurementWithType(
+                    AutoTestMode.AutoHRV,
+                    ecgDurationSeconds * 1000L,
+                    false,
+                ),
+                BleSDK.GetHRVDataWithMode(READ_START, ""),
+            ),
+        )
+        ecgHardTimeoutRunnable?.let { mainHandler.removeCallbacks(it) }
+        ecgHardTimeoutRunnable = Runnable { completeEcgMeasurement(cancelled = true) }
+            .also { mainHandler.postDelayed(it, ECG_RESULT_WAIT_MS) }
+    }
+
     private fun finishEcgMeasurement(cancelled: Boolean) {
         if (!ecgActive) return
         ecgFinishRunnable?.let { mainHandler.removeCallbacks(it) }
         ecgFinishRunnable = null
+        ecgHardTimeoutRunnable?.let { mainHandler.removeCallbacks(it) }
+        ecgHardTimeoutRunnable = null
+        ecgRetryRunnable?.let { mainHandler.removeCallbacks(it) }
+        ecgRetryRunnable = null
         enqueueCommands(
             listOf(
                 BleSDK.setECGRealtimeDuringHRVEnabled(false),
@@ -453,6 +528,19 @@ class JStyleBleController(
                 ),
             ),
         )
+        completeEcgMeasurement(cancelled)
+    }
+
+    // 完成：向 Dart 发 ecg_completed（携带本次会话捕获的全部指标值，
+    // 包括 ECGResult 的血压），复位状态并恢复实时心率/血氧循环。
+    private fun completeEcgMeasurement(cancelled: Boolean) {
+        if (!ecgActive) return
+        ecgFinishRunnable?.let { mainHandler.removeCallbacks(it) }
+        ecgFinishRunnable = null
+        ecgHardTimeoutRunnable?.let { mainHandler.removeCallbacks(it) }
+        ecgHardTimeoutRunnable = null
+        ecgRetryRunnable?.let { mainHandler.removeCallbacks(it) }
+        ecgRetryRunnable = null
         val elapsed = (System.currentTimeMillis() - ecgStartedAtMillis).coerceAtLeast(0L)
         ecgActive = false
         onEcgEvent?.invoke(
@@ -511,6 +599,8 @@ class JStyleBleController(
     private fun finishManagement() {
         val result = managementResult ?: return
         val serial = BandDeviceIdentity.serial(deviceInfo)
+        // 调试：身份结算快照——deviceInfo 全量 + 提取出的序列号。
+        Log.d(TAG, "BLE finishManagement deviceInfo=$deviceInfo serial=$serial expected=$managementExpectedSerial")
         if (serial == null) { failManagement("identity_missing", "The band did not report its hardware identity."); return }
         if (managementExpectedSerial?.let { !BandDeviceIdentity.matches(it, serial) } == true) {
             failManagement("identity_mismatch", "This is not the band bound to this account.")
@@ -754,6 +844,14 @@ class JStyleBleController(
     }
 
     private fun enqueueCommands(commands: List<ByteArray>) {
+        // 调试：原始 TX 命令（长度 + 前若干字节十六进制）。
+        commands.forEach { command ->
+            Log.d(
+                TAG,
+                "BLE tx len=" + command.size +
+                    " head=" + command.take(12).joinToString("") { "%02X".format(it) },
+            )
+        }
         writeQueue.addAll(commands)
         writeNext()
     }
@@ -794,6 +892,13 @@ class JStyleBleController(
     }
 
     private fun parseIncoming(value: ByteArray, sourceGatt: BluetoothGatt) {
+        // 调试：原始 RX 字节（长度 + 前若干字节十六进制），区分「手环没发」
+        // 与「发了但 DataParsingWithData 静默丢弃」。
+        Log.d(
+            TAG,
+            "BLE raw rx len=" + value.size +
+                " head=" + value.take(12).joinToString("") { "%02X".format(it) },
+        )
         mainHandler.post {
             if (sourceGatt != currentGatt) return@post
             try {
@@ -810,6 +915,8 @@ class JStyleBleController(
         // Parse/store this reply first, then complete the management read.
         if (managementResult != null && dataType in setOf(BleConst.GetDeviceMacAddress, BleConst.GetDeviceBatteryLevel, BleConst.GetDeviceVersion)) {
             managementReplies.add(dataType)
+            // 调试：设备身份读取（MAC/电量/固件）的原始回复，排查新表绑定失败。
+            Log.d(TAG, "BLE management reply dataType=$dataType raw=$maps replies=${managementReplies.toList()}")
             if (managementReplies.size == 3) mainHandler.post { finishManagement() }
         }
         Log.d(TAG, "BLE parsed dataType=$dataType")
@@ -817,6 +924,15 @@ class JStyleBleController(
         when (dataType) {
             BleConst.Getppg -> {
                 if (!ecgActive) return
+                if (!ecgWaveformSeen) {
+                    // 手环真正开始测量的时刻：从现在起 duration+grace 后软结束
+                    ecgWaveformSeen = true
+                    ecgRetryRunnable?.let { mainHandler.removeCallbacks(it) }
+                    ecgRetryRunnable = null
+                    Log.d(TAG, "ecg waveform started - scheduling soft finish in ${ecgDurationSeconds}s")
+                    ecgFinishRunnable = Runnable { softFinishEcgMeasurement() }
+                        .also { mainHandler.postDelayed(it, ecgDurationSeconds * 1000L + ECG_FINISH_GRACE_MS) }
+                }
                 val entry = payloadMap(maps)
                 val samples = entry.tokens(DeviceKey.arrayPpgRawData).mapNotNull { it.toIntOrNull() }
                 if (samples.isNotEmpty()) {
@@ -830,13 +946,20 @@ class JStyleBleController(
                 }
             }
             BleConst.ECGResult -> {
-                if (!ecgActive) return
+                if (!ecgActive) {
+                    Log.d(TAG, "ecg result arrived after session closed - dropped")
+                    return
+                }
                 val entry = payloadMap(maps)
                 heartRate = entry.intValue(DeviceKey.ECGHrValue) ?: heartRate
                 hrv = entry.intValue(DeviceKey.ECGHrvValue) ?: hrv
                 stress = entry.intValue(DeviceKey.ECGStreesValue) ?: stress
                 highBloodPressure = entry.intValue(DeviceKey.ECGhighBpValue) ?: highBloodPressure
                 lowBloodPressure = entry.intValue(DeviceKey.ECGLowBpValue) ?: lowBloodPressure
+                Log.d(
+                    TAG,
+                    "ecg result received hr=$heartRate hrv=$hrv stress=$stress bp=$highBloodPressure/$lowBloodPressure",
+                )
                 onEcgEvent?.invoke(
                     mapOf(
                         "event" to "ecg_metrics",
@@ -848,6 +971,8 @@ class JStyleBleController(
                         "respiratoryRate" to entry.intValue(DeviceKey.ECGBreathValue),
                     ),
                 )
+                // 结果包就是测量的自然终点：立即完成并落值，不再等硬超时。
+                completeEcgMeasurement(cancelled = false)
             }
             BleConst.GetDeviceTime -> storeDeviceInfo("deviceTime", maps)
             BleConst.SetPersonalInfo -> finishProfileSync()
@@ -952,6 +1077,26 @@ class JStyleBleController(
                     ?: entry.intValue(DeviceKey.LowPressure)
                     ?: lowBloodPressure
                 vascularAging = entry.intValue(DeviceKey.VascularAging) ?: vascularAging
+                // ECG 收尾路径：软结束后读到的 HRV 历史行就是本次测量的
+                // 结果（含血压）——先以 ecg_metrics 事件把值交给 Dart（其
+                // 保存载荷由该事件累积），再立即完成，不等硬超时。
+                if (ecgActive && ecgHardTimeoutRunnable != null) {
+                    Log.d(
+                        TAG,
+                        "ecg result via HRV history hr=$heartRate hrv=$hrv stress=$stress bp=$highBloodPressure/$lowBloodPressure",
+                    )
+                    onEcgEvent?.invoke(
+                        mapOf(
+                            "event" to "ecg_metrics",
+                            "heartRate" to heartRate.takeIf { it > 0 },
+                            "hrv" to hrv.takeIf { it > 0 },
+                            "stress" to stress.takeIf { it > 0 },
+                            "systolicBloodPressure" to highBloodPressure.takeIf { it > 0 },
+                            "diastolicBloodPressure" to lowBloodPressure.takeIf { it > 0 },
+                        ),
+                    )
+                    completeEcgMeasurement(cancelled = false)
+                }
             }
 
             BleConst.Temperature_history -> {
@@ -1546,6 +1691,14 @@ class JStyleBleController(
         // Keep this at 60 seconds so it cannot overflow the vendor protocol.
         private const val MAX_ECG_SECONDS = 60
         private const val ECG_FINISH_GRACE_MS = 2000L
+        // 软结束后等待手环 ECGResult 结果包的窗口。手环测量会话晚于命令
+        // 启动（测量槽被占时）会把结果推迟到 30s 定时之后，此窗口保证
+        // 结果包不被掐断。超出仍未收到则强制完成（指标可能缺省）。
+        private const val ECG_RESULT_WAIT_MS = 10000L
+        // HRV 启动被拒后的重试间隔（手环测量槽的冷却时间不定，逐步试探）。
+        private const val ECG_START_RETRY_MS = 3000L
+        // HRV 启动重试上限：~36s，足够跨过一轮 35s 的心率/血氧测量。
+        private const val ECG_START_MAX_RETRIES = 12
         private const val PROFILE_SYNC_TIMEOUT_MS = 20000L
         private const val DEFAULT_SLEEP_UNIT_MINUTES = 5
         private const val MINUTES_PER_HOUR = 60.0

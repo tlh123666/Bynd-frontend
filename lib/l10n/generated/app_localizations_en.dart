@@ -114,16 +114,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get workoutLoadError => 'Could not load local workouts.';
 
   @override
+  String get workoutReplaceExercise => 'Replace exercise';
+
+  @override
+  String get workoutCloseSets => 'Close sets';
+
+  @override
   String get workoutEditSets => 'Edit sets';
 
   @override
   String get workoutShowExercise => 'View exercise';
 
   @override
-  String get workoutRemoveExercise => 'Remove exercise';
+  String get workoutRemoveExercise => 'Remove';
 
   @override
-  String get workoutDuplicateExercise => 'Duplicate exercise';
+  String get workoutDuplicateExercise => 'Duplicate';
 
   @override
   String get workoutRemoveSet => 'Remove set';
@@ -153,6 +159,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get workoutPlanPreview => 'Local plan · activity not started';
 
   @override
+  String get workoutExercisesLabel => 'EXERCISES';
+
+  @override
   String get workoutReorder => 'Reorder exercises';
 
   @override
@@ -165,6 +174,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String workoutSuggestedName(String group) {
     return 'Workout: $group';
   }
+
+  @override
+  String get workoutMenuEdit => 'Edit';
+
+  @override
+  String get workoutMenuDelete => 'Delete';
+
+  @override
+  String get workoutDeleteTitle => 'Delete workout?';
+
+  @override
+  String workoutDeleteMessage(String name) {
+    return '“$name” will be removed from your saved workouts. Workouts you have already completed will remain in your history.';
+  }
+
+  @override
+  String get workoutActionError => 'Could not update local workouts.';
 
   @override
   String get workoutBuilderTitle => 'Build workout';
@@ -1362,6 +1388,14 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get communityCheckinLabel => 'check-in';
+
+  @override
+  String communityRankOf(Object total) {
+    return 'of $total';
+  }
+
+  @override
   String communityDaysTotal(Object days) {
     return '$days-day challenge';
   }
@@ -1655,6 +1689,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chatHistoryUntitled => 'Untitled conversation';
+
+  @override
+  String get chatContinueLast => 'Continue last conversation';
 
   @override
   String get healthGroupSleep => 'Sleep';

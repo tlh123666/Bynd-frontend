@@ -116,16 +116,22 @@ class AppLocalizationsPt extends AppLocalizations {
   String get workoutLoadError => 'Não foi possível carregar os treinos locais.';
 
   @override
+  String get workoutReplaceExercise => 'Trocar exercício';
+
+  @override
+  String get workoutCloseSets => 'Fechar séries';
+
+  @override
   String get workoutEditSets => 'Editar séries';
 
   @override
   String get workoutShowExercise => 'Ver como fazer';
 
   @override
-  String get workoutRemoveExercise => 'Remover exercício';
+  String get workoutRemoveExercise => 'Remover';
 
   @override
-  String get workoutDuplicateExercise => 'Duplicar exercício';
+  String get workoutDuplicateExercise => 'Duplicar';
 
   @override
   String get workoutRemoveSet => 'Remover série';
@@ -155,6 +161,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get workoutPlanPreview => 'Plano local · atividade ainda não iniciada';
 
   @override
+  String get workoutExercisesLabel => 'EXERCÍCIOS';
+
+  @override
   String get workoutReorder => 'Reordenar exercícios';
 
   @override
@@ -167,6 +176,24 @@ class AppLocalizationsPt extends AppLocalizations {
   String workoutSuggestedName(String group) {
     return 'Treino de $group';
   }
+
+  @override
+  String get workoutMenuEdit => 'Editar';
+
+  @override
+  String get workoutMenuDelete => 'Apagar';
+
+  @override
+  String get workoutDeleteTitle => 'Apagar treino?';
+
+  @override
+  String workoutDeleteMessage(String name) {
+    return '“$name” sai dos seus treinos salvos. Os treinos que você já fez com ele continuam no histórico.';
+  }
+
+  @override
+  String get workoutActionError =>
+      'Não foi possível atualizar os treinos locais.';
 
   @override
   String get workoutBuilderTitle => 'Montar treino';
@@ -1370,6 +1397,14 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String get communityCheckinLabel => 'check-in';
+
+  @override
+  String communityRankOf(Object total) {
+    return 'de $total';
+  }
+
+  @override
   String communityDaysTotal(Object days) {
     return 'desafio de $days dias';
   }
@@ -1664,6 +1699,9 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get chatHistoryUntitled => 'Conversa sem título';
+
+  @override
+  String get chatContinueLast => 'Continuar última conversa';
 
   @override
   String get healthGroupSleep => 'Sono';
@@ -6358,16 +6396,22 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get workoutLoadError => 'Não foi possível carregar os treinos locais.';
 
   @override
+  String get workoutReplaceExercise => 'Trocar exercício';
+
+  @override
+  String get workoutCloseSets => 'Fechar séries';
+
+  @override
   String get workoutEditSets => 'Editar séries';
 
   @override
   String get workoutShowExercise => 'Ver como fazer';
 
   @override
-  String get workoutRemoveExercise => 'Remover exercício';
+  String get workoutRemoveExercise => 'Remover';
 
   @override
-  String get workoutDuplicateExercise => 'Duplicar exercício';
+  String get workoutDuplicateExercise => 'Duplicar';
 
   @override
   String get workoutRemoveSet => 'Remover série';
@@ -6397,6 +6441,9 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get workoutPlanPreview => 'Plano local · atividade ainda não iniciada';
 
   @override
+  String get workoutExercisesLabel => 'EXERCÍCIOS';
+
+  @override
   String get workoutReorder => 'Reordenar exercícios';
 
   @override
@@ -6409,6 +6456,24 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String workoutSuggestedName(String group) {
     return 'Treino de $group';
   }
+
+  @override
+  String get workoutMenuEdit => 'Editar';
+
+  @override
+  String get workoutMenuDelete => 'Apagar';
+
+  @override
+  String get workoutDeleteTitle => 'Apagar treino?';
+
+  @override
+  String workoutDeleteMessage(String name) {
+    return '“$name” sai dos seus treinos salvos. Os treinos que você já fez com ele continuam no histórico.';
+  }
+
+  @override
+  String get workoutActionError =>
+      'Não foi possível atualizar os treinos locais.';
 
   @override
   String get workoutBuilderTitle => 'Montar treino';
@@ -7612,6 +7677,14 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   }
 
   @override
+  String get communityCheckinLabel => 'check-in';
+
+  @override
+  String communityRankOf(Object total) {
+    return 'de $total';
+  }
+
+  @override
   String communityDaysTotal(Object days) {
     return 'desafio de $days dias';
   }
@@ -7906,6 +7979,9 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get chatHistoryUntitled => 'Conversa sem título';
+
+  @override
+  String get chatContinueLast => 'Continuar última conversa';
 
   @override
   String get healthGroupSleep => 'Sono';

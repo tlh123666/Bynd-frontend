@@ -26,7 +26,29 @@ abstract final class CommunityStyle {
   static const double coverHeight = 184;
   static const double coverRadius = 24;
   static const double cardRadius = 18; // --radius-lg
+  static const double surfaceCardRadius = 24; // .cm-c（打卡墙/Para hoje 卡）
   static const double bubbleRadius = 18;
+
+  /// .av 的头像色板（comunidade/dados.js pessoa.cor，按成员稳定取色）。
+  static const List<Color> avatarPalette = [
+    Color(0xFF9CC4FF), // eu
+    Color(0xFFFFB0C8), // ma
+    Color(0xFF81D7B2), // ra
+    Color(0xFFFFE27A), // ca
+    Color(0xFFFFAA5E), // bi
+    Color(0xFF7FD4E0), // di
+    Color(0xFFB59CF0), // ju
+  ];
+
+  /// .av：字色深灰（#1c2026）、字重 600、字号 = size * .37。
+  static Color avatarColor(String id) {
+    if (id.isEmpty) return avatarPalette.first;
+    var hash = 0;
+    for (final code in id.codeUnits) {
+      hash = (hash * 31 + code) & 0x7fffffff;
+    }
+    return avatarPalette[hash % avatarPalette.length];
+  }
 
   /// .cmb-capa::after 的自上而下压暗层。
   static const LinearGradient coverScrim = LinearGradient(

@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
+import 'package:new_jcvital/core/network/api_client.dart';
+import 'package:new_jcvital/features/atlas/application/atlas_scope.dart';
+import 'package:new_jcvital/features/atlas/data/atlas_repository.dart';
 import 'package:new_jcvital/design_system/design_system.dart';
 import 'package:new_jcvital/features/home/application/home_controller.dart';
 import 'package:new_jcvital/features/home/data/demo_home_repository.dart';
@@ -34,24 +39,36 @@ Future<HomeController> mount(
   addTearDown(controller.dispose);
   await controller.initialize();
   await tester.pumpWidget(
-    MaterialApp(
-      theme: AppTheme.dark,
-      locale: const Locale('pt', 'BR'),
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      builder: (context, child) => MediaQuery(
-        data: MediaQuery.of(
-          context,
-        ).copyWith(textScaler: TextScaler.linear(scale)),
-        child: child!,
+    // 同真实应用一样，将 Atlas 放在导航器外以供后续路由使用。
+    AtlasScope(
+      repository: AtlasRepository(
+        ApiClient(
+          baseUrl: Uri.parse('https://api.example.test'),
+          tokenProvider: () async => null,
+          client: MockClient(
+            (_) async => http.Response('{"code":0,"data":null}', 200),
+          ),
+        ),
       ),
-      home: Scaffold(
-        body: HomeContent(
-          controller: controller,
-          onMenu: () {},
-          onProfile: () {},
-          onDevice: () {},
-          onMapa: () {},
+      child: MaterialApp(
+        theme: AppTheme.dark,
+        locale: const Locale('pt', 'BR'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: TextScaler.linear(scale)),
+          child: child!,
+        ),
+        home: Scaffold(
+          body: HomeContent(
+            controller: controller,
+            onMenu: () {},
+            onProfile: () {},
+            onDevice: () {},
+            onMapa: () {},
+          ),
         ),
       ),
     ),

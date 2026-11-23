@@ -7,6 +7,8 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:new_jcvital/core/network/api_client.dart';
 import 'package:new_jcvital/design_system/design_system.dart';
+import 'package:new_jcvital/features/atlas/application/atlas_scope.dart';
+import 'package:new_jcvital/features/atlas/data/atlas_repository.dart';
 import 'package:new_jcvital/features/diary/data/demo_diary_repository.dart';
 import 'package:new_jcvital/features/diary/data/remote_diary_repository.dart';
 import 'package:new_jcvital/features/diary/domain/diary_models.dart';
@@ -81,19 +83,31 @@ Future<void> mount(
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
   await tester.pumpWidget(
-    MaterialApp(
-      theme: AppTheme.dark,
-      locale: const Locale('pt', 'BR'),
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      builder: (c, child) => MediaQuery(
-        data: MediaQuery.of(c).copyWith(textScaler: TextScaler.linear(scale)),
-        child: child!,
+    // 作用域位于 Navigator 外，后续日记路由也能访问同一仓储。
+    AtlasScope(
+      repository: AtlasRepository(
+        ApiClient(
+          baseUrl: Uri.parse('https://api.example.test'),
+          tokenProvider: () async => null,
+          client: MockClient(
+            (_) async => http.Response('{"code":0,"data":null}', 200),
+          ),
+        ),
       ),
-      home: DiaryPage(
-        repository: repo,
-        openRecord: initialTracker != null,
-        initialTracker: initialTracker,
+      child: MaterialApp(
+        theme: AppTheme.dark,
+        locale: const Locale('pt', 'BR'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        builder: (c, child) => MediaQuery(
+          data: MediaQuery.of(c).copyWith(textScaler: TextScaler.linear(scale)),
+          child: child!,
+        ),
+        home: DiaryPage(
+          repository: repo,
+          openRecord: initialTracker != null,
+          initialTracker: initialTracker,
+        ),
       ),
     ),
   );

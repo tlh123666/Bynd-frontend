@@ -354,7 +354,7 @@ class _SleepPageState extends State<SleepPage> {
                   if (i == 0) {
                     Navigator.popUntil(context, (r) => r.isFirst);
                   } else if (i == 1) {
-                    Navigator.of(context).push(AtlasSheetRoute());
+                    AtlasOverlayScope.show(context);
                   }
                 },
                 onMorePressed: () {
@@ -747,7 +747,7 @@ class _SleepPageState extends State<SleepPage> {
           onTap: () => _metric(m),
         ),
       TextButton(
-        onPressed: () => Navigator.of(context).push(AtlasSheetRoute()),
+        onPressed: () => AtlasOverlayScope.show(context),
         child: Text(
           sleepText(
             context,

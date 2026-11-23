@@ -274,7 +274,7 @@ class _HeartPageState extends State<HeartPage> {
       return;
     }
     if (i == 1) {
-      Navigator.of(context).push(AtlasSheetRoute());
+      AtlasOverlayScope.show(context);
     } else {
       Navigator.of(context).popUntil((r) => r.isFirst);
     }

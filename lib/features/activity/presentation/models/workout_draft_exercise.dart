@@ -19,6 +19,24 @@ class WorkoutDraftExercise {
 
   WorkoutDraftExercise copy() => WorkoutDraftExercise.withSets(exercise, sets);
 
+  /// 切换动作时沿用组数；单位变化时重置次数，体重和计时动作不带负重。
+  WorkoutDraftExercise replaceWith(ExerciseCatalogItem next) {
+    final sameUnit = exercise.unit == next.unit;
+    return WorkoutDraftExercise.withSets(next, [
+      for (final set in sets)
+        WorkoutDraftSet(
+          amount: sameUnit ? set.amount : (next.unit == 'seg' ? 30 : 10),
+          weight: next.bodyweight || next.unit != 'reps'
+              ? 0
+              : (exercise.unit == 'reps' &&
+                        !exercise.bodyweight &&
+                        set.weight != 0
+                    ? set.weight
+                    : 10),
+        ),
+    ]);
+  }
+
   final ExerciseCatalogItem exercise;
   final List<WorkoutDraftSet> sets;
 

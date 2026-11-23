@@ -2,115 +2,109 @@ import 'package:flutter/material.dart';
 
 import '../../../../l10n/app_localizations_context.dart';
 import '../../data/models/conversation.dart';
-import 'insights_page.dart';
 
-/// 「Conversas anteriores」面板 —— 对应客户源码 Assistente 的会话历史子屏
-/// （`.at-subcab` / `.aj-lin`）：深底、顶栏带把手与居中标题、按天分组的行。
-class AtlasConversationsSheet extends StatelessWidget {
-  const AtlasConversationsSheet({required this.loader, super.key});
+/// Conversation history rendered as an in-place Atlas sub-screen.
+class AtlasConversationsLayer extends StatefulWidget {
+  const AtlasConversationsLayer({
+    required this.loader,
+    required this.onClose,
+    required this.onSelected,
+    super.key,
+  });
 
   final Future<List<AtlasConversation>> Function() loader;
+  final VoidCallback onClose;
+  final Future<void> Function(AtlasConversation conversation) onSelected;
+
+  @override
+  State<AtlasConversationsLayer> createState() =>
+      _AtlasConversationsLayerState();
+}
+
+class _AtlasConversationsLayerState extends State<AtlasConversationsLayer> {
+  late final Future<List<AtlasConversation>> _conversations = widget.loader();
 
   @override
   Widget build(BuildContext context) {
     final strings = context.l10n;
     return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.only(top: 24),
-        child: ClipRRect(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-          child: Container(
-            color: const Color(0xFF1C1F24),
-            constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height * 0.7,
-            ),
-            child: Column(
+      bottom: false,
+      child: Column(
+        children: [
+          SizedBox(
+            height: 64,
+            child: Row(
               children: [
-                // .at-alca：把手
-                Container(
-                  width: 38,
-                  height: 5,
-                  margin: const EdgeInsets.only(top: 12),
-                  decoration: BoxDecoration(
-                    color: const Color(0x47FFFFFF),
-                    borderRadius: BorderRadius.circular(3),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: Row(
-                    children: [
-                      const SizedBox(width: 48),
-                      Expanded(
-                        child: Text(
-                          strings.chatHistoryTitle,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Color(0xFFF4F5F7),
-                            fontSize: 19,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                      ),
-                      // 洞察列表入口（原脑图标的职责移到此处，保持可达）
-                      IconButton(
-                        tooltip: strings.insightsTitle,
-                        icon: const Icon(Icons.lightbulb_outline, size: 22),
-                        color: const Color(0xCCF4F5F7),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          Navigator.of(context).push<void>(
-                            MaterialPageRoute(
-                              builder: (_) => const InsightsPage(),
-                            ),
-                          );
-                        },
-                      ),
-                    ],
+                SizedBox(
+                  width: 56,
+                  child: IconButton(
+                    tooltip: MaterialLocalizations.of(
+                      context,
+                    ).backButtonTooltip,
+                    onPressed: widget.onClose,
+                    icon: const Icon(Icons.chevron_left_rounded, size: 30),
+                    color: const Color(0xEAF4F5F7),
                   ),
                 ),
                 Expanded(
-                  child: FutureBuilder<List<AtlasConversation>>(
-                    future: loader(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState != ConnectionState.done) {
-                        return const Center(
-                          child: SizedBox(
-                            width: 22,
-                            height: 22,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          ),
-                        );
-                      }
-                      final items = snapshot.data ?? const [];
-                      if (items.isEmpty) {
-                        return Padding(
-                          padding: const EdgeInsets.all(32),
-                          child: Text(
-                            strings.chatHistoryEmpty,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: Color(0x73F4F5F7),
-                              fontSize: 14,
-                            ),
-                          ),
-                        );
-                      }
-                      return ListView(
-                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-                        children: [
-                          // 置顶的排最前，其余按 updatedAt 新→旧
-                          for (final conversation in _sorted(items))
-                            _ConversationRow(conversation: conversation),
-                        ],
-                      );
-                    },
+                  child: Text(
+                    strings.chatHistoryTitle,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Color(0xFFF4F5F7),
+                      fontSize: 19,
+                      fontWeight: FontWeight.w400,
+                      letterSpacing: -0.45,
+                    ),
                   ),
                 ),
+                const SizedBox(width: 56),
               ],
             ),
           ),
-        ),
+          Expanded(
+            child: FutureBuilder<List<AtlasConversation>>(
+              future: _conversations,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState != ConnectionState.done) {
+                  return const Center(
+                    child: SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  );
+                }
+                final conversations = _sorted(snapshot.data ?? const []);
+                if (conversations.isEmpty) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(32),
+                      child: Text(
+                        strings.chatHistoryEmpty,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Color(0x8CF4F5F7),
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  );
+                }
+                final groups = _groupByDay(conversations);
+                return ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(30, 24, 30, 32),
+                  itemCount: groups.length,
+                  itemBuilder: (context, index) => _ConversationDayGroup(
+                    group: groups[index],
+                    untitled: strings.chatHistoryUntitled,
+                    onSelected: widget.onSelected,
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -123,69 +117,152 @@ class AtlasConversationsSheet extends StatelessWidget {
     });
     return list;
   }
+
+  List<_ConversationDay> _groupByDay(List<AtlasConversation> conversations) {
+    final groups = <_ConversationDay>[];
+    for (final conversation in conversations) {
+      final date = DateTime.tryParse(conversation.updatedAt)?.toLocal();
+      final key = date == null
+          ? conversation.updatedAt
+          : '${date.year}-${date.month}-${date.day}';
+      if (groups.isEmpty || groups.last.key != key) {
+        groups.add(
+          _ConversationDay(key, _dayLabel(date), <AtlasConversation>[]),
+        );
+      }
+      groups.last.conversations.add(conversation);
+    }
+    return groups;
+  }
+
+  String _dayLabel(DateTime? date) {
+    if (date == null) return 'CONVERSAS ANTERIORES';
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final day = DateTime(date.year, date.month, date.day);
+    final difference = today.difference(day).inDays;
+    if (difference == 0) return 'HOJE';
+    final suffix =
+        '${_weekday[date.weekday]}, ${date.day} ${_month[date.month]}';
+    return difference == 1 ? 'ONTEM · $suffix' : suffix;
+  }
+}
+
+class _ConversationDay {
+  _ConversationDay(this.key, this.label, this.conversations);
+
+  final String key;
+  final String label;
+  final List<AtlasConversation> conversations;
+}
+
+class _ConversationDayGroup extends StatelessWidget {
+  const _ConversationDayGroup({
+    required this.group,
+    required this.untitled,
+    required this.onSelected,
+  });
+
+  final _ConversationDay group;
+  final String untitled;
+  final Future<void> Function(AtlasConversation conversation) onSelected;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: 24),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          group.label,
+          style: const TextStyle(
+            color: Color(0x8CF4F5F7),
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.7,
+          ),
+        ),
+        const SizedBox(height: 9),
+        for (final conversation in group.conversations)
+          _ConversationRow(
+            conversation: conversation,
+            untitled: untitled,
+            onSelected: onSelected,
+          ),
+      ],
+    ),
+  );
 }
 
 class _ConversationRow extends StatelessWidget {
-  const _ConversationRow({required this.conversation});
+  const _ConversationRow({
+    required this.conversation,
+    required this.untitled,
+    required this.onSelected,
+  });
 
   final AtlasConversation conversation;
+  final String untitled;
+  final Future<void> Function(AtlasConversation conversation) onSelected;
 
   @override
-  Widget build(BuildContext context) {
-    final strings = context.l10n;
-    // .aj-lin：上下细线、右侧 ›
-    return Container(
-      decoration: const BoxDecoration(
-        border: Border(top: BorderSide(color: Color(0x14FFFFFF))),
-      ),
-      child: InkWell(
-        onTap: () => Navigator.of(context).pop(conversation),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      conversation.title.isEmpty
-                          ? strings.chatHistoryUntitled
-                          : conversation.title,
-                      style: const TextStyle(
-                        color: Color(0xFFF4F5F7),
-                        fontSize: 15.5,
-                      ),
-                    ),
-                    if (conversation.updatedAt.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 3),
-                        child: Text(
-                          _formatDate(conversation.updatedAt),
-                          style: const TextStyle(
-                            color: Color(0x6BF4F5F7),
-                            fontSize: 12.5,
-                          ),
-                        ),
-                      ),
-                  ],
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: const BoxDecoration(
+      border: Border(top: BorderSide(color: Color(0x14FFFFFF))),
+    ),
+    child: InkWell(
+      onTap: () => onSelected(conversation),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                conversation.title.isEmpty ? untitled : conversation.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: Color(0xFFF4F5F7),
+                  fontSize: 15.5,
+                  fontWeight: FontWeight.w400,
+                  letterSpacing: -0.25,
                 ),
               ),
-              const Icon(
-                Icons.chevron_right,
-                size: 18,
-                color: Color(0x99F4F5F7),
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(width: 12),
+            const Icon(
+              Icons.chevron_right_rounded,
+              size: 18,
+              color: Color(0x99F4F5F7),
+            ),
+          ],
         ),
       ),
-    );
-  }
-
-  String _formatDate(String iso) {
-    final parsed = DateTime.tryParse(iso)?.toLocal();
-    if (parsed == null) return '';
-    return '${parsed.day}/${parsed.month}/${parsed.year}';
-  }
+    ),
+  );
 }
+
+const _weekday = <int, String>{
+  DateTime.monday: 'SEG',
+  DateTime.tuesday: 'TER',
+  DateTime.wednesday: 'QUA',
+  DateTime.thursday: 'QUI',
+  DateTime.friday: 'SEX',
+  DateTime.saturday: 'SÁB',
+  DateTime.sunday: 'DOM',
+};
+
+const _month = <int, String>{
+  1: 'JAN',
+  2: 'FEV',
+  3: 'MAR',
+  4: 'ABR',
+  5: 'MAI',
+  6: 'JUN',
+  7: 'JUL',
+  8: 'AGO',
+  9: 'SET',
+  10: 'OUT',
+  11: 'NOV',
+  12: 'DEZ',
+};

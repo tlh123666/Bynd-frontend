@@ -8,21 +8,29 @@ import '../../data/local_workout_store.dart';
 import '../../../../l10n/app_localizations_context.dart';
 import '../../domain/models/activity_type.dart';
 import '../localization/activity_type_localizations.dart';
+import '../models/demo_workout_plans.dart';
 import 'activity_type_icon.dart';
 import 'workout_builder_sheet.dart';
+import 'workout_delete_confirmation_sheet.dart';
 import 'activity_frosted_sheet_header.dart';
 
-/// 力量训练选择叶片；模板仅用于还原示例，不代表用户已保存的训练。
+/// 力量训练选择叶片；示例和本地模板分别标记来源。
 class StrengthWorkoutSheet extends StatefulWidget {
   const StrengthWorkoutSheet({
     required this.activity,
     this.localPlans = const [],
     this.loadFailed = false,
+    required this.store,
+    required this.demoPlans,
+    required this.hiddenDemoIds,
     super.key,
   });
   final ActivityType activity;
   final List<LocalWorkoutPlan> localPlans;
   final bool loadFailed;
+  final LocalWorkoutStore store;
+  final List<LocalWorkoutPlan> demoPlans;
+  final Set<String> hiddenDemoIds;
 
   /// 选择新建时先关闭本叶片；编辑器关闭后恢复训练列表。
   static Future<StrengthWorkoutResult?> show(
@@ -31,11 +39,23 @@ class StrengthWorkoutSheet extends StatefulWidget {
   ) async {
     // 按登录用户隔离本地模板，访客使用独立命名空间。
     final store = LocalWorkoutStore(AuthScope.maybeOf(context)?.userId);
+    final s = context.l10n;
+    final demos = await demoWorkoutPlans([
+      s.strengthDemoName1,
+      s.strengthDemoName2,
+      s.strengthDemoName3,
+      s.strengthDemoName4,
+      s.strengthDemoName5,
+      s.strengthDemoName6,
+      s.strengthDemoName7,
+    ]);
     while (context.mounted) {
       List<LocalWorkoutPlan> plans = [];
+      Set<String> hidden = {};
       var loadFailed = false;
       try {
         plans = await store.load();
+        hidden = await store.hiddenDemoIds();
       } catch (_) {
         loadFailed = true;
       }
@@ -50,13 +70,22 @@ class StrengthWorkoutSheet extends StatefulWidget {
           activity: activity,
           localPlans: plans,
           loadFailed: loadFailed,
+          store: store,
+          demoPlans: demos,
+          hiddenDemoIds: hidden,
         ),
       );
       if (!context.mounted || action == null) return null;
       if (action.kind == _StrengthActionKind.start) {
         return StrengthWorkoutResult(action.plan?.copy());
       }
-      final plan = await WorkoutBuilderSheet.show(context, store: store);
+      final plan = await WorkoutBuilderSheet.show(
+        context,
+        store: store,
+        initialPlan: action.kind == _StrengthActionKind.edit
+            ? action.plan
+            : null,
+      );
       if (!context.mounted) return null;
       if (plan != null) return StrengthWorkoutResult(plan);
     }
@@ -72,7 +101,7 @@ class StrengthWorkoutResult {
   final LocalWorkoutPlan? plan;
 }
 
-enum _StrengthActionKind { start, build }
+enum _StrengthActionKind { start, build, edit }
 
 class _StrengthAction {
   const _StrengthAction(this.kind, [this.plan]);
@@ -81,7 +110,87 @@ class _StrengthAction {
 }
 
 class _StrengthWorkoutSheetState extends State<StrengthWorkoutSheet> {
-  bool _showUnavailable = false;
+  late List<LocalWorkoutPlan> _plans = widget.localPlans;
+  late Set<String> _hidden = widget.hiddenDemoIds;
+  bool _actionFailed = false;
+  bool _busy = false;
+
+  Future<void> _showOptions(
+    BuildContext anchorContext,
+    LocalWorkoutPlan plan,
+  ) async {
+    if (_busy) return;
+    final box = anchorContext.findRenderObject() as RenderBox;
+    final overlay =
+        Navigator.of(anchorContext).overlay!.context.findRenderObject()
+            as RenderBox;
+    final anchor = MatrixUtils.transformRect(
+      box.getTransformTo(overlay),
+      Offset.zero & box.size,
+    );
+    final s = context.l10n;
+    final action = await AppFrostedContextMenu.show<_WorkoutMenuAction>(
+      anchorContext,
+      anchor: anchor,
+      items: [
+        AppFrostedMenuItem(
+          value: _WorkoutMenuAction.edit,
+          label: s.workoutMenuEdit,
+          icon: Icons.edit_outlined,
+        ),
+        AppFrostedMenuItem(
+          value: _WorkoutMenuAction.duplicate,
+          label: s.workoutDuplicateExercise,
+          icon: Icons.copy_outlined,
+        ),
+        AppFrostedMenuItem(
+          value: _WorkoutMenuAction.delete,
+          label: s.workoutMenuDelete,
+          icon: Icons.delete_outline,
+          destructive: true,
+        ),
+      ],
+    );
+    if (!mounted || action == null) return;
+    if (action == _WorkoutMenuAction.edit) {
+      Navigator.pop(
+        context,
+        _StrengthAction(_StrengthActionKind.edit, plan.copy()),
+      );
+      return;
+    }
+    if (action == _WorkoutMenuAction.delete) {
+      final confirmed = await WorkoutDeleteConfirmationSheet.show(
+        context,
+        name: plan.name,
+      );
+      if (!mounted || !confirmed) return;
+    }
+    if (_busy) return;
+    setState(() {
+      _busy = true;
+      _actionFailed = false;
+    });
+    try {
+      if (action == _WorkoutMenuAction.delete) {
+        await widget.store.delete(plan.id);
+      } else {
+        await widget.store.duplicate(plan, demoPlans: widget.demoPlans);
+      }
+      final plans = await widget.store.load();
+      final hidden = await widget.store.hiddenDemoIds();
+      if (mounted) {
+        setState(() {
+          _plans = plans;
+          _hidden = hidden;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _actionFailed = true);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -95,14 +204,14 @@ class _StrengthWorkoutSheetState extends State<StrengthWorkoutSheet> {
           media.viewPadding.bottom -
           media.viewInsets.bottom,
     );
-    final workouts = <(String, int, int)>[
-      (s.strengthDemoName1, 4, 9),
-      (s.strengthDemoName2, 5, 17),
-      (s.strengthDemoName3, 6, 20),
-      (s.strengthDemoName4, 5, 16),
-      (s.strengthDemoName5, 5, 17),
-      (s.strengthDemoName6, 6, 20),
-      (s.strengthDemoName7, 4, 11),
+    final local = _plans.where((p) => !p.id.startsWith('demo:')).toList();
+    final overrides = {
+      for (final plan in _plans.where((p) => p.id.startsWith('demo:')))
+        plan.id: plan,
+    };
+    final demos = [
+      for (final plan in widget.demoPlans)
+        if (!_hidden.contains(plan.id)) overrides[plan.id] ?? plan,
     ];
     return SizedBox(
       height: height,
@@ -131,7 +240,7 @@ class _StrengthWorkoutSheetState extends State<StrengthWorkoutSheet> {
                 ),
                 _SectionLabel(
                   label: s.yourWorkouts,
-                  count: workouts.length + widget.localPlans.length,
+                  count: demos.length + local.length,
                 ),
                 if (widget.loadFailed)
                   Text(
@@ -140,7 +249,14 @@ class _StrengthWorkoutSheetState extends State<StrengthWorkoutSheet> {
                       color: AppColors.textSecondary,
                     ),
                   ),
-                if (widget.localPlans.isNotEmpty)
+                if (_actionFailed)
+                  Text(
+                    s.workoutActionError,
+                    style: AppTypography.caption.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                if (local.isNotEmpty || overrides.isNotEmpty)
                   Text(
                     s.workoutLocalNote,
                     style: AppTypography.caption.copyWith(
@@ -148,7 +264,7 @@ class _StrengthWorkoutSheetState extends State<StrengthWorkoutSheet> {
                       fontSize: 11,
                     ),
                   ),
-                for (final plan in widget.localPlans)
+                for (final plan in local)
                   _WorkoutRow(
                     icon: ActivityTypeIcon(
                       type: widget.activity,
@@ -164,6 +280,8 @@ class _StrengthWorkoutSheetState extends State<StrengthWorkoutSheet> {
                       context,
                       _StrengthAction(_StrengthActionKind.start, plan),
                     ),
+                    optionsLabel: s.strengthOptions(plan.name),
+                    onOptions: (anchor) => _showOptions(anchor, plan),
                   ),
                 // 提醒示例来源，避免将原型模板误认为账号中的真实训练。
                 Text(
@@ -173,28 +291,24 @@ class _StrengthWorkoutSheetState extends State<StrengthWorkoutSheet> {
                     fontSize: 11,
                   ),
                 ),
-                if (_showUnavailable)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Text(
-                      s.strengthDemoUnavailable,
-                      style: AppTypography.caption.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ),
-                for (final (name, exercises, sets) in workouts)
+                for (final plan in demos)
                   _WorkoutRow(
                     icon: ActivityTypeIcon(
                       type: widget.activity,
                       fallback: Icons.fitness_center,
                       size: 20,
                     ),
-                    title: name,
-                    subtitle: s.strengthExerciseCount(exercises, sets),
-                    onTap: () => setState(() => _showUnavailable = true),
-                    optionsLabel: s.strengthOptions(name),
-                    onOptions: () => setState(() => _showUnavailable = true),
+                    title: plan.name,
+                    subtitle: s.strengthExerciseCount(
+                      plan.exercises.length,
+                      plan.setCount,
+                    ),
+                    onTap: () => Navigator.pop(
+                      context,
+                      _StrengthAction(_StrengthActionKind.start, plan),
+                    ),
+                    optionsLabel: s.strengthOptions(plan.name),
+                    onOptions: (anchor) => _showOptions(anchor, plan),
                   ),
                 _SectionLabel(label: s.otherWays),
                 _WorkoutRow(
@@ -218,6 +332,8 @@ class _StrengthWorkoutSheetState extends State<StrengthWorkoutSheet> {
     );
   }
 }
+
+enum _WorkoutMenuAction { edit, duplicate, delete }
 
 class _SectionLabel extends StatelessWidget {
   const _SectionLabel({required this.label, this.count});
@@ -264,7 +380,7 @@ class _WorkoutRow extends StatelessWidget {
   final String title, subtitle;
   final VoidCallback onTap;
   final String? optionsLabel;
-  final VoidCallback? onOptions;
+  final ValueChanged<BuildContext>? onOptions;
   @override
   Widget build(BuildContext context) => Container(
     height: 72,
@@ -313,12 +429,14 @@ class _WorkoutRow extends StatelessWidget {
           Semantics(
             label: optionsLabel,
             button: true,
-            child: IconButton(
-              onPressed: onOptions,
-              icon: const Icon(
-                Icons.more_horiz,
-                size: 18,
-                color: AppColors.textSecondary,
+            child: Builder(
+              builder: (buttonContext) => IconButton(
+                onPressed: () => onOptions!(buttonContext),
+                icon: const Icon(
+                  Icons.more_horiz,
+                  size: 18,
+                  color: AppColors.textSecondary,
+                ),
               ),
             ),
           )

@@ -12,11 +12,11 @@ class AppFrostedSurface extends StatelessWidget {
     required this.child,
     required this.borderRadius,
     this.borderFadeHeight = 240,
+    this.tintColor = AppColors.sheetGlassTint,
     this.boxShadow = const [],
     super.key,
   }) : blurSigma = 14,
        saturation = 1.5,
-       tintColor = AppColors.sheetGlassTint,
        borderColor = AppColors.sheetGlassBorder,
        fit = StackFit.loose;
 
