@@ -142,9 +142,16 @@ class DiaryDay {
   final String note;
   final int revision;
   final bool editable;
-  List<DiaryMoment> get timeline =>
-      [...events, ...automatic]
-        ..sort((a, b) => (a.time ?? date).compareTo(b.time ?? date));
+  List<DiaryMoment> get timeline {
+    final byId = {
+      for (final moment in [...automatic, ...events]) moment.id: moment,
+    };
+    return byId.values.toList()..sort((a, b) {
+      final timeOrder = (a.time ?? date).compareTo(b.time ?? date);
+      return timeOrder == 0 ? a.id.compareTo(b.id) : timeOrder;
+    });
+  }
+
   factory DiaryDay.fromJson(Map<String, dynamic> j) => DiaryDay(
     date: DateTime.parse(j['date'] as String),
     events: (j['events'] as List? ?? [])
@@ -168,6 +175,10 @@ class DiaryDay {
     'revision': revision,
     'editable': editable,
   };
+}
+
+abstract interface class DiaryPlanSource {
+  Future<List<String>> planKeys();
 }
 
 abstract interface class DiaryRepository {

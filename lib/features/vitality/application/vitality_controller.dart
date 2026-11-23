@@ -7,6 +7,7 @@ class VitalityController extends ChangeNotifier {
     required this.repository,
     required this.kind,
     required this.date,
+    this.historyDays = 7,
     AuthSession? session,
   }) : _session = session,
        _token = session?.accessToken {
@@ -14,6 +15,7 @@ class VitalityController extends ChangeNotifier {
   }
   final VitalityRepository repository;
   final VitalityKind kind;
+  final int historyDays;
   final AuthSession? _session;
   final String? _token;
   DateTime date;
@@ -43,7 +45,7 @@ class VitalityController extends ChangeNotifier {
     snapshot = null;
     _emit();
     try {
-      final data = await repository.load(kind, this.date);
+      final data = await repository.load(kind, this.date, days: historyDays);
       if (_live(generation)) snapshot = data;
     } catch (e) {
       if (_live(generation)) error = e;

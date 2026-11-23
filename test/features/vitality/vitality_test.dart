@@ -426,50 +426,28 @@ void main() {
       expect(loaded.preferences.flag('showForecast'), isFalse);
     },
   );
-  testWidgets('English recovery screen and metric details are interactive', (
+  testWidgets('recovery trend and the selected day stay synchronized', (
     t,
   ) async {
-    await mount(t, MemoryVitality());
-    expect(find.text('Recovery'), findsOneWidget);
-    expect(
-      find.text('Your body is still recovering. Take it easy today.'),
-      findsOneWidget,
-    );
-    final card = find.byKey(const Key('vitality-week'));
-    await t.scrollUntilVisible(
-      card,
-      400,
-      scrollable: find
-          .descendant(
-            of: find.byKey(const Key('vitality-content')),
-            matching: find.byType(Scrollable),
-          )
-          .first,
-    );
-    await t.pumpAndSettle();
-    await t.ensureVisible(card);
-    await t.pumpAndSettle();
-    await t.tapAt(t.getTopLeft(card) + const Offset(100, 25));
-    await t.pumpAndSettle();
-    expect(find.text('Month'), findsOneWidget);
-    await t.tap(find.text('Month'));
-    await t.pumpAndSettle();
-    expect(find.text('About this reading'), findsNothing);
-    expect(t.takeException(), isNull);
-  });
-  testWidgets('settings save false flags and remove their sections', (t) async {
     final repo = MemoryVitality();
     await mount(t, repo);
-    await t.tap(find.byKey(const Key('vitality-settings')));
+    expect(find.text('Recovery'), findsOneWidget);
+    final trend = find.byKey(const Key('vitality-trend'));
+    expect(t.widget<AppHealthTrend>(trend).points, hasLength(30));
+    await t.ensureVisible(trend);
+    final viewport = find.descendant(
+      of: trend,
+      matching: find.byType(SingleChildScrollView),
+    );
+    final middle = t.getCenter(viewport);
+    await t.tapAt(middle - const Offset(32, 0));
     await t.pumpAndSettle();
-    await t.tap(find.text("Today's contributing factors"));
-    await t.tap(find.text("Tomorrow's outlook"));
-    await t.tap(find.text('Save'));
-    await t.pumpAndSettle();
-    expect(repo.preferences.flag('showFactors'), isFalse);
-    expect(repo.preferences.flag('showForecast'), isFalse);
-    expect(repo.preferences.forecastFor(VitalityKind.energy), isTrue);
-    expect(find.text('Key metrics'), findsNothing);
+    final now = DateTime.now();
+    expect(
+      vitalityDate(repo.loads.last),
+      vitalityDate(vitalityShiftDay(now, -1)),
+    );
+    expect(t.widget<AppHealthTrend>(trend).points.last.date.day, now.day);
     expect(t.takeException(), isNull);
   });
   testWidgets('system back closes More without leaving the recovery page', (
@@ -485,46 +463,37 @@ void main() {
     expect(find.byType(AppQuickActionsOverlay), findsNothing);
     expect(find.byType(VitalityPage), findsOneWidget);
   });
-  testWidgets('failed settings save keeps draft open', (t) async {
-    final repo = MemoryVitality()..failSave = true;
-    await mount(t, repo);
-    await t.tap(find.byKey(const Key('vitality-settings')));
+  testWidgets('grouped diary preserves unrelated events and notes', (t) async {
+    final diary = MemoryVitalityDiary();
+    await mount(t, MemoryVitality(), diary: diary);
+    final entry = find.text('Log in Diary');
+    await t.scrollUntilVisible(
+      entry,
+      300,
+      scrollable: find
+          .descendant(
+            of: find.byKey(const Key('vitality-content')),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
+    await t.ensureVisible(entry);
+    await t.tap(entry);
+    await t.pumpAndSettle();
+    final tracker = find.byKey(const ValueKey('diary-tracker-dor'));
+    await t.ensureVisible(tracker);
+    await t.tap(tracker);
     await t.pumpAndSettle();
     await t.tap(find.text('Save'));
     await t.pumpAndSettle();
+    expect(diary.day.events.first.label, 'Original label');
+    expect(diary.day.note, 'Private note');
     expect(
-      find.text('Could not save. Your changes are still here.'),
-      findsOneWidget,
+      diary.day.events.singleWhere((event) => event.key == 'dor').happened,
+      isTrue,
     );
-    expect(find.text('Save'), findsOneWidget);
+    expect(diary.day.revision, 1);
   });
-  testWidgets(
-    'rating saves to diary while retaining unrelated events and notes',
-    (t) async {
-      final diary = MemoryVitalityDiary();
-      await mount(t, MemoryVitality(), diary: diary);
-      final rating = find.byKey(const ValueKey('diary-habit-rating-4'));
-      await t.scrollUntilVisible(
-        rating,
-        300,
-        scrollable: find
-            .descendant(
-              of: find.byKey(const Key('vitality-content')),
-              matching: find.byType(Scrollable),
-            )
-            .first,
-      );
-      await t.pumpAndSettle();
-      await t.ensureVisible(rating);
-      await t.pumpAndSettle();
-      await t.tap(rating);
-      await t.pumpAndSettle();
-      expect(diary.day.events.first.label, 'Original label');
-      expect(diary.day.note, 'Private note');
-      expect(diary.day.events.singleWhere((e) => e.key == 'acordou').value, 8);
-      expect(diary.day.revision, 1);
-    },
-  );
   testWidgets(
     'Portuguese energy page renders correctly at narrow width and large text',
     (t) async {
@@ -542,58 +511,11 @@ void main() {
       expect(t.takeException(), isNull);
     },
   );
-  testWidgets(
-    'five-choice rating reflects and clears a rating written in the ten-point diary',
-    (t) async {
-      final diary = MemoryVitalityDiary();
-      diary.day = DiaryDay(
-        date: DateTime.now(),
-        note: diary.day.note,
-        events: [
-          ...diary.day.events,
-          DiaryMoment({
-            'id': 'rated',
-            'valueKey': 'acordou',
-            'numericValue': 7,
-            'label': 'Wake',
-            'details': {'kind': 'scale'},
-          }),
-        ],
-      );
-      await mount(t, MemoryVitality(), diary: diary);
-      final rating = find.byKey(const ValueKey('diary-habit-rating-4'));
-      await t.scrollUntilVisible(
-        rating,
-        350,
-        scrollable: find
-            .descendant(
-              of: find.byKey(const Key('vitality-content')),
-              matching: find.byType(Scrollable),
-            )
-            .first,
-      );
-      await t.pumpAndSettle();
-      await t.ensureVisible(rating);
-      await t.pumpAndSettle();
-      expect(
-        t.widget<OutlinedButton>(rating).style!.backgroundColor!.resolve({}),
-        AppColors.glass,
-      );
-      await t.tap(rating);
-      await t.pumpAndSettle();
-      expect(diary.day.events.any((e) => e.key == 'acordou'), isFalse);
-      expect(diary.day.events.first.label, 'Original label');
-      expect(diary.day.note, 'Private note');
-    },
-  );
   testWidgets('no-data and network errors do not display reference scores', (
     t,
   ) async {
     await mount(t, MemoryVitality()..empty = true);
-    expect(
-      find.text('Sync your band to see this day\'s signals.'),
-      findsOneWidget,
-    );
+    expect(find.text('Sync your band to see your readings.'), findsOneWidget);
     expect(t.widget<Text>(find.byKey(const Key('vitality-score'))).data, '—');
     await t.pumpWidget(const SizedBox());
     await mount(t, MemoryVitality()..failLoad = true);

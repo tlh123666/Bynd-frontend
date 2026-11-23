@@ -28,6 +28,20 @@ class RemoteVitalityRepository implements VitalityRepository {
     int days = 7,
   }) async {
     _check();
+    try {
+      return await _load(kind, date, days);
+    } on ApiException catch (error) {
+      if (days != 30 || error.statusCode != 403) rethrow;
+      _check();
+      return _load(kind, date, 7);
+    }
+  }
+
+  Future<VitalitySnapshot> _load(
+    VitalityKind kind,
+    DateTime date,
+    int days,
+  ) async {
     final data = await client.request(
       'GET',
       '/me/health-data/vitality/${kind.name}/experience',

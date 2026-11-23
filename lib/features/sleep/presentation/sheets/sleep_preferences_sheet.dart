@@ -1,36 +1,33 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:printing/printing.dart';
 import '../../../../design_system/design_system.dart';
 import '../../../../shared/widgets/app_sheet_controls.dart';
 import '../../application/sleep_controller.dart';
 import '../../application/sleep_reminders.dart';
+import '../../application/sleep_report.dart';
 import '../../data/demo_sleep_repository.dart';
 import '../../domain/sleep_models.dart';
 import '../sleep_copy.dart';
 import '../widgets/sleep_widgets.dart';
 
 class SleepPreferencesSheet extends StatefulWidget {
-  const SleepPreferencesSheet({
-    required this.controller,
-    this.planner = false,
-    super.key,
-  });
+  const SleepPreferencesSheet({required this.controller, super.key});
   final SleepController controller;
-  final bool planner;
   @override
   State<SleepPreferencesSheet> createState() => _SleepPreferencesSheetState();
 }
 
 class _SleepPreferencesSheetState extends State<SleepPreferencesSheet> {
   late SleepPreferences _preferences = widget.controller.snapshot!.preferences;
-  bool _saving = false;
+  bool _saving = false, _reporting = false;
   String? _error;
   List<Map<String, dynamic>>? _plans;
   Object? _planError;
   @override
   void initState() {
     super.initState();
-    if (widget.planner) _loadPlans();
+    _loadPlans();
   }
 
   Future<void> _loadPlans() async {
@@ -43,30 +40,215 @@ class _SleepPreferencesSheetState extends State<SleepPreferencesSheet> {
     }
   }
 
-  Future<void> _time(bool bedtime) async {
-    final minute = await showAppContentSheet<int>(
-      context,
-      (_) => _SleepTimePicker(
-        initial: bedtime ? _preferences.bedtime : _preferences.wake,
-        title: sleepText(
-          context,
-          bedtime ? 'Deitar' : 'Acordar',
-          bedtime ? 'Bedtime' : 'Wake time',
+  String _copy(String pt, String en) => sleepText(context, pt, en);
+
+  Future<T?> _page<T>(String title, WidgetBuilder body) => Navigator.push<T>(
+    context,
+    MaterialPageRoute(
+      builder: (context) => Scaffold(
+        backgroundColor: AppHealthStyle.canvas,
+        body: DecoratedBox(
+          decoration: const BoxDecoration(gradient: AppHealthStyle.background),
+          child: SafeArea(
+            child: AppGlassScrollHeader(
+              header: _header(context, title),
+              height: 49,
+              body: (inset) => Padding(
+                padding: EdgeInsets.only(top: inset),
+                child: body(context),
+              ),
+            ),
+          ),
         ),
       ),
-      glass: true,
-      heightFactor: .55,
+    ),
+  );
+
+  Widget _header(BuildContext context, String title) => AppPageHeader(
+    height: 49,
+    title: Text(title, style: AppTypography.detailBody.copyWith(fontSize: 17)),
+    leading: BackButton(
+      onPressed: _saving ? null : () => Navigator.pop(context),
+    ),
+  );
+
+  Future<void> _chooseDuration(bool target) async {
+    final title = target
+        ? _copy('Necessidade de sono', 'Sleep need')
+        : _copy('Desacelerar', 'Wind down');
+    final current = target ? _preferences.target : _preferences.windDown;
+    final values = {
+      if (target)
+        ...List.generate(17, (index) => 360 + index * 15)
+      else ...[
+        0,
+        15,
+        30,
+        45,
+        60,
+        90,
+        120,
+        180,
+      ],
+      current,
+    }.toList()..sort();
+    final result = await _page<int>(
+      title,
+      (routeContext) => ListView(
+        padding: const EdgeInsets.all(AppHealthStyle.edge),
+        children: [
+          Text(
+            target
+                ? _copy(
+                    'Usamos essa duração para comparar suas noites com seu objetivo.',
+                    'We use this duration to compare measured nights with your goal.',
+                  )
+                : _copy(
+                    'Escolha quanto tempo reservar antes de dormir.',
+                    'Choose how much time to set aside before bedtime.',
+                  ),
+            style: AppHealthStyle.body,
+          ),
+          const SizedBox(height: 16),
+          AppHealthPanel(
+            child: Column(
+              children: [
+                for (final (index, value) in values.indexed)
+                  AppHealthRow(
+                    label: value == 0
+                        ? _copy('Sem intervalo', 'No wind-down period')
+                        : sleepDuration(value),
+                    icon: current == value ? Icons.check : null,
+                    divider: index != values.length - 1,
+                    onTap: () => Navigator.pop(routeContext, value),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
-    if (mounted && minute != null) {
+    if (mounted && result != null) {
       setState(
         () => _preferences = _preferences.copy({
-          if (bedtime) ...{
-            'targetBedtimeHour': minute ~/ 60,
-            'targetBedtimeMinute': minute % 60,
-          } else ...{
-            'targetWakeHour': minute ~/ 60,
-            'targetWakeMinute': minute % 60,
-          },
+          if (target)
+            'targetSleepMinutes': result
+          else
+            'windDownMinutes': result,
+        }),
+      );
+    }
+  }
+
+  Future<void> _clockSettings() async {
+    var bedtime = _preferences.bedtime, wake = _preferences.wake;
+    var weekend = _preferences.weekendWake;
+    final result = await _page<(int, int, int?)>(
+      _copy('Acordar e deitar', 'Wake time and bedtime'),
+      (routeContext) => StatefulBuilder(
+        builder: (routeContext, update) {
+          Future<void> choose({
+            bool night = false,
+            bool weekendDay = false,
+          }) async {
+            final title = night
+                ? _copy('Deitar', 'Bedtime')
+                : _copy('Acordar', 'Wake time');
+            final selected = await showAppContentSheet<int>(
+              routeContext,
+              (_) => _SleepTimePicker(
+                initial: night
+                    ? bedtime
+                    : weekendDay
+                    ? (weekend ?? wake)
+                    : wake,
+                title: title,
+              ),
+              glass: true,
+              heightFactor: .55,
+            );
+            if (!routeContext.mounted || selected == null) return;
+            update(() {
+              if (night) {
+                bedtime = selected;
+              } else if (weekendDay) {
+                weekend = selected;
+              } else {
+                wake = selected;
+              }
+            });
+          }
+
+          return Column(
+            children: [
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.all(AppHealthStyle.edge),
+                  children: [
+                    if (_preferences.show('showBiologicalClock'))
+                      Center(
+                        child: CustomPaint(
+                          size: const Size(280, 150),
+                          painter: SleepClockPainter(bedtime, wake),
+                        ),
+                      ),
+                    AppHealthPanel(
+                      child: Column(
+                        children: [
+                          AppHealthRow(
+                            label: _copy('Deitar', 'Bedtime'),
+                            value: sleepClock(bedtime),
+                            icon: Icons.bedtime_outlined,
+                            onTap: () => choose(night: true),
+                          ),
+                          AppHealthRow(
+                            label: _copy('Dias úteis', 'Weekdays'),
+                            value: sleepClock(wake),
+                            icon: Icons.alarm_outlined,
+                            onTap: choose,
+                          ),
+                          AppHealthRow(
+                            label: _copy(
+                              'Sábado e domingo',
+                              'Saturday and Sunday',
+                            ),
+                            value: sleepClock(weekend ?? wake),
+                            icon: Icons.calendar_today_outlined,
+                            onTap: () => choose(weekendDay: true),
+                            divider: false,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      _copy(
+                        'Estes horários são as metas do planejador.',
+                        'These times are planner targets.',
+                      ),
+                      style: AppHealthStyle.small,
+                    ),
+                  ],
+                ),
+              ),
+              AppSheetSaveButton(
+                label: _copy('Confirmar', 'Confirm'),
+                onPressed: () =>
+                    Navigator.pop(routeContext, (bedtime, wake, weekend)),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+    if (mounted && result != null) {
+      setState(
+        () => _preferences = _preferences.copy({
+          'targetBedtimeHour': result.$1 ~/ 60,
+          'targetBedtimeMinute': result.$1 % 60,
+          'targetWakeHour': result.$2 ~/ 60,
+          'targetWakeMinute': result.$2 % 60,
+          if (result.$3 != null) 'targetWeekendWakeMinute': result.$3,
         }),
       );
     }
@@ -94,6 +276,60 @@ class _SleepPreferencesSheetState extends State<SleepPreferencesSheet> {
     }
   }
 
+  Future<void> _shareReport() async {
+    if (_reporting) return;
+    final data = widget.controller.snapshot;
+    if (data == null) return;
+    final portuguese = Localizations.localeOf(context).languageCode == 'pt';
+    final render = context.findRenderObject();
+    final bounds = render is RenderBox
+        ? render.localToGlobal(Offset.zero) & render.size
+        : null;
+    setState(() => _reporting = true);
+    try {
+      var trend = await widget.controller.repository.trend(data.date, 30);
+      if (trend.locked) {
+        trend = await widget.controller.repository.trend(data.date, 7);
+      }
+      if (!mounted || widget.controller.accountChanged) return;
+      if (!trend.days.any((day) => day['hasData'] == true)) {
+        AppNotice.show(
+          context,
+          kind: AppNoticeKind.error,
+          message: _copy(
+            'Nenhuma noite disponível para exportar.',
+            'No recorded nights to export.',
+          ),
+        );
+        return;
+      }
+      final bytes = await buildSleepReport(
+        trend,
+        portuguese: portuguese,
+        demo: widget.controller.repository is DemoSleepRepository,
+      );
+      if (!mounted || widget.controller.accountChanged) return;
+      await Printing.sharePdf(
+        bytes: bytes,
+        filename: 'BYND-sleep-${sleepDate(data.date)}.pdf',
+        bounds: bounds,
+      );
+    } catch (_) {
+      if (mounted && !widget.controller.accountChanged) {
+        AppNotice.show(
+          context,
+          kind: AppNoticeKind.error,
+          message: _copy(
+            'Não foi possível exportar o relatório.',
+            'Could not export the report.',
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _reporting = false);
+    }
+  }
+
   Future<void> _plan([Map<String, dynamic>? plan]) async {
     await showAppContentSheet<void>(
       context,
@@ -109,21 +345,20 @@ class _SleepPreferencesSheetState extends State<SleepPreferencesSheet> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.controller.snapshot!.unavailable.contains('preferences')) {
+    final title = _copy('Ajustes do sono', 'Sleep settings');
+    if (widget.controller.snapshot?.unavailable.contains('preferences') !=
+        false) {
       return Column(
         children: [
-          AppSheetHeader(
-            title: sleepText(context, 'Ajustes do sono', 'Sleep settings'),
-          ),
+          _header(context, title),
           Expanded(
             child: Center(
               child: Text(
-                sleepText(
-                  context,
+                _copy(
                   'Os ajustes não puderam ser carregados. Atualize a página e tente novamente.',
                   'Settings could not be loaded. Refresh the page and try again.',
                 ),
-                style: AppSleepStyle.body,
+                style: AppHealthStyle.body,
               ),
             ),
           ),
@@ -134,239 +369,220 @@ class _SleepPreferencesSheetState extends State<SleepPreferencesSheet> {
       canPop: !_saving,
       child: Column(
         children: [
-          AppSheetHeader(
-            title: sleepText(
-              context,
-              widget.planner ? 'Planejador de sono' : 'Ajustes do sono',
-              widget.planner ? 'Sleep planner' : 'Sleep settings',
-            ),
-            canClose: !_saving,
-          ),
           Expanded(
             child: AbsorbPointer(
               absorbing: _saving,
-              child: ListView(
-                padding: const EdgeInsets.all(22),
-                children: [
-                  Text(
-                    sleepText(
-                      context,
-                      'Seu ritmo para a noite',
-                      'Your night-time rhythm',
-                    ),
-                    style: AppSleepStyle.title,
+              child: AppGlassScrollHeader(
+                header: _header(context, title),
+                height: 49,
+                body: (inset) => ListView(
+                  padding: EdgeInsets.fromLTRB(
+                    AppHealthStyle.edge,
+                    inset + 18,
+                    AppHealthStyle.edge,
+                    20,
                   ),
-                  const SizedBox(height: 22),
-                  if (widget.planner)
-                    CustomPaint(
-                      size: const Size(280, 150),
-                      painter: SleepClockPainter(
-                        _preferences.bedtime,
-                        _preferences.wake,
-                      ),
-                    ),
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(
-                      sleepText(context, 'Deitar', 'Bedtime'),
-                      style: AppSleepStyle.body,
-                    ),
-                    trailing: Text(
-                      sleepClock(_preferences.bedtime),
-                      style: AppSleepStyle.value,
-                    ),
-                    onTap: () => _time(true),
-                  ),
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(
-                      sleepText(context, 'Acordar', 'Wake time'),
-                      style: AppSleepStyle.body,
-                    ),
-                    trailing: Text(
-                      sleepClock(_preferences.wake),
-                      style: AppSleepStyle.value,
-                    ),
-                    onTap: () => _time(false),
-                  ),
-                  const SizedBox(height: 22),
-                  SleepLabel(sleepText(context, 'Meta de sono', 'Sleep goal')),
-                  const SizedBox(height: 12),
-                  Text(
-                    sleepDuration(_preferences.target),
-                    style: AppSleepStyle.value,
-                  ),
-                  Slider(
-                    key: const Key('sleep-target'),
-                    value: _preferences.target.toDouble().clamp(360, 600),
-                    min: 360,
-                    max: 600,
-                    divisions: 8,
-                    activeColor: AppColors.textPrimary,
-                    inactiveColor: AppColors.glassBorder,
-                    label: sleepDuration(_preferences.target),
-                    onChanged: (v) => setState(
-                      () => _preferences = _preferences.copy({
-                        'targetSleepMinutes': v.round(),
-                      }),
-                    ),
-                  ),
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(
-                      sleepText(
-                        context,
-                        'Desacelerar antes de dormir',
-                        'Wind down before bed',
-                      ),
-                      style: AppSleepStyle.body,
-                    ),
-                    trailing: DropdownButton<int>(
-                      value: _preferences.windDown,
-                      dropdownColor: AppColors.surface,
-                      items:
-                          {
-                                0,
-                                15,
-                                30,
-                                45,
-                                60,
-                                90,
-                                120,
-                                180,
-                                _preferences.windDown,
-                              }
-                              .map(
-                                (n) => DropdownMenuItem(
-                                  value: n,
-                                  child: Text(
-                                    '$n min',
-                                    style: AppSleepStyle.caption,
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                      onChanged: (v) {
-                        if (v != null) {
-                          setState(
-                            () => _preferences = _preferences.copy({
-                              'windDownMinutes': v,
-                            }),
-                          );
-                        }
-                      },
-                    ),
-                  ),
-                  if (!widget.planner) ...[
-                    const SizedBox(height: 24),
-                    Text(
-                      sleepText(context, 'O que mostrar', 'What to show'),
-                      style: AppSleepStyle.title,
-                    ),
-                    for (final row in [
-                      ('showStages', 'Fases do sono', 'Sleep stages'),
-                      (
-                        'showBiologicalClock',
-                        'Relógio biológico',
-                        'Sleep schedule',
-                      ),
-                      (
-                        'showRespiration',
-                        'Respiração e oxigênio',
-                        'Breathing and oxygen',
-                      ),
-                    ])
-                      SwitchListTile.adaptive(
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(
-                          sleepText(context, row.$2, row.$3),
-                          style: AppSleepStyle.body,
-                        ),
-                        value: _preferences.show(row.$1),
-                        activeTrackColor: AppColors.textPrimary,
-                        activeThumbColor: AppColors.homeCanvas,
-                        onChanged: (v) => setState(
-                          () => _preferences = _preferences.copy({row.$1: v}),
-                        ),
-                      ),
-                  ],
-                  if (widget.planner) ...[
-                    const SizedBox(height: 30),
-                    Text(
-                      sleepText(
-                        context,
-                        'Lembretes para deitar',
-                        'Bedtime reminders',
-                      ),
-                      style: AppSleepStyle.title,
+                  children: [
+                    AppHealthSection(
+                      _copy('Planejador de sono', 'Sleep planner'),
+                      Icons.bedtime_outlined,
                     ),
                     const SizedBox(height: 14),
+                    AppHealthPanel(
+                      child: Column(
+                        children: [
+                          AppHealthRow(
+                            label: _copy(
+                              'Acordar e deitar',
+                              'Wake time and bedtime',
+                            ),
+                            subtitle:
+                                '${sleepClock(_preferences.bedtime)} → ${sleepClock(_preferences.wake)}',
+                            icon: Icons.alarm_outlined,
+                            onTap: _clockSettings,
+                          ),
+                          AppHealthRow(
+                            label: _copy('Necessidade de sono', 'Sleep need'),
+                            value: sleepDuration(_preferences.target),
+                            icon: Icons.schedule_outlined,
+                            onTap: () => _chooseDuration(true),
+                          ),
+                          AppHealthRow(
+                            label: _copy('Desacelerar', 'Wind down'),
+                            value: '${_preferences.windDown} min',
+                            icon: Icons.nights_stay_outlined,
+                            onTap: () => _chooseDuration(false),
+                            divider: false,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    AppHealthSection(
+                      _copy('Mostrar na página', 'Show on the page'),
+                      Icons.visibility_outlined,
+                    ),
+                    const SizedBox(height: 14),
+                    AppHealthPanel(
+                      child: Column(
+                        children: [
+                          for (final (key, pt, en, icon) in const [
+                            (
+                              'showStages',
+                              'Fases do sono',
+                              'Sleep stages',
+                              Icons.stacked_line_chart,
+                            ),
+                            (
+                              'showBiologicalClock',
+                              'Relógio do planejador',
+                              'Planner clock',
+                              Icons.schedule_outlined,
+                            ),
+                            (
+                              'showRespiration',
+                              'Respiração e oxigênio',
+                              'Breathing and oxygen',
+                              Icons.air_outlined,
+                            ),
+                            (
+                              'showNaps',
+                              'Cochilos',
+                              'Naps',
+                              Icons.hotel_outlined,
+                            ),
+                            (
+                              'showSleepDebt',
+                              'Dívida de sono',
+                              'Sleep debt',
+                              Icons.timelapse,
+                            ),
+                            (
+                              'showSleepTrend',
+                              'Suas noites',
+                              'Your nights',
+                              Icons.show_chart,
+                            ),
+                            (
+                              'showSleepSignals',
+                              'Sinais desta leitura',
+                              'Signals in this reading',
+                              Icons.monitor_heart_outlined,
+                            ),
+                          ])
+                            SwitchListTile.adaptive(
+                              key: ValueKey(key),
+                              contentPadding: EdgeInsets.zero,
+                              secondary: Icon(
+                                icon,
+                                size: 19,
+                                color: AppColors.textSecondary,
+                              ),
+                              title: Text(
+                                _copy(pt, en),
+                                style: AppHealthStyle.body,
+                              ),
+                              value: _preferences.show(key),
+                              activeTrackColor: AppColors.textPrimary,
+                              activeThumbColor: AppColors.homeCanvas,
+                              onChanged: (value) => setState(
+                                () => _preferences = _preferences.copy({
+                                  key: value,
+                                }),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    AppHealthSection(
+                      _copy('Lembretes para deitar', 'Bedtime reminders'),
+                      Icons.notifications_none,
+                    ),
+                    const SizedBox(height: 12),
                     if (_planError != null)
                       AppGlassPill(
-                        label: sleepText(context, 'Tentar novamente', 'Retry'),
+                        label: _copy('Tentar novamente', 'Retry'),
                         onPressed: _loadPlans,
                       )
                     else if (_plans == null)
                       const Center(child: AppLoadingIndicator())
-                    else ...[
-                      for (final plan in _plans!)
-                        ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          leading: Icon(
-                            plan['enabled'] == true
-                                ? Icons.notifications_active_outlined
-                                : Icons.notifications_off_outlined,
-                            color: AppColors.textMuted,
-                          ),
-                          title: Text(
-                            sleepClock(
-                              ((plan['bedtimeHour'] as num?)?.toInt() ?? 0) *
-                                      60 +
-                                  ((plan['bedtimeMinute'] as num?)?.toInt() ??
-                                      0),
-                            ),
-                            style: AppSleepStyle.value,
-                          ),
-                          subtitle: Text(
-                            sleepText(
-                              context,
-                              plan['enabled'] == true
-                                  ? 'Ativado'
-                                  : 'Desativado',
-                              plan['enabled'] == true ? 'Enabled' : 'Disabled',
-                            ),
-                            style: AppSleepStyle.caption,
-                          ),
-                          trailing: const Icon(Icons.chevron_right),
-                          onTap: () => _plan(plan),
+                    else
+                      AppHealthPanel(
+                        child: Column(
+                          children: [
+                            for (final plan in _plans!)
+                              AppHealthRow(
+                                icon: plan['enabled'] == true
+                                    ? Icons.notifications_active_outlined
+                                    : Icons.notifications_off_outlined,
+                                label: sleepClock(
+                                  ((plan['bedtimeHour'] as num?)?.toInt() ??
+                                              0) *
+                                          60 +
+                                      ((plan['bedtimeMinute'] as num?)
+                                              ?.toInt() ??
+                                          0),
+                                ),
+                                subtitle: plan['enabled'] == true
+                                    ? _copy('Ativado', 'Enabled')
+                                    : _copy('Desativado', 'Disabled'),
+                                onTap: () => _plan(plan),
+                              ),
+                            if (_plans!.length < 5)
+                              AppHealthRow(
+                                label: _copy(
+                                  'Adicionar lembrete',
+                                  'Add reminder',
+                                ),
+                                icon: Icons.add,
+                                onTap: _plan,
+                                divider: false,
+                              ),
+                          ],
                         ),
-                      if (_plans!.length < 5)
-                        TextButton.icon(
-                          onPressed: () => _plan(),
-                          icon: const Icon(Icons.add),
-                          label: Text(
-                            sleepText(
-                              context,
-                              'Adicionar lembrete',
-                              'Add reminder',
-                            ),
-                          ),
-                        ),
-                    ],
-                  ],
-                  if (_error != null)
-                    Text(
-                      _error!,
-                      style: AppSleepStyle.body.copyWith(
-                        color: AppColors.error,
+                      ),
+                    const SizedBox(height: 24),
+                    AppHealthSection(
+                      _copy(
+                        'Relatório para o médico',
+                        'Report for your doctor',
+                      ),
+                      Icons.description_outlined,
+                    ),
+                    const SizedBox(height: 12),
+                    AppHealthPanel(
+                      child: AppHealthRow(
+                        label: _reporting
+                            ? _copy(
+                                'Preparando relatório…',
+                                'Preparing report…',
+                              )
+                            : _copy(
+                                'Exportar noites e fases em PDF',
+                                'Export nights and stages as PDF',
+                              ),
+                        icon: Icons.picture_as_pdf_outlined,
+                        onTap: _reporting ? null : _shareReport,
+                        divider: false,
                       ),
                     ),
-                ],
+                    if (_error != null) ...[
+                      const SizedBox(height: 12),
+                      Text(
+                        _error!,
+                        style: AppHealthStyle.body.copyWith(
+                          color: AppColors.error,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
               ),
             ),
           ),
           AppSheetSaveButton(
-            label: sleepText(context, 'Salvar', 'Save'),
+            label: _copy('Salvar', 'Save'),
             loading: _saving,
             onPressed: _save,
           ),

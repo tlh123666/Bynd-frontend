@@ -32,7 +32,10 @@ String vitalityDateLabel(BuildContext c, DateTime date) => DateFormat(
   Localizations.localeOf(c).toLanguageTag(),
 ).format(date).replaceAll('.', '');
 String vitalityMetricName(BuildContext c, String key) => switch (key) {
-  'trainingLoad' => c.l10n.vitalityTraining,
+  'trainingLoad' => _label(c, 'Carga de ontem', 'Yesterday’s load'),
+  'todayTrainingLoad' => _label(c, 'Carga de hoje', 'Today’s load'),
+  'sleepDebtMinutes' => _label(c, 'Dívida de sono', 'Sleep debt'),
+  'yesterdayStress' => _label(c, 'Estresse ontem', 'Yesterday’s stress'),
   'stressScore' => c.l10n.vitalityStress,
   'hrvMs' => c.l10n.vitalityHRV,
   'restingHeartRate' => c.l10n.vitalityRHR,
@@ -48,7 +51,7 @@ String vitalityMetricName(BuildContext c, String key) => switch (key) {
 String vitalityMetricValue(BuildContext c, String key, Object? value) {
   final number = vitalityValue(value);
   if (number == null) return '—';
-  if (key == 'sleepMinutes') {
+  if (key == 'sleepMinutes' || key == 'sleepDebtMinutes') {
     return '${number.toInt() ~/ 60}h${(number.toInt() % 60).toString().padLeft(2, '0')}';
   }
   return vitalityNumber(
@@ -71,3 +74,6 @@ String vitalityMetricUnit(String key) => switch (key) {
 
 String vitalityDelta(BuildContext c, double value) =>
     '${value >= 0 ? '+' : '−'}${vitalityNumber(c, value.abs())}';
+
+String _label(BuildContext c, String pt, String en) =>
+    Localizations.localeOf(c).languageCode == 'en' ? en : pt;

@@ -227,103 +227,98 @@ class DiaryTimelineTile extends StatelessWidget {
   const DiaryTimelineTile({required this.moment, this.onTap, super.key});
   final DiaryMoment moment;
   final VoidCallback? onTap;
+
   @override
-  Widget build(BuildContext context) => IntrinsicHeight(
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        SizedBox(
-          width: 18,
-          child: Column(
+  Widget build(BuildContext context) {
+    final art = moment.details['illustration'];
+    final meal = moment.kind == 'meal';
+    final nutrients = [
+      for (final (key, label) in [
+        ('calories', 'kcal'),
+        ('protein', 'P'),
+        ('carbs', 'C'),
+        ('fat', context.l10n.diaryFatAbbreviation),
+      ])
+        if (moment.details[key] case final num value)
+          key == 'calories'
+              ? '${DiaryMoment.number(value)} kcal'
+              : '$label ${DiaryMoment.number(value)} g',
+    ];
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          decoration: const BoxDecoration(
+            border: Border(bottom: BorderSide(color: AppHealthStyle.divider)),
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              DiaryIcon(moment.icon, size: 18, color: AppColors.textMuted),
-              const SizedBox(height: 6),
-              Expanded(child: Container(width: 1, color: AppDiaryStyle.line)),
-              const SizedBox(height: 6),
+              SizedBox(
+                width: 28,
+                height: 28,
+                child: meal && DiaryMedia.meals.contains(art)
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.asset(
+                          'assets/images/diary/$art.png',
+                          fit: BoxFit.cover,
+                        ),
+                      )
+                    : Center(child: DiaryIcon(moment.icon, size: 18)),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(moment.timeLabel, style: AppHealthStyle.legend),
+                    const SizedBox(height: 2),
+                    Text(
+                      diaryMomentLabel(context, moment),
+                      style: AppDiaryStyle.label,
+                    ),
+                    if (!meal || nutrients.isEmpty)
+                      Text(
+                        moment.happened
+                            ? diaryMomentValue(context, moment)
+                            : context.l10n.diaryUiDidNotHappen,
+                        style: AppHealthStyle.small,
+                      ),
+                    if (meal && nutrients.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Wrap(
+                          spacing: 8,
+                          runSpacing: 4,
+                          children: [
+                            for (final item in nutrients)
+                              Text(item, style: AppHealthStyle.legend),
+                          ],
+                        ),
+                      ),
+                    if (moment.note.isNotEmpty &&
+                        !moment.automatic &&
+                        !meal &&
+                        moment.kind != 'boolean')
+                      Text(moment.note, style: AppHealthStyle.small),
+                  ],
+                ),
+              ),
+              if (onTap != null)
+                const Icon(
+                  Icons.chevron_right,
+                  size: 17,
+                  color: AppColors.textMuted,
+                ),
             ],
           ),
         ),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 20),
-                  child: Text(
-                    moment.timeLabel,
-                    style: AppDiaryStyle.caption.copyWith(
-                      fontSize: 12,
-                      color: AppDiaryStyle.faint,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 7),
-                DiarySurface(
-                  child: InkWell(
-                    onTap: onTap,
-                    borderRadius: AppDiaryStyle.radius,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 13,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  diaryMomentLabel(context, moment),
-                                  style: AppDiaryStyle.label,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Wrap(
-                            spacing: 12,
-                            runSpacing: 5,
-                            children: [
-                              Text(
-                                moment.happened
-                                    ? diaryMomentValue(context, moment)
-                                    : context.l10n.diaryUiDidNotHappen,
-                                style: AppDiaryStyle.caption,
-                              ),
-                              if (moment.kind == 'meal' &&
-                                  moment.details['protein'] != null)
-                                Text(
-                                  'P ${moment.details['protein']} g \u00b7 C ${moment.details['carbs']} g \u00b7 ${context.l10n.diaryFatAbbreviation} ${moment.details['fat']} g',
-                                  style: AppDiaryStyle.caption,
-                                ),
-                            ],
-                          ),
-                          if (moment.note.isNotEmpty &&
-                              !moment.automatic &&
-                              moment.kind != 'meal' &&
-                              moment.kind != 'boolean')
-                            Padding(
-                              padding: const EdgeInsets.only(top: 4),
-                              child: Text(
-                                moment.note,
-                                style: AppDiaryStyle.caption,
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
+      ),
+    );
+  }
 }
 
 /// The original photo and its masks scroll with the diary content.

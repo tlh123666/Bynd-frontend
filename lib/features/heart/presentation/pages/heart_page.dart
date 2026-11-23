@@ -7,7 +7,6 @@ import '../../../../core/config/app_config.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../design_system/design_system.dart';
 import '../../../../shared/widgets/day_strip.dart';
-import '../../../../shared/widgets/app_sheet_controls.dart';
 import '../../../atlas/presentation/pages/atlas_chat_page.dart';
 import '../../../device/application/device_scope.dart';
 import '../../../device/presentation/pages/device_management_page.dart';
@@ -15,7 +14,7 @@ import '../../../diary/data/demo_diary_repository.dart';
 import '../../../diary/data/remote_diary_repository.dart';
 import '../../../diary/domain/diary_models.dart';
 import '../../../diary/presentation/diary_page.dart';
-import '../../../diary/presentation/diary_quick_questions.dart';
+import '../../../diary/presentation/diary_health_sheet.dart';
 import '../../application/heart_controller.dart';
 import '../../application/heart_history_sync.dart';
 import '../../data/demo_heart_repository.dart';
@@ -27,7 +26,7 @@ import '../sheets/heart_detail_sheet.dart';
 import '../sheets/heart_recordings_sheet.dart';
 import '../sheets/heart_settings_sheet.dart';
 import '../widgets/heart_account_guard.dart';
-import '../widgets/heart_charts.dart';
+import '../widgets/heart_recording_trace.dart';
 import '../widgets/heart_widgets.dart';
 import 'heart_recording_page.dart';
 
@@ -60,16 +59,13 @@ class _HeartPageState extends State<HeartPage> {
   late final HeartController _controller;
   late final DiaryRepository _diary;
   String? _locale;
-  bool _habitsSaving = false,
-      _syncing = false,
-      _more = false,
-      _initialOpened = false;
-  int _diaryVersion = 0;
+  bool _syncing = false, _more = false, _initialOpened = false;
   final _moreKey = GlobalKey();
+  final _historyWindow = AppHealthHistory();
   Rect? _origin;
   ApiClient? _syncClient;
   HeartBandGateway? _syncGateway;
-  bool get _busy => _habitsSaving || _syncing || _controller.saving;
+  bool get _busy => _syncing || _controller.saving;
   @override
   void initState() {
     super.initState();
@@ -170,19 +166,8 @@ class _HeartPageState extends State<HeartPage> {
 
   Future<void> _record() async {
     if (_busy || _controller.accountChanged) return;
-    await showAppContentSheet<void>(
-      context,
-      (_) => HeartAccountGuard(
-        controller: _controller,
-        child: HeartRecordingPage(
-          repository: _controller.repository,
-          demo: _demo,
-        ),
-      ),
-      glass: true,
-      heightFactor: .99,
-      dismissible: false,
-      enableDrag: false,
+    await _openRecordingRoute(
+      HeartRecordingPage(repository: _controller.repository, demo: _demo),
     );
     if (mounted && !_controller.accountChanged) {
       await _controller.load(locale: _locale!);
@@ -191,18 +176,34 @@ class _HeartPageState extends State<HeartPage> {
 
   Future<void> _history([String? id]) async {
     if (_busy) return;
-    await showAppContentSheet<void>(
-      context,
-      (_) => HeartAccountGuard(
+    await _openRecordingRoute(
+      HeartRecordingsSheet(
         controller: _controller,
-        child: HeartRecordingsSheet(controller: _controller, initialId: id),
+        initialId: id,
+        onNewRecording: _record,
       ),
-      glass: true,
     );
     if (mounted && !_controller.accountChanged) {
       await _controller.load(locale: _locale!);
     }
   }
+
+  Future<void> _openRecordingRoute(Widget child) =>
+      Navigator.of(context).push<void>(
+        MaterialPageRoute(
+          builder: (_) => Scaffold(
+            backgroundColor: AppHealthStyle.canvas,
+            body: DecoratedBox(
+              decoration: const BoxDecoration(
+                gradient: AppHealthStyle.background,
+              ),
+              child: SafeArea(
+                child: HeartAccountGuard(controller: _controller, child: child),
+              ),
+            ),
+          ),
+        ),
+      );
 
   Future<void> _journal({bool meal = false}) async {
     if (_busy) return;
@@ -217,7 +218,6 @@ class _HeartPageState extends State<HeartPage> {
         ),
       ),
     );
-    if (mounted) setState(() => _diaryVersion++);
   }
 
   Future<void> _sync() async {
@@ -303,7 +303,7 @@ class _HeartPageState extends State<HeartPage> {
               extendBody: true,
               backgroundColor: AppColors.homeCanvas,
               body: AppAtmosphereBackground(
-                gradient: AppHeartStyle.background,
+                gradient: AppHealthStyle.background,
                 light: AppHeartStyle.family,
                 palette: AppHeartStyle.sky,
                 child: SafeArea(
@@ -329,20 +329,8 @@ class _HeartPageState extends State<HeartPage> {
                         title: Text(
                           heartText(context, 'Coração', 'Heart'),
                           style: AppHeartStyle.body.copyWith(
-                            fontSize: 19,
+                            fontSize: 17,
                             color: AppColors.textPrimary,
-                          ),
-                        ),
-                        trailing: IconButton(
-                          tooltip: heartText(
-                            context,
-                            'Ajustes do coração',
-                            'Heart settings',
-                          ),
-                          onPressed: _busy || data == null ? null : _settings,
-                          icon: const AppSvgIcon(
-                            AppSvgAssets.heartSettings,
-                            size: 19,
                           ),
                         ),
                       ),
@@ -461,553 +449,290 @@ class _HeartPageState extends State<HeartPage> {
     ),
   );
   Widget _content(HeartSnapshot data) {
-    final summary = data.summary,
-        last = data.records.firstOrNull,
-        rest = data.value(HeartMetric.resting),
-        upper = data.baseline['upper'] as num?,
-        elevated = rest != null && upper != null && rest > upper;
-    final children = <Widget>[
-      if (_demo) ...[
-        Text(
-          heartText(context, 'DEMONSTRAÇÃO', 'DEMONSTRATION'),
-          style: AppHeartStyle.kicker,
-        ),
-        const SizedBox(height: 14),
-      ],
-      Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
+    String copy(String pt, String en) => heartText(context, pt, en);
+    final rest = data.value(HeartMetric.resting);
+    final upper = data.baseline['upper'] as num?;
+    final lower = data.baseline['lower'] as num?;
+    final above = rest != null && upper != null && rest > upper;
+    final below = rest != null && lower != null && rest < lower;
+    final last = data.records.firstOrNull;
+    final today = DateUtils.isSameDay(data.date, DateTime.now());
+    final signals = [
+      HeartMetric.pulse,
+      HeartMetric.hrv,
+      HeartMetric.oxygen,
+      HeartMetric.respiration,
+      if (data.preferences.pressure) HeartMetric.pressure,
+    ];
+    final points = <AppHealthPoint>[
+      for (final row in data.trend.days)
+        if (DateTime.tryParse('${row['statDate'] ?? row['date']}')
+            case final DateTime date)
+          (
+            date: date,
+            value: row['hasData'] == true
+                ? row['restingHeartRate'] as num?
+                : null,
+          ),
+    ];
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppHealthStyle.edge),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(data.format(HeartMetric.pulse), style: AppHeartStyle.number),
-          const SizedBox(width: 8),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 5),
-            child: Text('bpm', style: AppHeartStyle.body),
+          AppHealthHero(
+            value: data.format(HeartMetric.resting),
+            label: copy('bpm em repouso', 'resting bpm'),
+            status: rest == null
+                ? copy('Sem leitura', 'No reading')
+                : above
+                ? copy('Acima do habitual', 'Above baseline')
+                : below
+                ? copy('Abaixo do habitual', 'Below baseline')
+                : lower != null && upper != null
+                ? copy('No seu intervalo', 'In your range')
+                : copy('Leitura registrada', 'Recorded'),
+            color: rest == null
+                ? AppColors.textMuted
+                : above || below
+                ? AppHealthStyle.attention
+                : AppHealthStyle.positive,
           ),
-          const SizedBox(width: 16),
-          Flexible(
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 6),
-              child: Text(
-                heartText(
-                  context,
-                  data.fresh(DateTime.now()) ? 'AGORA' : 'ÚLTIMA LEITURA',
-                  data.fresh(DateTime.now()) ? 'NOW' : 'LATEST READING',
-                ),
-                style: AppHeartStyle.kicker,
-              ),
-            ),
+          const SizedBox(height: 24),
+          Text(
+            !data.hasData
+                ? copy(
+                    'Seu coração, em perspectiva.',
+                    'Your heart, in perspective.',
+                  )
+                : above
+                ? copy(
+                    'Repouso acima do habitual.',
+                    'Resting rate above baseline.',
+                  )
+                : copy(
+                    'Seu coração ao longo do dia.',
+                    'Your heart through the day.',
+                  ),
+            style: AppHealthStyle.title,
           ),
-        ],
-      ),
-      const SizedBox(height: 22),
-      Text(
-        !data.hasData
-            ? heartText(
-                context,
-                'Seu coração, em perspectiva.',
-                'Your heart, in perspective.',
-              )
-            : elevated
-            ? heartText(
-                context,
-                'O repouso do seu coração subiu um pouco.',
-                'Your resting heart rate is a little higher.',
-              )
-            : heartText(
-                context,
-                'O coração acompanhou o seu dia.',
-                'Your heart through the day.',
-              ),
-        style: AppHeartStyle.title,
-      ),
-      const SizedBox(height: 14),
-      HeartExpandable(
-        !data.hasData
-            ? heartText(
-                context,
-                'Sincronize sua pulseira para ver os sinais registrados. Leituras ausentes permanecem vazias.',
-                'Sync your band to view recorded signals. Missing measurements stay empty.',
-              )
-            : heartText(
-                context,
-                'A última leitura registrada foi ${data.format(HeartMetric.pulse)} bpm${data.latestAt == null ? '' : ' às ${heartClock(data.latestAt)}'}. A média do dia foi ${heartNumber(summary['avgHeartRate'] as num?)} bpm e a máxima chegou a ${heartNumber(summary['maxHeartRate'] as num?)} bpm. ${elevated ? 'O repouso ficou acima do seu intervalo pessoal. Compare com as próximas noites.' : ''}',
-                'The latest stored reading was ${data.format(HeartMetric.pulse)} bpm${data.latestAt == null ? '' : ' at ${heartClock(data.latestAt)}'}. The daily average was ${heartNumber(summary['avgHeartRate'] as num?)} bpm and the maximum was ${heartNumber(summary['maxHeartRate'] as num?)} bpm.',
-              ),
-      ),
-      if (!_demo &&
-          !kIsWeb &&
-          defaultTargetPlatform == TargetPlatform.android) ...[
-        const SizedBox(height: 20),
-        AppGlassPill(
-          label: heartText(context, 'Sincronizar pulseira', 'Sync band'),
-          onPressed: _sync,
-        ),
-      ],
-      const SizedBox(height: 26),
-      AppMetricCard(
-        onTap: () => _metric(HeartMetric.pulse),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            HeartLabel(
-              heartText(
-                context,
-                'Frequência cardíaca hoje',
-                'Heart rate today',
-              ),
-              chevron: true,
-            ),
-            const SizedBox(height: 14),
+          const SizedBox(height: 8),
+          HeartExpandable(
+            !data.hasData
+                ? copy(
+                    'Sincronize sua pulseira para ver os sinais registrados.',
+                    'Sync your band to see recorded signals.',
+                  )
+                : copy(
+                    'Média de ${heartNumber(data.summary['avgHeartRate'] as num?)} bpm e máxima de ${heartNumber(data.summary['maxHeartRate'] as num?)} bpm no dia selecionado.',
+                    'Average of ${heartNumber(data.summary['avgHeartRate'] as num?)} bpm and maximum of ${heartNumber(data.summary['maxHeartRate'] as num?)} bpm on the selected day.',
+                  ),
+          ),
+          if (_demo)
             Text(
-              '${data.format(HeartMetric.pulse)} bpm',
-              style: AppHeartStyle.value,
+              copy('Demonstração', 'Demonstration'),
+              style: AppHealthStyle.small,
+            ),
+          if (!_demo &&
+              !kIsWeb &&
+              defaultTargetPlatform == TargetPlatform.android) ...[
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: AppGlassPill(
+                label: copy('Sincronizar pulseira', 'Sync band'),
+                onPressed: _sync,
+              ),
+            ),
+          ],
+          const SizedBox(height: 26),
+          AppHealthTrend(
+            key: const Key('heart-resting-trend'),
+            points: _historyWindow.resolve(points, data.date),
+            selected: data.date,
+            minimum: 40,
+            maximum: 90,
+            low: lower,
+            high: upper,
+            rangeLabel: copy('Seu intervalo', 'Your range'),
+            emptyLabel: copy(
+              'Sem histórico de repouso.',
+              'No resting rate history.',
+            ),
+            marker: AppHealthStyle.pulse,
+            unit: 'bpm',
+            onSelected: (date) {
+              if (!_busy) _controller.load(date: date, locale: _locale!);
+            },
+          ),
+          const SizedBox(height: 18),
+          DiaryHealthEntry(
+            topic: DiaryHealthTopic.heart,
+            repository: _diary,
+            date: data.date,
+            title: copy('Coração', 'Heart'),
+            subtitle: copy(
+              'Álcool, café, estresse e como você está',
+              'Alcohol, coffee, stress and how you feel',
+            ),
+          ),
+          if (today && data.hasData) ...[
+            const SizedBox(height: AppHealthStyle.sectionGap),
+            AppHealthSection(
+              copy('Direção do dia', 'Direction for today'),
+              Icons.explore_outlined,
             ),
             const SizedBox(height: 8),
-            Text(
-              heartText(
-                context,
-                'Repouso ${data.format(HeartMetric.resting)} · média ${heartNumber(summary['avgHeartRate'] as num?)} · máxima ${heartNumber(summary['maxHeartRate'] as num?)}',
-                'Resting ${data.format(HeartMetric.resting)} · average ${heartNumber(summary['avgHeartRate'] as num?)} · maximum ${heartNumber(summary['maxHeartRate'] as num?)}',
-              ),
-              style: AppHeartStyle.caption,
+            AppHealthRow(
+              label: copy('Faça movimento leve', 'Choose light movement'),
+              icon: Icons.directions_walk_outlined,
             ),
-            const SizedBox(height: 22),
-            HeartLineChart(points: data.points, date: data.date),
-          ],
-        ),
-      ),
-      const SizedBox(height: 10),
-      AppMetricCard(
-        padding: EdgeInsets.zero,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(22),
-              child: Text(
-                'ECG',
-                style: AppHeartStyle.body.copyWith(
-                  color: AppColors.textPrimary,
-                  fontSize: 17,
-                ),
-              ),
+            AppHealthRow(
+              label: copy('Evite álcool à noite', 'Avoid alcohol tonight'),
+              icon: Icons.local_bar_outlined,
             ),
-            TextButton.icon(
-              key: const ValueKey('heart-new-recording'),
-              onPressed: _record,
-              style: TextButton.styleFrom(
-                backgroundColor: AppHeartStyle.ecgButton,
-                shape: const RoundedRectangleBorder(),
-                minimumSize: const Size(double.infinity, 50),
+            AppHealthRow(
+              label: copy(
+                'Mantenha seu horário de dormir',
+                'Keep your planned bedtime',
               ),
-              icon: const Icon(Icons.add, size: 18),
-              label: Text(
-                heartText(context, 'FAZER NOVO ECG', 'NEW ECG RECORDING'),
-                style: AppHeartStyle.kicker.copyWith(
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(22),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  AppMetricCard(
-                    onTap: () => _history(last?.id),
-                    padding: const EdgeInsets.all(14),
-                    radius: BorderRadius.circular(16),
-                    child: Row(
-                      children: [
-                        if (last != null)
-                          HeartRecordPreview(
-                            repository: _controller.repository,
-                            record: last,
-                          )
-                        else
-                          const Icon(
-                            Icons.monitor_heart_outlined,
-                            color: AppHeartStyle.family,
-                            size: 28,
-                          ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                heartText(
-                                  context,
-                                  'Seu último registro',
-                                  'Your latest recording',
-                                ),
-                                style: AppHeartStyle.body.copyWith(
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
-                              Text(
-                                last == null
-                                    ? heartText(
-                                        context,
-                                        'Nenhuma leitura nesta data',
-                                        'No recording on this date',
-                                      )
-                                    : '${last.kind.toUpperCase()} · ${heartClock(last.measuredAt)}',
-                                style: AppHeartStyle.caption,
-                              ),
-                            ],
-                          ),
-                        ),
-                        const Icon(
-                          Icons.chevron_right,
-                          color: AppHeartStyle.muted,
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (last != null) ...[
-                    const SizedBox(height: 16),
-                    Text(
-                      heartText(
-                        context,
-                        'Ritmo não classificado',
-                        'Rhythm unclassified',
-                      ),
-                      style: AppHeartStyle.body,
-                    ),
-                    Text(
-                      heartText(
-                        context,
-                        'O sensor não forneceu uma análise de arritmias.',
-                        'No arrhythmia analysis was supplied by the sensor.',
-                      ),
-                      style: AppHeartStyle.caption,
-                    ),
-                  ],
-                  const SizedBox(height: 10),
-                  TextButton(
-                    onPressed: () => _history(),
-                    child: Text(
-                      heartText(
-                        context,
-                        'Ver todos os registros',
-                        'View all recordings',
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+              icon: Icons.bedtime_outlined,
             ),
           ],
-        ),
-      ),
-      if (data.preferences.pressure) ...[
-        const SizedBox(height: 10),
-        AppMetricCard(
-          onTap: () => _metric(HeartMetric.pressure),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+          const SizedBox(height: AppHealthStyle.sectionGap),
+          AppHealthSection('ECG', Icons.monitor_heart_outlined),
+          const SizedBox(height: 14),
+          if (last != null) ...[
+            HeartLatestTrace(repository: _controller.repository, record: last),
+            AppHealthRow(
+              label: copy('Tipo de sinal', 'Signal type'),
+              value: last.label,
+              onTap: () => _history(last.id),
+            ),
+            AppHealthRow(
+              label: copy('Batimento', 'Heart rate'),
+              value: last.number('heartRate') == null
+                  ? '—'
+                  : '${last.number('heartRate')} bpm',
+            ),
+            AppHealthRow(
+              label: copy('Ritmo', 'Rhythm'),
+              value: copy('Não classificado', 'Unclassified'),
+            ),
+            AppHealthRow(
+              label: copy('Horário', 'Time'),
+              value: heartClock(last.measuredAt),
+            ),
+          ] else
+            AppHealthRow(
+              label: copy(
+                'Nenhuma leitura nesta data',
+                'No recording on this date',
+              ),
+            ),
+          const SizedBox(height: 16),
+          Row(
             children: [
-              HeartLabel(
-                heartMetricTitle(context, HeartMetric.pressure),
-                chevron: true,
-              ),
-              const SizedBox(height: 18),
-              Text(
-                '${data.format(HeartMetric.pressure)} mmHg',
-                style: AppHeartStyle.value,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                heartText(
-                  context,
-                  'estimativa fornecida pelo dispositivo',
-                  'estimate supplied by your device',
+              Expanded(
+                child: AppButton(
+                  key: const ValueKey('heart-new-recording'),
+                  label: copy('Fazer ECG', 'Record ECG'),
+                  onPressed: _record,
                 ),
-                style: AppHeartStyle.caption,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: AppButton(
+                  label: copy('Histórico', 'History'),
+                  variant: AppButtonVariant.secondary,
+                  onPressed: () => _history(),
+                ),
               ),
             ],
           ),
-        ),
-      ],
-      const SizedBox(height: 22),
-      DiaryQuickQuestions(
-        key: ValueKey('heart-habits-${heartDate(data.date)}-$_diaryVersion'),
-        repository: _diary,
-        date: data.date,
-        onBusyChanged: (busy) {
-          if (mounted) setState(() => _habitsSaving = busy);
-        },
-        keyPrefix: 'heart-habit',
-        bodyStyle: AppHeartStyle.body,
-        captionStyle: AppHeartStyle.caption,
-        kickerStyle: AppHeartStyle.kicker,
-        iconAnswers: true,
-        questions: const [
-          (
-            'c_palpit',
-            'Sentiu o coração acelerar parado?',
-            'Did your heart race while resting?',
+          const SizedBox(height: AppHealthStyle.sectionGap),
+          AppHealthSection(
+            copy('Principais métricas', 'Main metrics'),
+            Icons.grid_view_outlined,
           ),
-          (
-            'c_sal',
-            'Comeu comida muito salgada?',
-            'Did you eat very salty food?',
+          const SizedBox(height: AppHealthStyle.gap),
+          AppHealthMetricGrid(
+            children: [
+              AppHealthMetric(
+                label: copy('FC média', 'Average heart rate'),
+                value: heartNumber(data.summary['avgHeartRate'] as num?),
+                unit: 'bpm',
+                icon: Icons.favorite_border,
+              ),
+              AppHealthMetric(
+                label: copy('FC máxima', 'Maximum heart rate'),
+                value: heartNumber(data.summary['maxHeartRate'] as num?),
+                unit: 'bpm',
+                icon: Icons.show_chart,
+              ),
+              AppHealthMetric(
+                label: copy('Queda após o esforço', 'Post-exercise drop'),
+                value: data.format(HeartMetric.recovery),
+                unit: 'bpm',
+                icon: Icons.trending_down,
+              ),
+              AppHealthMetric(
+                label: copy('Avisos do coração', 'Heart notices'),
+                value: heartNumber(
+                  data.preferences.high
+                      ? data.alerts['aboveBaselineNights'] as num?
+                      : null,
+                ),
+                caption: copy('Últimos 30 dias', 'Last 30 days'),
+                icon: Icons.notifications_none,
+              ),
+            ],
           ),
-          ('alc', 'Bebeu álcool?', 'Did you drink alcohol?'),
+          const SizedBox(height: AppHealthStyle.sectionGap),
+          AppHealthSection(
+            copy('Sinais desta leitura', 'Signals in this reading'),
+            Icons.analytics_outlined,
+          ),
+          const SizedBox(height: AppHealthStyle.gap),
+          AppHealthPanel(
+            child: Column(
+              children: [
+                for (final (index, metric) in signals.indexed)
+                  AppHealthRow(
+                    key: ValueKey('heart-signal-${metric.name}'),
+                    label: heartMetricTitle(context, metric),
+                    icon:
+                        metric == HeartMetric.oxygen ||
+                            metric == HeartMetric.respiration
+                        ? Icons.air_outlined
+                        : Icons.monitor_heart_outlined,
+                    value: data.format(metric) == '—'
+                        ? '—'
+                        : '${data.format(metric)} ${metric.unit}',
+                    onTap: () => _metric(metric),
+                    divider: index != signals.length - 1,
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          AppHealthRow(
+            key: const Key('heart-settings-entry'),
+            label: copy('Ajustes do coração', 'Heart settings'),
+            icon: Icons.settings_outlined,
+            onTap: _settings,
+            divider: false,
+          ),
+          if (data.unavailable.isNotEmpty)
+            Text(
+              copy(
+                'Alguns dados não puderam ser carregados. Puxe para atualizar.',
+                'Some data could not load. Pull to refresh.',
+              ),
+              style: AppHealthStyle.small,
+            ),
         ],
       ),
-      TextButton(
-        onPressed: _journal,
-        child: Text(heartText(context, 'Abrir meu Diário', 'Open my diary')),
-      ),
-      const SizedBox(height: 28),
-      Text(
-        heartText(context, 'Principais métricas', 'Main metrics'),
-        style: AppHeartStyle.title,
-      ),
-      const SizedBox(height: 12),
-      Text(
-        heartText(
-          context,
-          'O que o seu coração mostrou na noite e no dia.',
-          'What your heart recorded through the night and day.',
-        ),
-        style: AppHeartStyle.body,
-      ),
-      const SizedBox(height: 22),
-      LayoutBuilder(
-        builder: (c, box) => Wrap(
-          spacing: 10,
-          runSpacing: 10,
-          children: [
-            SizedBox(
-              width: (box.maxWidth - 10) / 2,
-              child: AppMetricCard(
-                onTap: () => _notices(data),
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    HeartLabel(
-                      heartText(context, 'Avisos do coração', 'Heart notices'),
-                      chevron: true,
-                    ),
-                    const SizedBox(height: 20),
-                    Text(
-                      !data.preferences.high
-                          ? '—'
-                          : data.alerts['aboveBaselineNights'] == null
-                          ? '—'
-                          : data.alerts['aboveBaselineNights'] == 0
-                          ? heartText(context, 'Nenhum', 'None')
-                          : '${data.alerts['aboveBaselineNights']}',
-                      style: AppHeartStyle.value.copyWith(fontSize: 22),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      heartText(
-                        context,
-                        'noites acima do normal · últimas 30 datas',
-                        'nights above baseline · last 30 dates',
-                      ),
-                      style: AppHeartStyle.caption,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            for (final metric in [
-              HeartMetric.hrv,
-              HeartMetric.oxygen,
-              HeartMetric.recovery,
-            ])
-              SizedBox(
-                width: (box.maxWidth - 10) / 2,
-                child: AppMetricCard(
-                  padding: const EdgeInsets.all(16),
-                  onTap: () => _metric(metric),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      HeartLabel(
-                        heartMetricTitle(context, metric),
-                        chevron: true,
-                      ),
-                      const SizedBox(height: 20),
-                      Text(
-                        '${data.format(metric)} ${metric.unit}',
-                        style: AppHeartStyle.value.copyWith(fontSize: 22),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        heartText(
-                          context,
-                          metric == HeartMetric.recovery
-                              ? 'no 1º minuto após treino'
-                              : 'leitura registrada',
-                          metric == HeartMetric.recovery
-                              ? '1st minute after exercise'
-                              : 'stored reading',
-                        ),
-                        style: AppHeartStyle.caption,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-      const SizedBox(height: 34),
-      Text(
-        heartText(
-          context,
-          'O repouso do seu coração, ao longo dos dias.',
-          'Your resting heart rate over time.',
-        ),
-        style: AppHeartStyle.title,
-      ),
-      const SizedBox(height: 22),
-      AppMetricCard(
-        onTap: () => _metric(HeartMetric.resting),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            HeartLabel(
-              heartText(
-                context,
-                'FC em repouso · 7 dias',
-                'Resting heart rate · 7 days',
-              ),
-              chevron: true,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              '${heartNumber(data.trend.average(HeartMetric.resting))} bpm',
-              style: AppHeartStyle.value,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              data.baseline['lower'] == null
-                  ? heartText(
-                      context,
-                      'seu intervalo pessoal ainda está em formação',
-                      'your personal baseline is still building',
-                    )
-                  : '${heartText(context, 'seu normal', 'your baseline')}: ${data.baseline['lower']}–${data.baseline['upper']} bpm',
-              style: AppHeartStyle.caption,
-            ),
-            const SizedBox(height: 24),
-            HeartTrendChart(trend: data.trend, metric: HeartMetric.resting),
-          ],
-        ),
-      ),
-      const SizedBox(height: 32),
-      Text(
-        heartText(context, 'Sinais desta leitura', 'Signals in this reading'),
-        style: AppHeartStyle.title,
-      ),
-      const SizedBox(height: 12),
-      for (final metric in [
-        HeartMetric.resting,
-        HeartMetric.hrv,
-        HeartMetric.oxygen,
-        HeartMetric.respiration,
-      ])
-        HeartReadingRow(
-          heartMetricTitle(context, metric),
-          '${data.format(metric)} ${metric.unit}',
-          onTap: () => _metric(metric),
-        ),
-      if (data.unavailable.isNotEmpty) ...[
-        const SizedBox(height: 20),
-        Text(
-          heartText(
-            context,
-            'Alguns dados não puderam ser carregados. Puxe para atualizar.',
-            'Some data could not be loaded. Pull to refresh.',
-          ),
-          style: AppHeartStyle.caption,
-        ),
-      ],
-    ];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        for (final child in children)
-          if (child is AppMetricCard || child is DiaryQuickQuestions)
-            child
-          else
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 22),
-              child: child,
-            ),
-      ],
-    );
-  }
-
-  Future<void> _notices(HeartSnapshot data) async {
-    if (_busy) return;
-    await showAppContentSheet<void>(
-      context,
-      (_) => HeartAccountGuard(
-        controller: _controller,
-        child: Column(
-          children: [
-            AppSheetHeader(
-              title: heartText(context, 'Avisos do coração', 'Heart notices'),
-            ),
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.all(22),
-                children: [
-                  Text(
-                    heartText(
-                      context,
-                      'Seu repouso nas últimas 30 datas',
-                      'Your resting rate over the last 30 dates',
-                    ),
-                    style: AppHeartStyle.title,
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    !data.preferences.high
-                        ? heartText(
-                            context,
-                            'Os avisos de repouso estão desativados nos ajustes.',
-                            'Resting rate notices are disabled in settings.',
-                          )
-                        : data.alerts['aboveBaselineNights'] == null
-                        ? heartText(
-                            context,
-                            'Ainda não há noites medidas suficientes para comparar com seu intervalo pessoal.',
-                            'There are not enough measured nights to compare with your personal baseline.',
-                          )
-                        : '${data.alerts['aboveBaselineNights']} ${heartText(context, 'noites acima do seu normal', 'nights above your baseline')} · ${data.alerts['observedNights']} ${heartText(context, 'noites observadas', 'observed nights')}',
-                    style: AppHeartStyle.body,
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    heartText(context, 'Ritmo irregular', 'Irregular rhythm'),
-                    style: AppHeartStyle.title,
-                  ),
-                  const SizedBox(height: 14),
-                  Text(
-                    heartText(
-                      context,
-                      'Nenhuma classificação validada de ritmo foi fornecida pelo dispositivo. Isso não representa um resultado normal nem uma exclusão de arritmia.',
-                      'No validated rhythm classification was supplied by the device. This does not represent a normal result or rule out an arrhythmia.',
-                    ),
-                    style: AppHeartStyle.body,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-      glass: true,
     );
   }
 }

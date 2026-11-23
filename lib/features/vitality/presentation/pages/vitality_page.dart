@@ -6,7 +6,6 @@ import '../../../../core/network/api_client.dart';
 import '../../../../design_system/design_system.dart';
 import '../../../../l10n/app_localizations_context.dart';
 import '../../../../shared/widgets/day_strip.dart';
-import '../../../../shared/widgets/day_calendar.dart';
 import '../../../../shared/navigation/app_quick_action_navigation.dart';
 import '../../../atlas/presentation/pages/atlas_chat_page.dart';
 import '../../../activity/presentation/pages/activity_overview_page.dart';
@@ -14,7 +13,8 @@ import '../../../diary/data/demo_diary_repository.dart';
 import '../../../diary/data/remote_diary_repository.dart';
 import '../../../diary/domain/diary_models.dart';
 import '../../../diary/presentation/diary_page.dart';
-import '../../../diary/presentation/diary_quick_questions.dart';
+import '../../../diary/presentation/diary_health_sheet.dart';
+import '../../../diary/presentation/diary_widgets.dart' show diaryText;
 import '../../../heart/domain/heart_models.dart';
 import '../../../heart/presentation/pages/heart_page.dart';
 import '../../../sleep/presentation/pages/sleep_page.dart';
@@ -23,10 +23,8 @@ import '../../data/demo_vitality_repository.dart';
 import '../../data/remote_vitality_repository.dart';
 import '../../domain/vitality_models.dart';
 import '../vitality_copy.dart';
-import '../widgets/vitality_charts.dart';
 import '../widgets/vitality_widgets.dart';
 import '../sheets/vitality_detail_sheet.dart';
-import '../sheets/vitality_settings_sheet.dart';
 
 /// Recovery and Energy share layout, account isolation, and data contracts.
 class VitalityPage extends StatefulWidget {
@@ -61,6 +59,7 @@ class _VitalityPageState extends State<VitalityPage> {
                 session: AuthSession.instance,
               )),
     kind: widget.kind,
+    historyDays: 30,
     date: DateUtils.dateOnly(widget.date ?? DateTime.now()),
     session: AuthSession.instance,
   );
@@ -72,14 +71,12 @@ class _VitalityPageState extends State<VitalityPage> {
               ApiClient.configured(),
               session: AuthSession.instance,
             ));
-  bool _started = false, _habitsBusy = false, _more = false;
-  int _diaryVersion = 0;
+  bool _started = false, _more = false;
   final _moreKey = GlobalKey();
+  final _historyWindow = AppHealthHistory();
   Rect? _origin;
   bool get _recovery => widget.kind == VitalityKind.recovery;
-  bool get _busy => _controller.saving || _habitsBusy;
-  Color get _color =>
-      _recovery ? AppVitalityStyle.recovery : AppVitalityStyle.energy;
+  bool get _busy => _controller.saving;
   int get _day =>
       vitalityDayDistance(DateTime.now(), _controller.date).clamp(0, 364);
   @override
@@ -100,18 +97,7 @@ class _VitalityPageState extends State<VitalityPage> {
 
   Future<void> _changeDate(int day) async {
     if (_busy) return;
-    setState(() => _diaryVersion++);
     await _controller.load(date: vitalityShiftDay(DateTime.now(), -day));
-  }
-
-  Future<void> _calendar() async {
-    final day = await showDayCalendar(
-      context: context,
-      selectedDay: _day,
-      daysCount: 365,
-      tone: DayStripTone.neutral,
-    );
-    if (mounted && day != null) await _changeDate(day);
   }
 
   Future<void> _journal({String? tracker}) async {
@@ -127,7 +113,6 @@ class _VitalityPageState extends State<VitalityPage> {
         ),
       ),
     );
-    if (mounted) setState(() => _diaryVersion++);
   }
 
   Future<void> _detail({String? metric}) async {
@@ -140,7 +125,9 @@ class _VitalityPageState extends State<VitalityPage> {
         child: VitalityDetailSheet(
           controller: _controller,
           snapshot: snapshot,
-          color: _color,
+          color: _recovery
+              ? AppVitalityStyle.recovery
+              : AppVitalityStyle.energy,
           metric: metric,
         ),
       ),
@@ -179,23 +166,6 @@ class _VitalityPageState extends State<VitalityPage> {
     }
   }
 
-  Future<void> _settings() async {
-    final snapshot = _controller.snapshot;
-    if (snapshot == null || _busy) return;
-    final calendar = await showAppContentSheet<bool>(
-      context,
-      (_) => VitalityAccountGuard(
-        controller: _controller,
-        child: VitalitySettingsSheet(
-          controller: _controller,
-          snapshot: snapshot,
-        ),
-      ),
-      glass: true,
-    );
-    if (mounted && calendar == true) await _calendar();
-  }
-
   @override
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: _controller,
@@ -211,17 +181,13 @@ class _VitalityPageState extends State<VitalityPage> {
             Scaffold(
               backgroundColor: const Color(0xFF030504),
               extendBody: true,
-              body: AppAtmosphereBackground(
-                gradient: _recovery
-                    ? AppVitalityStyle.recoverySky
-                    : AppVitalityStyle.energySky,
-                light: _color.withValues(alpha: .04),
-                palette: _recovery
-                    ? AppVitalityStyle.recoveryPalette
-                    : AppVitalityStyle.energyPalette,
+              body: DecoratedBox(
+                decoration: const BoxDecoration(
+                  gradient: AppHealthStyle.background,
+                ),
                 child: SafeArea(
                   bottom: false,
-                  minimum: const EdgeInsets.only(top: 51),
+                  minimum: const EdgeInsets.only(top: 31),
                   child: Column(
                     children: [
                       AppPageHeader(
@@ -230,7 +196,7 @@ class _VitalityPageState extends State<VitalityPage> {
                           vitalityTitle(c, widget.kind),
                           style: AppVitalityStyle.body.copyWith(
                             color: AppColors.textPrimary,
-                            fontSize: 19,
+                            fontSize: 17,
                           ),
                         ),
                         leading: IconButton(
@@ -241,17 +207,6 @@ class _VitalityPageState extends State<VitalityPage> {
                           icon: const AppSvgIcon(
                             'assets/icons/site/vitality-back.svg',
                             size: 22,
-                          ),
-                        ),
-                        trailing: IconButton(
-                          key: const Key('vitality-settings'),
-                          tooltip: l.vitalitySettings,
-                          onPressed: _controller.snapshot == null || _busy
-                              ? null
-                              : _settings,
-                          icon: const AppSvgIcon(
-                            'assets/icons/site/vitality-settings.svg',
-                            size: 19,
                           ),
                         ),
                       ),
@@ -297,7 +252,12 @@ class _VitalityPageState extends State<VitalityPage> {
                                   key: const Key('vitality-content'),
                                   physics:
                                       const AlwaysScrollableScrollPhysics(),
-                                  padding: const EdgeInsets.only(bottom: 140),
+                                  padding: const EdgeInsets.fromLTRB(
+                                    AppHealthStyle.edge,
+                                    14,
+                                    AppHealthStyle.edge,
+                                    140,
+                                  ),
                                   children: _controller.snapshot == null
                                       ? []
                                       : _content(_controller.snapshot!),
@@ -317,7 +277,7 @@ class _VitalityPageState extends State<VitalityPage> {
                   if (widget.onDestinationSelected != null) {
                     widget.onDestinationSelected!(i);
                   } else if (i == 1) {
-                    Navigator.push(c, AtlasSheetRoute());
+                    AtlasOverlayScope.show(c);
                   } else {
                     Navigator.maybePop(c);
                   }
@@ -385,500 +345,228 @@ class _VitalityPageState extends State<VitalityPage> {
     },
   );
 
-  List<Widget> _content(VitalitySnapshot s) {
-    final l = context.l10n, score = s.score;
+  List<Widget> _content(VitalitySnapshot data) {
+    final l = context.l10n;
+    final score = data.score;
+    final low = data.baselineLow;
+    final high = data.baselineHigh;
+    final below = score != null && low != null && score < low;
+    final above = score != null && high != null && score > high;
+    final needsAttention =
+        below || (score != null && low == null && score < 67);
+    final status = score == null
+        ? l.vitalityMissing
+        : below
+        ? l.vitalityLow
+        : above
+        ? l.vitalityGood
+        : low != null
+        ? l.vitalityNormal
+        : vitalityStatus(context, score);
     final title = score == null
         ? l.vitalityNoData
         : _recovery
-        ? (score >= 67
-              ? l.vitalityRecoveryReady
-              : score >= 34
-              ? l.vitalityRecoveryLow
-              : l.vitalityRecoveryRest)
-        : (score >= 67
-              ? l.vitalityEnergyReady
-              : score >= 34
-              ? l.vitalityEnergyLow
-              : l.vitalityEnergyRest);
-    final mainKeys = _recovery
-        ? ['trainingLoad', 'hrvMs', 'restingHeartRate']
-        : ['stressScore', 'restingHeartRate', 'vo2Max'];
-    final signalKeys = _recovery
+        ? (needsAttention ? l.vitalityRecoveryLow : l.vitalityRecoveryReady)
+        : (needsAttention ? l.vitalityEnergyLow : l.vitalityEnergyReady);
+    final main = _recovery
+        ? [
+            'trainingLoad',
+            'sleepDebtMinutes',
+            'yesterdayStress',
+            'todayTrainingLoad',
+          ]
+        : ['stressScore', 'restingHeartRate', 'vo2Max', 'todayTrainingLoad'];
+    final signals = _recovery
         ? [
             'hrvMs',
             'restingHeartRate',
-            'temperatureDeviation',
             'respiratoryRate',
             'sleepMinutes',
+            'temperatureDeviation',
           ]
-        : ['steps', 'activeMinutes', 'calories', 'restingHeartRate'];
+        : ['steps', 'activeMinutes', 'calories', 'sleepMinutes'];
+    Object? value(String key) =>
+        key == 'trainingLoad' ? data.trainingLoad : data.metrics[key];
+    String formatted(String key) =>
+        vitalityMetricValue(context, key, value(key));
+    final directions = _recovery
+        ? <(IconData, String)>[
+            (
+              Icons.bedtime_outlined,
+              diaryText(
+                context,
+                'Priorize o horário de dormir',
+                'Keep your planned bedtime',
+              ),
+            ),
+            (
+              Icons.directions_walk_outlined,
+              diaryText(
+                context,
+                'Prefira movimento leve',
+                'Choose light movement',
+              ),
+            ),
+            (
+              Icons.coffee_outlined,
+              diaryText(
+                context,
+                'Evite cafeína no fim da tarde',
+                'Avoid caffeine late in the day',
+              ),
+            ),
+          ]
+        : <(IconData, String)>[
+            (
+              Icons.schedule_outlined,
+              diaryText(
+                context,
+                'Reserve tempo para o mais importante',
+                'Make time for what matters most',
+              ),
+            ),
+            (
+              Icons.coffee_outlined,
+              diaryText(
+                context,
+                'Prefira café mais cedo',
+                'Have coffee earlier in the day',
+              ),
+            ),
+            (
+              Icons.light_mode_outlined,
+              diaryText(
+                context,
+                'Faça uma pausa ao ar livre',
+                'Take a break outdoors',
+              ),
+            ),
+          ];
     return [
-      Padding(
-        padding: const EdgeInsets.fromLTRB(22, 29, 22, 30),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Wrap(
-              crossAxisAlignment: WrapCrossAlignment.end,
-              spacing: 12,
-              children: [
-                Text(
-                  vitalityNumber(context, score),
-                  key: const Key('vitality-score'),
-                  style: AppVitalityStyle.number,
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Text(
-                    vitalityStatus(context, score).toUpperCase(),
-                    style: AppVitalityStyle.kicker.copyWith(
-                      color: score == null
-                          ? AppVitalityStyle.muted
-                          : score >= 67
-                          ? AppVitalityStyle.good
-                          : score >= 34
-                          ? AppVitalityStyle.attention
-                          : AppVitalityStyle.low,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Text(
-              '${_day == 0
-                  ? '${l.vitalityToday} · '
-                  : _day == 1
-                  ? '${l.vitalityYesterday.toLowerCase()} · '
-                  : ''}${vitalityDateLabel(context, s.date)}',
-              style: AppVitalityStyle.caption,
-            ),
-            const SizedBox(height: 18),
-            Text(title, style: AppVitalityStyle.title),
-            const SizedBox(height: 12),
-            VitalityExpandable(
-              _recovery ? l.vitalityRecoveryAnalysis : l.vitalityEnergyAnalysis,
-            ),
-            if (!s.demo)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Text(
-                  l.vitalityEstimated,
-                  style: AppVitalityStyle.caption,
-                ),
-              ),
-          ],
+      AppHealthHero(
+        value: vitalityNumber(context, score),
+        valueKey: const Key('vitality-score'),
+        label: _recovery
+            ? diaryText(context, 'Nota de recuperação', 'Recovery score')
+            : diaryText(context, 'Nota de energia', 'Energy score'),
+        status: status,
+        color: score == null
+            ? AppColors.textMuted
+            : below || score < 67 && low == null
+            ? AppHealthStyle.attention
+            : AppHealthStyle.positive,
+      ),
+      const SizedBox(height: 24),
+      Text(title, style: AppHealthStyle.title),
+      const SizedBox(height: 8),
+      Text(
+        score == null
+            ? diaryText(
+                context,
+                'Sincronize a pulseira para acompanhar suas leituras.',
+                'Sync your band to see your readings.',
+              )
+            : _recovery
+            ? l.vitalityRecoveryAnalysis
+            : l.vitalityEnergyAnalysis,
+        style: AppHealthStyle.body,
+        maxLines: 3,
+        overflow: TextOverflow.ellipsis,
+      ),
+      const SizedBox(height: 7),
+      Text(
+        data.demo ? l.vitalityDemo : l.vitalityEstimated,
+        style: AppHealthStyle.small,
+      ),
+      const SizedBox(height: 30),
+      AppHealthTrend(
+        key: const Key('vitality-trend'),
+        points: _historyWindow.resolve([
+          for (final point in data.trend) (date: point.at, value: point.score),
+        ], data.date),
+        selected: data.date,
+        minimum: 0,
+        maximum: 100,
+        low: low,
+        high: high,
+        rangeLabel: l.vitalityNormal,
+        emptyLabel: l.vitalityNoData,
+        onSelected: (date) => _changeDate(
+          vitalityDayDistance(DateTime.now(), date).clamp(0, 364),
         ),
       ),
-      if (s.preferences.flag('lowRecoveryNotice') &&
-          _recovery &&
-          score != null &&
-          score < 34)
-        _notice(l.vitalityRecoveryRest),
-      if (s.preferences.flag('morningNotice') && _recovery && score != null)
-        _notice(
-          l.vitalityScoreSummary(
-            vitalityNumber(context, score),
-            vitalityStatus(context, score),
-          ),
-        ),
-      if (s.preferences.flag('goalNotice') &&
-          !_recovery &&
-          (vitalityValue(s.metrics['steps']) ?? -1) >= s.preferences.stepGoal)
-        _notice(l.vitalityGoalReached),
-      if (s.preferences.flag('movementNotice') &&
-          !_recovery &&
-          s.metrics['activeMinutes'] is num &&
-          (s.metrics['activeMinutes'] as num) < s.preferences.activeGoal)
-        _notice(l.vitalityMovementHint),
-      if (_recovery) _recoveryCard(s) else _energyCard(s),
-      if (s.preferences.forecastFor(s.kind))
-        Padding(
-          padding: const EdgeInsets.only(top: 28),
-          child: VitalityForecast(
-            snapshot: s,
-            color: _color,
-            onTap: () => _detail(),
-          ),
-        ),
-      Padding(
-        padding: const EdgeInsets.only(top: 30),
-        child: DiaryQuickQuestions(
-          key: ValueKey(
-            'vitality-diary-${vitalityDate(s.date)}-$_diaryVersion',
-          ),
-          repository: _diary,
-          date: s.date,
-          onBusyChanged: (v) {
-            if (mounted) setState(() => _habitsBusy = v);
-          },
-          ratingKey: _recovery ? 'acordou' : 'energia',
-          ratingQuestion: _recovery
-              ? l.vitalityWakeQuestion
-              : l.vitalityEnergyQuestion,
-          ratingLowLabel: _recovery ? l.vitalityScaleBad : l.vitalityScaleLow,
-          ratingHighLabel: _recovery
-              ? l.vitalityScaleGood
-              : l.vitalityScaleHigh,
-          onOpenDiary: _journal,
-          questions: _recovery
-              ? [
-                  ('dor', l.vitalitySoreness, l.vitalitySoreness),
-                  ('gripe', l.vitalityFlu, l.vitalityFlu),
-                ]
-              : [
-                  ('c_cafemanha', l.vitalityBreakfast, l.vitalityBreakfast),
-                  ('c_cochilo', l.vitalityNap, l.vitalityNap),
-                ],
-          iconAnswers: true,
-          bodyStyle: AppVitalityStyle.body,
-          captionStyle: AppVitalityStyle.caption,
-          kickerStyle: AppVitalityStyle.kicker,
-        ),
-      ),
-      if (!_recovery || s.preferences.flag('showFactors')) ...[
-        Padding(
-          padding: const EdgeInsets.fromLTRB(22, 38, 22, 18),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(l.vitalityMetrics, style: AppVitalityStyle.title),
-              const SizedBox(height: 8),
-              Text(
-                _recovery ? l.vitalityRecoveryMetrics : l.vitalityEnergyMetrics,
-                style: AppVitalityStyle.body,
+      const SizedBox(height: 18),
+      DiaryHealthEntry(
+        topic: _recovery ? DiaryHealthTopic.recovery : DiaryHealthTopic.energy,
+        repository: _diary,
+        date: data.date,
+        title: vitalityTitle(context, data.kind),
+        subtitle: _recovery
+            ? diaryText(
+                context,
+                'Recuperação, bebida, sono, sintomas e estresse',
+                'Recovery, drinks, sleep, symptoms and stress',
+              )
+            : diaryText(
+                context,
+                'Café, água, comida, sol, pausas e disposição',
+                'Coffee, water, meals, sunlight, breaks and energy',
               ),
-            ],
-          ),
-        ),
-        AppMetricCard(
-          onTap: () => _metric(mainKeys.first),
-          child: _metricTile(s, mainKeys.first),
+      ),
+      if (_day == 0 && score != null) ...[
+        const SizedBox(height: AppHealthStyle.sectionGap),
+        AppHealthSection(
+          diaryText(context, 'Direção do dia', 'Direction for today'),
+          Icons.explore_outlined,
         ),
         const SizedBox(height: 8),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            for (final key in mainKeys.skip(1))
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    right: key == mainKeys[1] ? 4 : 0,
-                    left: key == mainKeys[2] ? 4 : 0,
-                  ),
-                  child: AppMetricCard(
-                    onTap: () => _metric(key),
-                    child: _metricTile(s, key),
-                  ),
-                ),
-              ),
-          ],
-        ),
+        for (final (icon, label) in directions)
+          AppHealthRow(label: label, icon: icon),
       ],
-      Padding(
-        padding: const EdgeInsets.fromLTRB(22, 35, 22, 18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (s.average != null && s.previousAverage != null) ...[
-              Text(
-                _recovery
-                    ? (s.average! >= s.previousAverage!
-                          ? l.vitalityRecoveryWeekUp
-                          : l.vitalityRecoveryWeekDown)
-                    : (s.average! >= s.previousAverage!
-                          ? l.vitalityEnergyWeekUp
-                          : l.vitalityEnergyWeekDown),
-                style: AppVitalityStyle.title,
-              ),
-              const SizedBox(height: 10),
-            ],
-            VitalityExpandable(
-              s.average != null && s.previousAverage != null
-                  ? '${l.vitalityWeekSummary(vitalityNumber(context, s.average), vitalityDelta(context, s.average! - s.previousAverage!))}\n\n${l.vitalityWeekExplanation}'
-                  : l.vitalityWeekExplanation,
-            ),
-          ],
-        ),
-      ),
-      AppMetricCard(
-        key: const Key('vitality-week'),
-        onTap: () => _detail(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            VitalityLabel(
-              _recovery ? l.vitalityRecoveryWeek : l.vitalityEnergyWeek,
-              chevron: true,
-            ),
-            const SizedBox(height: 12),
-            Text.rich(
-              TextSpan(
-                text: vitalityNumber(context, s.average),
-                style: AppVitalityStyle.value,
-                children: [
-                  TextSpan(
-                    text: ' ${l.vitalityAverage}',
-                    style: AppVitalityStyle.caption,
-                  ),
-                ],
-              ),
-            ),
-            if (s.average != null && s.previousAverage != null)
-              Text(
-                l.vitalityComparedWeek(
-                  '${s.average! - s.previousAverage! >= 0 ? '+' : ''}${vitalityNumber(context, s.average! - s.previousAverage!)}',
-                ),
-                style: AppVitalityStyle.caption,
-              ),
-            const SizedBox(height: 14),
-            if (s.baselineLow != null)
-              Text(
-                l.vitalityNormal.toUpperCase(),
-                style: AppVitalityStyle.kicker,
-              ),
-            VitalityChart(
-              points: s.trend,
-              color: _color,
-              low: s.baselineLow,
-              high: s.baselineHigh,
-            ),
-          ],
-        ),
-      ),
-      Padding(
-        padding: const EdgeInsets.fromLTRB(22, 30, 22, 16),
-        child: Text(l.vitalitySignals, style: AppVitalityStyle.title),
-      ),
-      AppMetricCard(
-        padding: EdgeInsets.zero,
-        child: Column(
-          children: [
-            for (final key in signalKeys)
-              ListTile(
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 22,
-                  vertical: 4,
-                ),
-                leading: AppSvgIcon(
-                  _signalIcon(key),
-                  size: 22,
-                  color: AppVitalityStyle.secondary,
-                ),
-                title: Text(
-                  vitalityMetricName(context, key),
-                  style: AppVitalityStyle.body,
-                ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '${vitalityMetricValue(context, key, s.metrics[key])}${vitalityMetricUnit(key)}',
-                      style: AppVitalityStyle.body,
-                    ),
-                    const SizedBox(width: 8),
-                    const Icon(
-                      Icons.chevron_right,
-                      size: 17,
-                      color: AppVitalityStyle.muted,
-                    ),
-                  ],
-                ),
-                onTap: () => _metric(key),
-              ),
-          ],
-        ),
-      ),
-      if (s.demo)
-        Padding(
-          padding: const EdgeInsets.fromLTRB(22, 20, 22, 0),
-          child: Text(l.vitalityDemo, style: AppVitalityStyle.caption),
-        ),
-      if (s.lastSyncAt != null)
-        Padding(
-          padding: const EdgeInsets.fromLTRB(22, 20, 22, 0),
-          child: Text(
-            '${l.vitalitySyncTime} · ${TimeOfDay.fromDateTime(s.lastSyncAt!.toLocal()).format(context)}',
-            style: AppVitalityStyle.caption,
-          ),
-        ),
-    ];
-  }
-
-  String _signalIcon(String key) =>
-      'assets/icons/site/home-${switch (key) {
-        'hrvMs' => 'hrv',
-        'restingHeartRate' => 'rhr',
-        'temperatureDeviation' => 'temperature',
-        'respiratoryRate' => 'respiration',
-        'sleepMinutes' => 'sleep',
-        'activeMinutes' => 'activeMinutes',
-        _ => key,
-      }}.svg';
-
-  Widget _notice(String text) => Padding(
-    padding: const EdgeInsets.fromLTRB(22, 0, 22, 12),
-    child: Text(text, style: AppVitalityStyle.body),
-  );
-  Widget _metricTile(VitalitySnapshot s, String key) {
-    final value = key == 'trainingLoad' ? s.trainingLoad : s.metrics[key];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        VitalityLabel(vitalityMetricName(context, key)),
-        const SizedBox(height: 12),
-        Text(
-          vitalityMetricValue(context, key, value),
-          style: AppVitalityStyle.value,
-        ),
-        if (vitalityMetricUnit(key).isNotEmpty)
-          Text(vitalityMetricUnit(key), style: AppVitalityStyle.caption),
-      ],
-    );
-  }
-
-  Widget _recoveryCard(VitalitySnapshot s) => InkWell(
-    onTap: () => _detail(),
-    child: Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 22),
-          child: VitalityLabel(
-            context.l10n.vitalityTodayRecovery,
-            chevron: true,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Text(vitalityNumber(context, s.score), style: AppVitalityStyle.value),
-        const SizedBox(height: 5),
-        Text(
-          vitalityStatus(context, s.score).toLowerCase(),
-          style: AppVitalityStyle.caption,
-        ),
-        const SizedBox(height: 10),
-        RecoveryArc(score: s.score),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 22),
-          child: Row(
-            children: [
-              for (final row in [
-                (
-                  context.l10n.vitalityYesterday,
-                  vitalityNumber(context, s.yesterday),
-                ),
-                (
-                  context.l10n.vitalityNormal,
-                  s.baselineLow == null
-                      ? '—'
-                      : '${vitalityNumber(context, s.baselineLow)}–${vitalityNumber(context, s.baselineHigh)}',
-                ),
-                (
-                  context.l10n.vitalityAverage7,
-                  vitalityNumber(context, s.average),
-                ),
-              ])
-                Expanded(
-                  child: Column(
-                    children: [
-                      Text(row.$1, style: AppVitalityStyle.caption),
-                      const SizedBox(height: 6),
-                      Text(
-                        row.$2,
-                        style: AppVitalityStyle.value.copyWith(fontSize: 24),
-                      ),
-                    ],
-                  ),
-                ),
-            ],
-          ),
-        ),
-        if (s.baselineLow == null)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(22, 12, 22, 0),
-            child: Text(
-              context.l10n.vitalityNoBaseline,
-              style: AppVitalityStyle.caption,
-            ),
-          ),
-      ],
-    ),
-  );
-  Widget _energyCard(VitalitySnapshot s) {
-    final latest = s.observations.lastOrNull;
-    final age = latest == null ? null : DateTime.now().difference(latest.at);
-    final fresh =
-        s.demo ||
-        (age != null &&
-            !age.isNegative &&
-            age.inMinutes < 5 &&
-            DateUtils.isSameDay(s.date, DateTime.now()));
-    final time = latest == null
-        ? ''
-        : fresh
-        ? context.l10n.vitalityNow
-        : TimeOfDay.fromDateTime(latest.at.toLocal()).format(context);
-    final peak = s.observations.isEmpty
-        ? null
-        : s.observations.reduce(
-            (a, b) => (a.score ?? 0) >= (b.score ?? 0) ? a : b,
-          );
-    final future = s.preferences.forecastFor(s.kind)
-        ? s.forecast.lastOrNull
-        : null;
-    return AppMetricCard(
-      onTap: () => _detail(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      const SizedBox(height: AppHealthStyle.sectionGap),
+      AppHealthSection(l.vitalityMetrics, Icons.grid_view_outlined),
+      const SizedBox(height: AppHealthStyle.gap),
+      AppHealthMetricGrid(
         children: [
-          VitalityLabel(context.l10n.vitalityEnergyDay, chevron: true),
-          const SizedBox(height: 12),
-          Text.rich(
-            TextSpan(
-              text: vitalityNumber(context, latest?.score),
-              style: AppVitalityStyle.value,
-              children: [
-                TextSpan(text: ' $time', style: AppVitalityStyle.caption),
-              ],
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            peak != null && future != null && s.preferences.flag('showWindows')
-                ? context.l10n.vitalityEnergyPeakForecast(
-                    vitalityNumber(context, peak.score),
-                    TimeOfDay.fromDateTime(peak.at.toLocal()).format(context),
-                    vitalityNumber(context, future.score),
-                    TimeOfDay.fromDateTime(future.at.toLocal()).format(context),
-                  )
-                : context.l10n.vitalityCurveExplanation,
-            style: AppVitalityStyle.caption,
-          ),
-          const SizedBox(height: 10),
-          VitalityChart(
-            points: s.observations,
-            forecast: s.preferences.forecastFor(s.kind) ? s.forecast : const [],
-            color: _color,
-            intraday: true,
-            low: s.baselineLow,
-            high: s.baselineHigh,
-          ),
-          if (s.preferences.flag('showWindows') && s.observations.isNotEmpty)
-            Builder(
-              builder: (c) {
-                final peak = s.observations.reduce(
-                  (a, b) => (a.score ?? 0) >= (b.score ?? 0) ? a : b,
-                );
-                return Text(
-                  c.l10n.vitalityPeakAt(
-                    vitalityNumber(c, peak.score),
-                    TimeOfDay.fromDateTime(peak.at.toLocal()).format(c),
-                  ),
-                  style: AppVitalityStyle.caption,
-                );
-              },
+          for (final key in main)
+            AppHealthMetric(
+              label: vitalityMetricName(context, key),
+              value: formatted(key),
+              unit: vitalityMetricUnit(key),
+              icon: _signalIcon(key),
             ),
         ],
       ),
-    );
+      const SizedBox(height: AppHealthStyle.sectionGap),
+      AppHealthSection(l.vitalitySignals, Icons.monitor_heart_outlined),
+      const SizedBox(height: AppHealthStyle.gap),
+      AppHealthPanel(
+        child: Column(
+          children: [
+            for (final (index, key) in signals.indexed)
+              AppHealthRow(
+                label: vitalityMetricName(context, key),
+                icon: _signalIcon(key),
+                value: formatted(key) == '—'
+                    ? '—'
+                    : '${formatted(key)} ${vitalityMetricUnit(key)}'.trim(),
+                onTap: () => _metric(key),
+                divider: index != signals.length - 1,
+              ),
+          ],
+        ),
+      ),
+    ];
   }
+
+  IconData _signalIcon(String key) => switch (key) {
+    'sleepMinutes' || 'sleepDebtMinutes' => Icons.bedtime_outlined,
+    'restingHeartRate' || 'hrvMs' => Icons.monitor_heart_outlined,
+    'temperatureDeviation' => Icons.thermostat_outlined,
+    'steps' || 'activeMinutes' => Icons.directions_walk_outlined,
+    'calories' => Icons.local_fire_department_outlined,
+    'trainingLoad' || 'todayTrainingLoad' => Icons.bolt_outlined,
+    'respiratoryRate' || 'vo2Max' => Icons.air_outlined,
+    _ => Icons.speed_outlined,
+  };
 }

@@ -13,6 +13,7 @@ import 'diary_page.dart';
 import 'diary_catalog_sheet.dart';
 import 'diary_moment_editor.dart';
 import 'diary_capture_sheet.dart';
+import 'diary_health_sheet.dart';
 
 class DiaryRecordSheet extends StatefulWidget {
   const DiaryRecordSheet({
@@ -23,6 +24,8 @@ class DiaryRecordSheet extends StatefulWidget {
     this.onPendingChanged,
     this.selected,
     this.initialTracker,
+    this.healthTopic,
+    this.title,
     super.key,
   });
   final DiaryRepository repository;
@@ -32,6 +35,8 @@ class DiaryRecordSheet extends StatefulWidget {
   final ValueChanged<bool>? onPendingChanged;
   final DiaryMoment? selected;
   final String? initialTracker;
+  final DiaryHealthTopic? healthTopic;
+  final String? title;
   @override
   State<DiaryRecordSheet> createState() => _DiaryRecordSheetState();
 }
@@ -40,6 +45,7 @@ class _DiaryRecordSheetState extends State<DiaryRecordSheet> {
   late final List<DiaryMoment> _events = [...widget.day.events];
   late String _note = widget.day.note;
   List<DiaryTracker>? _catalog;
+  Set<String> _planKeys = const {};
   Object? _error;
   bool _saving = false, _dirty = false;
   bool _openedInitialEditor = false;
@@ -61,6 +67,10 @@ class _DiaryRecordSheetState extends State<DiaryRecordSheet> {
         _catalog = diaryDisplayCatalog(items);
         _error = null;
       });
+      if (widget.repository case final DiaryPlanSource plan
+          when widget.embedded) {
+        unawaited(_loadPlan(plan));
+      }
       if (_openedInitialEditor) return;
       _openedInitialEditor = true;
       if (widget.selected != null) {
@@ -73,6 +83,15 @@ class _DiaryRecordSheetState extends State<DiaryRecordSheet> {
       }
     } catch (e) {
       if (mounted) setState(() => _error = e);
+    }
+  }
+
+  Future<void> _loadPlan(DiaryPlanSource plan) async {
+    try {
+      final keys = await plan.planKeys();
+      if (mounted) setState(() => _planKeys = keys.toSet());
+    } catch (_) {
+      // The optional plan must not prevent independent diary entries.
     }
   }
 
@@ -268,6 +287,7 @@ class _DiaryRecordSheetState extends State<DiaryRecordSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final topic = widget.healthTopic;
     final habits =
         _catalog
             ?.where(
@@ -279,47 +299,63 @@ class _DiaryRecordSheetState extends State<DiaryRecordSheet> {
             .toList() ??
         [];
     final scores = _events.where((e) => e.kind == 'scale').toList();
+    final planned = habits
+        .where((tracker) => _planKeys.contains(tracker.key))
+        .toList();
+    final personal = habits
+        .where((tracker) => !_planKeys.contains(tracker.key))
+        .toList();
     final editable = widget.day.editable;
     final content = <Widget>[
-      Text(
-        diaryDate(widget.day.date) == diaryDate(DateTime.now())
-            ? context.l10n.diaryUiWhatHappenedToday
-            : context.l10n.diaryWhatHappenedOnThisDay,
-        style: AppDiaryStyle.title,
-      ),
-      if (editable) ...[
-        const SizedBox(height: 20),
-        DiaryCapturePanel(
-          onWrite: () => _capture(),
-          onSpeak: () => _capture(voice: true),
+      if (topic == null) ...[
+        Text(
+          diaryDate(widget.day.date) == diaryDate(DateTime.now())
+              ? context.l10n.diaryUiWhatHappenedToday
+              : context.l10n.diaryWhatHappenedOnThisDay,
+          style: AppDiaryStyle.title,
         ),
-      ],
-      DiarySection(
-        context.l10n.diaryUiYourHabits,
-        icon: 'estrela',
-        trailing: Text(
-          '${habits.where((t) => _events.any((e) => diaryCanonicalKey(e.key) == t.key)).length} ${context.l10n.diaryUiOf} ${habits.length}',
-          style: AppDiaryStyle.caption,
-        ),
-      ),
-      Column(
-        children: [
-          for (final t in habits)
-            Padding(padding: const EdgeInsets.only(right: 4), child: _row(t)),
-          if (editable)
-            Padding(
-              padding: EdgeInsets.zero,
-              child: DiaryRecordRow(
-                title: context.l10n.diaryUiAddHabit,
-                icon: 'mais',
-                subtitle: context.l10n.diaryChooseCount(
-                  _catalog?.where((t) => t.diaryHabit).length ?? 0,
-                ),
-                onTap: _catalogSheet,
-              ),
-            ),
+        if (editable) ...[
+          const SizedBox(height: 20),
+          DiaryCapturePanel(
+            onWrite: () => _capture(),
+            onSpeak: () => _capture(voice: true),
+          ),
         ],
-      ),
+        if (planned.isNotEmpty) ...[
+          DiarySection(
+            diaryText(context, 'Do seu plano', 'From your plan'),
+            icon: 'alvo',
+          ),
+          for (final tracker in planned) _row(tracker),
+        ],
+        DiarySection(
+          context.l10n.diaryUiYourHabits,
+          icon: 'estrela',
+          trailing: Text(
+            '${personal.where((t) => _events.any((e) => diaryCanonicalKey(e.key) == t.key)).length} ${context.l10n.diaryUiOf} ${personal.length}',
+            style: AppDiaryStyle.caption,
+          ),
+        ),
+        Column(
+          children: [
+            for (final t in personal)
+              Padding(padding: const EdgeInsets.only(right: 4), child: _row(t)),
+            if (editable)
+              Padding(
+                padding: EdgeInsets.zero,
+                child: DiaryRecordRow(
+                  title: context.l10n.diaryUiAddHabit,
+                  icon: 'mais',
+                  subtitle: context.l10n.diaryChooseCount(
+                    _catalog?.where((t) => t.diaryHabit).length ?? 0,
+                  ),
+                  onTap: _catalogSheet,
+                ),
+              ),
+          ],
+        ),
+      ] else
+        ..._healthGroups(topic),
       DiarySection(context.l10n.diaryUiHowWasYourDay, icon: 'nota'),
       DiaryRecordRow(
         title: _note.isEmpty ? context.l10n.diaryUiHowWasYourDay2 : _note,
@@ -343,41 +379,41 @@ class _DiaryRecordSheetState extends State<DiaryRecordSheet> {
           ),
         ),
     ];
-    final body = _catalog == null
-        ? Center(
-            child: _error == null
-                ? const AppLoadingIndicator()
-                : AppGlassPill(
-                    label: context.l10n.diaryUiRetry,
-                    onPressed: _load,
-                  ),
+    Widget body(double headerInset) => _catalog == null
+        ? Padding(
+            padding: EdgeInsets.only(top: headerInset),
+            child: Center(
+              child: _error == null
+                  ? const AppLoadingIndicator()
+                  : AppGlassPill(
+                      label: context.l10n.diaryUiRetry,
+                      onPressed: _load,
+                    ),
+            ),
           )
         : SingleChildScrollView(
-            child: Stack(
+            padding: EdgeInsets.fromLTRB(
+              6,
+              headerInset +
+                  (widget.embedded
+                      ? 40
+                      : topic == null
+                      ? 6
+                      : 0),
+              6,
+              widget.embedded ? 150 : 24,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    6,
-                    widget.embedded ? 40 : 6,
-                    6,
-                    widget.embedded ? 150 : 24,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: content
-                        .map(
-                          (w) => w is DiarySurface || w is DiaryCapturePanel
-                              ? w
-                              : Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
-                                  ),
-                                  child: w,
-                                ),
-                        )
-                        .toList(),
-                  ),
-                ),
+                for (final item in content)
+                  if (item is DiarySurface || item is DiaryCapturePanel)
+                    item
+                  else
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      child: item,
+                    ),
               ],
             ),
           );
@@ -385,11 +421,6 @@ class _DiaryRecordSheetState extends State<DiaryRecordSheet> {
       canPop: !_saving,
       child: Column(
         children: [
-          if (!widget.embedded)
-            AppSheetHeader(
-              title: context.l10n.diaryUiRecord,
-              canClose: !_saving,
-            ),
           if (widget.embedded && _dirty && _error != null)
             Material(
               color: AppColors.surface,
@@ -437,7 +468,19 @@ class _DiaryRecordSheetState extends State<DiaryRecordSheet> {
               backgroundColor: Colors.transparent,
             ),
           Expanded(
-            child: AbsorbPointer(absorbing: _saving, child: body),
+            child: AbsorbPointer(
+              absorbing: _saving,
+              child: widget.embedded
+                  ? body(0)
+                  : AppGlassScrollHeader(
+                      height: AppSheetHeader.height,
+                      header: AppSheetHeader(
+                        title: widget.title ?? context.l10n.diaryUiRecord,
+                        canClose: !_saving,
+                      ),
+                      body: body,
+                    ),
+            ),
           ),
           if (!widget.embedded)
             AppSheetSaveButton(
@@ -448,6 +491,37 @@ class _DiaryRecordSheetState extends State<DiaryRecordSheet> {
         ],
       ),
     );
+  }
+
+  List<Widget> _healthGroups(DiaryHealthTopic topic) {
+    final catalog = {
+      for (final tracker in _catalog ?? <DiaryTracker>[]) tracker.key: tracker,
+    };
+    final seen = <String>{};
+    return [
+      for (final group in diaryHealthGroups(topic))
+        ..._healthGroup(group, catalog, seen),
+    ];
+  }
+
+  List<Widget> _healthGroup(
+    DiaryHealthGroup group,
+    Map<String, DiaryTracker> catalog,
+    Set<String> seen,
+  ) {
+    final trackers = group.keys
+        .map(diaryCanonicalKey)
+        .where((key) => catalog.containsKey(key) && seen.add(key))
+        .map((key) => catalog[key]!)
+        .toList();
+    if (trackers.isEmpty) return const [];
+    return [
+      DiarySection(
+        diaryText(context, group.title, group.englishTitle),
+        icon: group.icon,
+      ),
+      for (final tracker in trackers) _row(tracker),
+    ];
   }
 
   Widget _row(DiaryTracker t) {

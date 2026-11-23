@@ -41,7 +41,20 @@ void main() {
               data = {'items': []};
             }
             if (r.url.path.endsWith('/trend')) {
-              return http.Response(jsonEncode({'code': 100011}), 200);
+              if (r.url.queryParameters['days'] == '30') {
+                return http.Response(jsonEncode({'code': 100011}), 200);
+              }
+              return http.Response(
+                jsonEncode({
+                  'code': 200,
+                  'data': {
+                    'days': [
+                      {'statDate': '2026-11-14', 'hasData': false},
+                    ],
+                  },
+                }),
+                200,
+              );
             }
             return http.Response(jsonEncode({'code': 200, 'data': data}), 200);
           }),
@@ -50,12 +63,19 @@ void main() {
       );
       final snapshot = await repo.load(date, 'pt-BR');
       expect(snapshot.session!.asleep, 450);
-      expect(snapshot.trend.locked, isTrue);
+      expect(snapshot.trend.locked, isFalse);
+      expect(snapshot.trend.days.single['hasData'], false);
       expect(snapshot.value(SleepMetric.debt), 90);
       expect(snapshot.value(SleepMetric.respiration), isNull);
       expect(snapshot.value(SleepMetric.temperature), isNull);
       expect(snapshot.unavailable, isEmpty);
-      expect(requests.length, 5);
+      expect(requests.length, 6);
+      expect(
+        requests
+            .where((r) => r.url.path.endsWith('/trend'))
+            .map((r) => r.url.queryParameters['days']),
+        ['30', '7'],
+      );
       repo.dispose();
     },
   );
