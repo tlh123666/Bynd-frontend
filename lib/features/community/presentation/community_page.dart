@@ -8,15 +8,18 @@ import '../data/remote_community_repository.dart';
 import '../domain/community_models.dart';
 import 'community_new_page.dart';
 import 'community_style.dart';
-import 'community_avatar.dart';
-import 'day_strip.dart';
 import 'group_chat_page.dart';
 
-/// 社区主页 —— 逐屏复刻原型 `src/screens/comunidade/Comunidade.jsx`
-/// （modelo B「Mural」）：封面轮播 → Para hoje → 打卡墙。
+/// 社区主页 —— 对齐客户 11-22 设计源码 `src/screens/comunidade/Comunidade.jsx`
+/// （Luiz 11-20/21 的「modelo Whoop Teams com a cara da BYND」清单式改版）：
 ///
-/// 版式、间距、颜色全部对齐 `comunidade.css`；「Dar força」依赖后端缺口
-/// G-1（reactions），先占位提示；封面图依赖群封面上传，暂用渐变底。
+/// 头图（16/10，圆角 14，comunidade-maos）→ 邀请玻璃条（仅一条，计数徽章）→
+/// 「Seus times」行（名 + 人数 + 我的名次）→「Seus desafios」行（dia X de Y +
+/// 今日状态 selo）→ 底部「玻璃 + 白」双按钮。邀请/菜单/完成列表走底部弹层。
+///
+/// 版式与颜色逐项对齐 `styles/comunidade.css` 的 `.cmm` 块与 `.cmb-ln`；字体
+/// Urbanist 已在全局。数据逻辑沿用原实现（群 / 邀请 / 精选挑战 / 排名）；
+/// 旧「封面轮播 + Para hoje + 打卡墙」按新设计移除，打卡动作收进挑战行弹层。
 class CommunityPage extends StatefulWidget {
   const CommunityPage({this.repository, super.key});
 
@@ -32,13 +35,10 @@ class _CommunityPageState extends State<CommunityPage> {
 
   bool _loading = true;
   String? _error;
-  int _day = 0; // 0 = Hoje, 1 = Ontem（原型 FaixaDias 的序）
   List<CommunityGroup> _groups = const [];
   List<CommunityInvitation> _invitations = const [];
   List<CuratedChallenge> _mine = const [];
   final Map<String, CommunityRankingEntry?> _myRank = {};
-  List<CommunityMessage> _mural = const [];
-  List<CommunityAtlasInsight> _atlas = const [];
 
   @override
   void initState() {
@@ -65,10 +65,7 @@ class _CommunityPageState extends State<CommunityPage> {
           mine.add(challenge);
         }
       }
-      // 群列表会连同「可发现的公开群」一起返回（membershipState =
-      // not_joined）。只有 joined 的群才允许读详情/消息，公开未加入的群
-      // 详情会 403——这不是错误，是「还没加入」的正常状态，封面给
-      // Entrar 按钮即可。打卡墙挂在第一个已加入的群上。
+      // 群列表会连同「可发现的公开群」一起返回；排名挂在第一个已加入的群上。
       final joinedGroups = groups
           .where((g) => g.membershipState == 'joined')
           .toList(growable: false);
@@ -81,25 +78,11 @@ class _CommunityPageState extends State<CommunityPage> {
           }
         } catch (_) {}
       }
-      var mural = <CommunityMessage>[];
-      var atlas = <CommunityAtlasInsight>[];
-      if (joinedGroups.isNotEmpty) {
-        try {
-          final messages = await _repo.listMessages(joinedGroups.first.id);
-          messages.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-          mural = messages;
-          try {
-            atlas = await _repo.groupAtlas(joinedGroups.first.id);
-          } catch (_) {}
-        } catch (_) {}
-      }
       if (!mounted) return;
       setState(() {
         _groups = groups;
         _invitations = invitations;
         _mine = mine;
-        _mural = mural;
-        _atlas = atlas;
         _loading = false;
       });
     } catch (error) {
@@ -153,21 +136,6 @@ class _CommunityPageState extends State<CommunityPage> {
     );
   }
 
-  Future<void> _join(CommunityGroup group) async {
-    try {
-      await _repo.joinGroup(group.id, consent: true);
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.communityJoinedGroup)),
-      );
-      await _reload();
-    } catch (error) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(error.toString())));
-    }
-  }
-
   void _openChat(CommunityGroup group) {
     Navigator.of(context).push<void>(
       MaterialPageRoute(
@@ -186,42 +154,86 @@ class _CommunityPageState extends State<CommunityPage> {
     );
   }
 
+  // 挑战今日状态 → (文案, 颜色)，对应源码 seloHoje：Feito hoje(绿) /
+  // Não contou(灰) / Falta hoje(黄)。未开始的挑战没有开始日期字段，
+  // 用「Não começou」灰标兜底。
+  (String, Color) _seloHoje(CuratedChallenge challenge, AppLocalizations s) {
+    final today = challenge.today;
+    if (today == null) return (s.communityNotStarted, CommunityStyle.seloApaga);
+    return today.completed
+        ? (s.communityDoneToday, CommunityStyle.seloVerde)
+        : (s.communityPendingToday, CommunityStyle.seloAmarelo);
+  }
+
   @override
   Widget build(BuildContext context) {
     final strings = context.l10n;
-    final today = _day == 0;
     final joined = _groups
         .where((g) => g.membershipState == 'joined')
         .toList(growable: false);
-    final main = joined.isEmpty ? null : joined.first;
-    final mural =
-        _mural.where((m) => _sameDay(m.createdAt, today)).toList();
+    final concluded =
+        _mine.where((c) => (c.today?.dayNumber ?? 0) >= c.durationDays);
+    final active = _mine
+        .where((c) => (c.today?.dayNumber ?? 0) < c.durationDays)
+        .toList(growable: false);
     return Scaffold(
       backgroundColor: AppColors.background,
+      bottomNavigationBar: _bottomButtons(strings),
       body: SafeArea(
+        bottom: false,
         child: _loading
             ? const Center(child: AppLoadingIndicator())
             : _error != null
-                ? _CenterText(_error!)
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Text(
+                        _error!,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: CommunityStyle.text72,
+                          fontSize: 14,
+                          height: 1.5,
+                        ),
+                      ),
+                    ),
+                  )
                 : RefreshIndicator(
                     onRefresh: _reload,
                     child: ListView(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       children: [
                         _header(strings),
-                        const SizedBox(height: 10),
-                        _dayStrip(strings),
-                        const SizedBox(height: 4),
-                        _covers(strings),
-                        if (today) ...[
-                          const SizedBox(height: 20),
-                          ..._paraHoje(strings, main),
+                        const SizedBox(height: 12),
+                        _heroPhoto(),
+                        if (_invitations.isNotEmpty) ...[
+                          const SizedBox(height: 12),
+                          _invitesRow(strings),
                         ],
-                        if (main != null) ...[
-                          const SizedBox(height: 8),
-                          _muralSection(strings, main, mural, today),
+                        _sectionTitle(
+                          context,
+                          icon: Icons.groups_rounded,
+                          title: strings.communityMyTeams,
+                          marginTop: _invitations.isNotEmpty ? 24 : 28,
+                        ),
+                        if (joined.isEmpty)
+                          _emptyText(strings.communityTeamsEmpty)
+                        else
+                          ...joined.map((g) => _teamRow(strings, g)),
+                        _sectionTitle(
+                          context,
+                          icon: Icons.emoji_events_outlined,
+                          title: strings.communityMyChallenges,
+                          marginTop: 36,
+                        ),
+                        if (active.isEmpty && concluded.isEmpty)
+                          _emptyText(strings.communityChallengesEmpty)
+                        else ...[
+                          ...active.map((c) => _challengeRow(strings, c)),
+                          if (concluded.isNotEmpty)
+                            _concludedRow(strings, concluded.length),
                         ],
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 24),
                       ],
                     ),
                   ),
@@ -229,16 +241,7 @@ class _CommunityPageState extends State<CommunityPage> {
     );
   }
 
-  bool _sameDay(DateTime date, bool today) {
-    final now = DateTime.now();
-    final diff = DateTime(now.year, now.month, now.day)
-        .difference(DateTime(date.year, date.month, date.day))
-        .inDays;
-    return today ? diff == 0 : diff == 1;
-  }
-
-  // .cm-cab：grid 40/1fr/40，标题居中 17px w500；右侧 + 为纯图标钮
-  // （源码 .cm-cab button 无底色）。
+  // .sn-cab/.ax-cab：标题居中，右侧 ⋯ 打开玻璃菜单。
   Widget _header(AppLocalizations strings) {
     return SizedBox(
       height: 54,
@@ -247,22 +250,19 @@ class _CommunityPageState extends State<CommunityPage> {
         children: [
           Text(
             strings.community,
-            style: AppTypography.listItem.copyWith(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w500,
+            style: const TextStyle(
+              color: CommunityStyle.textBright,
               fontSize: 17,
+              fontWeight: FontWeight.w500,
+              fontFamily: 'Urbanist',
             ),
           ),
           Positioned(
             right: 0,
-            child: GestureDetector(
-              onTap: _openNew,
-              behavior: HitTestBehavior.opaque,
-              child: const SizedBox(
-                width: 40,
-                height: 40,
-                child: Icon(Icons.add_rounded, size: 22),
-              ),
+            child: IconButton(
+              onPressed: _openMenu,
+              icon: const Icon(Icons.more_horiz, size: 22),
+              color: CommunityStyle.text72,
             ),
           ),
         ],
@@ -270,1039 +270,645 @@ class _CommunityPageState extends State<CommunityPage> {
     );
   }
 
-  // FaixaDias：Ontem · Hoje 文字 tab + 固定居中 marca（源码 .hdx-*，
-  // 与 Memória 页 tab 条同族；条带满幅出血 margin 0 -16px，同 _covers）。
-  Widget _dayStrip(AppLocalizations strings) {
-    // 源码渲染顺序：index 0 = Ontem（_day 1），index 1 = Hoje（_day 0）。
-    final labels = [
-      strings.communityDayYesterday,
-      strings.communityDayToday,
-    ];
-    final screen = MediaQuery.sizeOf(context).width;
-    return SizedBox(
-      height: 52, // DayStrip 自身 46 + 顶部 6
-      child: OverflowBox(
-        maxWidth: screen,
-        alignment: Alignment.topLeft,
-        child: Transform.translate(
-          offset: const Offset(-16, 0),
-          child: SizedBox(
-            width: screen,
-            child: DayStrip(
-              labels: labels,
-              selectedIndex: _day == 0 ? 1 : 0,
-              onSelect: (index) => setState(() => _day = index == 1 ? 0 : 1),
-            ),
-          ),
+  // .cmb-foto：16/10，圆角 14，margin-top 12。
+  Widget _heroPhoto() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(14),
+      child: AspectRatio(
+        aspectRatio: 16 / 10,
+        child: Image.asset(
+          'assets/images/comunidade-maos.webp',
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => Container(color: CommunityStyle.card),
         ),
       ),
     );
   }
 
-  // .cmb-capas：封面轮播（群 + 邀请 + 建群空位）；满幅出血、内衬 16。
-  //
-  // 出血实现：外层 ListView 有水平 16 内衬（tight 宽 = 屏幕-32），直接在里面
-  // 放更宽的子项会拿到「水平视口高度无界」的布局异常（黑屏根因）。所以用
-  // OverflowBox 放宽到屏幕宽、再 Transform 左移 16——布局有界、绘制出血。
-  Widget _covers(AppLocalizations strings) {
-    final screen = MediaQuery.sizeOf(context).width;
-    final joined = _groups
-        .where((g) => g.membershipState == 'joined')
-        .toList(growable: false);
-    CuratedChallenge? coverChallenge;
-    if (joined.isNotEmpty && _mine.isNotEmpty) {
-      coverChallenge = _mine.first;
-    }
-    return SizedBox(
-      height: CommunityStyle.coverHeight,
-      child: OverflowBox(
-        maxWidth: screen,
-        alignment: Alignment.centerLeft,
-        child: Transform.translate(
-          offset: const Offset(-16, 0),
-          child: SizedBox(
-            width: screen,
-            height: CommunityStyle.coverHeight,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              clipBehavior: Clip.none,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              children: [
-                for (final group in _groups)
-                  if (group.membershipState == 'joined')
-                    _GroupCover(
-                      name: group.name,
-                      memberCount: group.memberCount,
-                      members: group.members,
-                      challenge:
-                          group == joined.firstOrNull ? coverChallenge : null,
-                      myRank: _myRank[group.id],
-                      onTap: () => _openChat(group),
-                    )
-                  else
-                    _PublicCover(
-                      group: group,
-                      onJoin: () => _join(group),
-                    ),
-                for (final invitation in _invitations)
-                  _InviteCover(
-                    invitation: invitation,
-                    onAccept: () => _respond(invitation, accept: true),
-                    onDecline: () => _respond(invitation, accept: false),
-                  ),
-                _NewCover(onTap: _openNew),
-              ],
-            ),
-          ),
+  // .cmt-cvl：邀请玻璃条（一条，计数徽章），点开邀请弹层。
+  Widget _invitesRow(AppLocalizations strings) {
+    final n = _invitations.length;
+    final subtitle = n == 1
+        ? strings.communityInviteFromShort(_invitations.first.inviterName)
+        : '${_invitations.where((i) => i.groupId.isNotEmpty).length} ${strings.communityInviteTeam}';
+    return Container(
+      margin: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        color: CommunityStyle.glass,
+      ),
+      child: _cmbRow(
+        leading: Icon(
+          Icons.notifications_none_rounded,
+          size: 22,
+          color: CommunityStyle.text72,
         ),
+        title: n == 1 ? strings.communityInviteOne : strings.communityInvites,
+        subtitle: subtitle,
+        trailing: _countBadge(n),
+        onTap: _openInvitesSheet,
       ),
     );
   }
 
-  // .cmb-hoje：Para hoje。
-  List<Widget> _paraHoje(AppLocalizations strings, CommunityGroup? main) {
-    if (_mine.isEmpty) {
-      return [
-        Material(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(CommunityStyle.cardRadius),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(CommunityStyle.cardRadius),
-            onTap: _openNew,
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Row(
-                children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: CommunityStyle.accentSoft,
-                      border: Border.all(color: const Color(0x73EC7030)),
-                    ),
-                    child: const Icon(
-                      Icons.add_rounded,
-                      size: 20,
-                      color: CommunityStyle.accent,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          strings.communityPickChallenge,
-                          style: AppTypography.listItem.copyWith(
-                            color: AppColors.textPrimary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        Text(
-                          strings.communityPickChallengeSub,
-                          style: AppTypography.caption.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ];
-    }
-    return [
-      Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(CommunityStyle.surfaceCardRadius),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // .cmb-k：kicker 居左，群名居右
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  strings.communityParaHoje.toUpperCase(),
-                  style: AppTypography.caption.copyWith(
-                    color: AppColors.textSecondary,
-                    letterSpacing: 2.2,
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                if (main != null)
-                  Text(
-                    main.name,
-                    style: AppTypography.caption.copyWith(
-                      color: AppColors.textMuted,
-                      fontSize: 12,
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            for (final challenge in _mine)
-              _TodayRow(
-                challenge: challenge,
-                onMark: () => _markDone(challenge),
-              ),
-          ],
-        ),
-      ),
-    ];
-  }
-
-  // .cmb-sec：打卡墙。
-  Widget _muralSection(
-    AppLocalizations strings,
-    CommunityGroup group,
-    List<CommunityMessage> messages,
-    bool today,
-  ) {
+  // .cmm-st：20/300 字重，图标 18，间距 10，margin 44/6（首个 28）。
+  Widget _sectionTitle(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required double marginTop,
+  }) {
     return Padding(
-      padding: const EdgeInsets.only(top: 36),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: EdgeInsets.fromLTRB(4, marginTop, 4, 6),
+      child: Row(
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
+          Icon(icon, size: 18, color: CommunityStyle.text72),
+          const SizedBox(width: 10),
+          Expanded(
             child: Text(
-              today
-                  ? strings.communityMuralToday
-                  : strings.communityMuralYesterday,
+              title,
               style: const TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 28,
+                color: CommunityStyle.textBright,
+                fontSize: 20,
                 fontWeight: FontWeight.w300,
-                letterSpacing: -0.7,
-                height: 1.12,
+                height: 25 / 20,
+                letterSpacing: -0.01,
+                fontFamily: 'Urbanist',
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
+        ],
+      ),
+    );
+  }
+
+  // .cmb-ln：一行（72 高，底部细线到右缘）：ft 32 + 名/副行 + 徽章 + chevron。
+  Widget _teamRow(AppLocalizations strings, CommunityGroup group) {
+    final rank = _myRank[group.id];
+    final showRank =
+        rank != null && rank.rank > 0 && group.memberCount > 1;
+    final members = strings.communityMemberCount(group.memberCount);
+    final subtitle = showRank
+        ? '$members · ${rank.rank}º ${strings.communityRankOf(group.memberCount)}'
+        : members;
+    return _cmbRow(
+      onTap: () => _openChat(group),
+      leading: ClipOval(
+        child: Image.asset(
+          'assets/images/comunidade-maos.webp',
+          width: 32,
+          height: 32,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => Container(
+            width: 32,
+            height: 32,
+            color: CommunityStyle.chip,
+            alignment: Alignment.center,
             child: Text(
-              strings.communityMuralIntro,
-              style: AppTypography.caption.copyWith(
-                color: AppColors.textMuted,
-                fontSize: 14,
-                height: 1.5,
+              group.name.isEmpty ? '' : group.name[0].toUpperCase(),
+              style: const TextStyle(
+                color: CommunityStyle.textBright,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                fontFamily: 'Urbanist',
               ),
             ),
           ),
-          const SizedBox(height: 14),
-          for (final insight in _atlas) _AtlasPost(insight: insight),
-          if (messages.isEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 12, left: 4),
-              child: Text(
-                today
-                    ? strings.communityNoCheckinsToday
-                    : strings.communityNoCheckinsYesterday,
-                style: AppTypography.label.copyWith(
-                  color: AppColors.textMuted,
-                ),
-              ),
-            )
-          else
-            for (final message in messages)
-              _CheckinPost(
-                message: message,
-                onCheer: () => ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(strings.communityCheerSoon)),
-                ),
-                onRespond: () => _openChat(group),
-              ),
-          const SizedBox(height: 8),
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () => _openChat(group),
-              child: Container(
-                padding: const EdgeInsets.fromLTRB(4, 14, 4, 14),
-                decoration: const BoxDecoration(
-                  border:
-                      Border(top: BorderSide(color: CommunityStyle.stroke)),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      strings.communityOpenGroupChat,
-                      style: AppTypography.listItem.copyWith(
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const Icon(
-                      Icons.chevron_right_rounded,
-                      size: 18,
-                      color: AppColors.textMuted,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
+      title: group.name,
+      subtitle: subtitle,
+      trailing: group.unreadCount > 0
+          ? _countBadge(group.unreadCount)
+          : const Icon(
+              Icons.chevron_right_rounded,
+              size: 18,
+              color: CommunityStyle.text50,
+            ),
     );
   }
-}
 
-// ---- 封面 ----
-
-class _GroupCover extends StatelessWidget {
-  const _GroupCover({
-    required this.name,
-    required this.memberCount,
-    required this.members,
-    required this.challenge,
-    required this.myRank,
-    required this.onTap,
-  });
-
-  final String name;
-  final int memberCount;
-  final List<CommunityMember> members;
-  final CuratedChallenge? challenge;
-  final CommunityRankingEntry? myRank;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final stack = members.take(5).toList();
-    final rank = myRank;
-    final showRank = rank != null && rank.rank > 0 && memberCount > 1;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: CommunityStyle.coverWidth,
-        height: CommunityStyle.coverHeight,
-        margin: const EdgeInsets.only(right: 10),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(CommunityStyle.coverRadius),
-          gradient: CommunityStyle.coverFallback,
+  // .cmb-ln：挑战行（图标 + 名 + dia X de Y + 今日 selo）。
+  Widget _challengeRow(AppLocalizations strings, CuratedChallenge challenge) {
+    final (label, color) = _seloHoje(challenge, strings);
+    final started = challenge.today != null;
+    final subtitle = started
+        ? strings.communityDayOfTotal(
+            challenge.today!.dayNumber,
+            challenge.durationDays,
+          )
+        : strings.communityDurationDays(challenge.durationDays);
+    return _cmbRow(
+      onTap: () => _openChallengeSheet(challenge),
+      leading: SizedBox(
+        width: 32,
+        child: Icon(
+          Icons.track_changes_rounded,
+          size: 20,
+          color: CommunityStyle.text72,
         ),
-        child: Stack(
-          children: [
-            const DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.all(
-                  Radius.circular(CommunityStyle.coverRadius),
-                ),
-                gradient: CommunityStyle.coverScrim,
-              ),
-              child: SizedBox.expand(),
-            ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // .cmb-t1：头像堆叠 + 人数
-                Row(
-                  children: [
-                    Expanded(child: _AvatarStack(members: stack)),
-                    Text(
-                      context.l10n.communityMemberCount(memberCount),
-                      style: AppTypography.caption.copyWith(
-                        color: CommunityStyle.onImage,
-                        fontSize: 12.5,
-                      ),
-                    ),
-                  ],
-                ),
-                // .cmb-lin：左侧挑战进度，右侧 42px 细体排名
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            name,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 21,
-                              fontWeight: FontWeight.w400,
-                              letterSpacing: -0.01,
-                            ),
-                          ),
-                          if (challenge != null) ...[
-                            const SizedBox(height: 4),
-                            Text(
-                              context.l10n.communityDayOfTotal(
-                                challenge!.today?.dayNumber ?? 1,
-                                challenge!.durationDays,
-                              ),
-                              style: const TextStyle(
-                                color: CommunityStyle.onImage,
-                                fontSize: 13,
-                                height: 1.4,
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                    if (showRank)
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '${rank.rank}',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 42,
-                                  fontWeight: FontWeight.w200,
-                                  height: 0.85,
-                                  letterSpacing: -0.03,
-                                ),
-                              ),
-                              Text(
-                                'º',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 42 * 0.34,
-                                  fontWeight: FontWeight.w300,
-                                  height: 1,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Text(
-                            context
-                                .l10n.communityRankOf(memberCount)
-                                .toUpperCase(),
-                            style: const TextStyle(
-                              color: CommunityStyle.onImage,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w500,
-                              letterSpacing: 1.6,
-                            ),
-                          ),
-                        ],
-                      ),
-                  ],
-                ),
-              ],
-            ),
-          ],
+      ),
+      title: challenge.title,
+      subtitle: started ? subtitle : strings.communityDurationDays(challenge.durationDays),
+      trailing: Text(
+        label.toUpperCase(),
+        style: TextStyle(
+          color: color,
+          fontSize: 11,
+          fontWeight: FontWeight.w500,
+          letterSpacing: 1.4,
+          fontFamily: 'Urbanist',
         ),
       ),
     );
   }
-}
 
-class _PublicCover extends StatelessWidget {
-  const _PublicCover({required this.group, required this.onJoin});
-
-  final CommunityGroup group;
-  final VoidCallback onJoin;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: CommunityStyle.coverWidth,
-      height: CommunityStyle.coverHeight,
-      margin: const EdgeInsets.only(right: 10),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(CommunityStyle.coverRadius),
-        gradient: CommunityStyle.coverFallback,
-      ),
-      child: Stack(
-        children: [
-          const DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.all(
-                Radius.circular(CommunityStyle.coverRadius),
-              ),
-              gradient: CommunityStyle.coverScrim,
-            ),
-            child: SizedBox.expand(),
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(child: _AvatarStack(members: group.members)),
-                  Text(
-                    context.l10n.communityMemberCount(group.memberCount),
-                    style: AppTypography.caption.copyWith(
-                      color: CommunityStyle.onImage,
-                      fontSize: 12.5,
-                    ),
-                  ),
-                ],
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.l10n.communityPublicGroup,
-                    style: const TextStyle(
-                      color: CommunityStyle.onImage,
-                      fontSize: 13,
-                    ),
-                  ),
-                  Text(
-                    group.name,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 21,
-                      fontWeight: FontWeight.w400,
-                      letterSpacing: -0.01,
-                    ),
-                  ),
-                ],
-              ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: _CoverButton(
-                  label: context.l10n.communityJoin,
-                  filled: true,
-                  onTap: onJoin,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _InviteCover extends StatelessWidget {
-  const _InviteCover({
-    required this.invitation,
-    required this.onAccept,
-    required this.onDecline,
-  });
-
-  final CommunityInvitation invitation;
-  final VoidCallback onAccept;
-  final VoidCallback onDecline;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: CommunityStyle.coverWidth,
-      height: CommunityStyle.coverHeight,
-      margin: const EdgeInsets.only(right: 10),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(CommunityStyle.coverRadius),
-        gradient: CommunityStyle.coverFallback,
-      ),
-      child: Stack(
-        children: [
-          const DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.all(
-                Radius.circular(CommunityStyle.coverRadius),
-              ),
-              gradient: CommunityStyle.coverScrim,
-            ),
-            child: SizedBox.expand(),
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // .cmb-t1：成员堆叠 + 「convite de {名}」
-              Row(
-                children: [
-                  Expanded(
-                    child: _AvatarStack(
-                      members: const [],
-                      extraInitial: invitation.inviterName,
-                    ),
-                  ),
-                  Flexible(
-                    child: Text(
-                      context.l10n.communityInviteFromShort(
-                        invitation.inviterName,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: CommunityStyle.onImage,
-                        fontSize: 12.5,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    invitation.groupName,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 21,
-                      fontWeight: FontWeight.w400,
-                      letterSpacing: -0.01,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    context.l10n.communityInviteFromShort(
-                      invitation.inviterName,
-                    ),
-                    style: const TextStyle(
-                      color: CommunityStyle.onImage,
-                      fontSize: 13,
-                      height: 1.4,
-                    ),
-                  ),
-                ],
-              ),
-              // .cmb-bts：Depois / Entrar
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  _CoverButton(
-                    label: context.l10n.communityDecline,
-                    filled: false,
-                    onTap: onDecline,
-                  ),
-                  const SizedBox(width: 6),
-                  _CoverButton(
-                    label: context.l10n.communityAccept,
-                    filled: true,
-                    onTap: onAccept,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _CoverButton extends StatelessWidget {
-  const _CoverButton({
-    required this.label,
-    required this.filled,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool filled;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 34,
-        padding: const EdgeInsets.symmetric(horizontal: 14),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(999),
-          color: filled ? const Color(0xFFF4F5F7) : const Color(0x1AFFFFFF),
-        ),
-        child: Text(
-          label,
-          style: AppTypography.caption.copyWith(
-            color: filled ? const Color(0xFF14181D) : AppColors.textPrimary,
-            fontWeight: FontWeight.w500,
-          ),
+  // 「Desafios concluídos」行：结果计数。
+  Widget _concludedRow(AppLocalizations strings, int count) {
+    return _cmbRow(
+      leading: SizedBox(
+        width: 32,
+        child: Icon(
+          Icons.flag_outlined,
+          size: 20,
+          color: CommunityStyle.text72,
         ),
       ),
-    );
-  }
-}
-
-class _NewCover extends StatelessWidget {
-  const _NewCover({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    // .cmb-capa.vazia：宽 180、居中、+ 为 44 圆（白 .08），无边框。
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 180,
-        height: CommunityStyle.coverHeight,
-        margin: const EdgeInsets.only(right: 10),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(CommunityStyle.coverRadius),
-          color: AppColors.surface,
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              alignment: Alignment.center,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: Color(0x14FFFFFF),
-              ),
-              child: const Icon(Icons.add_rounded, size: 22, color: Colors.white),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              context.l10n.communityNewCover,
-              textAlign: TextAlign.center,
-              style: AppTypography.label.copyWith(
-                color: AppColors.textSecondary,
-                fontSize: 13.5,
-                height: 1.4,
-              ),
-            ),
-          ],
+      title: strings.communityConcluded,
+      subtitle: strings.communityConcludedSub,
+      trailing: Text(
+        '$count',
+        style: const TextStyle(
+          color: CommunityStyle.text72,
+          fontSize: 14,
+          fontFamily: 'Urbanist',
         ),
       ),
+      onTap: _openConcludedSheet,
     );
   }
-}
 
-class _AvatarStack extends StatelessWidget {
-  const _AvatarStack({required this.members, this.extraInitial});
-
-  final List<CommunityMember> members;
-
-  /// 邀请封面没有成员列表：只渲染邀请人一个头像（源码 Pilha 的单成员形态）。
-  final String? extraInitial;
-
-  @override
-  Widget build(BuildContext context) {
-    final stack = members.take(5).toList();
-    return SizedBox(
-      height: 26,
-      child: Stack(
-        children: [
-          for (var i = stack.length - 1; i >= 0; i--)
-            Positioned(
-              left: i * 20.0,
-              child: CommunityAvatar(
-                name: stack[i].displayName,
-                avatarUrl: stack[i].avatarUrl,
-                size: 26,
-              ),
-            ),
-          if (stack.isEmpty && extraInitial != null)
-            CommunityAvatar(name: extraInitial!, size: 26),
-        ],
-      ),
-    );
-  }
-}
-
-
-// ---- Para hoje ----
-
-class _TodayRow extends StatelessWidget {
-  const _TodayRow({required this.challenge, required this.onMark});
-
-  final CuratedChallenge challenge;
-  final VoidCallback onMark;
-
-  @override
-  Widget build(BuildContext context) {
-    final strings = context.l10n;
-    final today = challenge.today;
-    final allDone = today != null && today.completed;
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+  // .cmb-ln 行通用结构：min-height 72，底部 1px 细线，内衬左 0 右 20。
+  Widget _cmbRow({
+    required Widget leading,
+    required String title,
+    required String subtitle,
+    required Widget trailing,
+    VoidCallback? onTap,
+  }) {
+    final row = Container(
+      constraints: const BoxConstraints(minHeight: 72),
+      padding: const EdgeInsets.fromLTRB(4, 12, 0, 12),
       decoration: const BoxDecoration(
         border: Border(bottom: BorderSide(color: CommunityStyle.stroke)),
       ),
       child: Row(
         children: [
-          Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: const Color(0x59FFFFFF)),
-            ),
-            child: const Icon(
-              Icons.radio_button_unchecked_rounded,
-              size: 15,
-              color: AppColors.textSecondary,
-            ),
-          ),
-          const SizedBox(width: 12),
+          leading,
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  today == null || today.action.isEmpty
-                      ? challenge.title
-                      : today.action,
-                  style: AppTypography.listItem.copyWith(
-                    color: AppColors.textPrimary,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-                Text(
-                  strings.communityDayOfTotal(
-                    today?.dayNumber ?? 0,
-                    challenge.durationDays,
-                  ),
-                  style: AppTypography.caption.copyWith(
-                    color: AppColors.textMuted,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (allDone)
-            Text(
-              strings.communityDoneToday,
-              style: AppTypography.caption.copyWith(color: AppColors.sage),
-            )
-          else
-            GestureDetector(
-              onTap: onMark,
-              child: Container(
-                height: 34,
-                padding: const EdgeInsets.symmetric(horizontal: 14),
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(999),
-                  color: const Color(0x1AFFFFFF),
-                ),
-                child: Text(
-                  strings.communityMarkDone,
-                  style: AppTypography.caption.copyWith(
-                    color: AppColors.textPrimary,
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: CommunityStyle.textBright,
+                    fontSize: 15,
                     fontWeight: FontWeight.w500,
+                    fontFamily: 'Urbanist',
                   ),
                 ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-// ---- 打卡墙的帖子 ----
-
-class _AtlasPost extends StatelessWidget {
-  const _AtlasPost({required this.insight});
-
-  final CommunityAtlasInsight insight;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(CommunityStyle.surfaceCardRadius),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 34,
-            height: 34,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: Color(0x1FF2C27F),
-            ),
-            child: const Icon(
-              Icons.auto_awesome_rounded,
-              size: 16,
-              color: CommunityStyle.gold,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+                const SizedBox(height: 2),
                 Text(
-                  context.l10n.communityAtlasKicker,
-                  style: AppTypography.caption.copyWith(
-                    color: CommunityStyle.gold,
-                    fontSize: 10.5,
-                    letterSpacing: 1.8,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  insight.summary,
-                  style: AppTypography.label.copyWith(
-                    color: AppColors.textSecondary,
-                    height: 1.5,
+                  subtitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: CommunityStyle.text72,
+                    fontSize: 13,
+                    height: 1.3,
+                    fontFamily: 'Urbanist',
                   ),
                 ),
               ],
             ),
           ),
+          const SizedBox(width: 10),
+          trailing,
+          const SizedBox(width: 8),
+          const Icon(
+            Icons.chevron_right_rounded,
+            size: 18,
+            color: CommunityStyle.text50,
+          ),
+        ],
+      ),
+    );
+    if (onTap == null) return row;
+    return InkWell(onTap: onTap, child: row);
+  }
+
+  // .nl：未读/计数徽章（浅底深字 20px 胶囊）。
+  Widget _countBadge(int count) {
+    return Container(
+      constraints: const BoxConstraints(minWidth: 20),
+      height: 20,
+      padding: const EdgeInsets.symmetric(horizontal: 6),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: CommunityStyle.textBright,
+      ),
+      child: Text(
+        '$count',
+        style: const TextStyle(
+          color: Color(0xFF121418),
+          fontSize: 12,
+          fontFamily: 'Urbanist',
+        ),
+      ),
+    );
+  }
+
+  // .cmm-pe：底部双按钮（玻璃左「Entrar com código」+ 白右「Criar time」，
+  // 132 + 8 + 132）。
+  Widget _bottomButtons(AppLocalizations strings) {
+    return SafeArea(
+      minimum: const EdgeInsets.only(bottom: 16, top: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _pillButton(
+            label: strings.communityJoinWithCode,
+            glass: true,
+            onTap: _openNew,
+          ),
+          const SizedBox(width: 8),
+          _pillButton(
+            label: strings.communityCreateTeam,
+            glass: false,
+            onTap: _openNew,
+          ),
         ],
       ),
     );
   }
-}
 
-class _CheckinPost extends StatelessWidget {
-  const _CheckinPost({
-    required this.message,
-    required this.onCheer,
-    required this.onRespond,
-  });
-
-  final CommunityMessage message;
-  final VoidCallback onCheer;
-  final VoidCallback onRespond;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(CommunityStyle.surfaceCardRadius),
+  Widget _pillButton({
+    required String label,
+    required bool glass,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 132,
+        height: 48,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(999),
+          color: glass ? CommunityStyle.glass : CommunityStyle.textBright,
+          border: glass
+              ? Border.all(color: CommunityStyle.strokeStrong)
+              : null,
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: glass ? CommunityStyle.textBright : const Color(0xFF121418),
+            fontSize: 13,
+            fontWeight: glass ? FontWeight.w400 : FontWeight.w500,
+            fontFamily: 'Urbanist',
+          ),
+        ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              CommunityAvatar(
-                name: message.authorDisplayName,
-                avatarUrl: message.authorAvatarUrl,
-                size: 36,
+    );
+  }
+
+  Widget _emptyText(String text) => Padding(
+        padding: const EdgeInsets.fromLTRB(4, 14, 0, 0),
+        child: Text(
+          text,
+          style: const TextStyle(
+            color: CommunityStyle.text50,
+            fontSize: 13,
+            height: 1.5,
+            fontFamily: 'Urbanist',
+          ),
+        ),
+      );
+
+  // ---- 弹层 ----
+
+  void _openMenu() {
+    final strings = context.l10n;
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: CommunityStyle.sheet,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+      ),
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _sheetItem(
+              sheetContext,
+              icon: Icons.groups_rounded,
+              label: strings.communityCreateTeam,
+              onTap: () { Navigator.of(sheetContext).pop(); _openNew(); }
+            ),
+            _sheetItem(
+              sheetContext,
+              icon: Icons.link_rounded,
+              label: strings.communityJoinWithCode,
+              onTap: () { Navigator.of(sheetContext).pop(); _openNew(); }
+            ),
+            _sheetItem(
+              sheetContext,
+              icon: Icons.flag_outlined,
+              label: strings.communityConcluded,
+              onTap: () {
+                Navigator.of(sheetContext).pop();
+                _openConcludedSheet();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _openInvitesSheet() {
+    final strings = context.l10n;
+    final invites = _invitations;
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: CommunityStyle.sheet,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+      ),
+      builder: (sheetContext) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+          children: [
+            Text(
+              strings.communityInvites,
+              style: const TextStyle(
+                color: CommunityStyle.textBright,
+                fontSize: 17,
+                fontWeight: FontWeight.w500,
+                fontFamily: 'Urbanist',
               ),
-              const SizedBox(width: 10),
-              Expanded(
+            ),
+            const SizedBox(height: 8),
+            for (final invite in invites) ...[
+              const SizedBox(height: 8),
+              Text(
+                invite.groupName,
+                style: const TextStyle(
+                  color: CommunityStyle.textBright,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  fontFamily: 'Urbanist',
+                ),
+              ),
+              Text(
+                '${strings.communityInviteTeam} · ${strings.communityInviteFromShort(invite.inviterName)}',
+                style: const TextStyle(
+                  color: CommunityStyle.text72,
+                  fontSize: 13,
+                  fontFamily: 'Urbanist',
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  _pillButton(
+                    label: strings.communityDecline,
+                    glass: true,
+                    onTap: () {
+                      Navigator.of(sheetContext).pop();
+                      _respond(invite, accept: false);
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  _pillButton(
+                    label: strings.communityAccept,
+                    glass: false,
+                    onTap: () {
+                      Navigator.of(sheetContext).pop();
+                      _respond(invite, accept: true);
+                    },
+                  ),
+                ],
+              ),
+            ],
+            if (invites.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Text(
+                  strings.communityInviteNone,
+                  style: const TextStyle(
+                    color: CommunityStyle.text50,
+                    fontSize: 13,
+                    fontFamily: 'Urbanist',
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _openChallengeSheet(CuratedChallenge challenge) {
+    final strings = context.l10n;
+    final (label, color) = _seloHoje(challenge, strings);
+    final done = challenge.today?.completed ?? false;
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: CommunityStyle.sheet,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+      ),
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                challenge.title,
+                style: const TextStyle(
+                  color: CommunityStyle.textBright,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w500,
+                  fontFamily: 'Urbanist',
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                challenge.today != null
+                    ? strings.communityDayOfTotal(
+                        challenge.today!.dayNumber,
+                        challenge.durationDays,
+                      )
+                    : strings.communityDurationDays(challenge.durationDays),
+                style: const TextStyle(
+                  color: CommunityStyle.text72,
+                  fontSize: 13,
+                  fontFamily: 'Urbanist',
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                label,
+                style: TextStyle(
+                  color: color,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 1.4,
+                  fontFamily: 'Urbanist',
+                ),
+              ),
+              if (challenge.today != null) ...[
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: TextButton(
+                    onPressed: done
+                        ? null
+                        : () {
+                            Navigator.of(sheetContext).pop();
+                            _markDone(challenge);
+                          },
+                    style: TextButton.styleFrom(
+                      backgroundColor: done
+                          ? CommunityStyle.chip
+                          : CommunityStyle.textBright,
+                      shape: const StadiumBorder(),
+                    ),
+                    child: Text(
+                      done ? strings.communityDoneToday : strings.communityMarkDay,
+                      style: TextStyle(
+                        color: done
+                            ? CommunityStyle.text72
+                            : const Color(0xFF121418),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        fontFamily: 'Urbanist',
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _openConcludedSheet() {
+    final strings = context.l10n;
+    final concluded =
+        _mine.where((c) => (c.today?.dayNumber ?? 0) >= c.durationDays);
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: CommunityStyle.sheet,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+      ),
+      builder: (sheetContext) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+          children: [
+            Text(
+              strings.communityConcluded,
+              style: const TextStyle(
+                color: CommunityStyle.textBright,
+                fontSize: 17,
+                fontWeight: FontWeight.w500,
+                fontFamily: 'Urbanist',
+              ),
+            ),
+            const SizedBox(height: 8),
+            for (final challenge in concluded)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      message.authorDisplayName,
-                      style: AppTypography.label.copyWith(
-                        color: AppColors.textPrimary,
+                      challenge.title,
+                      style: const TextStyle(
+                        color: CommunityStyle.textBright,
+                        fontSize: 15,
                         fontWeight: FontWeight.w500,
-                        fontSize: 14.5,
+                        fontFamily: 'Urbanist',
                       ),
                     ),
-                    // 源码 cab small：{时间} · check-in
                     Text(
-                      '${message.createdAt.hour.toString().padLeft(2, '0')}:${message.createdAt.minute.toString().padLeft(2, '0')}'
-                      ' · ${context.l10n.communityCheckinLabel}',
-                      style: AppTypography.caption.copyWith(
-                        color: AppColors.textMuted,
-                        fontSize: 12,
+                      strings.communityDurationDays(challenge.durationDays),
+                      style: const TextStyle(
+                        color: CommunityStyle.text72,
+                        fontSize: 13,
+                        fontFamily: 'Urbanist',
                       ),
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            message.content,
-            style: AppTypography.body.copyWith(
-              color: AppColors.textPrimary,
-              fontSize: 15,
-              height: 1.45,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.only(top: 10),
-            decoration: const BoxDecoration(
-              border: Border(top: BorderSide(color: CommunityStyle.stroke)),
-            ),
-            child: Row(
-              children: [
-                GestureDetector(
-                  onTap: onCheer,
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.favorite_border_rounded,
-                        size: 16,
-                        color: AppColors.textSecondary,
-                      ),
-                      const SizedBox(width: 7),
-                      Text(
-                        context.l10n.communityCheer,
-                        style: AppTypography.caption.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
+            if (concluded.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Text(
+                  strings.communityConcludedEmpty,
+                  style: const TextStyle(
+                    color: CommunityStyle.text50,
+                    fontSize: 13,
+                    fontFamily: 'Urbanist',
                   ),
                 ),
-                const SizedBox(width: 18),
-                GestureDetector(
-                  onTap: onRespond,
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.chat_bubble_outline_rounded,
-                        size: 16,
-                        color: AppColors.textSecondary,
-                      ),
-                      const SizedBox(width: 7),
-                      Text(
-                        context.l10n.communityRespond,
-                        style: AppTypography.caption.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+              ),
+          ],
+        ),
       ),
     );
   }
-}
 
-class _CenterText extends StatelessWidget {
-  const _CenterText(this.message);
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Text(
-        message,
-        textAlign: TextAlign.center,
-        style: AppTypography.caption.copyWith(color: AppColors.textSecondary),
+  Widget _sheetItem(
+    BuildContext sheetContext, {
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      onTap: onTap,
+      leading: Icon(icon, size: 20, color: CommunityStyle.text72),
+      title: Text(
+        label,
+        style: const TextStyle(
+          color: CommunityStyle.textBright,
+          fontSize: 15,
+          fontFamily: 'Urbanist',
+        ),
+      ),
+      trailing: const Icon(
+        Icons.chevron_right_rounded,
+        size: 18,
+        color: CommunityStyle.text50,
       ),
     );
   }

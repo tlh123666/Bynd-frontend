@@ -6282,6 +6282,73 @@ class AppLocalizationsPt extends AppLocalizations {
   String vitalityWeekSummary(String average, String delta) {
     return 'A média dos últimos 7 dias foi $average, $delta sobre a semana anterior.';
   }
+
+  @override
+  String get communityMyTeams => 'Seus times';
+
+  @override
+  String get communityMyChallenges => 'Seus desafios';
+
+  @override
+  String get communityInvites => 'Convites';
+
+  @override
+  String get communityInviteOne => 'Convite';
+
+  @override
+  String get communityInviteTeam => 'Time';
+
+  @override
+  String get communityInviteChallenge => 'Desafio';
+
+  @override
+  String get communityInviteNone => 'Nenhum convite agora.';
+
+  @override
+  String get communityMissedToday => 'Não contou';
+
+  @override
+  String get communityPendingToday => 'Falta hoje';
+
+  @override
+  String get communityNotStarted => 'Não começou';
+
+  @override
+  String get communityConcluded => 'Desafios concluídos';
+
+  @override
+  String get communityConcludedSub => 'os resultados dos que você terminou';
+
+  @override
+  String get communityConcludedEmpty =>
+      'Os desafios que você terminar aparecem aqui.';
+
+  @override
+  String get communityJoinWithCode => 'Entrar com código';
+
+  @override
+  String get communityCreateTeam => 'Criar time';
+
+  @override
+  String get communityTeamsEmpty =>
+      'Crie um time com quem você quiser, ou entre com o código que te mandaram.';
+
+  @override
+  String get communityChallengesEmpty =>
+      'Os desafios chegam por convite da BYND e dos médicos parceiros. Qualquer pessoa pode entrar, com ou sem time.';
+
+  @override
+  String get communityMarkDay => 'Marcar como feito';
+
+  @override
+  String communityDurationDays(int days) {
+    return '$days dias';
+  }
+
+  @override
+  String communityStartsOn(String date) {
+    return 'Começa $date';
+  }
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -12561,5 +12628,72 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   @override
   String vitalityWeekSummary(String average, String delta) {
     return 'A média dos últimos 7 dias foi $average, $delta sobre a semana anterior.';
+  }
+
+  @override
+  String get communityMyTeams => 'Seus times';
+
+  @override
+  String get communityMyChallenges => 'Seus desafios';
+
+  @override
+  String get communityInvites => 'Convites';
+
+  @override
+  String get communityInviteOne => 'Convite';
+
+  @override
+  String get communityInviteTeam => 'Time';
+
+  @override
+  String get communityInviteChallenge => 'Desafio';
+
+  @override
+  String get communityInviteNone => 'Nenhum convite agora.';
+
+  @override
+  String get communityMissedToday => 'Não contou';
+
+  @override
+  String get communityPendingToday => 'Falta hoje';
+
+  @override
+  String get communityNotStarted => 'Não começou';
+
+  @override
+  String get communityConcluded => 'Desafios concluídos';
+
+  @override
+  String get communityConcludedSub => 'os resultados dos que você terminou';
+
+  @override
+  String get communityConcludedEmpty =>
+      'Os desafios que você terminar aparecem aqui.';
+
+  @override
+  String get communityJoinWithCode => 'Entrar com código';
+
+  @override
+  String get communityCreateTeam => 'Criar time';
+
+  @override
+  String get communityTeamsEmpty =>
+      'Crie um time com quem você quiser, ou entre com o código que te mandaram.';
+
+  @override
+  String get communityChallengesEmpty =>
+      'Os desafios chegam por convite da BYND e dos médicos parceiros. Qualquer pessoa pode entrar, com ou sem time.';
+
+  @override
+  String get communityMarkDay => 'Marcar como feito';
+
+  @override
+  String communityDurationDays(int days) {
+    return '$days dias';
+  }
+
+  @override
+  String communityStartsOn(String date) {
+    return 'Começa $date';
   }
 }

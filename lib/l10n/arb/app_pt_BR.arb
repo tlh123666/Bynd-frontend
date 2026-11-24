@@ -2302,5 +2302,39 @@
         "type": "String"
       }
     }
+  },
+  "communityMyTeams": "Seus times",
+  "communityMyChallenges": "Seus desafios",
+  "communityInvites": "Convites",
+  "communityInviteOne": "Convite",
+  "communityInviteTeam": "Time",
+  "communityInviteChallenge": "Desafio",
+  "communityInviteNone": "Nenhum convite agora.",
+  "communityMissedToday": "Não contou",
+  "communityPendingToday": "Falta hoje",
+  "communityNotStarted": "Não começou",
+  "communityConcluded": "Desafios concluídos",
+  "communityConcludedSub": "os resultados dos que você terminou",
+  "communityConcludedEmpty": "Os desafios que você terminar aparecem aqui.",
+  "communityJoinWithCode": "Entrar com código",
+  "communityCreateTeam": "Criar time",
+  "communityTeamsEmpty": "Crie um time com quem você quiser, ou entre com o código que te mandaram.",
+  "communityChallengesEmpty": "Os desafios chegam por convite da BYND e dos médicos parceiros. Qualquer pessoa pode entrar, com ou sem time.",
+  "communityMarkDay": "Marcar como feito",
+  "communityDurationDays": "{days} dias",
+  "@communityDurationDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "communityStartsOn": "Começa {date}",
+  "@communityStartsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
   }
 }

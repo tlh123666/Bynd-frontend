@@ -6394,4 +6394,71 @@ class AppLocalizationsEn extends AppLocalizations {
   String vitalityWeekSummary(String average, String delta) {
     return 'The last 7 days averaged $average, $delta compared with the previous week.';
   }
+
+  @override
+  String get communityMyTeams => 'Your teams';
+
+  @override
+  String get communityMyChallenges => 'Your challenges';
+
+  @override
+  String get communityInvites => 'Invitations';
+
+  @override
+  String get communityInviteOne => 'Invitation';
+
+  @override
+  String get communityInviteTeam => 'Team';
+
+  @override
+  String get communityInviteChallenge => 'Challenge';
+
+  @override
+  String get communityInviteNone => 'No invitations right now.';
+
+  @override
+  String get communityMissedToday => 'Didn\'t count';
+
+  @override
+  String get communityPendingToday => 'Left today';
+
+  @override
+  String get communityNotStarted => 'Not started';
+
+  @override
+  String get communityConcluded => 'Completed challenges';
+
+  @override
+  String get communityConcludedSub => 'results of the ones you finished';
+
+  @override
+  String get communityConcludedEmpty =>
+      'The challenges you finish appear here.';
+
+  @override
+  String get communityJoinWithCode => 'Enter with code';
+
+  @override
+  String get communityCreateTeam => 'Create team';
+
+  @override
+  String get communityTeamsEmpty =>
+      'Create a team with whoever you want, or join with a code you were sent.';
+
+  @override
+  String get communityChallengesEmpty =>
+      'Challenges arrive by invitation from BYND and partner doctors. Anyone can join, with or without a team.';
+
+  @override
+  String get communityMarkDay => 'Mark as done';
+
+  @override
+  String communityDurationDays(int days) {
+    return '$days days';
+  }
+
+  @override
+  String communityStartsOn(String date) {
+    return 'Starts $date';
+  }
 }

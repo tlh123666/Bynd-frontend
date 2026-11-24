@@ -12043,6 +12043,126 @@ abstract class AppLocalizations {
   /// In pt_BR, this message translates to:
   /// **'A média dos últimos 7 dias foi {average}, {delta} sobre a semana anterior.'**
   String vitalityWeekSummary(String average, String delta);
+
+  /// No description provided for @communityMyTeams.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Seus times'**
+  String get communityMyTeams;
+
+  /// No description provided for @communityMyChallenges.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Seus desafios'**
+  String get communityMyChallenges;
+
+  /// No description provided for @communityInvites.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Convites'**
+  String get communityInvites;
+
+  /// No description provided for @communityInviteOne.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Convite'**
+  String get communityInviteOne;
+
+  /// No description provided for @communityInviteTeam.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Time'**
+  String get communityInviteTeam;
+
+  /// No description provided for @communityInviteChallenge.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Desafio'**
+  String get communityInviteChallenge;
+
+  /// No description provided for @communityInviteNone.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Nenhum convite agora.'**
+  String get communityInviteNone;
+
+  /// No description provided for @communityMissedToday.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Não contou'**
+  String get communityMissedToday;
+
+  /// No description provided for @communityPendingToday.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Falta hoje'**
+  String get communityPendingToday;
+
+  /// No description provided for @communityNotStarted.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Não começou'**
+  String get communityNotStarted;
+
+  /// No description provided for @communityConcluded.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Desafios concluídos'**
+  String get communityConcluded;
+
+  /// No description provided for @communityConcludedSub.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'os resultados dos que você terminou'**
+  String get communityConcludedSub;
+
+  /// No description provided for @communityConcludedEmpty.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Os desafios que você terminar aparecem aqui.'**
+  String get communityConcludedEmpty;
+
+  /// No description provided for @communityJoinWithCode.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Entrar com código'**
+  String get communityJoinWithCode;
+
+  /// No description provided for @communityCreateTeam.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Criar time'**
+  String get communityCreateTeam;
+
+  /// No description provided for @communityTeamsEmpty.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Crie um time com quem você quiser, ou entre com o código que te mandaram.'**
+  String get communityTeamsEmpty;
+
+  /// No description provided for @communityChallengesEmpty.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Os desafios chegam por convite da BYND e dos médicos parceiros. Qualquer pessoa pode entrar, com ou sem time.'**
+  String get communityChallengesEmpty;
+
+  /// No description provided for @communityMarkDay.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Marcar como feito'**
+  String get communityMarkDay;
+
+  /// No description provided for @communityDurationDays.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'{days} dias'**
+  String communityDurationDays(int days);
+
+  /// No description provided for @communityStartsOn.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Começa {date}'**
+  String communityStartsOn(String date);
 }
 
 class _AppLocalizationsDelegate
