@@ -57,6 +57,15 @@ Map<String, List<Map<String, dynamic>>> heartVitalsFromHistory(
       put('spo2', at, value: oxygen, unit: '%');
     }
   }
+  // 手环自动皮温（dataType 59/腋温历史）：10 分钟一条，单位摄氏度。
+  // 后端批次接口按 skin_temperature 校验 20–45 °C。
+  for (final r in heartMaps(history['temperature'])) {
+    final at = DateTime.tryParse('${r['date']}'.replaceAll('.', '-')),
+        temp = double.tryParse('${r['temperature']}');
+    if (at != null && temp != null && temp >= 20 && temp <= 45) {
+      put('skin_temperature', at, value: temp, unit: 'celsius');
+    }
+  }
   final rows = unique.values.toList()
     ..sort((a, b) {
       final time = '${a['measuredAt']}'.compareTo('${b['measuredAt']}');
