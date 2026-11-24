@@ -331,6 +331,18 @@ class _HeartRecordingPageState extends State<HeartRecordingPage>
                       (
                         heartText(
                           context,
+                          'Palma direita no eletrodo',
+                          'Right palm on the electrode',
+                        ),
+                        heartText(
+                          context,
+                          'Pulseira no pulso esquerdo. Pressione a palma da mão direita sobre o eletrodo da pulseira durante toda a leitura; sem esse contato a pulseira não inicia a medição.',
+                          'Band on your left wrist. Press your right palm against the band electrode for the whole reading; without that contact the band does not start measuring.',
+                        ),
+                      ),
+                      (
+                        heartText(
+                          context,
                           'Fique parado e sem falar',
                           'Stay still and quiet',
                         ),

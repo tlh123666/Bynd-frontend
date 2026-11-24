@@ -533,6 +533,16 @@ class JStyleBleController(
 
     // 完成：向 Dart 发 ecg_completed（携带本次会话捕获的全部指标值，
     // 包括 ECGResult 的血压），复位状态并恢复实时心率/血氧循环。
+    // 手环历史行的时间格式：yyyy.MM.dd HH:mm:ss（按手机时区解释，与
+    // SetDeviceTime 的写入一致）。解析失败返回 null。
+    private fun parseBandDate(value: String?): Long? {
+        if (value.isNullOrBlank()) return null
+        return runCatching {
+            java.text.SimpleDateFormat("yyyy.MM.dd HH:mm:ss", java.util.Locale.US)
+                .parse(value)?.time
+        }.getOrNull()
+    }
+
     private fun completeEcgMeasurement(cancelled: Boolean) {
         if (!ecgActive) return
         ecgFinishRunnable?.let { mainHandler.removeCallbacks(it) }
@@ -1077,24 +1087,38 @@ class JStyleBleController(
                     ?: entry.intValue(DeviceKey.LowPressure)
                     ?: lowBloodPressure
                 vascularAging = entry.intValue(DeviceKey.VascularAging) ?: vascularAging
-                // ECG 收尾路径：软结束后读到的 HRV 历史行就是本次测量的
-                // 结果（含血压）——先以 ecg_metrics 事件把值交给 Dart（其
-                // 保存载荷由该事件累积），再立即完成，不等硬超时。
+                // ECG 收尾路径：软结束后读 HRV 历史取本次测量结果。**只有
+                // 时间戳落在本次会话窗口内的行才允许作为结果**——实测（2026-11-20
+                // 三块记录）手环不会把手动测量即时写进历史，直接取首行会把
+                // 几天前自动监测的旧值当成当次结果入库，属于错误数据。
                 if (ecgActive && ecgHardTimeoutRunnable != null) {
-                    Log.d(
-                        TAG,
-                        "ecg result via HRV history hr=$heartRate hrv=$hrv stress=$stress bp=$highBloodPressure/$lowBloodPressure",
-                    )
-                    onEcgEvent?.invoke(
-                        mapOf(
-                            "event" to "ecg_metrics",
-                            "heartRate" to heartRate.takeIf { it > 0 },
-                            "hrv" to hrv.takeIf { it > 0 },
-                            "stress" to stress.takeIf { it > 0 },
-                            "systolicBloodPressure" to highBloodPressure.takeIf { it > 0 },
-                            "diastolicBloodPressure" to lowBloodPressure.takeIf { it > 0 },
-                        ),
-                    )
+                    val entryAt = parseBandDate(entry?.get("date")?.toString())
+                    val now = System.currentTimeMillis()
+                    val inSession = entryAt != null &&
+                        entryAt >= ecgStartedAtMillis - BAND_CLOCK_TOLERANCE_MS &&
+                        entryAt <= now + BAND_CLOCK_TOLERANCE_MS
+                    if (inSession) {
+                        Log.d(
+                            TAG,
+                            "ecg result via HRV history hr=$heartRate hrv=$hrv stress=$stress bp=$highBloodPressure/$lowBloodPressure",
+                        )
+                        onEcgEvent?.invoke(
+                            mapOf(
+                                "event" to "ecg_metrics",
+                                "heartRate" to heartRate.takeIf { it > 0 },
+                                "hrv" to hrv.takeIf { it > 0 },
+                                "stress" to stress.takeIf { it > 0 },
+                                "systolicBloodPressure" to highBloodPressure.takeIf { it > 0 },
+                                "diastolicBloodPressure" to lowBloodPressure.takeIf { it > 0 },
+                            ),
+                        )
+                    } else {
+                        Log.w(
+                            TAG,
+                            "ecg: HRV history row ${entry?.get("date")} is not from this session " +
+                                "(started $ecgStartedAtMillis); recording without result metrics",
+                        )
+                    }
                     completeEcgMeasurement(cancelled = false)
                 }
             }
@@ -1699,6 +1723,8 @@ class JStyleBleController(
         private const val ECG_START_RETRY_MS = 3000L
         // HRV 启动重试上限：~36s，足够跨过一轮 35s 的心率/血氧测量。
         private const val ECG_START_MAX_RETRIES = 12
+        // 手环时钟与手机的允许偏差（历史行时间戳与本次会话窗口的匹配容差）。
+        private const val BAND_CLOCK_TOLERANCE_MS = 120_000L
         private const val PROFILE_SYNC_TIMEOUT_MS = 20000L
         private const val DEFAULT_SLEEP_UNIT_MINUTES = 5
         private const val MINUTES_PER_HOUR = 60.0
