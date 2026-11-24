@@ -5867,6 +5867,421 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get diaryWhatHappenedOnThisDay => 'O que aconteceu neste dia?';
+
+  @override
+  String get vitalityRecovery => 'Recuperação';
+
+  @override
+  String get vitalityEnergy => 'Energia';
+
+  @override
+  String get vitalityMissing => 'Sem leitura';
+
+  @override
+  String get vitalityLow => 'Baixa';
+
+  @override
+  String get vitalityGood => 'Boa';
+
+  @override
+  String get vitalityGreat => 'Ótima';
+
+  @override
+  String get vitalityAttention => 'Atenção';
+
+  @override
+  String get vitalityTodayRecovery => 'Recuperação de hoje';
+
+  @override
+  String get vitalityEnergyDay => 'Energia ao longo do dia';
+
+  @override
+  String get vitalityForecastRecovery => 'Previsão de recuperação';
+
+  @override
+  String get vitalityForecastEnergy => 'Próximas horas';
+
+  @override
+  String get vitalityYesterday => 'Ontem';
+
+  @override
+  String get vitalityNormal => 'Seu normal';
+
+  @override
+  String get vitalityAverage7 => 'Média 7 dias';
+
+  @override
+  String get vitalityAverage => 'média';
+
+  @override
+  String get vitalityToday => 'hoje';
+
+  @override
+  String get vitalityTomorrow => 'amanhã';
+
+  @override
+  String get vitalityNow => 'agora';
+
+  @override
+  String get vitalityDetails => 'Ver detalhes';
+
+  @override
+  String get vitalitySettings => 'Ajustes';
+
+  @override
+  String get vitalityRecoverySettings =>
+      'O que a Recuperação considera e mostra para você.';
+
+  @override
+  String get vitalityEnergySettings =>
+      'Suas metas de movimento e os avisos da Energia.';
+
+  @override
+  String get vitalityCalculation => 'Como calcular';
+
+  @override
+  String get vitalityTrainingSetting => 'Considerar o treino de ontem';
+
+  @override
+  String get vitalityTrainingHint =>
+      'Carga estimada a partir de duração e frequência de treinos registrados.';
+
+  @override
+  String get vitalityShowPage => 'Mostrar na página';
+
+  @override
+  String get vitalityFactors => 'O que pesou hoje';
+
+  @override
+  String get vitalityFactorsHint => 'VFC, frequência, sono e carga';
+
+  @override
+  String get vitalityShowForecast => 'Previsão de amanhã';
+
+  @override
+  String get vitalityShowWindows => 'Janelas de energia';
+
+  @override
+  String get vitalityWindowsHint =>
+      'Picos observados nas sincronizações do dia';
+
+  @override
+  String get vitalityNotices => 'Avisos na página';
+
+  @override
+  String get vitalityLowNotice => 'Recuperação baixa';
+
+  @override
+  String get vitalityMorningNotice => 'Resumo da manhã';
+
+  @override
+  String get vitalityMovementNotice => 'Hora de se mexer';
+
+  @override
+  String get vitalityGoalNotice => 'Meta alcançada';
+
+  @override
+  String get vitalityNoticeHint =>
+      'Avisos exibidos ao abrir a página; não são notificações em segundo plano.';
+
+  @override
+  String get vitalityGoals => 'Metas';
+
+  @override
+  String get vitalityStepsGoal => 'Meta de passos';
+
+  @override
+  String get vitalityActiveGoal => 'Minutos ativos';
+
+  @override
+  String get vitalityPerDay => 'por dia';
+
+  @override
+  String get vitalityData => 'Dados';
+
+  @override
+  String get vitalityCalendar => 'Calendário';
+
+  @override
+  String get vitalityShare => 'Compartilhar';
+
+  @override
+  String get vitalityExport => 'Exportar dados';
+
+  @override
+  String get vitalitySave => 'Salvar';
+
+  @override
+  String get vitalitySaved => 'Preferências salvas.';
+
+  @override
+  String get vitalitySaveFailed =>
+      'Não foi possível salvar. Suas alterações continuam aqui.';
+
+  @override
+  String get vitalityLoadingFailed =>
+      'Não foi possível carregar. Tente novamente.';
+
+  @override
+  String get vitalityRetry => 'Tentar novamente';
+
+  @override
+  String get vitalityAccountChanged => 'Sua conta mudou. Reabra esta página.';
+
+  @override
+  String get vitalityNoData =>
+      'Sincronize a pulseira para ver os sinais deste dia.';
+
+  @override
+  String get vitalityNoBaseline =>
+      'Seu normal aparece após 7 dias válidos nos 28 dias anteriores.';
+
+  @override
+  String get vitalityNoCurve =>
+      'Ainda não há estimativas sincronizadas suficientes neste dia para uma curva.';
+
+  @override
+  String get vitalityNoForecast =>
+      'Ainda não há histórico suficiente para uma previsão.';
+
+  @override
+  String get vitalityEstimated => 'Estimativa baseada nos seus dados';
+
+  @override
+  String get vitalityEstimateExplanation =>
+      'Esta nota é uma estimativa de bem-estar calculada a partir dos sinais disponíveis. Não é uma medição direta nem um diagnóstico.';
+
+  @override
+  String get vitalityForecastExplanation =>
+      'Cenário de evolução, não uma garantia. Novas leituras podem mudar a estimativa.';
+
+  @override
+  String get vitalityCurveExplanation =>
+      'Pontos registrados em sincronizações reais. Intervalos sem leituras ficam em branco.';
+
+  @override
+  String get vitalityDemo => 'Demonstração · dados de referência';
+
+  @override
+  String get vitalityRecoveryReady =>
+      'Seu corpo está pronto para um dia forte.';
+
+  @override
+  String get vitalityRecoveryLow =>
+      'Seu corpo ainda está se recuperando. Hoje é dia de pegar leve.';
+
+  @override
+  String get vitalityRecoveryRest => 'Seu corpo pede descanso hoje.';
+
+  @override
+  String get vitalityEnergyReady =>
+      'Bom pico pela manhã. Agora, poupe o corpo.';
+
+  @override
+  String get vitalityEnergyLow =>
+      'Energia mais baixa hoje. Faça o importante cedo.';
+
+  @override
+  String get vitalityEnergyRest => 'Pouca energia hoje. Priorize o descanso.';
+
+  @override
+  String get vitalityRecoveryAnalysis =>
+      'A VFC, o estresse e os treinos registrados ajudam a compor esta estimativa. Compare os sinais abaixo e acompanhe a tendência, sem tirar conclusões a partir de um dia isolado.';
+
+  @override
+  String get vitalityEnergyAnalysis =>
+      'Sono verificado, estresse, VFC e passos contribuem para esta estimativa. A curva mostra apenas os pontos capturados durante as sincronizações.';
+
+  @override
+  String get vitalityMetrics => 'Principais métricas';
+
+  @override
+  String get vitalityRecoveryMetrics =>
+      'O que a recuperação de hoje quer dizer para o seu dia.';
+
+  @override
+  String get vitalityEnergyMetrics => 'O que mexe com a sua energia hoje.';
+
+  @override
+  String get vitalityTraining => 'Carga de treino';
+
+  @override
+  String get vitalityStress => 'Estresse';
+
+  @override
+  String get vitalityHRV => 'VFC';
+
+  @override
+  String get vitalityRHR => 'FC em repouso';
+
+  @override
+  String get vitalityVO2 => 'VO₂ Max';
+
+  @override
+  String get vitalitySleep => 'Sono';
+
+  @override
+  String get vitalityTemperature => 'Temperatura';
+
+  @override
+  String get vitalityBreathing => 'Respiração';
+
+  @override
+  String get vitalitySteps => 'Passos';
+
+  @override
+  String get vitalityActiveMinutes => 'Min. ativos';
+
+  @override
+  String get vitalityCalories => 'Calorias';
+
+  @override
+  String get vitalitySignals => 'Sinais desta leitura';
+
+  @override
+  String get vitalityRecoveryWeek => 'Recuperação nos últimos 7 dias';
+
+  @override
+  String get vitalityEnergyWeek => 'Energia nos últimos 7 dias';
+
+  @override
+  String get vitalityWeek => 'Semana';
+
+  @override
+  String get vitalityMonth => 'Mês';
+
+  @override
+  String get vitalityDay => 'Dia';
+
+  @override
+  String get vitalityMetricDetails => 'Sobre esta leitura';
+
+  @override
+  String get vitalityMissingMetric =>
+      'Este sinal não foi medido ou sincronizado neste dia.';
+
+  @override
+  String get vitalityWeekExplanation =>
+      'As médias usam apenas os dias com dados. Dias sem leitura não entram como zero.';
+
+  @override
+  String get vitalityDiary => 'Seu Diário';
+
+  @override
+  String get vitalityDiaryHint =>
+      'Um toque em cada. Vai direto para o seu Diário e ajuda o Atlas a entender o seu dia.';
+
+  @override
+  String get vitalityWakeQuestion => 'Como você acordou?';
+
+  @override
+  String get vitalityEnergyQuestion => 'Como está sua disposição?';
+
+  @override
+  String get vitalitySoreness => 'Está com dor muscular?';
+
+  @override
+  String get vitalityFlu => 'Algum sinal de gripe?';
+
+  @override
+  String get vitalityBreakfast => 'Tomou café da manhã?';
+
+  @override
+  String get vitalityNap => 'Cochilou hoje?';
+
+  @override
+  String get vitalityScaleBad => 'Muito mal';
+
+  @override
+  String get vitalityScaleGood => 'Muito bem';
+
+  @override
+  String get vitalityScaleLow => 'Muito baixa';
+
+  @override
+  String get vitalityScaleHigh => 'Muito boa';
+
+  @override
+  String get vitalityMore => 'Mostrar mais';
+
+  @override
+  String get vitalityLess => 'Mostrar menos';
+
+  @override
+  String get vitalityAskAtlas => 'Conversar com Atlas';
+
+  @override
+  String get vitalityShareFailed =>
+      'Não foi possível compartilhar ou exportar. Tente novamente.';
+
+  @override
+  String get vitalityPremium => 'O histórico de 30 dias requer Premium.';
+
+  @override
+  String get vitalityGoalReached =>
+      'Você alcançou sua meta de passos neste dia.';
+
+  @override
+  String get vitalityMovementHint =>
+      'Veja seus minutos ativos e encontre uma pausa para se movimentar.';
+
+  @override
+  String get vitalityOpenDiary => 'Abrir Diário';
+
+  @override
+  String get vitalitySyncTime => 'Última sincronização';
+
+  @override
+  String get vitalityInfo => 'Como funciona';
+
+  @override
+  String vitalityScoreSummary(String score, String status) {
+    return '$score de 100 · $status';
+  }
+
+  @override
+  String vitalityComparedWeek(String delta) {
+    return '$delta sobre a semana anterior';
+  }
+
+  @override
+  String vitalityPeakAt(String score, String time) {
+    return 'Pico observado: $score às $time';
+  }
+
+  @override
+  String vitalitySelectedPoint(String date, String score) {
+    return '$date · $score';
+  }
+
+  @override
+  String vitalityEnergyPeakForecast(
+    String peak,
+    String peakTime,
+    String forecast,
+    String forecastTime,
+  ) {
+    return 'Pico de $peak às $peakTime · previsão de $forecast às $forecastTime';
+  }
+
+  @override
+  String get vitalityRecoveryWeekUp => 'Sua recuperação subiu nesta semana.';
+
+  @override
+  String get vitalityRecoveryWeekDown =>
+      'Sua recuperação caiu um pouco nesta semana.';
+
+  @override
+  String get vitalityEnergyWeekUp => 'Sua energia subiu nesta semana.';
+
+  @override
+  String get vitalityEnergyWeekDown =>
+      'Sua energia caiu um pouco nesta semana.';
+
+  @override
+  String vitalityWeekSummary(String average, String delta) {
+    return 'A média dos últimos 7 dias foi $average, $delta sobre a semana anterior.';
+  }
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -11732,4 +12147,419 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get diaryWhatHappenedOnThisDay => 'O que aconteceu neste dia?';
+
+  @override
+  String get vitalityRecovery => 'Recuperação';
+
+  @override
+  String get vitalityEnergy => 'Energia';
+
+  @override
+  String get vitalityMissing => 'Sem leitura';
+
+  @override
+  String get vitalityLow => 'Baixa';
+
+  @override
+  String get vitalityGood => 'Boa';
+
+  @override
+  String get vitalityGreat => 'Ótima';
+
+  @override
+  String get vitalityAttention => 'Atenção';
+
+  @override
+  String get vitalityTodayRecovery => 'Recuperação de hoje';
+
+  @override
+  String get vitalityEnergyDay => 'Energia ao longo do dia';
+
+  @override
+  String get vitalityForecastRecovery => 'Previsão de recuperação';
+
+  @override
+  String get vitalityForecastEnergy => 'Próximas horas';
+
+  @override
+  String get vitalityYesterday => 'Ontem';
+
+  @override
+  String get vitalityNormal => 'Seu normal';
+
+  @override
+  String get vitalityAverage7 => 'Média 7 dias';
+
+  @override
+  String get vitalityAverage => 'média';
+
+  @override
+  String get vitalityToday => 'hoje';
+
+  @override
+  String get vitalityTomorrow => 'amanhã';
+
+  @override
+  String get vitalityNow => 'agora';
+
+  @override
+  String get vitalityDetails => 'Ver detalhes';
+
+  @override
+  String get vitalitySettings => 'Ajustes';
+
+  @override
+  String get vitalityRecoverySettings =>
+      'O que a Recuperação considera e mostra para você.';
+
+  @override
+  String get vitalityEnergySettings =>
+      'Suas metas de movimento e os avisos da Energia.';
+
+  @override
+  String get vitalityCalculation => 'Como calcular';
+
+  @override
+  String get vitalityTrainingSetting => 'Considerar o treino de ontem';
+
+  @override
+  String get vitalityTrainingHint =>
+      'Carga estimada a partir de duração e frequência de treinos registrados.';
+
+  @override
+  String get vitalityShowPage => 'Mostrar na página';
+
+  @override
+  String get vitalityFactors => 'O que pesou hoje';
+
+  @override
+  String get vitalityFactorsHint => 'VFC, frequência, sono e carga';
+
+  @override
+  String get vitalityShowForecast => 'Previsão de amanhã';
+
+  @override
+  String get vitalityShowWindows => 'Janelas de energia';
+
+  @override
+  String get vitalityWindowsHint =>
+      'Picos observados nas sincronizações do dia';
+
+  @override
+  String get vitalityNotices => 'Avisos na página';
+
+  @override
+  String get vitalityLowNotice => 'Recuperação baixa';
+
+  @override
+  String get vitalityMorningNotice => 'Resumo da manhã';
+
+  @override
+  String get vitalityMovementNotice => 'Hora de se mexer';
+
+  @override
+  String get vitalityGoalNotice => 'Meta alcançada';
+
+  @override
+  String get vitalityNoticeHint =>
+      'Avisos exibidos ao abrir a página; não são notificações em segundo plano.';
+
+  @override
+  String get vitalityGoals => 'Metas';
+
+  @override
+  String get vitalityStepsGoal => 'Meta de passos';
+
+  @override
+  String get vitalityActiveGoal => 'Minutos ativos';
+
+  @override
+  String get vitalityPerDay => 'por dia';
+
+  @override
+  String get vitalityData => 'Dados';
+
+  @override
+  String get vitalityCalendar => 'Calendário';
+
+  @override
+  String get vitalityShare => 'Compartilhar';
+
+  @override
+  String get vitalityExport => 'Exportar dados';
+
+  @override
+  String get vitalitySave => 'Salvar';
+
+  @override
+  String get vitalitySaved => 'Preferências salvas.';
+
+  @override
+  String get vitalitySaveFailed =>
+      'Não foi possível salvar. Suas alterações continuam aqui.';
+
+  @override
+  String get vitalityLoadingFailed =>
+      'Não foi possível carregar. Tente novamente.';
+
+  @override
+  String get vitalityRetry => 'Tentar novamente';
+
+  @override
+  String get vitalityAccountChanged => 'Sua conta mudou. Reabra esta página.';
+
+  @override
+  String get vitalityNoData =>
+      'Sincronize a pulseira para ver os sinais deste dia.';
+
+  @override
+  String get vitalityNoBaseline =>
+      'Seu normal aparece após 7 dias válidos nos 28 dias anteriores.';
+
+  @override
+  String get vitalityNoCurve =>
+      'Ainda não há estimativas sincronizadas suficientes neste dia para uma curva.';
+
+  @override
+  String get vitalityNoForecast =>
+      'Ainda não há histórico suficiente para uma previsão.';
+
+  @override
+  String get vitalityEstimated => 'Estimativa baseada nos seus dados';
+
+  @override
+  String get vitalityEstimateExplanation =>
+      'Esta nota é uma estimativa de bem-estar calculada a partir dos sinais disponíveis. Não é uma medição direta nem um diagnóstico.';
+
+  @override
+  String get vitalityForecastExplanation =>
+      'Cenário de evolução, não uma garantia. Novas leituras podem mudar a estimativa.';
+
+  @override
+  String get vitalityCurveExplanation =>
+      'Pontos registrados em sincronizações reais. Intervalos sem leituras ficam em branco.';
+
+  @override
+  String get vitalityDemo => 'Demonstração · dados de referência';
+
+  @override
+  String get vitalityRecoveryReady =>
+      'Seu corpo está pronto para um dia forte.';
+
+  @override
+  String get vitalityRecoveryLow =>
+      'Seu corpo ainda está se recuperando. Hoje é dia de pegar leve.';
+
+  @override
+  String get vitalityRecoveryRest => 'Seu corpo pede descanso hoje.';
+
+  @override
+  String get vitalityEnergyReady =>
+      'Bom pico pela manhã. Agora, poupe o corpo.';
+
+  @override
+  String get vitalityEnergyLow =>
+      'Energia mais baixa hoje. Faça o importante cedo.';
+
+  @override
+  String get vitalityEnergyRest => 'Pouca energia hoje. Priorize o descanso.';
+
+  @override
+  String get vitalityRecoveryAnalysis =>
+      'A VFC, o estresse e os treinos registrados ajudam a compor esta estimativa. Compare os sinais abaixo e acompanhe a tendência, sem tirar conclusões a partir de um dia isolado.';
+
+  @override
+  String get vitalityEnergyAnalysis =>
+      'Sono verificado, estresse, VFC e passos contribuem para esta estimativa. A curva mostra apenas os pontos capturados durante as sincronizações.';
+
+  @override
+  String get vitalityMetrics => 'Principais métricas';
+
+  @override
+  String get vitalityRecoveryMetrics =>
+      'O que a recuperação de hoje quer dizer para o seu dia.';
+
+  @override
+  String get vitalityEnergyMetrics => 'O que mexe com a sua energia hoje.';
+
+  @override
+  String get vitalityTraining => 'Carga de treino';
+
+  @override
+  String get vitalityStress => 'Estresse';
+
+  @override
+  String get vitalityHRV => 'VFC';
+
+  @override
+  String get vitalityRHR => 'FC em repouso';
+
+  @override
+  String get vitalityVO2 => 'VO₂ Max';
+
+  @override
+  String get vitalitySleep => 'Sono';
+
+  @override
+  String get vitalityTemperature => 'Temperatura';
+
+  @override
+  String get vitalityBreathing => 'Respiração';
+
+  @override
+  String get vitalitySteps => 'Passos';
+
+  @override
+  String get vitalityActiveMinutes => 'Min. ativos';
+
+  @override
+  String get vitalityCalories => 'Calorias';
+
+  @override
+  String get vitalitySignals => 'Sinais desta leitura';
+
+  @override
+  String get vitalityRecoveryWeek => 'Recuperação nos últimos 7 dias';
+
+  @override
+  String get vitalityEnergyWeek => 'Energia nos últimos 7 dias';
+
+  @override
+  String get vitalityWeek => 'Semana';
+
+  @override
+  String get vitalityMonth => 'Mês';
+
+  @override
+  String get vitalityDay => 'Dia';
+
+  @override
+  String get vitalityMetricDetails => 'Sobre esta leitura';
+
+  @override
+  String get vitalityMissingMetric =>
+      'Este sinal não foi medido ou sincronizado neste dia.';
+
+  @override
+  String get vitalityWeekExplanation =>
+      'As médias usam apenas os dias com dados. Dias sem leitura não entram como zero.';
+
+  @override
+  String get vitalityDiary => 'Seu Diário';
+
+  @override
+  String get vitalityDiaryHint =>
+      'Um toque em cada. Vai direto para o seu Diário e ajuda o Atlas a entender o seu dia.';
+
+  @override
+  String get vitalityWakeQuestion => 'Como você acordou?';
+
+  @override
+  String get vitalityEnergyQuestion => 'Como está sua disposição?';
+
+  @override
+  String get vitalitySoreness => 'Está com dor muscular?';
+
+  @override
+  String get vitalityFlu => 'Algum sinal de gripe?';
+
+  @override
+  String get vitalityBreakfast => 'Tomou café da manhã?';
+
+  @override
+  String get vitalityNap => 'Cochilou hoje?';
+
+  @override
+  String get vitalityScaleBad => 'Muito mal';
+
+  @override
+  String get vitalityScaleGood => 'Muito bem';
+
+  @override
+  String get vitalityScaleLow => 'Muito baixa';
+
+  @override
+  String get vitalityScaleHigh => 'Muito boa';
+
+  @override
+  String get vitalityMore => 'Mostrar mais';
+
+  @override
+  String get vitalityLess => 'Mostrar menos';
+
+  @override
+  String get vitalityAskAtlas => 'Conversar com Atlas';
+
+  @override
+  String get vitalityShareFailed =>
+      'Não foi possível compartilhar ou exportar. Tente novamente.';
+
+  @override
+  String get vitalityPremium => 'O histórico de 30 dias requer Premium.';
+
+  @override
+  String get vitalityGoalReached =>
+      'Você alcançou sua meta de passos neste dia.';
+
+  @override
+  String get vitalityMovementHint =>
+      'Veja seus minutos ativos e encontre uma pausa para se movimentar.';
+
+  @override
+  String get vitalityOpenDiary => 'Abrir Diário';
+
+  @override
+  String get vitalitySyncTime => 'Última sincronização';
+
+  @override
+  String get vitalityInfo => 'Como funciona';
+
+  @override
+  String vitalityScoreSummary(String score, String status) {
+    return '$score de 100 · $status';
+  }
+
+  @override
+  String vitalityComparedWeek(String delta) {
+    return '$delta sobre a semana anterior';
+  }
+
+  @override
+  String vitalityPeakAt(String score, String time) {
+    return 'Pico observado: $score às $time';
+  }
+
+  @override
+  String vitalitySelectedPoint(String date, String score) {
+    return '$date · $score';
+  }
+
+  @override
+  String vitalityEnergyPeakForecast(
+    String peak,
+    String peakTime,
+    String forecast,
+    String forecastTime,
+  ) {
+    return 'Pico de $peak às $peakTime · previsão de $forecast às $forecastTime';
+  }
+
+  @override
+  String get vitalityRecoveryWeekUp => 'Sua recuperação subiu nesta semana.';
+
+  @override
+  String get vitalityRecoveryWeekDown =>
+      'Sua recuperação caiu um pouco nesta semana.';
+
+  @override
+  String get vitalityEnergyWeekUp => 'Sua energia subiu nesta semana.';
+
+  @override
+  String get vitalityEnergyWeekDown =>
+      'Sua energia caiu um pouco nesta semana.';
+
+  @override
+  String vitalityWeekSummary(String average, String delta) {
+    return 'A média dos últimos 7 dias foi $average, $delta sobre a semana anterior.';
+  }
 }

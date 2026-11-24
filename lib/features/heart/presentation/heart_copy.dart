@@ -70,4 +70,5 @@ const heartContexts = <String, (String, String)>{
   'rest': ('Repouso', 'At rest'),
   'after_coffee': ('Após café', 'After coffee'),
   'after_workout': ('Após treino', 'After exercise'),
+  'stressed': ('Sob estresse', 'Feeling stressed'),
 };

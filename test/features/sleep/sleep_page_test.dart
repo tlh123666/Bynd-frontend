@@ -62,30 +62,34 @@ Future<void> mountSleep(
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
   testWidgets(
-    'refresh cannot dispose a pending diary save or leave the page locked',
+    'grouped diary keeps the sleep route open during a pending save',
     (tester) async {
       final repo = MemorySleepRepository();
       final diary = PendingSleepDiary();
       await mountSleep(tester, repo, diary: diary);
-      final answer = find.byKey(const ValueKey('sleep-habit-cafe15-true'));
-      await tester.ensureVisible(answer);
-      await tester.tap(answer);
+      final entry = find.text('Marcar no Diário');
+      await tester.ensureVisible(entry);
+      await tester.tap(entry);
+      await tester.pumpAndSettle();
+      final tracker = find.byKey(const ValueKey('diary-tracker-cafe15'));
+      await tester.ensureVisible(tracker);
+      await tester.tap(tracker);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Salvar'));
       await tester.pump();
       expect(diary.started, isTrue);
-      await tester
-          .widget<RefreshIndicator>(find.byType(RefreshIndicator))
-          .onRefresh();
+      await tester.binding.handlePopRoute();
       await tester.pump();
-      expect(repo.loads, 1);
+      expect(
+        find.byKey(const ValueKey('diary-tracker-cafe15')),
+        findsOneWidget,
+      );
       diary.pending.complete(
         DiaryDay(date: DateTime(2026, 11, 14), events: const []),
       );
       await tester.pumpAndSettle();
-      await tester
-          .widget<RefreshIndicator>(find.byType(RefreshIndicator))
-          .onRefresh();
-      await tester.pumpAndSettle();
-      expect(repo.loads, 2);
+      expect(find.byType(SleepPage), findsOneWidget);
+      expect(find.byKey(const ValueKey('diary-tracker-cafe15')), findsNothing);
       expect(tester.takeException(), isNull);
     },
   );
@@ -139,16 +143,12 @@ void main() {
     (tester) async {
       final repo = MemorySleepRepository()..empty = true;
       await mountSleep(tester, repo);
-      expect(
-        find.text('Não conseguimos ler o seu sono nessa noite.'),
-        findsOneWidget,
-      );
-      expect(
-        find.text('82'),
-        findsWidgets,
-      ); // measured historic nights remain independent
+      expect(find.text('Nenhuma noite registrada.'), findsOneWidget);
+      expect(find.text('—'), findsWidgets);
       expect(find.text('TEMPO DE SONO'), findsNothing);
-      expect(find.text('PLANEJADOR DE SONO'), findsOneWidget);
+      await tester.tap(find.byTooltip('Ajustes do sono'));
+      await tester.pumpAndSettle();
+      expect(find.text('Planejador de sono'), findsOneWidget);
       expect(tester.takeException(), isNull);
     },
   );

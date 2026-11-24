@@ -5,7 +5,8 @@ import '../../../../shared/widgets/app_sheet_controls.dart';
 import '../../application/heart_exports.dart';
 import '../../domain/heart_models.dart';
 import '../heart_copy.dart';
-import '../widgets/heart_charts.dart';
+import '../widgets/heart_recording_trace.dart';
+import '../../../diary/presentation/diary_page.dart' show DiarySessionGuard;
 import '../widgets/heart_widgets.dart';
 
 class HeartRecordingReport extends StatefulWidget {
@@ -86,6 +87,29 @@ class _HeartRecordingReportState extends State<HeartRecordingReport> {
     } finally {
       if (mounted) setState(() => _saving = false);
     }
+  }
+
+  Future<void> _editObservations() async {
+    final token = AuthSession.instance.accessToken;
+    final draft = await showAppContentSheet<(String, Set<String>)>(
+      context,
+      (_) => DiarySessionGuard(
+        token: token,
+        child: _RecordingDiary(contextValue: _context, symptoms: _symptoms),
+      ),
+      glass: true,
+      heightFactor: .88,
+    );
+    if (!mounted ||
+        draft == null ||
+        AuthSession.instance.accessToken != token) {
+      return;
+    }
+    setState(() {
+      _context = draft.$1;
+      _symptoms = draft.$2;
+    });
+    if (_dirty) await _save();
   }
 
   Rect? _origin() {
@@ -198,14 +222,12 @@ class _HeartRecordingReportState extends State<HeartRecordingReport> {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(22, 28, 22, 38),
                 children: [
-                  Text(
-                    heartNumber(record.number('heartRate')),
-                    style: AppHeartStyle.number,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'bpm · ${heartShortDate(context, record.measuredAt)} · ${heartClock(record.measuredAt)}',
-                    style: AppHeartStyle.caption,
+                  AppHealthHero(
+                    value: heartNumber(record.number('heartRate')),
+                    label:
+                        'bpm · ${heartShortDate(context, record.measuredAt)} · ${heartClock(record.measuredAt)}',
+                    status: record.label,
+                    color: AppHealthStyle.pulse,
                   ),
                   const SizedBox(height: 24),
                   Text(
@@ -248,118 +270,82 @@ class _HeartRecordingReportState extends State<HeartRecordingReport> {
                     ),
                   ],
                   const SizedBox(height: 26),
-                  AppMetricCard(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        HeartLabel(
-                          heartText(context, 'O traçado', 'The trace'),
-                        ),
-                        const SizedBox(height: 14),
-                        if (record.available)
-                          HeartWaveform(samples: record.samples, height: 170)
-                        else
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 30),
-                            child: Text(
-                              record.status == 'expired'
-                                  ? heartText(
-                                      context,
-                                      'O prazo de retenção do traçado terminou. O resumo continua disponível.',
-                                      'The waveform retention period has ended. The summary remains available.',
-                                    )
-                                  : heartText(
-                                      context,
-                                      'Traçado indisponível.',
-                                      'Waveform unavailable.',
-                                    ),
-                              style: AppHeartStyle.caption,
-                            ),
-                          ),
-                        Text(
-                          heartText(
-                            context,
-                            'Amplitude relativa · sem calibração em mm/mV',
-                            'Relative amplitude · no mm/mV calibration',
-                          ),
-                          style: AppHeartStyle.caption,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 28),
-                  HeartLabel(
-                    heartText(context, 'Como você estava?', 'How were you?'),
+                  AppHealthSection(
+                    heartText(context, 'O traçado', 'The trace'),
+                    Icons.monitor_heart_outlined,
                   ),
                   const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      for (final entry in heartContexts.entries)
-                        ChoiceChip(
-                          label: Text(
-                            heartText(context, entry.value.$1, entry.value.$2),
-                          ),
-                          selected: _context == entry.key,
-                          selectedColor: AppColors.glassBorderStrong,
-                          onSelected: (_) =>
-                              setState(() => _context = entry.key),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 26),
-                  HeartLabel(
-                    heartText(
-                      context,
-                      'Sentiu algo?',
-                      'Did you feel anything?',
+                  if (record.available)
+                    HeartRecordingTrace(
+                      samples: record.samples,
+                      twoRows: true,
+                      reveal: true,
+                      seconds: record.duration > 0
+                          ? record.duration / 1000
+                          : 30,
+                    )
+                  else
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 24),
+                      child: Text(
+                        record.status == 'expired'
+                            ? heartText(
+                                context,
+                                'O prazo de retenção do traçado terminou.',
+                                'The waveform retention period has ended.',
+                              )
+                            : heartText(
+                                context,
+                                'Traçado indisponível.',
+                                'Waveform unavailable.',
+                              ),
+                        style: AppHealthStyle.small,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      for (final entry in heartSymptoms.entries)
-                        FilterChip(
-                          label: Text(
-                            heartText(context, entry.value.$1, entry.value.$2),
-                          ),
-                          selected: _symptoms.contains(entry.key),
-                          selectedColor: AppColors.glassBorderStrong,
-                          onSelected: (on) => setState(() {
-                            if (entry.key == 'none') {
-                              _symptoms = on ? {'none'} : {};
-                            } else {
-                              _symptoms.remove('none');
-                              if (on) {
-                                _symptoms.add(entry.key);
-                              } else {
-                                _symptoms.remove(entry.key);
-                              }
-                            }
-                          }),
-                        ),
-                    ],
-                  ),
+                  if (record.available)
+                    Text(
+                      heartText(
+                        context,
+                        'Amplitude relativa · sem calibração em mm/mV',
+                        'Relative amplitude · uncalibrated',
+                      ),
+                      style: AppHealthStyle.legend,
+                    ),
                   const SizedBox(height: 18),
-                  AppButton(
-                    label: heartText(
-                      context,
-                      'Salvar observações',
-                      'Save observations',
+                  AppHealthPanel(
+                    child: AppHealthRow(
+                      label: heartText(
+                        context,
+                        'Marcar no Diário',
+                        'Log in Diary',
+                      ),
+                      subtitle: heartText(
+                        context,
+                        'Como você estava e o que sentiu',
+                        'How you felt before and during the recording',
+                      ),
+                      icon: Icons.receipt_long_outlined,
+                      divider: false,
+                      onTap: _editObservations,
                     ),
-                    loading: _saving,
-                    onPressed: _exporting ? null : _save,
                   ),
+                  if (_dirty)
+                    AppGlassPill(
+                      label: heartText(
+                        context,
+                        'Salvar observações',
+                        'Save observations',
+                      ),
+                      onPressed: _save,
+                    ),
                   const SizedBox(height: 28),
-                  HeartLabel(
+                  AppHealthSection(
                     heartText(
                       context,
                       'Detalhes da leitura',
                       'Recording details',
                     ),
+                    Icons.analytics_outlined,
                   ),
                   HeartReadingRow(
                     heartText(context, 'Duração', 'Duration'),
@@ -436,8 +422,97 @@ class _HeartRecordingReportState extends State<HeartRecordingReport> {
               ),
             ),
           ),
+          AppSheetSaveButton(
+            label: heartText(context, 'Concluir', 'Done'),
+            onPressed: _saving || _exporting ? null : _close,
+          ),
         ],
       ),
     );
   }
+}
+
+class _RecordingDiary extends StatefulWidget {
+  const _RecordingDiary({required this.contextValue, required this.symptoms});
+  final String contextValue;
+  final Set<String> symptoms;
+
+  @override
+  State<_RecordingDiary> createState() => _RecordingDiaryState();
+}
+
+class _RecordingDiaryState extends State<_RecordingDiary> {
+  late String _context = widget.contextValue;
+  late final Set<String> _symptoms = {...widget.symptoms};
+
+  @override
+  Widget build(BuildContext context) => Column(
+    children: [
+      AppSheetHeader(
+        title: heartText(context, 'Diário da leitura', 'Recording diary'),
+      ),
+      Expanded(
+        child: ListView(
+          padding: const EdgeInsets.symmetric(horizontal: AppHealthStyle.edge),
+          children: [
+            AppHealthSection(
+              heartText(context, 'Antes da leitura', 'Before the recording'),
+              Icons.schedule_outlined,
+            ),
+            const SizedBox(height: 8),
+            RadioGroup<String>(
+              groupValue: _context,
+              onChanged: (value) {
+                if (value != null) setState(() => _context = value);
+              },
+              child: Column(
+                children: [
+                  for (final entry in heartContexts.entries)
+                    RadioListTile<String>(
+                      contentPadding: EdgeInsets.zero,
+                      value: entry.key,
+                      title: Text(
+                        heartText(context, entry.value.$1, entry.value.$2),
+                        style: AppHealthStyle.body,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 26),
+            AppHealthSection(
+              heartText(context, 'O que sentiu', 'What you felt'),
+              Icons.edit_note_outlined,
+            ),
+            const SizedBox(height: 8),
+            for (final entry in heartSymptoms.entries)
+              CheckboxListTile(
+                contentPadding: EdgeInsets.zero,
+                value: _symptoms.contains(entry.key),
+                title: Text(
+                  heartText(context, entry.value.$1, entry.value.$2),
+                  style: AppHealthStyle.body,
+                ),
+                onChanged: (value) => setState(() {
+                  if (entry.key == 'none') {
+                    _symptoms.clear();
+                  } else {
+                    _symptoms.remove('none');
+                  }
+                  if (value == true) {
+                    _symptoms.add(entry.key);
+                  } else {
+                    _symptoms.remove(entry.key);
+                  }
+                }),
+              ),
+          ],
+        ),
+      ),
+      AppSheetSaveButton(
+        label: heartText(context, 'Salvar observações', 'Save observations'),
+        onPressed: () => Navigator.pop(context, (_context, _symptoms)),
+      ),
+    ],
+  );
 }

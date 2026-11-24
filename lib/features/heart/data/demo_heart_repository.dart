@@ -79,7 +79,7 @@ class DemoHeartRepository implements HeartRepository {
       preferences: await _preferences(),
       points: points,
       records: (await recordings(date: date)).items,
-      trend: await trend(date, 7),
+      trend: await trend(date, 30),
       demo: true,
     );
   }

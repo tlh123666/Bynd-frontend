@@ -70,7 +70,7 @@ class DemoSleepRepository implements SleepRepository {
               'body':
                   'This is the reference app’s demonstration night. Your own sleep will appear after your band synchronizes.',
             },
-      trend: await trend(date, 7),
+      trend: await trend(date, 30),
     );
   }
 
