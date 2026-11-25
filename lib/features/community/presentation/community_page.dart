@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 
 import '../../../core/network/api_client.dart';
@@ -37,6 +39,8 @@ class _CommunityPageState extends State<CommunityPage> {
   late final RemoteCommunityRepository _repo =
       widget.repository ?? RemoteCommunityRepository(ApiClient.configured());
 
+  final ScrollController _scroll = ScrollController();
+  bool _scrolled = false;
   bool _loading = true;
   String? _error;
   List<CommunityGroup> _groups = const [];
@@ -47,7 +51,20 @@ class _CommunityPageState extends State<CommunityPage> {
   @override
   void initState() {
     super.initState();
+    _scroll.addListener(_onScroll);
     _reload();
+  }
+
+  // .sn-cab.rolou：滚动超过 6px 后吸顶头部浮现玻璃（模糊 + 渐变纱）。
+  void _onScroll() {
+    final scrolled = _scroll.offset > 6;
+    if (scrolled != _scrolled && mounted) setState(() => _scrolled = scrolled);
+  }
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
   }
 
   Future<void> _reload() async {
@@ -183,7 +200,9 @@ class _CommunityPageState extends State<CommunityPage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       bottomNavigationBar: _bottomButtons(strings),
-      body: _loading
+      body: Stack(
+        children: [
+          _loading
           ? const Center(child: AppLoadingIndicator())
           : _error != null
               ? Center(
@@ -203,6 +222,7 @@ class _CommunityPageState extends State<CommunityPage> {
               : RefreshIndicator(
                   onRefresh: _reload,
                   child: ListView(
+                    controller: _scroll,
                     padding: EdgeInsets.zero,
                     children: [
                       // 照片层 + 内容同栈：照片随内容一起滚动（原型里
@@ -215,7 +235,7 @@ class _CommunityPageState extends State<CommunityPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _header(strings),
+                                const SizedBox(height: 54),
                                 if (_invitations.isNotEmpty) ...[
                                   const SizedBox(height: 12),
                                   Padding(
@@ -267,6 +287,70 @@ class _CommunityPageState extends State<CommunityPage> {
                     ],
                   ),
                 ),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: _pinnedHeader(strings),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // .sn-cab：吸顶头部（sticky top 0, z 5/6）。滚动后 .rolou：玻璃 =
+  // blur(16px) + 渐变纱 rgba(34,44,56,.96) 70% → 透明，内容从下面滚过时
+  // 被模糊化（与原型一致）。
+  Widget _pinnedHeader(AppLocalizations strings) {
+    final header = SizedBox(
+      height: 54,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Text(
+            strings.community,
+            style: const TextStyle(
+              color: CommunityStyle.textBright,
+              fontSize: 17,
+              fontWeight: FontWeight.w500,
+              fontFamily: 'Urbanist',
+            ),
+          ),
+          Positioned(
+            right: 8,
+            child: IconButton(
+              onPressed: _openMenu,
+              icon: const Icon(Icons.more_horiz, size: 22),
+              color: CommunityStyle.text72,
+            ),
+          ),
+        ],
+      ),
+    );
+    return SafeArea(
+      bottom: false,
+      child: _scrolled
+          ? ClipRect(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+                child: Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      stops: [0, 0.70, 1],
+                      colors: [
+                        Color(0xF5222C38), // rgba(34,44,56,.96)
+                        Color(0xF5222C38),
+                        Color(0x00222C38),
+                      ],
+                    ),
+                  ),
+                  child: header,
+                ),
+              ),
+            )
+          : header,
     );
   }
 
