@@ -11,11 +11,15 @@ import 'community_style.dart';
 import 'group_chat_page.dart';
 
 /// 社区主页 —— 对齐客户 11-22 设计源码 `src/screens/comunidade/Comunidade.jsx`
-/// （Luiz 11-20/21 的「modelo Whoop Teams com a cara da BYND」清单式改版）：
+/// （Luiz 11-20/21 的「modelo Whoop Teams com a cara da BYND」清单式改版，
+/// 含 11-24 渲染核对）：
 ///
-/// 头图（16/10，圆角 14，comunidade-maos）→ 邀请玻璃条（仅一条，计数徽章）→
-/// 「Seus times」行（名 + 人数 + 我的名次）→「Seus desafios」行（dia X de Y +
-/// 今日状态 selo）→ 底部「玻璃 + 白」双按钮。邀请/菜单/完成列表走底部弹层。
+/// 头图是**全出血背景层**（.cmb > .cmb-foto：absolute top 0，高约 90% 屏高，
+/// cover 50% 30%，65% 处 mask 渐隐；再叠暗化渐变 .25/.05@25%/.55@62%/.85），
+/// 头部与内容行浮在照片上，随内容一起滚动。之后是邀请玻璃条（仅一条 +
+/// 计数徽章）→「Seus times」行（名 + 人数 + 我的名次）→「Seus desafios」行
+/// （dia X de Y + 今日 selo 三色）→ 底部「玻璃 + 白」双按钮；邀请/菜单/
+/// 完成列表走底部弹层。
 ///
 /// 版式与颜色逐项对齐 `styles/comunidade.css` 的 `.cmm` 块与 `.cmb-ln`；字体
 /// Urbanist 已在全局。数据逻辑沿用原实现（群 / 邀请 / 精选挑战 / 排名）；
@@ -179,64 +183,140 @@ class _CommunityPageState extends State<CommunityPage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       bottomNavigationBar: _bottomButtons(strings),
-      body: SafeArea(
-        bottom: false,
-        child: _loading
-            ? const Center(child: AppLoadingIndicator())
-            : _error != null
-                ? Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Text(
-                        _error!,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: CommunityStyle.text72,
-                          fontSize: 14,
-                          height: 1.5,
-                        ),
+      body: _loading
+          ? const Center(child: AppLoadingIndicator())
+          : _error != null
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Text(
+                      _error!,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: CommunityStyle.text72,
+                        fontSize: 14,
+                        height: 1.5,
                       ),
                     ),
-                  )
-                : RefreshIndicator(
-                    onRefresh: _reload,
-                    child: ListView(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      children: [
-                        _header(strings),
-                        const SizedBox(height: 12),
-                        _heroPhoto(),
-                        if (_invitations.isNotEmpty) ...[
-                          const SizedBox(height: 12),
-                          _invitesRow(strings),
-                        ],
-                        _sectionTitle(
-                          context,
-                          icon: Icons.groups_rounded,
-                          title: strings.communityMyTeams,
-                          marginTop: _invitations.isNotEmpty ? 24 : 28,
-                        ),
-                        if (joined.isEmpty)
-                          _emptyText(strings.communityTeamsEmpty)
-                        else
-                          ...joined.map((g) => _teamRow(strings, g)),
-                        _sectionTitle(
-                          context,
-                          icon: Icons.emoji_events_outlined,
-                          title: strings.communityMyChallenges,
-                          marginTop: 36,
-                        ),
-                        if (active.isEmpty && concluded.isEmpty)
-                          _emptyText(strings.communityChallengesEmpty)
-                        else ...[
-                          ...active.map((c) => _challengeRow(strings, c)),
-                          if (concluded.isNotEmpty)
-                            _concludedRow(strings, concluded.length),
-                        ],
-                        const SizedBox(height: 24),
-                      ],
-                    ),
                   ),
+                )
+              : RefreshIndicator(
+                  onRefresh: _reload,
+                  child: ListView(
+                    padding: EdgeInsets.zero,
+                    children: [
+                      // 照片层 + 内容同栈：照片随内容一起滚动（原型里
+                      // .cmb-foto 是滚动内容内的 absolute 层）。
+                      Stack(
+                        children: [
+                          _heroBackdrop(),
+                          SafeArea(
+                            bottom: false,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _header(strings),
+                                if (_invitations.isNotEmpty) ...[
+                                  const SizedBox(height: 12),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16),
+                                    child: _invitesRow(strings),
+                                  ),
+                                ],
+                                _sectionTitle(
+                                  strings,
+                                  icon: Icons.groups_rounded,
+                                  title: strings.communityMyTeams,
+                                  marginTop: _invitations.isNotEmpty ? 24 : 28,
+                                ),
+                                if (joined.isEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16),
+                                    child: _EmptyText(
+                                        strings.communityTeamsEmpty),
+                                  )
+                                else
+                                  ...joined.map((g) => _teamRow(strings, g)),
+                                _sectionTitle(
+                                  strings,
+                                  icon: Icons.emoji_events_outlined,
+                                  title: strings.communityMyChallenges,
+                                  marginTop: 36,
+                                ),
+                                if (active.isEmpty && concluded.isEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16),
+                                    child: _EmptyText(
+                                        strings.communityChallengesEmpty),
+                                  )
+                                else ...[
+                                  ...active
+                                      .map((c) => _challengeRow(strings, c)),
+                                  if (concluded.isNotEmpty)
+                                    _concludedRow(strings, concluded.length),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                    ],
+                  ),
+                ),
+    );
+  }
+
+  // .cmb > .cmb-foto：全出血照片背景层。高约 90% 屏高（原型 --foto-topo-h
+  // 760px / 844 视口），background-position 50% 30%；65% 处开始 mask 渐隐；
+  // 内叠暗化渐变 rgba(18,20,24,.25)→.05@25%→.55@62%→.85。
+  Widget _heroBackdrop() {
+    final height = MediaQuery.sizeOf(context).height * 0.9;
+    return Positioned(
+      top: 0,
+      left: 0,
+      right: 0,
+      height: height,
+      child: ShaderMask(
+        shaderCallback: (bounds) => const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Colors.black, Colors.black, Colors.transparent],
+          stops: [0, 0.65, 1],
+        ).createShader(bounds),
+        blendMode: BlendMode.dstIn,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Image.asset(
+              'assets/images/comunidade-maos.webp',
+              fit: BoxFit.cover,
+              alignment: const Alignment(0, 0.3),
+              errorBuilder: (_, __, ___) => const DecoratedBox(
+                decoration:
+                    BoxDecoration(gradient: CommunityStyle.coverFallback),
+              ),
+            ),
+            const DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: [0, 0.25, 0.62, 1],
+                  colors: [
+                    Color(0x40121418), // rgba(18,20,24,.25)
+                    Color(0x0D121418), // rgba(18,20,24,.05)
+                    Color(0x8C121418), // rgba(18,20,24,.55)
+                    Color(0xD9121418), // rgba(18,20,24,.85)
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -258,7 +338,7 @@ class _CommunityPageState extends State<CommunityPage> {
             ),
           ),
           Positioned(
-            right: 0,
+            right: 8,
             child: IconButton(
               onPressed: _openMenu,
               icon: const Icon(Icons.more_horiz, size: 22),
@@ -270,21 +350,6 @@ class _CommunityPageState extends State<CommunityPage> {
     );
   }
 
-  // .cmb-foto：16/10，圆角 14，margin-top 12。
-  Widget _heroPhoto() {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(14),
-      child: AspectRatio(
-        aspectRatio: 16 / 10,
-        child: Image.asset(
-          'assets/images/comunidade-maos.webp',
-          fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => Container(color: CommunityStyle.card),
-        ),
-      ),
-    );
-  }
-
   // .cmt-cvl：邀请玻璃条（一条，计数徽章），点开邀请弹层。
   Widget _invitesRow(AppLocalizations strings) {
     final n = _invitations.length;
@@ -292,7 +357,6 @@ class _CommunityPageState extends State<CommunityPage> {
         ? strings.communityInviteFromShort(_invitations.first.inviterName)
         : '${_invitations.where((i) => i.groupId.isNotEmpty).length} ${strings.communityInviteTeam}';
     return Container(
-      margin: const EdgeInsets.only(top: 12),
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(18),
@@ -312,15 +376,15 @@ class _CommunityPageState extends State<CommunityPage> {
     );
   }
 
-  // .cmm-st：20/300 字重，图标 18，间距 10，margin 44/6（首个 28）。
+  // .cmm-st：20/300 字重，图标 18，间距 10；cmb 作用域 margin 36/14。
   Widget _sectionTitle(
-    BuildContext context, {
+    AppLocalizations strings, {
     required IconData icon,
     required String title,
     required double marginTop,
   }) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(4, marginTop, 4, 6),
+      padding: EdgeInsets.fromLTRB(4, marginTop, 4, 14),
       child: Row(
         children: [
           Icon(icon, size: 18, color: CommunityStyle.text72),
@@ -346,8 +410,7 @@ class _CommunityPageState extends State<CommunityPage> {
   // .cmb-ln：一行（72 高，底部细线到右缘）：ft 32 + 名/副行 + 徽章 + chevron。
   Widget _teamRow(AppLocalizations strings, CommunityGroup group) {
     final rank = _myRank[group.id];
-    final showRank =
-        rank != null && rank.rank > 0 && group.memberCount > 1;
+    final showRank = rank != null && rank.rank > 0 && group.memberCount > 1;
     final members = strings.communityMemberCount(group.memberCount);
     final subtitle = showRank
         ? '$members · ${rank.rank}º ${strings.communityRankOf(group.memberCount)}'
@@ -379,13 +442,7 @@ class _CommunityPageState extends State<CommunityPage> {
       ),
       title: group.name,
       subtitle: subtitle,
-      trailing: group.unreadCount > 0
-          ? _countBadge(group.unreadCount)
-          : const Icon(
-              Icons.chevron_right_rounded,
-              size: 18,
-              color: CommunityStyle.text50,
-            ),
+      trailing: group.unreadCount > 0 ? _countBadge(group.unreadCount) : null,
     );
   }
 
@@ -410,7 +467,7 @@ class _CommunityPageState extends State<CommunityPage> {
         ),
       ),
       title: challenge.title,
-      subtitle: started ? subtitle : strings.communityDurationDays(challenge.durationDays),
+      subtitle: subtitle,
       trailing: Text(
         label.toUpperCase(),
         style: TextStyle(
@@ -449,12 +506,12 @@ class _CommunityPageState extends State<CommunityPage> {
     );
   }
 
-  // .cmb-ln 行通用结构：min-height 72，底部 1px 细线，内衬左 0 右 20。
+  // .cmb-ln 行通用结构：min-height 72，底部 1px 细线，行尾固定 chevron。
   Widget _cmbRow({
     required Widget leading,
     required String title,
     required String subtitle,
-    required Widget trailing,
+    Widget? trailing,
     VoidCallback? onTap,
   }) {
     final row = Container(
@@ -499,8 +556,10 @@ class _CommunityPageState extends State<CommunityPage> {
             ),
           ),
           const SizedBox(width: 10),
-          trailing,
-          const SizedBox(width: 8),
+          if (trailing != null) ...[
+            trailing,
+            const SizedBox(width: 8),
+          ],
           const Icon(
             Icons.chevron_right_rounded,
             size: 18,
@@ -573,9 +632,7 @@ class _CommunityPageState extends State<CommunityPage> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(999),
           color: glass ? CommunityStyle.glass : CommunityStyle.textBright,
-          border: glass
-              ? Border.all(color: CommunityStyle.strokeStrong)
-              : null,
+          border: glass ? Border.all(color: CommunityStyle.strokeStrong) : null,
         ),
         child: Text(
           label,
@@ -589,19 +646,6 @@ class _CommunityPageState extends State<CommunityPage> {
       ),
     );
   }
-
-  Widget _emptyText(String text) => Padding(
-        padding: const EdgeInsets.fromLTRB(4, 14, 0, 0),
-        child: Text(
-          text,
-          style: const TextStyle(
-            color: CommunityStyle.text50,
-            fontSize: 13,
-            height: 1.5,
-            fontFamily: 'Urbanist',
-          ),
-        ),
-      );
 
   // ---- 弹层 ----
 
@@ -621,13 +665,19 @@ class _CommunityPageState extends State<CommunityPage> {
               sheetContext,
               icon: Icons.groups_rounded,
               label: strings.communityCreateTeam,
-              onTap: () { Navigator.of(sheetContext).pop(); _openNew(); }
+              onTap: () {
+                Navigator.of(sheetContext).pop();
+                _openNew();
+              },
             ),
             _sheetItem(
               sheetContext,
               icon: Icons.link_rounded,
               label: strings.communityJoinWithCode,
-              onTap: () { Navigator.of(sheetContext).pop(); _openNew(); }
+              onTap: () {
+                Navigator.of(sheetContext).pop();
+                _openNew();
+              },
             ),
             _sheetItem(
               sheetContext,
@@ -799,7 +849,9 @@ class _CommunityPageState extends State<CommunityPage> {
                       shape: const StadiumBorder(),
                     ),
                     child: Text(
-                      done ? strings.communityDoneToday : strings.communityMarkDay,
+                      done
+                          ? strings.communityDoneToday
+                          : strings.communityMarkDay,
                       style: TextStyle(
                         color: done
                             ? CommunityStyle.text72
@@ -909,6 +961,28 @@ class _CommunityPageState extends State<CommunityPage> {
         Icons.chevron_right_rounded,
         size: 18,
         color: CommunityStyle.text50,
+      ),
+    );
+  }
+}
+
+class _EmptyText extends StatelessWidget {
+  const _EmptyText(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 14, 0, 0),
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: CommunityStyle.text50,
+          fontSize: 13,
+          height: 1.5,
+          fontFamily: 'Urbanist',
+        ),
       ),
     );
   }
