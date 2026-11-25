@@ -40,7 +40,7 @@ class _CommunityPageState extends State<CommunityPage> {
       widget.repository ?? RemoteCommunityRepository(ApiClient.configured());
 
   final ScrollController _scroll = ScrollController();
-  bool _scrolled = false;
+  double _glass = 0;
   bool _loading = true;
   String? _error;
   List<CommunityGroup> _groups = const [];
@@ -55,10 +55,12 @@ class _CommunityPageState extends State<CommunityPage> {
     _reload();
   }
 
-  // .sn-cab.rolou：滚动超过 6px 后吸顶头部浮现玻璃（模糊 + 渐变纱）。
+  // 标题和操作栏始终固定，滚动距离只驱动下方玻璃背景的渐进叠加。
   void _onScroll() {
-    final scrolled = _scroll.offset > 6;
-    if (scrolled != _scrolled && mounted) setState(() => _scrolled = scrolled);
+    final glass = (_scroll.offset / 80).clamp(0.0, 1.0);
+    if ((glass - _glass).abs() > 0.01 && mounted) {
+      setState(() => _glass = glass);
+    }
   }
 
   @override
@@ -125,15 +127,15 @@ class _CommunityPageState extends State<CommunityPage> {
         completed: true,
       );
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.communityMarkedDone)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.l10n.communityMarkedDone)));
       await _reload();
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.toString())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.toString())));
     }
   }
 
@@ -192,19 +194,19 @@ class _CommunityPageState extends State<CommunityPage> {
     final joined = _groups
         .where((g) => g.membershipState == 'joined')
         .toList(growable: false);
-    final concluded =
-        _mine.where((c) => (c.today?.dayNumber ?? 0) >= c.durationDays);
+    final concluded = _mine.where(
+      (c) => (c.today?.dayNumber ?? 0) >= c.durationDays,
+    );
     final active = _mine
         .where((c) => (c.today?.dayNumber ?? 0) < c.durationDays)
         .toList(growable: false);
     return Scaffold(
       backgroundColor: AppColors.background,
-      bottomNavigationBar: _bottomButtons(strings),
       body: Stack(
         children: [
           _loading
-          ? const Center(child: AppLoadingIndicator())
-          : _error != null
+              ? const Center(child: AppLoadingIndicator())
+              : _error != null
               ? Center(
                   child: Padding(
                     padding: const EdgeInsets.all(24),
@@ -232,53 +234,59 @@ class _CommunityPageState extends State<CommunityPage> {
                           _heroBackdrop(),
                           SafeArea(
                             bottom: false,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const SizedBox(height: 54),
-                                if (_invitations.isNotEmpty) ...[
-                                  const SizedBox(height: 12),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 16),
-                                    child: _invitesRow(strings),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(height: 54),
+                                  if (_invitations.isNotEmpty) ...[
+                                    const SizedBox(height: 12),
+                                    _invitesRow(strings),
+                                  ],
+                                  _sectionTitle(
+                                    strings,
+                                    icon: Icons.groups_rounded,
+                                    title: strings.communityMyTeams,
+                                    marginTop: _invitations.isNotEmpty
+                                        ? 24
+                                        : 36,
                                   ),
+                                  if (joined.isEmpty)
+                                    Padding(
+                                      padding: EdgeInsets.zero,
+                                      child: _EmptyText(
+                                        strings.communityTeamsEmpty,
+                                      ),
+                                    )
+                                  else
+                                    ...joined.map((g) => _teamRow(strings, g)),
+                                  _sectionTitle(
+                                    strings,
+                                    icon: Icons.emoji_events_outlined,
+                                    title: strings.communityMyChallenges,
+                                    marginTop: 36,
+                                  ),
+                                  if (active.isEmpty && concluded.isEmpty)
+                                    Padding(
+                                      padding: EdgeInsets.zero,
+                                      child: _EmptyText(
+                                        strings.communityChallengesEmpty,
+                                      ),
+                                    )
+                                  else ...[
+                                    ...active.map(
+                                      (c) => _challengeRow(strings, c),
+                                    ),
+                                    if (concluded.isNotEmpty)
+                                      _concludedRow(strings, concluded.length),
+                                  ],
+                                  _bottomButtons(strings),
+                                  const SizedBox(height: 72),
                                 ],
-                                _sectionTitle(
-                                  strings,
-                                  icon: Icons.groups_rounded,
-                                  title: strings.communityMyTeams,
-                                  marginTop: _invitations.isNotEmpty ? 24 : 28,
-                                ),
-                                if (joined.isEmpty)
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 16),
-                                    child: _EmptyText(
-                                        strings.communityTeamsEmpty),
-                                  )
-                                else
-                                  ...joined.map((g) => _teamRow(strings, g)),
-                                _sectionTitle(
-                                  strings,
-                                  icon: Icons.emoji_events_outlined,
-                                  title: strings.communityMyChallenges,
-                                  marginTop: 36,
-                                ),
-                                if (active.isEmpty && concluded.isEmpty)
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 16),
-                                    child: _EmptyText(
-                                        strings.communityChallengesEmpty),
-                                  )
-                                else ...[
-                                  ...active
-                                      .map((c) => _challengeRow(strings, c)),
-                                  if (concluded.isNotEmpty)
-                                    _concludedRow(strings, concluded.length),
-                                ],
-                              ],
+                              ),
                             ),
                           ),
                         ],
@@ -287,12 +295,7 @@ class _CommunityPageState extends State<CommunityPage> {
                     ],
                   ),
                 ),
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: _pinnedHeader(strings),
-          ),
+          Positioned(top: 0, left: 0, right: 0, child: _pinnedHeader(strings)),
         ],
       ),
     );
@@ -329,28 +332,26 @@ class _CommunityPageState extends State<CommunityPage> {
     );
     return SafeArea(
       bottom: false,
-      child: _scrolled
-          ? ClipRect(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-                child: Container(
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      stops: [0, 0.70, 1],
-                      colors: [
-                        Color(0xF5222C38), // rgba(34,44,56,.96)
-                        Color(0xF5222C38),
-                        Color(0x00222C38),
-                      ],
-                    ),
+      child: SizedBox(
+        height: 54,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            IgnorePointer(
+              child: Opacity(
+                opacity: _glass,
+                child: ClipRect(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+                    child: const SizedBox.expand(),
                   ),
-                  child: header,
                 ),
               ),
-            )
-          : header,
+            ),
+            header,
+          ],
+        ),
+      ),
     );
   }
 
@@ -358,7 +359,7 @@ class _CommunityPageState extends State<CommunityPage> {
   // 760px / 844 视口），background-position 50% 30%；65% 处开始 mask 渐隐；
   // 内叠暗化渐变 rgba(18,20,24,.25)→.05@25%→.55@62%→.85。
   Widget _heroBackdrop() {
-    final height = MediaQuery.sizeOf(context).height * 0.58;
+    final height = MediaQuery.sizeOf(context).height * 0.90;
     return Positioned(
       top: 0,
       left: 0,
@@ -379,9 +380,10 @@ class _CommunityPageState extends State<CommunityPage> {
               'assets/images/comunidade-maos.webp',
               fit: BoxFit.cover,
               alignment: const Alignment(0, 0.3),
-              errorBuilder: (_, __, ___) => const DecoratedBox(
-                decoration:
-                    BoxDecoration(gradient: CommunityStyle.coverFallback),
+              errorBuilder: (_, _, _) => const DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: CommunityStyle.coverFallback,
+                ),
               ),
             ),
             const DecoratedBox(
@@ -401,36 +403,6 @@ class _CommunityPageState extends State<CommunityPage> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  // .sn-cab/.ax-cab：标题居中，右侧 ⋯ 打开玻璃菜单。
-  Widget _header(AppLocalizations strings) {
-    return SizedBox(
-      width: double.infinity,
-      height: 54,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Text(
-            strings.community,
-            style: const TextStyle(
-              color: CommunityStyle.textBright,
-              fontSize: 17,
-              fontWeight: FontWeight.w500,
-              fontFamily: 'Urbanist',
-            ),
-          ),
-          Positioned(
-            right: 8,
-            child: IconButton(
-              onPressed: _openMenu,
-              icon: const Icon(Icons.more_horiz, size: 22),
-              color: CommunityStyle.text72,
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -508,7 +480,7 @@ class _CommunityPageState extends State<CommunityPage> {
           width: 32,
           height: 32,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => Container(
+          errorBuilder: (_, _, _) => Container(
             width: 32,
             height: 32,
             color: CommunityStyle.chip,
@@ -641,10 +613,7 @@ class _CommunityPageState extends State<CommunityPage> {
             ),
           ),
           const SizedBox(width: 10),
-          if (trailing != null) ...[
-            trailing,
-            const SizedBox(width: 8),
-          ],
+          if (trailing != null) ...[trailing, const SizedBox(width: 8)],
           const Icon(
             Icons.chevron_right_rounded,
             size: 18,
@@ -682,21 +651,24 @@ class _CommunityPageState extends State<CommunityPage> {
   // .cmm-pe：底部双按钮（玻璃左「Entrar com código」+ 白右「Criar time」，
   // 132 + 8 + 132）。
   Widget _bottomButtons(AppLocalizations strings) {
-    return SafeArea(
-      minimum: const EdgeInsets.only(bottom: 16, top: 8),
+    return Padding(
+      padding: const EdgeInsets.only(top: 36),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _pillButton(
-            label: strings.communityJoinWithCode,
-            glass: true,
-            onTap: _openNew,
+          Expanded(
+            child: _pillButton(
+              label: strings.communityJoinWithCode,
+              glass: true,
+              onTap: _openNew,
+            ),
           ),
           const SizedBox(width: 8),
-          _pillButton(
-            label: strings.communityCreateTeam,
-            glass: false,
-            onTap: _openNew,
+          Expanded(
+            child: _pillButton(
+              label: strings.communityCreateTeam,
+              glass: false,
+              onTap: _openNew,
+            ),
           ),
         ],
       ),
@@ -958,8 +930,9 @@ class _CommunityPageState extends State<CommunityPage> {
 
   void _openConcludedSheet() {
     final strings = context.l10n;
-    final concluded =
-        _mine.where((c) => (c.today?.dayNumber ?? 0) >= c.durationDays);
+    final concluded = _mine.where(
+      (c) => (c.today?.dayNumber ?? 0) >= c.durationDays,
+    );
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: CommunityStyle.sheet,

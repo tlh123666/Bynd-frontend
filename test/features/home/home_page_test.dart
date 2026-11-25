@@ -112,7 +112,10 @@ void main() {
     tester,
   ) async {
     final controller = await mount(tester);
-    await tester.ensureVisible(find.byTooltip('Personalizar a Home'));
+    await Scrollable.ensureVisible(
+      tester.element(find.byTooltip('Personalizar a Home')),
+      alignment: 0.5,
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Personalizar a Home'));
     await tester.pumpAndSettle();
@@ -154,7 +157,10 @@ void main() {
       await tester.tap(find.text('1/25'));
       await tester.pumpAndSettle();
       expect(controller.photo, 2);
-      await tester.ensureVisible(find.byTooltip('Personalizar a Home'));
+      await Scrollable.ensureVisible(
+        tester.element(find.byTooltip('Personalizar a Home')),
+        alignment: 0.5,
+      );
       await tester.pumpAndSettle();
       await tester.tap(find.byTooltip('Personalizar a Home'));
       await tester.pumpAndSettle();
@@ -199,7 +205,8 @@ void main() {
   ) async {
     await mount(tester);
     final card = find.byKey(const ValueKey('home-signal-sleep'));
-    await tester.ensureVisible(card);
+    await Scrollable.ensureVisible(tester.element(card), alignment: 0.5);
+    await tester.pumpAndSettle();
     await tester.tap(card);
     await tester.pump();
     // This test verifies routing; sleep rendering is covered with controlled
