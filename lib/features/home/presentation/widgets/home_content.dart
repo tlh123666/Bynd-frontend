@@ -1,6 +1,7 @@
 import '../../../vitality/presentation/widgets/vitality_entries.dart';
 import '../home_signal_destination.dart';
 import 'dart:async';
+import 'dart:ui' show ImageFilter;
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../../../design_system/design_system.dart';
@@ -18,7 +19,7 @@ import 'home_explore_section.dart';
 import 'home_account_guard.dart';
 
 class HomeContent extends StatelessWidget {
-  const HomeContent({
+  HomeContent({
     required this.controller,
     required this.onMenu,
     required this.onProfile,
@@ -30,6 +31,9 @@ class HomeContent extends StatelessWidget {
   final HomeController controller;
   final ValueChanged<int>? onDestinationSelected;
   final VoidCallback onMenu, onProfile, onDevice, onMapa;
+  // .sn-cab：吸顶头部（首页的 logo 头部滚出视口后，玻璃吸顶条浮现，
+  // 内容从下面滚过被模糊化）。阈值 110 ≈ 状态栏 + 头部高度。
+  final ValueNotifier<bool> _scrolled = ValueNotifier(false);
   Future<void> _photo(BuildContext context) async {
     try {
       await controller.nextPhoto();
@@ -56,9 +60,17 @@ class HomeContent extends StatelessWidget {
         return const ColoredBox(color: AppColors.homeCanvas);
       }
       final safeTop = math.max(20.0, MediaQuery.paddingOf(context).top);
-      return ColoredBox(
+      return Stack(children: [
+        ColoredBox(
         color: AppColors.homeCanvas,
-        child: RefreshIndicator(
+        child: NotificationListener<ScrollNotification>(
+          onNotification: (notification) {
+            if (notification.metrics.axis == Axis.vertical) {
+              _scrolled.value = notification.metrics.pixels > 110;
+            }
+            return false;
+          },
+          child: RefreshIndicator(
           onRefresh: controller.reload,
           color: AppColors.sky,
           backgroundColor: AppColors.surface,
@@ -343,7 +355,67 @@ class HomeContent extends StatelessWidget {
             ),
           ),
         ),
-      );
+      ),
+        ),
+        ValueListenableBuilder<bool>(
+          valueListenable: _scrolled,
+          builder: (context, scrolled, _) => scrolled
+              ? _glassHeader(context)
+              : const SizedBox.shrink(),
+        ),
+      ]);
     },
+  );
+}
+
+/// .sn-cab.rolou：玻璃吸顶条（blur 16px + 渐变纱 rgba(34,44,56,.96) 70%→0）。
+Widget _glassHeader(BuildContext context) {
+  return SafeArea(
+    bottom: false,
+    child: ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+        child: Container(
+          height: 40,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              stops: [0, 0.70, 1],
+              colors: [
+                Color(0xF5222C38),
+                Color(0xF5222C38),
+                Color(0x00222C38),
+              ],
+            ),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 22),
+          child: Row(
+            children: [
+              const AppSvgIcon(AppSvgAssets.menu, size: 22),
+              const Spacer(),
+              const AppSvgIcon(
+                AppSvgAssets.logo,
+                label: 'BYND',
+                width: 72.5,
+                height: 15,
+              ),
+              const Spacer(),
+              Container(
+                width: 37,
+                height: 37,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppColors.homePhotoBorder),
+                ),
+                child: const ClipOval(
+                  child: Icon(Icons.person_outline, size: 22),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
   );
 }

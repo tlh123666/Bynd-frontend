@@ -358,7 +358,7 @@ class _CommunityPageState extends State<CommunityPage> {
   // 760px / 844 视口），background-position 50% 30%；65% 处开始 mask 渐隐；
   // 内叠暗化渐变 rgba(18,20,24,.25)→.05@25%→.55@62%→.85。
   Widget _heroBackdrop() {
-    final height = MediaQuery.sizeOf(context).height * 0.62;
+    final height = MediaQuery.sizeOf(context).height * 0.58;
     return Positioned(
       top: 0,
       left: 0,
@@ -369,7 +369,7 @@ class _CommunityPageState extends State<CommunityPage> {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [Colors.black, Colors.black, Colors.transparent],
-          stops: [0, 0.65, 1],
+          stops: [0, 0.60, 1],
         ).createShader(bounds),
         blendMode: BlendMode.dstIn,
         child: Stack(
