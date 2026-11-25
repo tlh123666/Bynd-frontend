@@ -274,7 +274,7 @@ class _CommunityPageState extends State<CommunityPage> {
   // 760px / 844 视口），background-position 50% 30%；65% 处开始 mask 渐隐；
   // 内叠暗化渐变 rgba(18,20,24,.25)→.05@25%→.55@62%→.85。
   Widget _heroBackdrop() {
-    final height = MediaQuery.sizeOf(context).height * 0.9;
+    final height = MediaQuery.sizeOf(context).height * 0.62;
     return Positioned(
       top: 0,
       left: 0,
@@ -305,12 +305,12 @@ class _CommunityPageState extends State<CommunityPage> {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  stops: [0, 0.25, 0.62, 1],
+                  stops: [0, 0.30, 0.60, 1],
                   colors: [
-                    Color(0x40121418), // rgba(18,20,24,.25)
-                    Color(0x0D121418), // rgba(18,20,24,.05)
-                    Color(0x8C121418), // rgba(18,20,24,.55)
-                    Color(0xD9121418), // rgba(18,20,24,.85)
+                    Color(0x80121418), // rgba(18,20,24,.50)
+                    Color(0x94121418), // rgba(18,20,24,.58)
+                    Color(0xC7121418), // rgba(18,20,24,.78)
+                    Color(0xEB121418), // rgba(18,20,24,.92)
                   ],
                 ),
               ),
@@ -324,6 +324,7 @@ class _CommunityPageState extends State<CommunityPage> {
   // .sn-cab/.ax-cab：标题居中，右侧 ⋯ 打开玻璃菜单。
   Widget _header(AppLocalizations strings) {
     return SizedBox(
+      width: double.infinity,
       height: 54,
       child: Stack(
         alignment: Alignment.center,
