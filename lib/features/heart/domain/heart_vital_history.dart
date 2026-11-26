@@ -19,6 +19,9 @@ Map<String, List<Map<String, dynamic>>> heartVitalsFromHistory(
       'valueType': 'sample',
       'statDate': heartDate(at),
       'measuredAt': at.toUtc().toIso8601String(),
+      // 确定性幂等键：同一条历史读数无论哪次同步重新上报都是同一个 ID，
+      // 服务端按 (userId, clientReadingId) 跨批次去重。
+      'clientReadingId': '$type@${at.toUtc().toIso8601String()}',
       'unit': unit,
       'value': ?value,
       'payload': ?payload,
