@@ -171,6 +171,8 @@ class _GroupChatPageState extends State<GroupChatPage> {
   bool get _canEditGroup => _groupRole == 'owner' || _groupRole == 'admin';
 
   Future<void> _openGroupDetails() async {
+    // Any action mutates state (upload/reload) the sheet cannot rebuild
+    // with, so the sheet closes first and the page renders the result.
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -183,9 +185,18 @@ class _GroupChatPageState extends State<GroupChatPage> {
         memberCount: _members.length,
         canEditAvatar: _canEditGroup,
         uploadingAvatar: _uploadingAvatar,
-        onChangeAvatar: _changeGroupAvatar,
-        onInvite: _inviteMember,
-        onViewRanking: _openRanking,
+        onChangeAvatar: () {
+          Navigator.of(sheetContext).pop();
+          _changeGroupAvatar();
+        },
+        onInvite: () {
+          Navigator.of(sheetContext).pop();
+          _inviteMember();
+        },
+        onViewRanking: () {
+          Navigator.of(sheetContext).pop();
+          _openRanking();
+        },
       ),
     );
   }

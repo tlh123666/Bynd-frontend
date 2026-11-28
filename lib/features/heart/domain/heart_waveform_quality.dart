@@ -25,9 +25,13 @@ bool heartWaveformLooksValid(List<int> samples, {int minCycles = 10}) {
   // Sensor off-contact: the vendor streams zeros without skin contact.
   if (zeros / samples.length > 0.6) return false;
 
-  // Hysteresis peak counting: a pulse wave must oscillate. With a
-  // threshold at 35% of the range, noise below that never counts.
-  final threshold = range * 0.35;
+  // Hysteresis peak counting: a pulse wave must oscillate. The threshold
+  // uses the 2nd–98th percentile range, not max–min, so a single motion
+  // artifact cannot inflate it enough to hide the real pulse cycles.
+  final lo = sorted[(sorted.length * 0.02).floor()];
+  final hiIndex = (sorted.length * 0.98).floor().clamp(0, sorted.length - 1);
+  final robustRange = (sorted[hiIndex] - lo) > 0 ? sorted[hiIndex] - lo : range;
+  final threshold = robustRange * 0.35;
   var extreme = samples.first;
   var inPeak = false;
   var cycles = 0;
