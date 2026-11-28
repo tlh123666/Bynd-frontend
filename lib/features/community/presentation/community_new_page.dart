@@ -187,8 +187,9 @@ class _ChallengesSectionState extends State<_ChallengesSection> {
       await _reload();
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(error.toString())));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.toString())));
     }
   }
 
@@ -238,8 +239,8 @@ class _ChallengesSectionState extends State<_ChallengesSection> {
               challenge: challenge,
               expanded: _expanded == challenge.id,
               onToggle: () => setState(
-                () => _expanded =
-                    _expanded == challenge.id ? null : challenge.id,
+                () =>
+                    _expanded = _expanded == challenge.id ? null : challenge.id,
               ),
               onMembership: () => _toggleMembership(challenge),
             ),
@@ -448,6 +449,7 @@ class _CreateGroupSectionState extends State<_CreateGroupSection> {
           builder: (_) => GroupChatPage(
             groupId: group.id,
             groupName: group.name,
+            groupAvatarUrl: group.avatarUrl,
             repository: widget.repository,
           ),
         ),
@@ -575,9 +577,9 @@ class _CodeSectionState extends State<_CodeSection> {
           width: double.infinity,
           height: 46,
           child: FilledButton(
-            onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(strings.communityCodeSoon)),
-            ),
+            onPressed: () => ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(strings.communityCodeSoon))),
             style: FilledButton.styleFrom(
               backgroundColor: CommunityStyle.accent,
               foregroundColor: const Color(0xFF1A120C),
@@ -591,14 +593,14 @@ class _CodeSectionState extends State<_CodeSection> {
 }
 
 InputDecoration _decoration(String hint) => InputDecoration(
-      hintText: hint,
-      hintStyle: AppTypography.caption.copyWith(color: AppColors.textMuted),
-      filled: true,
-      fillColor: AppColors.surface,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
-      ),
-      counterText: '',
-    );
+  hintText: hint,
+  hintStyle: AppTypography.caption.copyWith(color: AppColors.textMuted),
+  filled: true,
+  fillColor: AppColors.surface,
+  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+  border: OutlineInputBorder(
+    borderRadius: BorderRadius.circular(12),
+    borderSide: BorderSide.none,
+  ),
+  counterText: '',
+);

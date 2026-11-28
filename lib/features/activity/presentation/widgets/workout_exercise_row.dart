@@ -262,6 +262,12 @@ class _WorkoutExerciseRowState extends State<WorkoutExerciseRow> {
               label: Text(s.workoutAddSet),
               style: TextButton.styleFrom(
                 foregroundColor: AppColors.textSecondary,
+                backgroundColor: Colors.transparent,
+                // 原型的添加行在悬停及点击时均不显示胶囊背景。
+                overlayColor: Colors.transparent,
+                minimumSize: const Size(0, 44),
+                padding: EdgeInsets.zero,
+                textStyle: AppTypography.listItem.copyWith(fontSize: 15),
               ),
             ),
           ),

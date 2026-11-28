@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import '../../../../design_system/design_system.dart';
 import '../../../../l10n/app_localizations_context.dart';
 import '../../../diary/presentation/diary_page.dart';
-import '../activity_selection_flow.dart';
 import '../models/demo_history_activity.dart';
 import '../widgets/activity_detail_sheet.dart';
 
@@ -37,10 +36,8 @@ class _ActivityHistoryPageState extends State<ActivityHistoryPage> {
 
   void _onQuickAction(AppQuickAction action) {
     setState(() => _menuOpen = false);
-    if(AppQuickActionNavigation.open(context,action))return;
-    if (action == AppQuickAction.startActivity) {
-      openActivitySelection(context);
-    } else if (action == AppQuickAction.dayReview ||
+    if (AppQuickActionNavigation.open(context, action)) return;
+    if (action == AppQuickAction.dayReview ||
         action == AppQuickAction.meal) {
       Navigator.of(context).push(
         MaterialPageRoute<void>(

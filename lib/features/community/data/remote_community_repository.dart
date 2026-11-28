@@ -13,8 +13,7 @@ class RemoteCommunityRepository {
     String method,
     String path, {
     Map<String, dynamic>? body,
-  }) =>
-      client.request(method, path, body: body);
+  }) => client.request(method, path, body: body);
 
   // ---- 汇总 ----
 
@@ -35,12 +34,23 @@ class RemoteCommunityRepository {
     String description = '',
     String visibility = 'private',
   }) async {
-    final data = await _call('POST', ApiEndpoints.communityGroups, body: {
-      'name': name,
-      'description': description,
-      'visibility': visibility,
-    });
+    final data = await _call(
+      'POST',
+      ApiEndpoints.communityGroups,
+      body: {
+        'name': name,
+        'description': description,
+        'visibility': visibility,
+      },
+    );
     return CommunityGroup.fromJson(data);
+  }
+
+  Future<CommunityGroup> groupDetail(String groupId) async {
+    final data = await _call('GET', ApiEndpoints.communityGroup(groupId));
+    return CommunityGroup.fromJson(
+      (data['group'] as Map?)?.cast<String, dynamic>() ?? data,
+    );
   }
 
   Future<List<CommunityMember>> groupMembers(String groupId) async {
@@ -48,6 +58,23 @@ class RemoteCommunityRepository {
     return (data['members'] as List<Object?>? ?? const [])
         .map((e) => CommunityMember.fromJson(e as Map<String, dynamic>))
         .toList();
+  }
+
+  Future<String> uploadGroupAvatar(
+    String groupId, {
+    required List<int> bytes,
+    required String filename,
+  }) async {
+    final data = await client.uploadFile(
+      ApiEndpoints.communityGroupAvatar(groupId),
+      bytes: bytes,
+      filename: filename,
+    );
+    final avatarUrl = data['avatarUrl'] as String?;
+    if (avatarUrl == null || avatarUrl.isEmpty) {
+      throw const ApiException('A foto do grupo não pôde ser salva.');
+    }
+    return avatarUrl;
   }
 
   Future<void> joinGroup(String groupId, {bool consent = true}) => _call(
@@ -63,12 +90,11 @@ class RemoteCommunityRepository {
   Future<void> updateNotificationSettings(
     String groupId, {
     required bool muted,
-  }) =>
-      _call(
-        'PATCH',
-        ApiEndpoints.communityGroupNotificationSettings(groupId),
-        body: {'muted': muted},
-      );
+  }) => _call(
+    'PATCH',
+    ApiEndpoints.communityGroupNotificationSettings(groupId),
+    body: {'muted': muted},
+  );
 
   Future<void> inviteMember(String groupId, String email) => _call(
     'POST',
@@ -95,21 +121,29 @@ class RemoteCommunityRepository {
   // ---- 消息 ----
 
   Future<List<CommunityMessage>> listMessages(String groupId) async {
-    final data = await _call('GET', ApiEndpoints.communityGroupMessages(groupId));
+    final data = await _call(
+      'GET',
+      ApiEndpoints.communityGroupMessages(groupId),
+    );
     return (data['items'] as List<Object?>? ?? const [])
         .map((e) => CommunityMessage.fromJson(e as Map<String, dynamic>))
         .toList();
   }
 
   Future<CommunityMessage> sendMessage(String groupId, String content) async {
-    final data = await _call('POST', ApiEndpoints.communityGroupMessages(groupId), body: {
-      'content': content,
-    });
+    final data = await _call(
+      'POST',
+      ApiEndpoints.communityGroupMessages(groupId),
+      body: {'content': content},
+    );
     return CommunityMessage.fromJson(data);
   }
 
-  Future<void> markMessagesRead(String groupId) =>
-      _call('POST', ApiEndpoints.communityGroupMessagesRead(groupId), body: const {});
+  Future<void> markMessagesRead(String groupId) => _call(
+    'POST',
+    ApiEndpoints.communityGroupMessagesRead(groupId),
+    body: const {},
+  );
 
   Future<void> recallMessage(String groupId, String messageId) => _call(
     'POST',
@@ -127,12 +161,18 @@ class RemoteCommunityRepository {
   }
 
   Future<CuratedChallenge> challengeDetail(String challengeId) async {
-    final data = await _call('GET', ApiEndpoints.communityChallenge(challengeId));
+    final data = await _call(
+      'GET',
+      ApiEndpoints.communityChallenge(challengeId),
+    );
     return CuratedChallenge.fromJson(data);
   }
 
-  Future<void> joinChallenge(String challengeId) =>
-      _call('POST', ApiEndpoints.communityChallengeJoin(challengeId), body: const {});
+  Future<void> joinChallenge(String challengeId) => _call(
+    'POST',
+    ApiEndpoints.communityChallengeJoin(challengeId),
+    body: const {},
+  );
 
   Future<void> leaveChallenge(String challengeId) =>
       _call('DELETE', ApiEndpoints.communityChallengeMembership(challengeId));
@@ -143,12 +183,11 @@ class RemoteCommunityRepository {
     int dayNumber, {
     required bool completed,
     String note = '',
-  }) =>
-      _call(
-        'PUT',
-        ApiEndpoints.communityChallengeDayProgress(challengeId, dayNumber),
-        body: {'completed': completed, 'note': note},
-      );
+  }) => _call(
+    'PUT',
+    ApiEndpoints.communityChallengeDayProgress(challengeId, dayNumber),
+    body: {'completed': completed, 'note': note},
+  );
 
   // ---- 群 Atlas 与排名 ----
 
@@ -160,7 +199,10 @@ class RemoteCommunityRepository {
   }
 
   /// 群目标排名：需要先知道 goalId，见 [firstGoalId]。
-  Future<List<CommunityRankingEntry>> goalRanking(String groupId, String goalId) async {
+  Future<List<CommunityRankingEntry>> goalRanking(
+    String groupId,
+    String goalId,
+  ) async {
     final data = await _call(
       'GET',
       ApiEndpoints.communityGroupGoalRanking(groupId, goalId),

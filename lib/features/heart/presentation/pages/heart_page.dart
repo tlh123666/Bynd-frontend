@@ -8,7 +8,9 @@ import '../../../../core/network/api_client.dart';
 import '../../../../design_system/design_system.dart';
 import '../../../../shared/widgets/day_strip.dart';
 import '../../../atlas/presentation/pages/atlas_chat_page.dart';
+import '../../../activity/presentation/activity_selection_flow.dart';
 import '../../../device/application/device_scope.dart';
+import '../../../device/domain/device_models.dart';
 import '../../../device/presentation/pages/device_management_page.dart';
 import '../../../diary/data/demo_diary_repository.dart';
 import '../../../diary/data/remote_diary_repository.dart';
@@ -25,6 +27,7 @@ import '../heart_copy.dart';
 import '../sheets/heart_detail_sheet.dart';
 import '../sheets/heart_recordings_sheet.dart';
 import '../sheets/heart_settings_sheet.dart';
+import '../sheets/heart_spo2_measure_sheet.dart';
 import '../widgets/heart_account_guard.dart';
 import '../widgets/heart_recording_trace.dart';
 import '../widgets/heart_widgets.dart';
@@ -65,6 +68,7 @@ class _HeartPageState extends State<HeartPage> {
   Rect? _origin;
   ApiClient? _syncClient;
   HeartBandGateway? _syncGateway;
+  HeartBandGateway? _spo2Gateway;
   bool get _busy => _syncing || _controller.saving;
   @override
   void initState() {
@@ -122,6 +126,7 @@ class _HeartPageState extends State<HeartPage> {
   void dispose() {
     _syncClient?.close();
     _syncGateway?.dispose();
+    _spo2Gateway?.dispose();
     _controller.dispose();
     if (widget.diaryRepository == null) _diary.dispose();
     super.dispose();
@@ -172,6 +177,32 @@ class _HeartPageState extends State<HeartPage> {
     if (mounted && !_controller.accountChanged) {
       await _controller.load(locale: _locale!);
     }
+  }
+
+  // 「Measure now」血氧：一次性读数，单独展示、不进夜间平均值。
+  Future<void> _measureSpo2() async {
+    if (_busy || _controller.accountChanged) return;
+    final device = DeviceScope.maybeOf(context)?.device;
+    if (!_demo && device?.connected != true) {
+      await Navigator.push(
+        context,
+        MaterialPageRoute<void>(builder: (_) => const DeviceManagementPage()),
+      );
+      return;
+    }
+    _spo2Gateway ??= _demo ? DemoHeartBandGateway() : NativeHeartBandGateway();
+    await showAppContentSheet<void>(
+      context,
+      (_) => HeartAccountGuard(
+        controller: _controller,
+        child: HeartSpo2MeasureSheet(
+          gateway: _spo2Gateway!,
+          device:
+              device ?? const DeviceSnapshot(id: 'demo', serialNumber: 'demo'),
+        ),
+      ),
+      glass: true,
+    );
   }
 
   Future<void> _history([String? id]) async {
@@ -401,7 +432,9 @@ class _HeartPageState extends State<HeartPage> {
                   onClose: () => setState(() => _more = false),
                   onActionSelected: (action) {
                     setState(() => _more = false);
-                    if (action == AppQuickAction.ecg) {
+                    if (action == AppQuickAction.startActivity) {
+                      unawaited(openActivitySelection(context));
+                    } else if (action == AppQuickAction.ecg) {
                       _record();
                     } else if (action == AppQuickAction.dayReview ||
                         action == AppQuickAction.meal) {
@@ -721,6 +754,13 @@ class _HeartPageState extends State<HeartPage> {
             ),
           ),
           const SizedBox(height: 12),
+          AppHealthRow(
+            key: const Key('heart-spo2-measure'),
+            label: copy('Medir SpO2 agora', 'Measure SpO2 now'),
+            icon: Icons.air_outlined,
+            onTap: _measureSpo2,
+            divider: false,
+          ),
           AppHealthRow(
             key: const Key('heart-settings-entry'),
             label: copy('Ajustes do coração', 'Heart settings'),

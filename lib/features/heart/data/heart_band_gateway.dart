@@ -10,6 +10,10 @@ abstract interface class HeartBandGateway {
   Future<void> start(DeviceSnapshot device);
   Future<void> stop();
   Future<Map<String, dynamic>> readHistory(DeviceSnapshot device);
+
+  /// On-demand SpO2 ("Measure now"): a one-off reading that the UI shows
+  /// apart and never mixes into the night average.
+  Future<Map<String, dynamic>> measureSpo2Now(DeviceSnapshot device);
   void dispose();
 }
 
@@ -49,6 +53,14 @@ class NativeHeartBandGateway implements HeartBandGateway {
       Map<String, dynamic>.from(
         await channel
                 .invokeMethod<Map>('readHeartHistory', _identity(device))
+                .timeout(const Duration(seconds: 120)) ??
+            {},
+      );
+  @override
+  Future<Map<String, dynamic>> measureSpo2Now(DeviceSnapshot device) async =>
+      Map<String, dynamic>.from(
+        await channel
+                .invokeMethod<Map>('startOnDemandSpo2', _identity(device))
                 .timeout(const Duration(seconds: 120)) ??
             {},
       );
@@ -94,6 +106,16 @@ class DemoHeartBandGateway implements HeartBandGateway {
 
   @override
   Future<Map<String, dynamic>> readHistory(DeviceSnapshot device) async => {};
+  @override
+  Future<Map<String, dynamic>> measureSpo2Now(DeviceSnapshot device) async {
+    await Future<void>.delayed(const Duration(seconds: 3));
+    return {
+      'spo2': 97,
+      'heartRate': 64,
+      'measuredAt': DateTime.now().toIso8601String(),
+    };
+  }
+
   @override
   void dispose() {
     _timer?.cancel();

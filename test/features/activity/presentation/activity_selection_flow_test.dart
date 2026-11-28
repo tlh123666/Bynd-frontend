@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:new_jcvital/design_system/components/app_bottom_nav.dart';
 import 'package:new_jcvital/features/activity/presentation/pages/activity_overview_page.dart';
+import 'package:new_jcvital/features/activity/presentation/widgets/activity_selection_sheet.dart';
 import 'package:new_jcvital/core/network/api_client.dart';
 import 'package:new_jcvital/features/atlas/application/atlas_scope.dart';
 import 'package:new_jcvital/features/atlas/data/atlas_repository.dart';
@@ -152,7 +153,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('首页快捷入口先进入活动页，再自动打开选择面板', (tester) async {
+  testWidgets('首页快捷入口直接打开选择面板，关闭后保留首页', (tester) async {
     await pumpHome(tester);
 
     await tester.tap(find.bySemanticsLabel('Ações rápidas'));
@@ -160,15 +161,17 @@ void main() {
     await tester.tap(find.text('Iniciar\natividade'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Atividades'), findsOneWidget);
-    expect(find.text('O que vamos fazer hoje?'), findsOneWidget);
+    expect(find.byType(HomePage), findsOneWidget);
+    expect(find.byType(ActivityOverviewPage), findsNothing);
+    expect(find.byType(ActivitySelectionSheet), findsOneWidget);
     expect(find.text('Buscar entre 140 modalidades'), findsOneWidget);
 
     await tester.tap(find.byTooltip('Fechar'));
     await tester.pumpAndSettle();
 
-    expect(find.text('O que vamos fazer hoje?'), findsOneWidget);
-    expect(find.text('Iniciar atividade'), findsOneWidget);
+    expect(find.byType(HomePage), findsOneWidget);
+    expect(find.byType(ActivitySelectionSheet), findsNothing);
+    expect(find.byType(ActivityOverviewPage), findsNothing);
   });
 
   testWidgets('首页选择普通活动后进入准备页', (tester) async {
@@ -184,7 +187,7 @@ void main() {
     await tester.tap(find.text('Corrida').last);
     await tester.pumpAndSettle();
 
-    expect(find.text('Pulseira não integrada'), findsOneWidget);
+    expect(find.text('Pulseira 82% · demonstração'), findsOneWidget);
     expect(find.text('Iniciar atividade'), findsOneWidget);
     expect(find.text('Registrar o percurso'), findsOneWidget);
   });
@@ -213,7 +216,7 @@ void main() {
     await tester.tap(find.text('Caminhada').last);
     await tester.pumpAndSettle();
 
-    expect(find.text('Pulseira não integrada'), findsOneWidget);
+    expect(find.text('Pulseira 82% · demonstração'), findsOneWidget);
     expect(find.text('Iniciar atividade'), findsOneWidget);
   });
 
@@ -244,7 +247,7 @@ void main() {
     await tester.tap(find.text('Começar sem plano'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Pulseira não integrada'), findsOneWidget);
+    expect(find.text('Pulseira 82% · demonstração'), findsOneWidget);
     expect(find.text('Musculação'), findsOneWidget);
   });
 }

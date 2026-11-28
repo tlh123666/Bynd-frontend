@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ui' show PointerDeviceKind;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -141,9 +142,25 @@ void main() {
     expect(setValue, findsNWidgets(3));
     expect(tester.getCenter(setValue.first).dy, closeTo(setName.dy, 1));
     expect(find.byIcon(Icons.remove_circle_outline), findsNothing);
+    final addButtonFinder = find.widgetWithText(TextButton, 'Adicionar série');
+    final addButton = tester.widget<TextButton>(addButtonFinder);
+    expect(
+      addButton.style!.overlayColor!.resolve({WidgetState.hovered}),
+      Colors.transparent,
+    );
+    expect(
+      addButton.style!.overlayColor!.resolve({WidgetState.pressed}),
+      Colors.transparent,
+    );
+    final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await mouse.addPointer(location: tester.getCenter(addButtonFinder));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Adicionar série'));
     await tester.pumpAndSettle();
     expect(find.text('400'), findsOneWidget);
+    expect(find.text('Série 4'), findsOneWidget);
+    expect(setValue, findsNWidgets(4));
+    await mouse.removePointer();
     await tester.tap(find.text('Série 1'));
     await tester.pumpAndSettle();
     await tester.tap(find.bySemanticsLabel('Remover série').last);

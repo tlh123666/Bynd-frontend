@@ -38,11 +38,12 @@ class ActivitySelectionSheet extends StatefulWidget {
 }
 
 class _ActivitySelectionSheetState extends State<ActivitySelectionSheet> {
+  // 活动历史尚未接入时，使用原型中的示例顺序。
   static const _recentActivityIds = [
-    'corrida',
     'musculacao',
+    'corrida',
     'caminhada',
-    'ciclismo',
+    'sauna',
   ];
 
   final _searchController = TextEditingController();
