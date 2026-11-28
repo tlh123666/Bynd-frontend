@@ -252,13 +252,18 @@ class _HeartPageState extends State<HeartPage> {
       }
     } catch (e) {
       if (mounted) {
+        final partial = e is ApiException && e.code == 'partial_sync';
         AppNotice.show(
           context,
           kind: AppNoticeKind.error,
           message: heartText(
             context,
-            'Não foi possível sincronizar. Verifique a pulseira e tente novamente.',
-            'Could not sync. Check your band and retry.',
+            partial
+                ? 'A sincronização ficou incompleta. Aproxime a pulseira e tente novamente.'
+                : 'Não foi possível sincronizar. Verifique a pulseira e tente novamente.',
+            partial
+                ? 'Sync was incomplete. Bring your band closer and retry.'
+                : 'Could not sync. Check your band and retry.',
           ),
         );
       }

@@ -75,8 +75,9 @@ void main() {
         'skin_temperature',
         'spo2',
       ]);
-      final skin = grouped.values.single
-          .firstWhere((r) => r['metricType'] == 'skin_temperature');
+      final skin = grouped.values.single.firstWhere(
+        (r) => r['metricType'] == 'skin_temperature',
+      );
       expect(skin['value'], 33.6);
       expect(skin['unit'], 'celsius');
     },
@@ -88,6 +89,7 @@ void main() {
       await session.setAccessToken('a');
       final gateway = FakeHeartGateway()
         ..history = {
+          'historyComplete': true,
           'history': {
             'dynamicHeartRate': [
               {
@@ -144,6 +146,14 @@ void main() {
         jsonDecode(requests[5].body)['clientBatchId'],
         vital['clientBatchId'],
       );
+      gateway.history['historyComplete'] = false;
+      await expectLater(
+        sync.sync(device),
+        throwsA(
+          isA<ApiException>().having((e) => e.code, 'code', 'partial_sync'),
+        ),
+      );
+      expect(requests, hasLength(9));
       client.close();
       gateway.dispose();
       await session.signOut();

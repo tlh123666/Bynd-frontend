@@ -124,19 +124,24 @@ class _SleepPageState extends State<SleepPage> {
           message: sleepText(
             context,
             n > 0 ? 'Sono sincronizado.' : 'Nenhum novo registro de sono.',
-            'Sleep sync completed.',
+            n > 0 ? 'Sleep synced.' : 'No new sleep records.',
           ),
         );
       }
     } catch (e) {
       if (mounted) {
+        final partial = e is ApiException && e.code == 'partial_sleep_sync';
         AppNotice.show(
           context,
           kind: AppNoticeKind.error,
           message: sleepText(
             context,
-            'Não foi possível sincronizar. Aproxime a pulseira e tente novamente.',
-            'Could not sync. Bring your band closer and retry.',
+            partial
+                ? 'A sincronização do sono ficou incompleta. Aproxime a pulseira e tente novamente.'
+                : 'Não foi possível sincronizar. Aproxime a pulseira e tente novamente.',
+            partial
+                ? 'Sleep sync was incomplete. Bring your band closer and retry.'
+                : 'Could not sync. Bring your band closer and retry.',
           ),
         );
       }

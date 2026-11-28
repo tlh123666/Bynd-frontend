@@ -1,4 +1,4 @@
-// Ported without algorithm changes from JCVital/shared/band/sleep_session_builder.dart.
+// Based on JCVital/shared/band/sleep_session_builder.dart.
 enum SleepStageType { awake, rem, light, deep }
 
 class SleepStageSpan {
@@ -107,17 +107,18 @@ List<SleepSessionDraft> buildSleepSessions(
 
   final sessions = <SleepSessionDraft>[];
   var group = <_ParsedSleepRecord>[parsed.first];
+  var end = parsed.first.end;
   for (final record in parsed.skip(1)) {
-    final previous = group.last;
-    final gap = record.start.difference(previous.end);
-    if (gap <= kSleepRecordGapTolerance) {
-      group.add(record);
-    } else {
-      sessions.add(_stitchSession(group, deviceSerial));
-      group = <_ParsedSleepRecord>[record];
+    if (record.start.difference(end) > kSleepRecordGapTolerance) {
+      sessions.add(_stitchSession(group, end, deviceSerial));
+      group = [];
+      end = record.end;
+    } else if (record.end.isAfter(end)) {
+      end = record.end;
     }
+    group.add(record);
   }
-  sessions.add(_stitchSession(group, deviceSerial));
+  sessions.add(_stitchSession(group, end, deviceSerial));
   return List<SleepSessionDraft>.unmodifiable(sessions);
 }
 
@@ -169,10 +170,10 @@ SleepStageTotals? sleepStageTotalsForLocalDate(
 /// Joins a run of device records into a single session.
 SleepSessionDraft _stitchSession(
   List<_ParsedSleepRecord> group,
+  DateTime end,
   String deviceSerial,
 ) {
   final start = group.first.start;
-  final end = group.last.end;
   return SleepSessionDraft(
     clientRequestId: sleepClientRequestId(deviceSerial, start),
     startAt: start.toUtc(),

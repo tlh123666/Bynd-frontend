@@ -23,7 +23,6 @@ import com.jstyle.blesdkv8.Util.BleSDK
 import com.jstyle.blesdkv8.callback.DataListener2301
 import com.jstyle.blesdkv8.constant.BleConst
 import com.jstyle.blesdkv8.constant.DeviceKey
-import com.jstyle.blesdkv8.model.AutoMode
 import com.jstyle.blesdkv8.model.AutoTestMode
 import com.jstyle.blesdkv8.model.MyDeviceTime
 import com.jstyle.blesdkv8.model.MyPersonalInfo
@@ -62,15 +61,13 @@ class JStyleBleController(
 
     private var pendingConnectResult: MethodChannel.Result? = null
     private var connectTimeout: Runnable? = null
-    private var pendingMetricsResult: MethodChannel.Result? = null
-    private var metricsTimeout: Runnable? = null
+    private var pendingHistoryResult: MethodChannel.Result? = null
+    private var pendingHistory: BandHistoryRead? = null
+    private var historyTimeout: Runnable? = null
     private var managementResult: MethodChannel.Result? = null
     private var managementTimeout: Runnable? = null
     private var managementExpectedSerial: String? = null
     private val managementReplies = mutableSetOf<String>()
-    private var sleepHistoryResponseCount = 0
-    private var dynamicHeartRateResponseCount = 0
-    private var staticHeartRateResponseCount = 0
     private var pendingProfileSyncResult: MethodChannel.Result? = null
     private var profileSyncTimeout: Runnable? = null
     private var realtimeStepActive = false
@@ -203,6 +200,7 @@ class JStyleBleController(
         }
 
         stopScanInternal()
+        failHistoryRead("disconnected", "The band connection changed.")
         clearGatt()
         resetMetrics()
 
@@ -249,7 +247,7 @@ class JStyleBleController(
         Log.d(TAG, "disconnect() called from " + Throwable().stackTrace.take(6).joinToString(" <- "))
         cancelScan()
         failManagement("device_disconnected", "The band disconnected.")
-        finishMetrics()
+        failHistoryRead("disconnected", "The band disconnected.")
         failProfileSync("disconnected", "Disconnected before profile sync completed.")
         failConnect("disconnected", "Disconnected before the band was ready.")
 
@@ -270,7 +268,7 @@ class JStyleBleController(
         }
     }
 
-    fun fetchLatestMetrics(result: MethodChannel.Result) {
+    fun readHistory(sleep: Boolean, result: MethodChannel.Result) {
         if (!ensureConnectPermission(result)) return
 
         if (!connectionReady || currentGatt == null || currentDevice == null) {
@@ -278,44 +276,33 @@ class JStyleBleController(
             return
         }
 
-        if (pendingMetricsResult != null) {
-            result.success(metricsPayload())
+        if (pendingHistoryResult != null || ecgActive) {
+            result.error("busy", "A band operation is in progress.", null)
             return
         }
 
-        pendingMetricsResult = result
-        sleepHistoryResponseCount = 0
-        dynamicHeartRateResponseCount = 0
-        staticHeartRateResponseCount = 0
-        metricsTimeout =
+        val commands = if (sleep) {
+            mapOf("sleep" to BleSDK.GetDetailSleepDataWithMode(READ_START, ""))
+        } else {
+            mapOf(
+                "dynamicHeartRate" to BleSDK.GetDynamicHRWithMode(READ_START, ""),
+                "staticHeartRate" to BleSDK.GetStaticHRWithMode(READ_START, ""),
+                "hrv" to BleSDK.GetHRVDataWithMode(READ_START, ""),
+                "temperature" to BleSDK.GetTemperature_historyData(READ_START, ""),
+                "bloodOxygen" to BleSDK.Oxygen_data(READ_START, ""),
+            )
+        }
+        commands.keys.forEach { historyData.remove(it) }
+        pendingHistoryResult = result
+        pendingHistory = BandHistoryRead(commands.keys)
+        historyTimeout =
             Runnable {
-                finishMetrics()
-            }.also { mainHandler.postDelayed(it, METRICS_TIMEOUT_MS) }
+                finishHistoryRead()
+                // Clear the GATT session so late pages cannot complete a retry's transfer.
+                clearGatt()
+            }.also { mainHandler.postDelayed(it, HISTORY_TIMEOUT_MS) }
 
-        enqueueCommands(
-            listOf(
-                BleSDK.GetDeviceTime(),
-                BleSDK.GetPersonalInfo(),
-                BleSDK.GetDeviceBatteryLevel(),
-                BleSDK.GetDeviceMacAddress(),
-                BleSDK.GetDeviceVersion(),
-                BleSDK.GetDeviceName(),
-                BleSDK.GetAutomatic(AutoMode.AutoHeartRate),
-                BleSDK.GetAutomatic(AutoMode.AutoSpo2),
-                BleSDK.GetAutomatic(AutoMode.AutoTemp),
-                BleSDK.GetAutomatic(AutoMode.AutoHrv),
-                BleSDK.GetTotalActivityDataWithMode(READ_START, ""),
-                BleSDK.GetDetailActivityDataWithMode(READ_START, ""),
-                BleSDK.GetDynamicHRWithMode(READ_START, ""),
-                BleSDK.GetStaticHRWithMode(READ_START, ""),
-                BleSDK.GetDetailSleepDataWithMode(READ_START, ""),
-                BleSDK.GetHRVDataWithMode(READ_START, ""),
-                BleSDK.GetTemperature_historyData(READ_START, ""),
-                BleSDK.Oxygen_data(READ_START, ""),
-                BleSDK.GetActivityModeDataWithMode(READ_START),
-                BleSDK.FindActivityMode(),
-            ),
-        )
+        enqueueCommands(commands.values.toList())
     }
 
     fun syncUserProfile(
@@ -402,6 +389,10 @@ class JStyleBleController(
         }
         if (ecgActive) {
             result.error("ecg_in_progress", "An ECG measurement is already running.", null)
+            return
+        }
+        if (pendingHistoryResult != null) {
+            result.error("busy", "Band history is being read.", null)
             return
         }
         if (durationSeconds !in MIN_ECG_SECONDS..MAX_ECG_SECONDS) {
@@ -722,7 +713,7 @@ class JStyleBleController(
                             if (!wasReady) {
                                 failConnect("connection_failed", "The band disconnected before setup completed.")
                             } else {
-                                failMetrics("disconnected", "The band disconnected.")
+                                failHistoryRead("disconnected", "The band disconnected.")
                                 failProfileSync("disconnected", "The band disconnected.")
                             }
                         }
@@ -1016,7 +1007,6 @@ class JStyleBleController(
 
             BleConst.GetStaticHR -> {
                 val records = storeHistory("staticHeartRate", maps)
-                staticHeartRateResponseCount++
                 val entry = records.maxByOrNull { it[DeviceKey.Date]?.toString().orEmpty() }
                 heartRate = entry.intValue(DeviceKey.StaticHR) ?: heartRate
                 if (records.isNotEmpty()) {
@@ -1025,29 +1015,27 @@ class JStyleBleController(
                     // every timestamped reading instead of only the latest BPM.
                     pushRealtimeUpdate("static_heart_rate_history")
                 }
-                if (!maps.dataEnded() && staticHeartRateResponseCount % HEART_RATE_HISTORY_BATCH_SIZE == 0) {
-                    enqueueCommands(listOf(BleSDK.GetStaticHRWithMode(READ_CONTINUE, "")))
+                receiveHistoryPage("staticHeartRate", maps) {
+                    BleSDK.GetStaticHRWithMode(READ_CONTINUE, "")
                 }
             }
 
             BleConst.GetDynamicHR -> {
                 val records = storeHistory("dynamicHeartRate", maps)
-                dynamicHeartRateResponseCount++
                 val entry = records.maxByOrNull { it[DeviceKey.Date]?.toString().orEmpty() }
                 val values = entry.tokens(DeviceKey.ArrayDynamicHR).mapNotNull { it.toIntOrNull() }
                 heartRate = values.lastOrNull { it > 0 } ?: heartRate
                 if (records.isNotEmpty()) {
                     pushRealtimeUpdate("dynamic_heart_rate_history")
                 }
-                if (!maps.dataEnded() && dynamicHeartRateResponseCount % HEART_RATE_HISTORY_BATCH_SIZE == 0) {
-                    enqueueCommands(listOf(BleSDK.GetDynamicHRWithMode(READ_CONTINUE, "")))
+                receiveHistoryPage("dynamicHeartRate", maps) {
+                    BleSDK.GetDynamicHRWithMode(READ_CONTINUE, "")
                 }
             }
 
             BleConst.GetDetailSleepData,
             BleConst.Obtain_detailed_sleep_data -> {
                 val records = storeHistory("sleep", maps)
-                sleepHistoryResponseCount++
                 val entry = records.firstOrNull()
                 val samples = entry.tokens(DeviceKey.ArraySleep)
                 val unitMinutes = entry.intValue(DeviceKey.sleepUnitLength) ?: DEFAULT_SLEEP_UNIT_MINUTES
@@ -1058,19 +1046,11 @@ class JStyleBleController(
                     TAG,
                     "BLE sleep history records=${records.size}, samples=${samples.size}, unitMinutes=$unitMinutes",
                 )
-                // Detailed sleep history is often delivered after the normal
-                // metrics request has already timed out. Publish every packet
-                // so Flutter persists the history and runs the idempotent
-                // sleep upload instead of silently keeping it only in this
-                // controller's in-memory map.
                 if (records.isNotEmpty()) {
                     pushRealtimeUpdate("sleep_history")
                 }
-                // The vendor demo resumes a large history transfer every 50
-                // responses with mode=2. Without this, a band holding more
-                // than one batch can stop partway through its sleep history.
-                if (!maps.dataEnded() && sleepHistoryResponseCount % SLEEP_HISTORY_BATCH_SIZE == 0) {
-                    enqueueCommands(listOf(BleSDK.GetDetailSleepDataWithMode(READ_CONTINUE, "")))
+                receiveHistoryPage("sleep", maps) {
+                    BleSDK.GetDetailSleepDataWithMode(READ_CONTINUE, "")
                 }
             }
 
@@ -1121,12 +1101,18 @@ class JStyleBleController(
                     }
                     completeEcgMeasurement(cancelled = false)
                 }
+                receiveHistoryPage("hrv", maps) {
+                    BleSDK.GetHRVDataWithMode(READ_CONTINUE, "")
+                }
             }
 
             BleConst.Temperature_history -> {
                 val records = storeHistory("temperature", maps)
                 val entry = records.firstOrNull()
                 temperature = entry.doubleValue(DeviceKey.temperature) ?: temperature
+                receiveHistoryPage("temperature", maps) {
+                    BleSDK.GetTemperature_historyData(READ_CONTINUE, "")
+                }
             }
 
             BleConst.GetAutomaticSpo2Monitoring,
@@ -1134,6 +1120,11 @@ class JStyleBleController(
                 val records = storeHistory("bloodOxygen", maps)
                 val entry = records.firstOrNull()
                 bloodOxygen = entry.intValue(DeviceKey.Blood_oxygen) ?: bloodOxygen
+                if (maps[DeviceKey.DataType] == BleConst.GetAutomaticSpo2Monitoring) {
+                    receiveHistoryPage("bloodOxygen", maps) {
+                        BleSDK.Oxygen_data(READ_CONTINUE, "")
+                    }
+                }
             }
 
             BleConst.GetActivityModeData -> {
@@ -1251,24 +1242,43 @@ class JStyleBleController(
         }
     }
 
-    private fun failMetrics(code: String, message: String) {
-        val result = pendingMetricsResult ?: return
-        metricsTimeout?.let { mainHandler.removeCallbacks(it) }
-        metricsTimeout = null
-        pendingMetricsResult = null
+    private fun failHistoryRead(code: String, message: String) {
+        val result = pendingHistoryResult ?: return
+        historyTimeout?.let { mainHandler.removeCallbacks(it) }
+        historyTimeout = null
+        pendingHistoryResult = null
+        pendingHistory = null
         result.error(code, message, null)
     }
 
-    private fun finishMetrics() {
-        val result = pendingMetricsResult ?: return
-        metricsTimeout?.let { mainHandler.removeCallbacks(it) }
-        metricsTimeout = null
-        pendingMetricsResult = null
+    private fun receiveHistoryPage(
+        stream: String,
+        page: Map<String, Any>,
+        continuation: () -> ByteArray,
+    ) {
+        val history = pendingHistory ?: return
+        if (history.receivePage(stream, page.dataEnded())) {
+            enqueueCommands(listOf(continuation()))
+        }
+        if (history.complete) finishHistoryRead()
+    }
+
+    private fun finishHistoryRead() {
+        val result = pendingHistoryResult ?: return
+        val history = pendingHistory ?: return
+        historyTimeout?.let { mainHandler.removeCallbacks(it) }
+        historyTimeout = null
+        pendingHistoryResult = null
+        pendingHistory = null
+        val completed = history.completedStreams
         Log.d(
             TAG,
-            "BLE metrics finished; history=${historyData.mapValues { it.value.size }}",
+            "BLE history read complete=${history.complete}; completed=$completed",
         )
-        result.success(metricsPayload())
+        result.success(mapOf(
+            "historyComplete" to history.complete,
+            "history" to historyData.filterKeys { it in completed }.mapValues { it.value.toList() },
+        ))
     }
 
     private fun failProfileSync(code: String, message: String) {
@@ -1702,10 +1712,8 @@ class JStyleBleController(
         private const val TAG = "JStyleBleController"
         private const val SCAN_DURATION_MS = 8000L
         private const val CONNECT_TIMEOUT_MS = 18000L
-        // A history read can involve many 2-hour sleep packets. 20 seconds is
-        // often not enough for the band to finish after the other sync
-        // commands, especially on its first connection of the day.
-        private const val METRICS_TIMEOUT_MS = 60000L
+        // Full reads may span several pages of history stored on the band.
+        private const val HISTORY_TIMEOUT_MS = 60000L
         private const val CLOSE_DELAY_MS = 500L
         private const val COMMAND_WRITE_GAP_MS = 180L
         private const val HEART_MEASUREMENT_SECONDS = 35L
@@ -1730,8 +1738,6 @@ class JStyleBleController(
         private const val MINUTES_PER_HOUR = 60.0
         private const val READ_START: Byte = 0x00
         private const val READ_CONTINUE: Byte = 0x02
-        private const val SLEEP_HISTORY_BATCH_SIZE = 50
-        private const val HEART_RATE_HISTORY_BATCH_SIZE = 50
 
         private val DATA_SERVICE_UUID: UUID =
             UUID.fromString("0000fff0-0000-1000-8000-00805f9b34fb")
