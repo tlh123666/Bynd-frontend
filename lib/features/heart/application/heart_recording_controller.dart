@@ -7,6 +7,7 @@ import '../../device/domain/device_models.dart';
 import '../../diary/domain/diary_models.dart' show diaryId;
 import '../data/heart_band_gateway.dart';
 import '../domain/heart_models.dart';
+import '../domain/heart_waveform_quality.dart';
 
 enum HeartRecordingStatus {
   ready,
@@ -219,6 +220,12 @@ class HeartRecordingController extends ChangeNotifier {
         final duration = (event['durationMillis'] as num?)?.round() ?? 0;
         if (samples.isEmpty || duration < 29000) {
           _fail('incomplete_recording');
+          return;
+        }
+        // 弱信号门：不合格的波形在这里丢弃——不落库、不进血压估计、
+        // 不进 ATLAS。这是保存前唯一的入口，reject 即全链路不可见。
+        if (!heartWaveformLooksValid(samples)) {
+          _fail('weak_signal');
           return;
         }
         _payload = {

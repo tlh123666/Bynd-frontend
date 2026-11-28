@@ -144,7 +144,7 @@ void main() {
       expect(gateway.startedDevices.last.transportId, 'BLE-B');
       gateway.emit({
         'event': 'ecg_waveform',
-        'samples': [1, 2, 3],
+        'samples': validCaptureWaveform(),
         'waveformKind': 'ppg',
       });
       gateway.emit({'event': 'ecg_completed', 'durationMillis': 30000});

@@ -23,6 +23,13 @@ HeartRecording heartRecordingFixture({
   'symptoms': <String>[],
   'samples': [for (var i = 0; i < 300; i++) i % 70],
 });
+
+/// 40 full oscillation cycles — passes the capture quality gate so tests
+/// that complete a recording exercise the real save path.
+List<int> validCaptureWaveform() => [
+  for (var c = 0; c < 40; c++)
+    for (var i = 0; i < 50; i++) (i < 25 ? i * 8 : (49 - i) * 8),
+];
 HeartSnapshot heartSnapshotFixture(
   DateTime date, {
   bool empty = false,
