@@ -124,7 +124,7 @@ class AtlasChatController extends ChangeNotifier {
       ),
     );
     final requestId =
-        'flutter-${DateTime.now().millisecondsSinceEpoch}-${Random().nextInt(1 << 32)}';
+        'flutter-${DateTime.now().millisecondsSinceEpoch}-${Random().nextInt(0x100000000)}';
     _generationId = requestId;
     _streamingText = '';
     _phase = 'preparing';
