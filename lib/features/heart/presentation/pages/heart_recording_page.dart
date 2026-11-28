@@ -232,8 +232,8 @@ class _HeartRecordingPageState extends State<HeartRecordingPage>
                     Text(
                       heartText(
                         context,
-                        'Continue com o sensor em contato. Fique parado e sem falar.',
-                        'Keep contact with the sensor. Stay still and quiet.',
+                        'Mantenha a palma firme no eletrodo e o pulso parado. Sem falar, durante os 30 segundos.',
+                        'Keep your palm firmly on the electrode and your wrist still. No talking, for the whole 30 seconds.',
                       ),
                       style: AppHeartStyle.body,
                     ),
@@ -353,11 +353,17 @@ class _HeartRecordingPageState extends State<HeartRecordingPage>
                     if (c?.errorCode != null) ...[
                       const SizedBox(height: 18),
                       Text(
-                        heartText(
-                          context,
-                          'Não recebemos uma leitura completa. Verifique a conexão e o contato com o sensor e tente novamente.',
-                          'A complete recording was not received. Check the connection and sensor contact, then retry.',
-                        ),
+                        c!.errorCode == 'weak_signal'
+                            ? heartText(
+                                context,
+                                'Sinal fraco, tente novamente. Mantenha a palma da mão firme no eletrodo e o pulso parado durante toda a leitura.',
+                                'Weak signal, try again. Keep your palm firmly on the electrode and your wrist still for the whole reading.',
+                              )
+                            : heartText(
+                                context,
+                                'Não recebemos uma leitura completa. Verifique a conexão e o contato com o sensor e tente novamente.',
+                                'A complete recording was not received. Check the connection and sensor contact, then retry.',
+                              ),
                         style: AppHeartStyle.body.copyWith(
                           color: AppColors.error,
                         ),
