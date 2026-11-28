@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -18,6 +19,8 @@ import 'package:speech_to_text/speech_to_text.dart';
 
 class CaptureLocaleDiary extends DemoDiaryRepository {
   String? parsedLocale;
+  String? parsedText;
+  Completer<List<DiaryMoment>>? response;
   @override
   Future<List<DiaryMoment>> parse(
     String text,
@@ -26,7 +29,8 @@ class CaptureLocaleDiary extends DemoDiaryRepository {
     bool voice = false,
   }) async {
     parsedLocale = locale;
-    return [];
+    parsedText = text;
+    return response?.future ?? [];
   }
 }
 
@@ -271,6 +275,41 @@ void main() {
       expect(repo.chapterLoads, 2);
       expect(find.text('Seus capítulos'), findsOneWidget);
       expect(find.text('Os 14 km'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'changing the diary draft invalidates in-flight and existing previews',
+    (tester) async {
+      final repo = CaptureLocaleDiary()..response = Completer();
+      await mount(
+        tester,
+        DiaryCaptureSheet(repository: repo, date: DateTime.now()),
+      );
+      final field = find.byKey(const Key('diary-capture-text'));
+      await tester.enterText(field, 'I drank coffee');
+      await tester.tap(find.text('Review entries'));
+      await tester.pump();
+      expect(repo.parsedText, 'I drank coffee');
+      await tester.enterText(field, 'I went walking');
+      repo.response!.complete([
+        const DiaryMoment({'id': 'old-draft', 'label': 'Old coffee result'}),
+      ]);
+      await tester.pumpAndSettle();
+      expect(find.text('Old coffee result'), findsNothing);
+      expect(find.text('Add to day'), findsNothing);
+
+      repo.response = Completer()
+        ..complete([
+          const DiaryMoment({'id': 'new-draft', 'label': 'Walking result'}),
+        ]);
+      await tester.tap(find.text('Review entries'));
+      await tester.pumpAndSettle();
+      expect(find.text('Walking result'), findsOneWidget);
+      await tester.enterText(field, 'I cycled');
+      await tester.pump();
+      expect(find.text('Walking result'), findsNothing);
+      expect(find.text('Add to day'), findsNothing);
     },
   );
 

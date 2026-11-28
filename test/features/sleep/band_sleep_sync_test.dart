@@ -39,6 +39,7 @@ void main() {
             expect(call.method, 'readSleepHistory');
             expect(call.arguments['serialNumber'], 'B1');
             return {
+              'historyComplete': true,
               'history': {
                 'sleep': [
                   for (var day = 1; day <= 25; day++)
@@ -103,6 +104,38 @@ void main() {
       );
     },
   );
+  test('incomplete sleep history is never uploaded as a night', () async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          channel,
+          (_) async => {
+            'historyComplete': false,
+            'history': {
+              'sleep': [
+                {'date': '2026-10-01 01:00:00', 'arraySleep': '01 02'},
+              ],
+            },
+          },
+        );
+    var uploads = 0;
+    final client = ApiClient(
+      baseUrl: Uri.parse('https://example.test/api/v1'),
+      tokenProvider: () async => session.accessToken,
+      client: MockClient((_) async {
+        uploads++;
+        return http.Response('{}', 200);
+      }),
+    );
+    addTearDown(client.close);
+    await expectLater(
+      BandSleepSync(client, channel: channel, session: session).sync(device),
+      throwsA(
+        isA<ApiException>().having((e) => e.code, 'code', 'partial_sleep_sync'),
+      ),
+    );
+    expect(uploads, 0);
+  });
+
   test('account change during BLE read prevents any upload', () async {
     final read = Completer<dynamic>();
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -130,6 +163,7 @@ void main() {
     );
     await session.setAccessToken('account-b');
     read.complete({
+      'historyComplete': true,
       'history': {'sleep': []},
     });
     await assertion;

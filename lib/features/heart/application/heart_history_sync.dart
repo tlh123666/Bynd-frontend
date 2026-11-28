@@ -103,6 +103,12 @@ class HeartHistorySync {
           );
         }
       }
+      if (data['historyComplete'] != true) {
+        throw const ApiException(
+          'The band did not finish sending its history',
+          code: 'partial_sync',
+        );
+      }
       return written;
     } finally {
       _busy = false;

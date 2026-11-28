@@ -23,7 +23,6 @@ import com.jstyle.blesdkv8.Util.BleSDK
 import com.jstyle.blesdkv8.callback.DataListener2301
 import com.jstyle.blesdkv8.constant.BleConst
 import com.jstyle.blesdkv8.constant.DeviceKey
-import com.jstyle.blesdkv8.model.AutoMode
 import com.jstyle.blesdkv8.model.AutoTestMode
 import com.jstyle.blesdkv8.model.MyDeviceTime
 import com.jstyle.blesdkv8.model.MyPersonalInfo
@@ -62,15 +61,13 @@ class JStyleBleController(
 
     private var pendingConnectResult: MethodChannel.Result? = null
     private var connectTimeout: Runnable? = null
-    private var pendingMetricsResult: MethodChannel.Result? = null
-    private var metricsTimeout: Runnable? = null
+    private var pendingHistoryResult: MethodChannel.Result? = null
+    private var pendingHistory: BandHistoryRead? = null
+    private var historyTimeout: Runnable? = null
     private var managementResult: MethodChannel.Result? = null
     private var managementTimeout: Runnable? = null
     private var managementExpectedSerial: String? = null
     private val managementReplies = mutableSetOf<String>()
-    private var sleepHistoryResponseCount = 0
-    private var dynamicHeartRateResponseCount = 0
-    private var staticHeartRateResponseCount = 0
     private var pendingProfileSyncResult: MethodChannel.Result? = null
     private var profileSyncTimeout: Runnable? = null
     private var realtimeStepActive = false
@@ -87,8 +84,6 @@ class JStyleBleController(
 
     private var spo2OnDemandActive = false
     private var spo2OnDemandResult: MethodChannel.Result? = null
-    private var spo2OnDemandRetries = 0
-    private var spo2RetryRunnable: Runnable? = null
     private var spo2TimeoutRunnable: Runnable? = null
     private var spo2StreamFallbackRunnable: Runnable? = null
     private var spo2StreamResult: Int? = null
@@ -214,6 +209,7 @@ class JStyleBleController(
         }
 
         stopScanInternal()
+        failHistoryRead("disconnected", "The band connection changed.")
         clearGatt()
         resetMetrics()
 
@@ -260,7 +256,7 @@ class JStyleBleController(
         Log.d(TAG, "disconnect() called from " + Throwable().stackTrace.take(6).joinToString(" <- "))
         cancelScan()
         failManagement("device_disconnected", "The band disconnected.")
-        finishMetrics()
+        failHistoryRead("disconnected", "The band disconnected.")
         failProfileSync("disconnected", "Disconnected before profile sync completed.")
         failConnect("disconnected", "Disconnected before the band was ready.")
 
@@ -281,7 +277,7 @@ class JStyleBleController(
         }
     }
 
-    fun fetchLatestMetrics(result: MethodChannel.Result) {
+    fun readHistory(sleep: Boolean, result: MethodChannel.Result) {
         if (!ensureConnectPermission(result)) return
 
         if (!connectionReady || currentGatt == null || currentDevice == null) {
@@ -289,44 +285,33 @@ class JStyleBleController(
             return
         }
 
-        if (pendingMetricsResult != null) {
-            result.success(metricsPayload())
+        if (pendingHistoryResult != null || ecgActive || spo2OnDemandActive) {
+            result.error("busy", "A band operation is in progress.", null)
             return
         }
 
-        pendingMetricsResult = result
-        sleepHistoryResponseCount = 0
-        dynamicHeartRateResponseCount = 0
-        staticHeartRateResponseCount = 0
-        metricsTimeout =
+        val commands = if (sleep) {
+            mapOf("sleep" to BleSDK.GetDetailSleepDataWithMode(READ_START, ""))
+        } else {
+            mapOf(
+                "dynamicHeartRate" to BleSDK.GetDynamicHRWithMode(READ_START, ""),
+                "staticHeartRate" to BleSDK.GetStaticHRWithMode(READ_START, ""),
+                "hrv" to BleSDK.GetHRVDataWithMode(READ_START, ""),
+                "temperature" to BleSDK.GetTemperature_historyData(READ_START, ""),
+                "bloodOxygen" to BleSDK.Oxygen_data(READ_START, ""),
+            )
+        }
+        commands.keys.forEach { historyData.remove(it) }
+        pendingHistoryResult = result
+        pendingHistory = BandHistoryRead(commands.keys)
+        historyTimeout =
             Runnable {
-                finishMetrics()
-            }.also { mainHandler.postDelayed(it, METRICS_TIMEOUT_MS) }
+                finishHistoryRead()
+                // Clear the GATT session so late pages cannot complete a retry's transfer.
+                clearGatt()
+            }.also { mainHandler.postDelayed(it, HISTORY_TIMEOUT_MS) }
 
-        enqueueCommands(
-            listOf(
-                BleSDK.GetDeviceTime(),
-                BleSDK.GetPersonalInfo(),
-                BleSDK.GetDeviceBatteryLevel(),
-                BleSDK.GetDeviceMacAddress(),
-                BleSDK.GetDeviceVersion(),
-                BleSDK.GetDeviceName(),
-                BleSDK.GetAutomatic(AutoMode.AutoHeartRate),
-                BleSDK.GetAutomatic(AutoMode.AutoSpo2),
-                BleSDK.GetAutomatic(AutoMode.AutoTemp),
-                BleSDK.GetAutomatic(AutoMode.AutoHrv),
-                BleSDK.GetTotalActivityDataWithMode(READ_START, ""),
-                BleSDK.GetDetailActivityDataWithMode(READ_START, ""),
-                BleSDK.GetDynamicHRWithMode(READ_START, ""),
-                BleSDK.GetStaticHRWithMode(READ_START, ""),
-                BleSDK.GetDetailSleepDataWithMode(READ_START, ""),
-                BleSDK.GetHRVDataWithMode(READ_START, ""),
-                BleSDK.GetTemperature_historyData(READ_START, ""),
-                BleSDK.Oxygen_data(READ_START, ""),
-                BleSDK.GetActivityModeDataWithMode(READ_START),
-                BleSDK.FindActivityMode(),
-            ),
-        )
+        enqueueCommands(commands.values.toList())
     }
 
     fun syncUserProfile(
@@ -413,6 +398,14 @@ class JStyleBleController(
         }
         if (ecgActive) {
             result.error("ecg_in_progress", "An ECG measurement is already running.", null)
+            return
+        }
+        if (pendingHistoryResult != null) {
+            result.error("busy", "Band history is being read.", null)
+            return
+        }
+        if (spo2OnDemandActive) {
+            result.error("busy", "A blood oxygen measurement is in progress.", null)
             return
         }
         if (durationSeconds !in MIN_ECG_SECONDS..MAX_ECG_SECONDS) {
@@ -608,16 +601,18 @@ class JStyleBleController(
             result.error("busy", "A blood oxygen measurement is already running.", null)
             return
         }
+        if (pendingHistoryResult != null) {
+            result.error("busy", "Band history is being read.", null)
+            return
+        }
         spo2RealtimeStartedByUs = !realtimeStepActive
         startRealtimeStep()
         spo2OnDemandActive = true
         spo2OnDemandResult = result
-        spo2OnDemandRetries = 0
         spo2StreamResult = null
         spo2StreamValidCount = 0
         spo2LastNonCapped = 0
         enqueueCommands(listOf(spo2StartCommand()))
-        scheduleSpo2FollowUp()
         spo2StreamFallbackRunnable =
             Runnable {
                 if (!spo2OnDemandActive) return@Runnable
@@ -625,8 +620,7 @@ class JStyleBleController(
                 // pin to 100 once the measurement window is over.
                 val preferred = when {
                     spo2LastNonCapped in 1..99 -> spo2LastNonCapped
-                    bloodOxygen in 1..100 -> bloodOxygen
-                    else -> null
+                    else -> spo2StreamResult
                 }
                 if (preferred != null) {
                     Log.d(TAG, "spo2 on-demand stream fallback result: $preferred")
@@ -648,39 +642,11 @@ class JStyleBleController(
             true,
         )
 
-    // The measurement itself takes ~35s after an accepted start. Aggressive
-    // re-sending every few seconds restarts it and produces zero-value
-    // packets (2026-11-27 field finding), so follow-ups are far apart. The
-    // band may also store the result in its manual-test history instead of
-    // pushing a live packet: each follow-up reads the manual SpO2 channel
-    // (read-and-clear, 0x99) and refreshes the automatic history, and a
-    // fresh valid record completes the flow. Zero-value packets are logged
-    // and waited through, never treated as the result.
-    private fun scheduleSpo2FollowUp() {
-        spo2RetryRunnable?.let { mainHandler.removeCallbacks(it) }
-        if (!spo2OnDemandActive || spo2OnDemandRetries >= SPO2_START_MAX_RETRIES) return
-        spo2RetryRunnable =
-            Runnable {
-                if (!spo2OnDemandActive) return@Runnable
-                spo2OnDemandRetries++
-                Log.d(TAG, "spo2 on-demand history probe #$spo2OnDemandRetries")
-                enqueueCommands(
-                    listOf(
-                        BleSDK.Oxygen_data(SPO2_MANUAL_READ, ""),
-                        BleSDK.Oxygen_data(READ_START, ""),
-                    ),
-                )
-                scheduleSpo2FollowUp()
-            }.also { mainHandler.postDelayed(it, SPO2_START_RETRY_MS) }
-    }
-
     private fun completeSpo2OnDemand(
         errorCode: String? = null,
         resultValue: Int? = null,
     ) {
         val pending = spo2OnDemandResult
-        spo2RetryRunnable?.let { mainHandler.removeCallbacks(it) }
-        spo2RetryRunnable = null
         spo2TimeoutRunnable?.let { mainHandler.removeCallbacks(it) }
         spo2TimeoutRunnable = null
         spo2StreamFallbackRunnable?.let { mainHandler.removeCallbacks(it) }
@@ -700,7 +666,7 @@ class JStyleBleController(
         } else {
             pending.success(
                 mapOf(
-                    "spo2" to (resultValue ?: bloodOxygen).takeIf { it in 1..100 },
+                    "spo2" to resultValue?.takeIf { it in 1..100 },
                     "heartRate" to heartRate.takeIf { it > 0 },
                     "hrv" to hrv.takeIf { it > 0 },
                     "stress" to stress.takeIf { it > 0 },
@@ -864,7 +830,7 @@ class JStyleBleController(
                             if (!wasReady) {
                                 failConnect("connection_failed", "The band disconnected before setup completed.")
                             } else {
-                                failMetrics("disconnected", "The band disconnected.")
+                                failHistoryRead("disconnected", "The band disconnected.")
                                 failProfileSync("disconnected", "The band disconnected.")
                             }
                         }
@@ -1158,7 +1124,6 @@ class JStyleBleController(
 
             BleConst.GetStaticHR -> {
                 val records = storeHistory("staticHeartRate", maps)
-                staticHeartRateResponseCount++
                 val entry = records.maxByOrNull { it[DeviceKey.Date]?.toString().orEmpty() }
                 heartRate = entry.intValue(DeviceKey.StaticHR) ?: heartRate
                 if (records.isNotEmpty()) {
@@ -1167,29 +1132,27 @@ class JStyleBleController(
                     // every timestamped reading instead of only the latest BPM.
                     pushRealtimeUpdate("static_heart_rate_history")
                 }
-                if (!maps.dataEnded() && staticHeartRateResponseCount % HEART_RATE_HISTORY_BATCH_SIZE == 0) {
-                    enqueueCommands(listOf(BleSDK.GetStaticHRWithMode(READ_CONTINUE, "")))
+                receiveHistoryPage("staticHeartRate", maps) {
+                    BleSDK.GetStaticHRWithMode(READ_CONTINUE, "")
                 }
             }
 
             BleConst.GetDynamicHR -> {
                 val records = storeHistory("dynamicHeartRate", maps)
-                dynamicHeartRateResponseCount++
                 val entry = records.maxByOrNull { it[DeviceKey.Date]?.toString().orEmpty() }
                 val values = entry.tokens(DeviceKey.ArrayDynamicHR).mapNotNull { it.toIntOrNull() }
                 heartRate = values.lastOrNull { it > 0 } ?: heartRate
                 if (records.isNotEmpty()) {
                     pushRealtimeUpdate("dynamic_heart_rate_history")
                 }
-                if (!maps.dataEnded() && dynamicHeartRateResponseCount % HEART_RATE_HISTORY_BATCH_SIZE == 0) {
-                    enqueueCommands(listOf(BleSDK.GetDynamicHRWithMode(READ_CONTINUE, "")))
+                receiveHistoryPage("dynamicHeartRate", maps) {
+                    BleSDK.GetDynamicHRWithMode(READ_CONTINUE, "")
                 }
             }
 
             BleConst.GetDetailSleepData,
             BleConst.Obtain_detailed_sleep_data -> {
                 val records = storeHistory("sleep", maps)
-                sleepHistoryResponseCount++
                 val entry = records.firstOrNull()
                 val samples = entry.tokens(DeviceKey.ArraySleep)
                 val unitMinutes = entry.intValue(DeviceKey.sleepUnitLength) ?: DEFAULT_SLEEP_UNIT_MINUTES
@@ -1200,19 +1163,11 @@ class JStyleBleController(
                     TAG,
                     "BLE sleep history records=${records.size}, samples=${samples.size}, unitMinutes=$unitMinutes",
                 )
-                // Detailed sleep history is often delivered after the normal
-                // metrics request has already timed out. Publish every packet
-                // so Flutter persists the history and runs the idempotent
-                // sleep upload instead of silently keeping it only in this
-                // controller's in-memory map.
                 if (records.isNotEmpty()) {
                     pushRealtimeUpdate("sleep_history")
                 }
-                // The vendor demo resumes a large history transfer every 50
-                // responses with mode=2. Without this, a band holding more
-                // than one batch can stop partway through its sleep history.
-                if (!maps.dataEnded() && sleepHistoryResponseCount % SLEEP_HISTORY_BATCH_SIZE == 0) {
-                    enqueueCommands(listOf(BleSDK.GetDetailSleepDataWithMode(READ_CONTINUE, "")))
+                receiveHistoryPage("sleep", maps) {
+                    BleSDK.GetDetailSleepDataWithMode(READ_CONTINUE, "")
                 }
             }
 
@@ -1263,31 +1218,32 @@ class JStyleBleController(
                     }
                     completeEcgMeasurement(cancelled = false)
                 }
+                receiveHistoryPage("hrv", maps) {
+                    BleSDK.GetHRVDataWithMode(READ_CONTINUE, "")
+                }
             }
 
             BleConst.Temperature_history -> {
                 val records = storeHistory("temperature", maps)
                 val entry = records.firstOrNull()
                 temperature = entry.doubleValue(DeviceKey.temperature) ?: temperature
+                receiveHistoryPage("temperature", maps) {
+                    BleSDK.GetTemperature_historyData(READ_CONTINUE, "")
+                }
             }
 
             BleConst.GetAutomaticSpo2Monitoring,
             BleConst.Blood_oxygen -> {
-                val records = storeHistory("bloodOxygen", maps)
-                val entry = records.firstOrNull()
-                // While an on-demand measurement is running, the probe's
-                // placeholder records (empty history returns Blood_oxygen=0)
-                // must not clobber the stream-measured value.
                 if (!spo2OnDemandActive) {
+                    val records = storeHistory("bloodOxygen", maps)
+                    val entry = records.firstOrNull()
                     bloodOxygen = entry.intValue(DeviceKey.Blood_oxygen) ?: bloodOxygen
+                    if (dataType == BleConst.GetAutomaticSpo2Monitoring) {
+                        receiveHistoryPage("bloodOxygen", maps) {
+                            BleSDK.Oxygen_data(READ_CONTINUE, "")
+                        }
+                    }
                 }
-                if (spo2OnDemandActive) {
-                    Log.d(TAG, "spo2 on-demand history probe ignored during measurement: records=$records")
-                }
-            }
-
-            BleConst.Delete_Obtain_The_data_of_manual_blood_oxygen_test -> {
-                Log.d(TAG, "spo2 manual channel read confirmed")
             }
 
             BleConst.GetActivityModeData -> {
@@ -1324,7 +1280,7 @@ class JStyleBleController(
                     val spo2Value = entry.intValue(DeviceKey.Blood_oxygen) ?: 0
                     Log.d(TAG, "spo2 on-demand packet: oxygen=$spo2Value hr=${entry.intValue(DeviceKey.HeartRate)} entry=$entry")
                     if (spo2Value in 1..100) {
-                        completeSpo2OnDemand()
+                        completeSpo2OnDemand(resultValue = spo2Value)
                     } else {
                         Log.d(TAG, "spo2 on-demand zero packet, waiting for the result packet")
                     }
@@ -1352,23 +1308,24 @@ class JStyleBleController(
                 steps = entry.intValue(DeviceKey.Step) ?: steps
                 heartRate = entry.intValue(DeviceKey.HeartRate) ?: heartRate
                 calories = entry.intValue(DeviceKey.Calories) ?: calories
-                bloodOxygen = entry.intValue(DeviceKey.Blood_oxygen) ?: bloodOxygen
+                val spo2Value = entry.intValue(DeviceKey.Blood_oxygen)
+                bloodOxygen = spo2Value ?: bloodOxygen
                 // The stream readings are the measurement result (the
                 // manufacturer's guidance: the 09 command delivers SpO2).
                 // Pattern seen on 2026-11-27: real values (97..96) during
                 // the measurement window, then the stream pins to 100, so
-                // complete once 3+ valid readings arrived and the latest is
-                // realistic; the history probes must not clobber the value.
-                if (spo2OnDemandActive && bloodOxygen in 1..100) {
+                // complete once 3+ valid readings arrived and the latest is realistic.
+                if (spo2OnDemandActive && spo2Value != null && spo2Value in 1..100) {
                     spo2StreamValidCount++
-                    if (bloodOxygen in 1..99) spo2LastNonCapped = bloodOxygen
+                    spo2StreamResult = spo2Value
+                    if (spo2Value in 1..99) spo2LastNonCapped = spo2Value
                     Log.d(
                         TAG,
-                        "spo2 on-demand stream value: $bloodOxygen (valid readings: $spo2StreamValidCount)",
+                        "spo2 on-demand stream value: $spo2Value (valid readings: $spo2StreamValidCount)",
                     )
-                    if (spo2StreamValidCount >= 3 && bloodOxygen in 1..99) {
-                        Log.d(TAG, "spo2 on-demand result from realtime stream: $bloodOxygen")
-                        completeSpo2OnDemand(resultValue = bloodOxygen)
+                    if (spo2StreamValidCount >= 3 && spo2Value in 1..99) {
+                        Log.d(TAG, "spo2 on-demand result from realtime stream: $spo2Value")
+                        completeSpo2OnDemand(resultValue = spo2Value)
                     }
                 }
                 distance = entry.doubleValue(DeviceKey.Distance) ?: distance
@@ -1434,24 +1391,43 @@ class JStyleBleController(
         }
     }
 
-    private fun failMetrics(code: String, message: String) {
-        val result = pendingMetricsResult ?: return
-        metricsTimeout?.let { mainHandler.removeCallbacks(it) }
-        metricsTimeout = null
-        pendingMetricsResult = null
+    private fun failHistoryRead(code: String, message: String) {
+        val result = pendingHistoryResult ?: return
+        historyTimeout?.let { mainHandler.removeCallbacks(it) }
+        historyTimeout = null
+        pendingHistoryResult = null
+        pendingHistory = null
         result.error(code, message, null)
     }
 
-    private fun finishMetrics() {
-        val result = pendingMetricsResult ?: return
-        metricsTimeout?.let { mainHandler.removeCallbacks(it) }
-        metricsTimeout = null
-        pendingMetricsResult = null
+    private fun receiveHistoryPage(
+        stream: String,
+        page: Map<String, Any>,
+        continuation: () -> ByteArray,
+    ) {
+        val history = pendingHistory ?: return
+        if (history.receivePage(stream, page.dataEnded())) {
+            enqueueCommands(listOf(continuation()))
+        }
+        if (history.complete) finishHistoryRead()
+    }
+
+    private fun finishHistoryRead() {
+        val result = pendingHistoryResult ?: return
+        val history = pendingHistory ?: return
+        historyTimeout?.let { mainHandler.removeCallbacks(it) }
+        historyTimeout = null
+        pendingHistoryResult = null
+        pendingHistory = null
+        val completed = history.completedStreams
         Log.d(
             TAG,
-            "BLE metrics finished; history=${historyData.mapValues { it.value.size }}",
+            "BLE history read complete=${history.complete}; completed=$completed",
         )
-        result.success(metricsPayload())
+        result.success(mapOf(
+            "historyComplete" to history.complete,
+            "history" to historyData.filterKeys { it in completed }.mapValues { it.value.toList() },
+        ))
     }
 
     private fun failProfileSync(code: String, message: String) {
@@ -1888,10 +1864,8 @@ class JStyleBleController(
         private const val TAG = "JStyleBleController"
         private const val SCAN_DURATION_MS = 8000L
         private const val CONNECT_TIMEOUT_MS = 18000L
-        // A history read can involve many 2-hour sleep packets. 20 seconds is
-        // often not enough for the band to finish after the other sync
-        // commands, especially on its first connection of the day.
-        private const val METRICS_TIMEOUT_MS = 60000L
+        // Full reads may span several pages of history stored on the band.
+        private const val HISTORY_TIMEOUT_MS = 60000L
         private const val CLOSE_DELAY_MS = 500L
         private const val COMMAND_WRITE_GAP_MS = 180L
         private const val HEART_MEASUREMENT_SECONDS = 35L
@@ -1920,19 +1894,13 @@ class JStyleBleController(
         // completed on the first ACK. Current attempt: seconds + the fixed
         // wait-through-ACK logic.
         private const val SPO2_MEASUREMENT_SECONDS = 35L
-        private const val SPO2_START_RETRY_MS = 45000L
-        private const val SPO2_START_MAX_RETRIES = 2
         private const val SPO2_STREAM_FALLBACK_MS = 50000L
         private const val SPO2_TIMEOUT_MS = 120000L
-        // 手动测试血氧历史通道（读取即清除），与自动历史（0x00/68）分开。
-        private const val SPO2_MANUAL_READ: Byte = 0x99.toByte()
         private const val PROFILE_SYNC_TIMEOUT_MS = 20000L
         private const val DEFAULT_SLEEP_UNIT_MINUTES = 5
         private const val MINUTES_PER_HOUR = 60.0
         private const val READ_START: Byte = 0x00
         private const val READ_CONTINUE: Byte = 0x02
-        private const val SLEEP_HISTORY_BATCH_SIZE = 50
-        private const val HEART_RATE_HISTORY_BATCH_SIZE = 50
 
         private val DATA_SERVICE_UUID: UUID =
             UUID.fromString("0000fff0-0000-1000-8000-00805f9b34fb")

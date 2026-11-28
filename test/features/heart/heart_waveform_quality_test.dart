@@ -13,11 +13,15 @@ List<int> pulseWave({
     for (var i = 0; i < perCycle; i++)
       (base +
               amp *
-                  (0.5 - 0.5 * math_cos(2 * 3.141592653589793 * i / perCycle)))
+                  (0.5 -
+                      0.5 *
+                          _cosApproximation(
+                            2 * 3.141592653589793 * i / perCycle,
+                          )))
           .round(),
 ];
 
-double math_cos(double x) {
+double _cosApproximation(double x) {
   var term = 1.0, sum = 1.0;
   for (var k = 1; k <= 12; k++) {
     term *= -x * x / ((2 * k - 1) * (2 * k));

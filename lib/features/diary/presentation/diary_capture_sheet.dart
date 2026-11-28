@@ -27,8 +27,26 @@ class _DiaryCaptureSheetState extends State<DiaryCaptureSheet> {
   final _speech = SpeechToText();
   List<DiaryMoment>? _review;
   bool _loading = false, _listening = false, _voice = false;
+  String _draftText = '';
+  int _draftRevision = 0;
   String? _error;
   String? _locale;
+
+  @override
+  void initState() {
+    super.initState();
+    _text.addListener(_draftChanged);
+  }
+
+  void _draftChanged() {
+    if (_draftText == _text.text) return;
+    setState(() {
+      _draftText = _text.text;
+      _draftRevision++;
+      _review = null;
+    });
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -83,7 +101,7 @@ class _DiaryCaptureSheetState extends State<DiaryCaptureSheet> {
       await _speech.listen(
         listenOptions: SpeechListenOptions(localeId: speechLocale),
         onResult: (r) {
-          if (mounted) setState(() => _text.text = r.recognizedWords);
+          if (mounted) _text.text = r.recognizedWords;
         },
       );
     } catch (e) {
@@ -97,22 +115,29 @@ class _DiaryCaptureSheetState extends State<DiaryCaptureSheet> {
 
   Future<void> _parse() async {
     if (_text.text.trim().isEmpty || _loading) return;
-    await _speech.stop();
-    if (!mounted) return;
     setState(() {
       _loading = true;
       _error = null;
     });
+    var revision = _draftRevision;
+    final locale = _locale!;
     try {
+      await _speech.stop();
+      if (!mounted || _locale != locale) return;
+      final text = _text.text.trim();
+      if (text.isEmpty) return;
+      revision = _draftRevision;
       final result = await widget.repository.parse(
-        _text.text.trim(),
+        text,
         widget.date,
-        _locale!,
+        locale,
         voice: _voice,
       );
-      if (mounted) setState(() => _review = result);
+      if (mounted && revision == _draftRevision && _locale == locale) {
+        setState(() => _review = result);
+      }
     } catch (e) {
-      if (mounted) {
+      if (mounted && revision == _draftRevision && _locale == locale) {
         setState(
           () => _error = context
               .l10n
@@ -160,7 +185,6 @@ class _DiaryCaptureSheetState extends State<DiaryCaptureSheet> {
                 controller: _text,
                 maxLength: 1000,
                 maxLines: 6,
-                onChanged: (_) => setState(() => _review = null),
                 style: AppDiaryStyle.label,
                 decoration: InputDecoration(
                   hintText:

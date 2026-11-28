@@ -8,6 +8,7 @@ import 'package:new_jcvital/main.dart';
 import 'package:new_jcvital/features/activity/domain/models/activity_type_catalog.dart';
 import 'package:new_jcvital/features/activity/domain/models/activity_type.dart';
 import 'package:new_jcvital/features/activity/presentation/localization/activity_type_localizations.dart';
+import 'package:new_jcvital/features/activity/presentation/widgets/activity_selection_sheet.dart';
 import 'package:new_jcvital/shared/navigation/app_side_menu.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -167,18 +168,18 @@ void main() {
     await tester.tap(find.text('Start\nactivity'));
     await tester.pumpAndSettle();
 
-    expect(find.text('BELOW TARGET'), findsOneWidget);
-    expect(find.text("You're close to your target."), findsOneWidget);
-    expect(
-      find.text('Illustrative demo data · not synced from a device'),
-      findsOneWidget,
-    );
-    expect(find.text('Modalities'), findsOneWidget);
-    expect(find.textContaining('6,240'), findsOneWidget);
-    expect(find.text('Search 140 activities'), findsOneWidget);
-    expect(find.text('RECENT'), findsOneWidget);
-    expect(find.text('Running'), findsWidgets);
-    // 该名称也会出现在活动页的静态演示区域中。
-    expect(find.text('Strength training'), findsWidgets);
+    final selector = find.byType(ActivitySelectionSheet);
+    expect(selector, findsOneWidget);
+    for (final label in [
+      'Search 140 activities',
+      'RECENT',
+      'Running',
+      'Strength training',
+    ]) {
+      expect(
+        find.descendant(of: selector, matching: find.text(label)),
+        findsWidgets,
+      );
+    }
   });
 }

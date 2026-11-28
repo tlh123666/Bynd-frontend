@@ -147,7 +147,7 @@ class DeviceManagementChannelHandler(private val activity: Activity) : MethodCha
                         override fun success(value: Any?) {
                             controller.readManagementStatus(call.argument<String>("serialNumber"), object : ForwardResult(result) {
                                 override fun success(value: Any?) {
-                                    controller.fetchLatestMetrics(result)
+                                    controller.readHistory(call.method == "readSleepHistory", result)
                                 }
                             })
                         }

@@ -54,6 +54,12 @@ class BandSleepSync {
           })
           .timeout(const Duration(seconds: 120));
       check();
+      if (result?['historyComplete'] != true) {
+        throw const ApiException(
+          'The band did not finish sending its sleep history',
+          code: 'partial_sleep_sync',
+        );
+      }
       final history = sleepMap(result?['history']);
       final drafts =
           buildSleepSessions(

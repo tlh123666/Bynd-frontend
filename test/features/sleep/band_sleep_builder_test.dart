@@ -23,6 +23,20 @@ List<(SleepStageType, int, int)> spanValues(SleepSessionDraft session) {
 }
 
 void main() {
+  test('nested records never shorten or split a continuous sleep window', () {
+    final drafts = buildSleepSessions([
+      record('2026-09-13 22:00:00', List.filled(24, '02').join(' ')),
+      record('2026-09-13 22:30:00', '02 02'),
+      record('2026-09-14 00:10:00', '01 01'),
+    ], deviceSerial: 'B1');
+    final night = drafts.single;
+    expect(night.duration, const Duration(minutes: 140));
+    expect(spanValues(night), [
+      (SleepStageType.light, 0, 120),
+      (SleepStageType.deep, 130, 10),
+    ]);
+  });
+
   group('stage codes', () {
     test('maps 01/02/03 to deep/light/rem and everything else to awake', () {
       // The protocol only assigns meaning to 01, 02 and 03; 00 and 05 are both
