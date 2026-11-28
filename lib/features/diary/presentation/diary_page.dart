@@ -1,6 +1,5 @@
 import '../../../shared/navigation/app_quick_action_navigation.dart';
 import '../../../l10n/app_localizations_context.dart';
-import '../../activity/presentation/pages/activity_overview_page.dart';
 import '../../atlas/application/atlas_greeting_store.dart';
 import '../../atlas/application/atlas_scope.dart';
 import '../../atlas/presentation/pages/atlas_chat_page.dart';
@@ -465,14 +464,6 @@ class _DiaryPageState extends State<DiaryPage> {
                   initialTracker: action == AppQuickAction.meal
                       ? 'almoco'
                       : null,
-                );
-              } else if (action == AppQuickAction.startActivity) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute<void>(
-                    builder: (_) =>
-                        const ActivityOverviewPage(openSelectorOnEnter: true),
-                  ),
                 );
               } else {
                 AppNotice.show(

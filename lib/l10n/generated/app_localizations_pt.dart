@@ -820,6 +820,58 @@ class AppLocalizationsPt extends AppLocalizations {
   String get preparationClose => 'Fechar preparação';
 
   @override
+  String get refreshUpdated => 'Atualizado';
+
+  @override
+  String refreshTime(String time) {
+    return 'às $time';
+  }
+
+  @override
+  String get refreshFailed => 'Não foi possível atualizar';
+
+  @override
+  String get preparationDemoRefreshed => 'Demonstração atualizada';
+
+  @override
+  String get preparationHeartRateZone => 'ZONA 0';
+
+  @override
+  String get preparationHeartRateRest => 'Repouso · até 92 bpm';
+
+  @override
+  String get preparationHeartRateDemo => 'Exemplo · não conectado';
+
+  @override
+  String get preparationHeartRateSemantics =>
+      'Frequência cardíaca de exemplo: 74 batimentos por minuto, zona 0. Não conectada.';
+
+  @override
+  String get preparationLoadBase => 'Carga sugerida';
+
+  @override
+  String get preparationLoadLevel => 'LEVE';
+
+  @override
+  String get preparationWeatherOk => 'Clima ok';
+
+  @override
+  String get preparationWeatherExample =>
+      'Em lugar fechado, o clima de fora quase não pesa. Carga sugerida: 24 (leve, fecha o alvo do dia): leva o dia de 28 para cerca de 45.';
+
+  @override
+  String get preparationDemoLabel => 'Dados ilustrativos · não conectados';
+
+  @override
+  String get preparationLoadExample => 'Carga sugerida · LEVE';
+
+  @override
+  String get preparationLoadOff => 'Carga sugerida · desligada';
+
+  @override
+  String get preparationBatteryExample => 'Pulseira 82% · demonstração';
+
+  @override
   String get watchNotIntegrated => 'Pulseira não integrada';
 
   @override
@@ -6683,6 +6735,58 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get preparationClose => 'Fechar preparação';
+
+  @override
+  String get refreshUpdated => 'Atualizado';
+
+  @override
+  String refreshTime(String time) {
+    return 'às $time';
+  }
+
+  @override
+  String get refreshFailed => 'Não foi possível atualizar';
+
+  @override
+  String get preparationDemoRefreshed => 'Demonstração atualizada';
+
+  @override
+  String get preparationHeartRateZone => 'ZONA 0';
+
+  @override
+  String get preparationHeartRateRest => 'Repouso · até 92 bpm';
+
+  @override
+  String get preparationHeartRateDemo => 'Exemplo · não conectado';
+
+  @override
+  String get preparationHeartRateSemantics =>
+      'Frequência cardíaca de exemplo: 74 batimentos por minuto, zona 0. Não conectada.';
+
+  @override
+  String get preparationLoadBase => 'Carga sugerida';
+
+  @override
+  String get preparationLoadLevel => 'LEVE';
+
+  @override
+  String get preparationWeatherOk => 'Clima ok';
+
+  @override
+  String get preparationWeatherExample =>
+      'Em lugar fechado, o clima de fora quase não pesa. Carga sugerida: 24 (leve, fecha o alvo do dia): leva o dia de 28 para cerca de 45.';
+
+  @override
+  String get preparationDemoLabel => 'Dados ilustrativos · não conectados';
+
+  @override
+  String get preparationLoadExample => 'Carga sugerida · LEVE';
+
+  @override
+  String get preparationLoadOff => 'Carga sugerida · desligada';
+
+  @override
+  String get preparationBatteryExample => 'Pulseira 82% · demonstração';
 
   @override
   String get watchNotIntegrated => 'Pulseira não integrada';

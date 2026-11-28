@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:new_jcvital/design_system/design_system.dart';
 import 'package:new_jcvital/features/heart/presentation/pages/heart_page.dart';
+import 'package:new_jcvital/features/activity/presentation/widgets/activity_selection_sheet.dart';
 import 'package:new_jcvital/features/heart/presentation/pages/heart_recording_page.dart';
 import 'package:new_jcvital/features/heart/domain/heart_models.dart';
 import 'package:new_jcvital/features/heart/presentation/sheets/heart_detail_sheet.dart';
@@ -55,6 +56,20 @@ Future<void> mountHeart(
 
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
+  testWidgets('heart quick action opens activity sheet over current page', (t) async {
+    await mountHeart(t, MemoryHeartRepository());
+    await t.tap(find.bySemanticsLabel('Quick actions'));
+    await t.pumpAndSettle();
+    await t.tap(find.text('Start\nactivity'));
+    await t.pumpAndSettle();
+    expect(find.byType(ActivitySelectionSheet), findsOneWidget);
+    expect(find.byType(HeartPage), findsOneWidget);
+    await t.tap(find.byTooltip('Close').last);
+    await t.pumpAndSettle();
+    expect(find.byType(ActivitySelectionSheet), findsNothing);
+    expect(find.byType(HeartPage), findsOneWidget);
+    expect(t.takeException(), isNull);
+  });
   testWidgets(
     'backgrounding during connection cancels capture and ignores late start',
     (t) async {

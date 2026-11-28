@@ -71,6 +71,14 @@ void main() {
     expect(find.byType(ShaderMask), findsOneWidget);
     expect(find.text('RECENTES'), findsOneWidget);
     expect(find.text('CARDIO'), findsOneWidget);
+    final recentLabels = ['Musculação', 'Corrida', 'Caminhada', 'Sauna'];
+    final recentY = [
+      for (final label in recentLabels)
+        tester.getTopLeft(find.text(label).first).dy,
+    ];
+    for (var i = 1; i < recentY.length; i++) {
+      expect(recentY[i], greaterThan(recentY[i - 1]));
+    }
     expect(find.text('Corrida'), findsWidgets);
     expect(find.byType(SvgPicture), findsWidgets);
     expect(find.text('Buscar entre 140 modalidades'), findsOneWidget);

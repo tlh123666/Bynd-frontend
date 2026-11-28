@@ -1587,6 +1587,102 @@ abstract class AppLocalizations {
   /// **'Fechar preparação'**
   String get preparationClose;
 
+  /// No description provided for @refreshUpdated.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Atualizado'**
+  String get refreshUpdated;
+
+  /// No description provided for @refreshTime.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'às {time}'**
+  String refreshTime(String time);
+
+  /// No description provided for @refreshFailed.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Não foi possível atualizar'**
+  String get refreshFailed;
+
+  /// No description provided for @preparationDemoRefreshed.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Demonstração atualizada'**
+  String get preparationDemoRefreshed;
+
+  /// No description provided for @preparationHeartRateZone.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'ZONA 0'**
+  String get preparationHeartRateZone;
+
+  /// No description provided for @preparationHeartRateRest.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Repouso · até 92 bpm'**
+  String get preparationHeartRateRest;
+
+  /// No description provided for @preparationHeartRateDemo.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Exemplo · não conectado'**
+  String get preparationHeartRateDemo;
+
+  /// No description provided for @preparationHeartRateSemantics.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Frequência cardíaca de exemplo: 74 batimentos por minuto, zona 0. Não conectada.'**
+  String get preparationHeartRateSemantics;
+
+  /// No description provided for @preparationLoadBase.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Carga sugerida'**
+  String get preparationLoadBase;
+
+  /// No description provided for @preparationLoadLevel.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'LEVE'**
+  String get preparationLoadLevel;
+
+  /// No description provided for @preparationWeatherOk.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Clima ok'**
+  String get preparationWeatherOk;
+
+  /// No description provided for @preparationWeatherExample.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Em lugar fechado, o clima de fora quase não pesa. Carga sugerida: 24 (leve, fecha o alvo do dia): leva o dia de 28 para cerca de 45.'**
+  String get preparationWeatherExample;
+
+  /// No description provided for @preparationDemoLabel.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Dados ilustrativos · não conectados'**
+  String get preparationDemoLabel;
+
+  /// No description provided for @preparationLoadExample.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Carga sugerida · LEVE'**
+  String get preparationLoadExample;
+
+  /// No description provided for @preparationLoadOff.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Carga sugerida · desligada'**
+  String get preparationLoadOff;
+
+  /// No description provided for @preparationBatteryExample.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Pulseira 82% · demonstração'**
+  String get preparationBatteryExample;
+
   /// No description provided for @watchNotIntegrated.
   ///
   /// In pt_BR, this message translates to:

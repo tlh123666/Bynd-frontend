@@ -1,9 +1,8 @@
-import 'dart:ui' show ImageFilter;
-
 import 'package:flutter/material.dart';
 
 import '../../../../l10n/app_localizations_context.dart';
 
+import '../../../../design_system/components/app_pull_to_refresh.dart';
 import '../../../../design_system/tokens/app_colors.dart';
 import '../../../../design_system/tokens/app_dimensions.dart';
 import '../../../../design_system/tokens/app_typography.dart';
@@ -11,9 +10,12 @@ import '../../domain/models/activity_type.dart';
 import '../../data/local_workout_store.dart';
 import '../localization/activity_type_localizations.dart';
 import '../widgets/activity_selection_sheet.dart';
+import '../widgets/activity_preparation_controls.dart';
+import '../widgets/activity_preparation_heart_rate.dart';
+import '../widgets/activity_type_icon.dart';
 import '../widgets/strength_workout_sheet.dart';
 
-/// 活动准备页的安全基础版：先复现主布局，不生成演示指标或会话。
+/// 活动准备页：演示数据明确标记，尚未接入真实会话。
 class ActivityPreparationPage extends StatefulWidget {
   const ActivityPreparationPage({
     required this.initialActivity,
@@ -59,14 +61,41 @@ class _ActivityPreparationPageState extends State<ActivityPreparationPage> {
   Widget build(BuildContext context) {
     final strings = context.l10n;
     final activityName = activityTypeLocalizedName(_activity, strings);
-    final hero = Center(
-      child: _StatusLine(
-        icon: Icons.watch_outlined,
-        title: strings.watchNotIntegrated,
-        detail: strings.heartRateBatteryUnavailable,
-      ),
+    // 没有实际地图时显示静态示例心率；路线预览开启时保留地图区域。
+    final showHeartRate = !(_activity.hasRouteToggle && _routeRecordingEnabled);
+    final hero = Column(
+      children: [
+        Expanded(
+          child: showHeartRate
+              ? const ActivityPreparationHeartRate()
+              : const SizedBox(),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 14),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.battery_std_outlined,
+                color: AppColors.textMuted,
+                size: 19,
+              ),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  strings.preparationBatteryExample,
+                  style: AppTypography.caption.copyWith(
+                    color: AppColors.textMuted,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
-    final controls = _PreparationControls();
+    const controls = ActivityPreparationControls();
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -75,7 +104,8 @@ class _ActivityPreparationPageState extends State<ActivityPreparationPage> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFF252A31), AppColors.background],
+            colors: [Color(0xFF21303B), Color(0xFF151E24), Color(0xFF0F1519)],
+            stops: [0, .40, 1],
           ),
         ),
         child: SafeArea(
@@ -83,6 +113,7 @@ class _ActivityPreparationPageState extends State<ActivityPreparationPage> {
             children: [
               _PreparationHeader(
                 activityName: activityName,
+                activity: _activity,
                 onClose: () => Navigator.of(context).pop(),
                 onChangeActivity: _changeActivity,
               ),
@@ -119,27 +150,45 @@ class _ActivityPreparationPageState extends State<ActivityPreparationPage> {
                       setState(() => _routeRecordingEnabled = enabled),
                 ),
               Expanded(
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    // 空间不足时整页可滚动；常规高度时面板固定贴底。
-                    if (constraints.maxHeight < 680) {
+                child: AppPullToRefresh(
+                  successLabel: strings.preparationDemoRefreshed,
+                  // 当前只刷新明确标记的演示内容，不代表设备或天气已同步。
+                  onRefresh: () async {
+                    if (mounted) setState(() {});
+                  },
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      // 空间不足时整页可滚动；常规高度时面板固定贴底。
+                      if (constraints.maxHeight <
+                          520 * MediaQuery.textScalerOf(context).scale(1)) {
+                        return SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          child: Column(
+                            children: [
+                              SizedBox(
+                                height: showHeartRate ? 300 : 200,
+                                child: hero,
+                              ),
+                              controls,
+                            ],
+                          ),
+                        );
+                      }
+
                       return SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            SizedBox(height: 200, child: hero),
-                            controls,
-                          ],
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        child: SizedBox(
+                          height: constraints.maxHeight,
+                          child: Column(
+                            children: [
+                              Expanded(child: hero),
+                              controls,
+                            ],
+                          ),
                         ),
                       );
-                    }
-
-                    return Column(
-                      children: [
-                        Expanded(child: hero),
-                        controls,
-                      ],
-                    );
-                  },
+                    },
+                  ),
                 ),
               ),
             ],
@@ -153,109 +202,68 @@ class _ActivityPreparationPageState extends State<ActivityPreparationPage> {
 class _PreparationHeader extends StatelessWidget {
   const _PreparationHeader({
     required this.activityName,
+    required this.activity,
     required this.onClose,
     required this.onChangeActivity,
   });
 
   final String activityName;
+  final ActivityType activity;
   final VoidCallback onClose;
   final VoidCallback onChangeActivity;
 
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.fromLTRB(
-      AppSpacing.sm,
-      AppSpacing.xs,
-      AppSpacing.lg,
-      AppSpacing.xs,
-    ),
-    child: Row(
+  Widget build(BuildContext context) => SizedBox(
+    height: 62,
+    child: Stack(
+      alignment: Alignment.center,
       children: [
-        IconButton(
-          tooltip: context.l10n.preparationClose,
-          onPressed: onClose,
-          icon: const Icon(Icons.close, color: AppColors.textPrimary),
-        ),
-        const Spacer(),
-        TextButton.icon(
-          onPressed: onChangeActivity,
-          icon: const Icon(Icons.expand_more),
-          label: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 210),
-            child: Text(
-              activityName,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 56),
+          child: Center(
+            child: TextButton(
+              onPressed: onChangeActivity,
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.textPrimary,
+                overlayColor: Colors.transparent,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ActivityTypeIcon(
+                    type: activity,
+                    fallback: Icons.fitness_center,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      activityName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.title.copyWith(fontSize: 17),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  const Icon(
+                    Icons.keyboard_arrow_down,
+                    size: 18,
+                    color: AppColors.textMuted,
+                  ),
+                ],
+              ),
             ),
           ),
-          style: TextButton.styleFrom(foregroundColor: AppColors.textPrimary),
+        ),
+        Positioned(
+          left: 8,
+          child: IconButton(
+            tooltip: context.l10n.preparationClose,
+            onPressed: onClose,
+            icon: const Icon(Icons.close, color: AppColors.textPrimary),
+          ),
         ),
       ],
-    ),
-  );
-}
-
-class _PreparationControls extends StatelessWidget {
-  const _PreparationControls();
-
-  @override
-  Widget build(BuildContext context) => ClipRRect(
-    borderRadius: const BorderRadius.vertical(
-      top: Radius.circular(AppRadii.sheet),
-    ),
-    child: BackdropFilter(
-      filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
-      child: Container(
-        key: const ValueKey('activity-preparation-controls'),
-        width: double.infinity,
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.lg,
-          AppSpacing.md,
-          AppSpacing.lg,
-          AppSpacing.xl,
-        ),
-        decoration: BoxDecoration(
-          color: AppColors.menuPanel,
-          border: Border(top: AppBorders.glass),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 38,
-                height: 4,
-                decoration: const BoxDecoration(
-                  color: AppColors.textMuted,
-                  borderRadius: AppRadii.pillBorder,
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            _WeatherStatusCard(),
-            _LoadTargetStatus(),
-            const SizedBox(height: AppSpacing.md),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: null,
-                child: Text(context.l10n.startActivityButton),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            Center(
-              child: Text(
-                context.l10n.waitingForSensors,
-                textAlign: TextAlign.center,
-                style: AppTypography.caption.copyWith(
-                  color: AppColors.textMuted,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
     ),
   );
 }
@@ -304,106 +312,5 @@ class _RouteRecordingToggle extends StatelessWidget {
         ),
       ],
     ),
-  );
-}
-
-class _WeatherStatusCard extends StatelessWidget {
-  const _WeatherStatusCard();
-
-  @override
-  Widget build(BuildContext context) => Container(
-    margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-    padding: const EdgeInsets.all(AppSpacing.md),
-    decoration: BoxDecoration(
-      color: AppColors.glass,
-      borderRadius: AppRadii.cardBorder,
-      border: Border.fromBorderSide(AppBorders.glass),
-    ),
-    child: _StatusLine(
-      icon: Icons.cloud_outlined,
-      title: context.l10n.weatherUnavailable,
-      detail: context.l10n.weatherNotIntegrated,
-    ),
-  );
-}
-
-class _LoadTargetStatus extends StatelessWidget {
-  const _LoadTargetStatus();
-
-  @override
-  Widget build(BuildContext context) => Row(
-    children: [
-      Container(
-        width: 34,
-        height: 34,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(color: AppColors.textMuted, width: 2),
-        ),
-        child: const Icon(
-          Icons.bolt_outlined,
-          size: 18,
-          color: AppColors.textMuted,
-        ),
-      ),
-      const SizedBox(width: AppSpacing.sm),
-      Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              context.l10n.suggestedLoadUnavailable,
-              style: AppTypography.body.copyWith(color: AppColors.textPrimary),
-            ),
-            const SizedBox(height: AppSpacing.xxs),
-            Text(
-              context.l10n.loadNotIntegrated,
-              style: AppTypography.caption.copyWith(color: AppColors.textMuted),
-            ),
-          ],
-        ),
-      ),
-      Semantics(
-        label: context.l10n.suggestedLoadUnavailable,
-        child: Switch.adaptive(value: false, onChanged: null),
-      ),
-    ],
-  );
-}
-
-class _StatusLine extends StatelessWidget {
-  const _StatusLine({
-    required this.icon,
-    required this.title,
-    required this.detail,
-  });
-
-  final IconData icon;
-  final String title;
-  final String detail;
-
-  @override
-  Widget build(BuildContext context) => Row(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Icon(icon, color: AppColors.textMuted),
-      const SizedBox(width: AppSpacing.sm),
-      Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: AppTypography.body.copyWith(color: AppColors.textPrimary),
-            ),
-            const SizedBox(height: AppSpacing.xxs),
-            Text(
-              detail,
-              style: AppTypography.caption.copyWith(color: AppColors.textMuted),
-            ),
-          ],
-        ),
-      ),
-    ],
   );
 }

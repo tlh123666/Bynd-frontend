@@ -812,6 +812,58 @@ class AppLocalizationsEn extends AppLocalizations {
   String get preparationClose => 'Close preparation';
 
   @override
+  String get refreshUpdated => 'Updated';
+
+  @override
+  String refreshTime(String time) {
+    return 'at $time';
+  }
+
+  @override
+  String get refreshFailed => 'Could not refresh';
+
+  @override
+  String get preparationDemoRefreshed => 'Demo updated';
+
+  @override
+  String get preparationHeartRateZone => 'ZONE 0';
+
+  @override
+  String get preparationHeartRateRest => 'Rest · up to 92 bpm';
+
+  @override
+  String get preparationHeartRateDemo => 'Example · not connected';
+
+  @override
+  String get preparationHeartRateSemantics =>
+      'Example heart rate: 74 beats per minute, zone 0. Not connected.';
+
+  @override
+  String get preparationLoadBase => 'Suggested load';
+
+  @override
+  String get preparationLoadLevel => 'LIGHT';
+
+  @override
+  String get preparationWeatherOk => 'Weather OK';
+
+  @override
+  String get preparationWeatherExample =>
+      'Indoors, the weather has little effect. Suggested load: 24 (light), bringing the day from 28 to about 45.';
+
+  @override
+  String get preparationDemoLabel => 'Illustrative data · not connected';
+
+  @override
+  String get preparationLoadExample => 'Suggested load · LIGHT';
+
+  @override
+  String get preparationLoadOff => 'Suggested load · off';
+
+  @override
+  String get preparationBatteryExample => 'Band 82% · demo';
+
+  @override
   String get watchNotIntegrated => 'Wristband not connected';
 
   @override

@@ -6,6 +6,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:new_jcvital/design_system/design_system.dart';
 import 'package:new_jcvital/main.dart';
 import 'package:new_jcvital/features/profile/profile_page.dart';
+import 'package:new_jcvital/features/home/presentation/widgets/home_content.dart';
+import 'package:new_jcvital/features/activity/presentation/pages/activity_overview_page.dart';
+import 'package:new_jcvital/features/activity/presentation/pages/activity_preparation_page.dart';
+import 'package:new_jcvital/features/activity/presentation/widgets/activity_selection_sheet.dart';
 import 'package:new_jcvital/shared/navigation/app_side_menu.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -218,6 +222,41 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(AppQuickActionsOverlay), findsNothing);
     expect(find.text('Respirar 5 min: em breve.'), findsOneWidget);
+  });
+
+  testWidgets('首页快捷开始直接弹出活动选择，取消返回原页面', (tester) async {
+    tester.view.physicalSize = const Size(400, 840);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      ByndApp(
+        config: AppConfig.resolve(
+          defines: const {'MAPA_USE_DEMO_DATA': 'true'},
+        ),
+      ),
+    );
+    await tester.tap(find.bySemanticsLabel('Ações rápidas'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(AppQuickAction.startActivity.label));
+    await tester.pumpAndSettle();
+    expect(find.byType(ActivitySelectionSheet), findsOneWidget);
+    expect(find.byType(HomeContent), findsOneWidget);
+    expect(find.byType(ActivityOverviewPage), findsNothing);
+    expect(find.text('Buscar entre 140 modalidades'), findsOneWidget);
+    await tester.tap(find.byIcon(Icons.close).last);
+    await tester.pumpAndSettle();
+    expect(find.byType(ActivitySelectionSheet), findsNothing);
+    expect(find.byType(HomeContent), findsOneWidget);
+
+    await tester.tap(find.bySemanticsLabel('Ações rápidas'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(AppQuickAction.startActivity.label));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Corrida').first);
+    await tester.pumpAndSettle();
+    expect(find.byType(ActivityPreparationPage), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('系统返回键收起快捷菜单并保留当前页面', (tester) async {
