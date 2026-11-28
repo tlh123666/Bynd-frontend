@@ -13,13 +13,8 @@ import 'activity_history_page.dart';
 import '../widgets/activity_registration_sheet.dart';
 
 /// 活动总览页：对应网页原型的 `exercicio` 页面。
-///
-/// 首页快捷入口会带着“打开活动选择面板”的意图进入本页；面板关闭后，
-/// 用户仍然停留在活动总览页，和网页原型的导航层级保持一致。
 class ActivityOverviewPage extends StatefulWidget {
-  const ActivityOverviewPage({this.openSelectorOnEnter = false, super.key});
-
-  final bool openSelectorOnEnter;
+  const ActivityOverviewPage({super.key});
 
   @override
   State<ActivityOverviewPage> createState() => _ActivityOverviewPageState();
@@ -28,7 +23,6 @@ class ActivityOverviewPage extends StatefulWidget {
 class _ActivityOverviewPageState extends State<ActivityOverviewPage> {
   final GlobalKey _moreButtonKey = GlobalKey();
   final ScrollController _scrollController = ScrollController();
-  bool _didOpenInitialSelector = false;
   bool _quickActionsOpen = false;
   Rect? _quickActionOrigin;
   int _selectedDay = 0;
@@ -45,16 +39,6 @@ class _ActivityOverviewPageState extends State<ActivityOverviewPage> {
     setState(() {
       _quickActionOrigin = box.localToGlobal(Offset.zero) & box.size;
       _quickActionsOpen = true;
-    });
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!widget.openSelectorOnEnter || _didOpenInitialSelector) return;
-    _didOpenInitialSelector = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) openActivitySelection(context);
     });
   }
 
@@ -183,10 +167,8 @@ class _ActivityOverviewPageState extends State<ActivityOverviewPage> {
               onClose: () => setState(() => _quickActionsOpen = false),
               onActionSelected: (action) {
                 setState(() => _quickActionsOpen = false);
-                if(AppQuickActionNavigation.open(context,action))return;
-                if (action == AppQuickAction.startActivity) {
-                  openActivitySelection(context);
-                } else if (action == AppQuickAction.dayReview ||
+                if (AppQuickActionNavigation.open(context, action)) return;
+                if (action == AppQuickAction.dayReview ||
                     action == AppQuickAction.meal) {
                   Navigator.push(
                     context,

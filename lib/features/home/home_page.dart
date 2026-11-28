@@ -15,7 +15,6 @@ import '../community/presentation/community_page.dart';
 import 'presentation/pages/home_diary_page.dart';
 import 'presentation/widgets/home_account_guard.dart';
 import '../profile/profile_page.dart';
-import '../activity/presentation/pages/activity_overview_page.dart';
 import '../atlas/presentation/pages/mapa_page.dart';
 import '../atlas/application/atlas_greeting_store.dart';
 import '../atlas/application/atlas_scope.dart';
@@ -236,17 +235,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       date: _home.date,
       onDestinationSelected: _featureDestination,
     )) {
-      return;
-    }
-    if (action == AppQuickAction.startActivity) {
-      final selectedIndex = await Navigator.of(context).push<int>(
-        MaterialPageRoute<int>(
-          builder: (_) => const ActivityOverviewPage(openSelectorOnEnter: true),
-        ),
-      );
-      if (mounted && selectedIndex != null) {
-        setState(() => _selectedIndex = selectedIndex);
-      }
       return;
     }
     if (action == AppQuickAction.dayReview || action == AppQuickAction.meal) {

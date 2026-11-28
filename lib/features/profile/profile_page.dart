@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 
 import '../../design_system/design_system.dart';
 import '../../l10n/app_localizations_context.dart';
-import '../activity/presentation/pages/activity_overview_page.dart';
 
 /// Profile page reached from the side menu's Ajustes entry.
 class ProfilePage extends StatefulWidget {
@@ -31,17 +30,6 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _handleQuickAction(AppQuickAction action) async {
     setState(() => _quickActionsOpen = false);
     if (AppQuickActionNavigation.open(context, action)) return;
-    if (action == AppQuickAction.startActivity) {
-      final selectedIndex = await Navigator.of(context).push<int>(
-        MaterialPageRoute<int>(
-          builder: (_) => const ActivityOverviewPage(openSelectorOnEnter: true),
-        ),
-      );
-      if (mounted && selectedIndex != null) {
-        Navigator.of(context).pop(selectedIndex);
-      }
-      return;
-    }
     if (action == AppQuickAction.dayReview || action == AppQuickAction.meal) {
       await Navigator.push(
         context,

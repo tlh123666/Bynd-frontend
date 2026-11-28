@@ -8,6 +8,7 @@ import '../../../../core/network/api_client.dart';
 import '../../../../design_system/design_system.dart';
 import '../../../../shared/widgets/day_strip.dart';
 import '../../../atlas/presentation/pages/atlas_chat_page.dart';
+import '../../../activity/presentation/activity_selection_flow.dart';
 import '../../../device/application/device_scope.dart';
 import '../../../device/domain/device_models.dart';
 import '../../../device/presentation/pages/device_management_page.dart';
@@ -426,7 +427,9 @@ class _HeartPageState extends State<HeartPage> {
                   onClose: () => setState(() => _more = false),
                   onActionSelected: (action) {
                     setState(() => _more = false);
-                    if (action == AppQuickAction.ecg) {
+                    if (action == AppQuickAction.startActivity) {
+                      unawaited(openActivitySelection(context));
+                    } else if (action == AppQuickAction.ecg) {
                       _record();
                     } else if (action == AppQuickAction.dayReview ||
                         action == AppQuickAction.meal) {
