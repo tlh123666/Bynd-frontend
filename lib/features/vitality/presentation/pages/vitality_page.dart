@@ -8,7 +8,6 @@ import '../../../../l10n/app_localizations_context.dart';
 import '../../../../shared/widgets/day_strip.dart';
 import '../../../../shared/navigation/app_quick_action_navigation.dart';
 import '../../../atlas/presentation/pages/atlas_chat_page.dart';
-import '../../../activity/presentation/pages/activity_overview_page.dart';
 import '../../../diary/data/demo_diary_repository.dart';
 import '../../../diary/data/remote_diary_repository.dart';
 import '../../../diary/domain/diary_models.dart';
@@ -309,16 +308,7 @@ class _VitalityPageState extends State<VitalityPage> {
                     )) {
                       return;
                     }
-                    if (action == AppQuickAction.startActivity) {
-                      Navigator.push(
-                        c,
-                        MaterialPageRoute<void>(
-                          builder: (_) => const ActivityOverviewPage(
-                            openSelectorOnEnter: true,
-                          ),
-                        ),
-                      );
-                    } else if (action == AppQuickAction.dayReview ||
+                    if (action == AppQuickAction.dayReview ||
                         action == AppQuickAction.meal) {
                       unawaited(
                         _journal(

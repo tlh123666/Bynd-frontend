@@ -38,28 +38,35 @@ Future<T?> showAppContentSheet<T>(
       builder: (context) => FractionallySizedBox(
         heightFactor: heightFactor,
         child: surface(
-          Column(
-            children: [
-              SizedBox(
-                height: 16,
-                child: Center(
-                  child: Container(
-                    width: 38,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: AppColors.textDim,
-                      borderRadius: BorderRadius.circular(999),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final handleHeight = constraints.maxHeight.isFinite
+                  ? constraints.maxHeight.clamp(0.0, 16.0)
+                  : 16.0;
+              return Column(
+                children: [
+                  SizedBox(
+                    height: handleHeight,
+                    child: Center(
+                      child: Container(
+                        width: 38,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: AppColors.textDim,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-              Expanded(
-                child: Material(
-                  color: Colors.transparent,
-                  child: builder(context),
-                ),
-              ),
-            ],
+                  Expanded(
+                    child: Material(
+                      color: Colors.transparent,
+                      child: builder(context),
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ),
