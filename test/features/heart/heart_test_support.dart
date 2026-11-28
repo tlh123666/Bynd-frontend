@@ -214,6 +214,11 @@ class FakeHeartGateway implements HeartBandGateway {
   Future<Map<String, dynamic>> readHistory(DeviceSnapshot device) async =>
       history;
   @override
+  Future<Map<String, dynamic>> measureSpo2Now(DeviceSnapshot device) async => {
+    'spo2': 97,
+    'heartRate': 64,
+  };
+  @override
   void dispose() {
     if (!disposed) {
       disposed = true;

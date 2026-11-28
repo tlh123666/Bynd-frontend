@@ -85,6 +85,17 @@ class JStyleBleController(
     private var ecgHrvRetries = 0
     private var ecgWaveformSeen = false
 
+    private var spo2OnDemandActive = false
+    private var spo2OnDemandResult: MethodChannel.Result? = null
+    private var spo2OnDemandRetries = 0
+    private var spo2RetryRunnable: Runnable? = null
+    private var spo2TimeoutRunnable: Runnable? = null
+    private var spo2StreamFallbackRunnable: Runnable? = null
+    private var spo2StreamResult: Int? = null
+    private var spo2StreamValidCount = 0
+    private var spo2LastNonCapped = 0
+    private var spo2RealtimeStartedByUs = false
+
     private var steps = 0
     private var heartRate = 0
     private var sleepHours = 0.0
@@ -566,6 +577,137 @@ class JStyleBleController(
         )
         if (connectionReady) {
             scheduleMeasurementLoop()
+        }
+    }
+
+    // On-demand SpO2 ("Measure now"): the doc requires pairing
+    // SetDeviceMeasurementWithType with the realtime data stream
+    // ("需要结合以下方式同步使用") — without the stream the band only ACKs
+    // and never measures (2026-11-27 field finding). So the flow is:
+    // start the realtime stream, send the one-shot AutoSpo2 start, and
+    // complete on the result packet OR on the stream's Blood_oxygen going
+    // valid. The stream is stopped again when the flow ends.
+    fun startOnDemandSpo2(
+        deviceId: String?,
+        result: MethodChannel.Result,
+    ) {
+        if (!ensureConnectPermission(result)) return
+        if (!connectionReady || currentGatt == null || currentDevice == null) {
+            result.error("disconnected", "The band is not connected.", null)
+            return
+        }
+        if (deviceId != null && currentDevice?.id != deviceId.trim()) {
+            result.error("invalid_device", "The requested band is not connected.", null)
+            return
+        }
+        if (ecgActive) {
+            result.error("busy", "A heart recording is in progress.", null)
+            return
+        }
+        if (spo2OnDemandActive) {
+            result.error("busy", "A blood oxygen measurement is already running.", null)
+            return
+        }
+        spo2RealtimeStartedByUs = !realtimeStepActive
+        startRealtimeStep()
+        spo2OnDemandActive = true
+        spo2OnDemandResult = result
+        spo2OnDemandRetries = 0
+        spo2StreamResult = null
+        spo2StreamValidCount = 0
+        spo2LastNonCapped = 0
+        enqueueCommands(listOf(spo2StartCommand()))
+        scheduleSpo2FollowUp()
+        spo2StreamFallbackRunnable =
+            Runnable {
+                if (!spo2OnDemandActive) return@Runnable
+                // Prefer the last realistic reading (<100); the stream can
+                // pin to 100 once the measurement window is over.
+                val preferred = when {
+                    spo2LastNonCapped in 1..99 -> spo2LastNonCapped
+                    bloodOxygen in 1..100 -> bloodOxygen
+                    else -> null
+                }
+                if (preferred != null) {
+                    Log.d(TAG, "spo2 on-demand stream fallback result: $preferred")
+                    completeSpo2OnDemand(resultValue = preferred)
+                } else {
+                    Log.d(TAG, "spo2 on-demand no valid stream value at fallback point")
+                }
+            }.also { mainHandler.postDelayed(it, SPO2_STREAM_FALLBACK_MS) }
+        spo2TimeoutRunnable =
+            Runnable { completeSpo2OnDemand(errorCode = "measurement_timeout") }
+                .also { mainHandler.postDelayed(it, SPO2_TIMEOUT_MS) }
+        Log.d(TAG, "spo2 on-demand start command sent (realtime stream on)")
+    }
+
+    private fun spo2StartCommand(): ByteArray =
+        BleSDK.SetDeviceMeasurementWithType(
+            AutoTestMode.AutoSpo2,
+            SPO2_MEASUREMENT_SECONDS,
+            true,
+        )
+
+    // The measurement itself takes ~35s after an accepted start. Aggressive
+    // re-sending every few seconds restarts it and produces zero-value
+    // packets (2026-11-27 field finding), so follow-ups are far apart. The
+    // band may also store the result in its manual-test history instead of
+    // pushing a live packet: each follow-up reads the manual SpO2 channel
+    // (read-and-clear, 0x99) and refreshes the automatic history, and a
+    // fresh valid record completes the flow. Zero-value packets are logged
+    // and waited through, never treated as the result.
+    private fun scheduleSpo2FollowUp() {
+        spo2RetryRunnable?.let { mainHandler.removeCallbacks(it) }
+        if (!spo2OnDemandActive || spo2OnDemandRetries >= SPO2_START_MAX_RETRIES) return
+        spo2RetryRunnable =
+            Runnable {
+                if (!spo2OnDemandActive) return@Runnable
+                spo2OnDemandRetries++
+                Log.d(TAG, "spo2 on-demand history probe #$spo2OnDemandRetries")
+                enqueueCommands(
+                    listOf(
+                        BleSDK.Oxygen_data(SPO2_MANUAL_READ, ""),
+                        BleSDK.Oxygen_data(READ_START, ""),
+                    ),
+                )
+                scheduleSpo2FollowUp()
+            }.also { mainHandler.postDelayed(it, SPO2_START_RETRY_MS) }
+    }
+
+    private fun completeSpo2OnDemand(
+        errorCode: String? = null,
+        resultValue: Int? = null,
+    ) {
+        val pending = spo2OnDemandResult
+        spo2RetryRunnable?.let { mainHandler.removeCallbacks(it) }
+        spo2RetryRunnable = null
+        spo2TimeoutRunnable?.let { mainHandler.removeCallbacks(it) }
+        spo2TimeoutRunnable = null
+        spo2StreamFallbackRunnable?.let { mainHandler.removeCallbacks(it) }
+        spo2StreamFallbackRunnable = null
+        spo2OnDemandActive = false
+        spo2OnDemandResult = null
+        spo2StreamResult = null
+        if (spo2RealtimeStartedByUs && realtimeStepActive) {
+            realtimeStepActive = false
+            enqueueCommands(listOf(BleSDK.RealTimeStep(false, false)))
+            Log.d(TAG, "spo2 on-demand realtime stream stopped")
+        }
+        spo2RealtimeStartedByUs = false
+        if (pending == null) return
+        if (errorCode != null) {
+            pending.error(errorCode, "The band did not complete the blood oxygen measurement.", null)
+        } else {
+            pending.success(
+                mapOf(
+                    "spo2" to (resultValue ?: bloodOxygen).takeIf { it in 1..100 },
+                    "heartRate" to heartRate.takeIf { it > 0 },
+                    "hrv" to hrv.takeIf { it > 0 },
+                    "stress" to stress.takeIf { it > 0 },
+                    "systolicBloodPressure" to highBloodPressure.takeIf { it > 0 },
+                    "diastolicBloodPressure" to lowBloodPressure.takeIf { it > 0 },
+                ),
+            )
         }
     }
 
@@ -1133,7 +1275,19 @@ class JStyleBleController(
             BleConst.Blood_oxygen -> {
                 val records = storeHistory("bloodOxygen", maps)
                 val entry = records.firstOrNull()
-                bloodOxygen = entry.intValue(DeviceKey.Blood_oxygen) ?: bloodOxygen
+                // While an on-demand measurement is running, the probe's
+                // placeholder records (empty history returns Blood_oxygen=0)
+                // must not clobber the stream-measured value.
+                if (!spo2OnDemandActive) {
+                    bloodOxygen = entry.intValue(DeviceKey.Blood_oxygen) ?: bloodOxygen
+                }
+                if (spo2OnDemandActive) {
+                    Log.d(TAG, "spo2 on-demand history probe ignored during measurement: records=$records")
+                }
+            }
+
+            BleConst.Delete_Obtain_The_data_of_manual_blood_oxygen_test -> {
+                Log.d(TAG, "spo2 manual channel read confirmed")
             }
 
             BleConst.GetActivityModeData -> {
@@ -1166,6 +1320,17 @@ class JStyleBleController(
                 latestRealtime.clear()
                 latestRealtime.putAll(entry)
                 pushRealtimeUpdate("measurement")
+                if (spo2OnDemandActive && dataType == BleConst.MeasurementOxygenCallback) {
+                    val spo2Value = entry.intValue(DeviceKey.Blood_oxygen) ?: 0
+                    Log.d(TAG, "spo2 on-demand packet: oxygen=$spo2Value hr=${entry.intValue(DeviceKey.HeartRate)} entry=$entry")
+                    if (spo2Value in 1..100) {
+                        completeSpo2OnDemand()
+                    } else {
+                        Log.d(TAG, "spo2 on-demand zero packet, waiting for the result packet")
+                    }
+                } else if (spo2OnDemandActive && dataType == BleConst.StopMeasurementOxygenCallback) {
+                    Log.d(TAG, "spo2 on-demand stop packet while waiting: $entry")
+                }
                 if (ecgActive && dataType == BleConst.MeasurementHrvCallback) {
                     onEcgEvent?.invoke(
                         mapOf(
@@ -1188,6 +1353,24 @@ class JStyleBleController(
                 heartRate = entry.intValue(DeviceKey.HeartRate) ?: heartRate
                 calories = entry.intValue(DeviceKey.Calories) ?: calories
                 bloodOxygen = entry.intValue(DeviceKey.Blood_oxygen) ?: bloodOxygen
+                // The stream readings are the measurement result (the
+                // manufacturer's guidance: the 09 command delivers SpO2).
+                // Pattern seen on 2026-11-27: real values (97..96) during
+                // the measurement window, then the stream pins to 100, so
+                // complete once 3+ valid readings arrived and the latest is
+                // realistic; the history probes must not clobber the value.
+                if (spo2OnDemandActive && bloodOxygen in 1..100) {
+                    spo2StreamValidCount++
+                    if (bloodOxygen in 1..99) spo2LastNonCapped = bloodOxygen
+                    Log.d(
+                        TAG,
+                        "spo2 on-demand stream value: $bloodOxygen (valid readings: $spo2StreamValidCount)",
+                    )
+                    if (spo2StreamValidCount >= 3 && bloodOxygen in 1..99) {
+                        Log.d(TAG, "spo2 on-demand result from realtime stream: $bloodOxygen")
+                        completeSpo2OnDemand(resultValue = bloodOxygen)
+                    }
+                }
                 distance = entry.doubleValue(DeviceKey.Distance) ?: distance
                 temperature = entry.doubleValue(DeviceKey.TempData) ?: temperature
                 exerciseTime = entry.intValue(DeviceKey.ActiveMinutes) ?: exerciseTime
@@ -1516,6 +1699,9 @@ class JStyleBleController(
             ecgActive = false
             onEcgEvent?.invoke(mapOf("event" to "ecg_failed", "message" to "Band disconnected."))
         }
+        if (spo2OnDemandActive) {
+            completeSpo2OnDemand(errorCode = "disconnected")
+        }
         ecgFinishRunnable?.let { mainHandler.removeCallbacks(it) }
         ecgFinishRunnable = null
         measurementLoopRunnable?.let { mainHandler.removeCallbacks(it) }
@@ -1725,6 +1911,21 @@ class JStyleBleController(
         private const val ECG_START_MAX_RETRIES = 12
         // 手环时钟与手机的允许偏差（历史行时间戳与本次会话窗口的匹配容差）。
         private const val BAND_CLOCK_TOLERANCE_MS = 120_000L
+        // On-demand SpO2 ("Measure now") test matrix (2026-11-27 field):
+        // every START is answered by an immediate all-zero ACK frame
+        // (0x28,type,0...); the real result packet would follow ~35s later.
+        // duration=35000 (ms reading) produced no result packet at all →
+        // the band rejects/ignores it; duration=35 (seconds, per the doc's
+        // "greater than 30 seconds") was never fairly tested because v1
+        // completed on the first ACK. Current attempt: seconds + the fixed
+        // wait-through-ACK logic.
+        private const val SPO2_MEASUREMENT_SECONDS = 35L
+        private const val SPO2_START_RETRY_MS = 45000L
+        private const val SPO2_START_MAX_RETRIES = 2
+        private const val SPO2_STREAM_FALLBACK_MS = 50000L
+        private const val SPO2_TIMEOUT_MS = 120000L
+        // 手动测试血氧历史通道（读取即清除），与自动历史（0x00/68）分开。
+        private const val SPO2_MANUAL_READ: Byte = 0x99.toByte()
         private const val PROFILE_SYNC_TIMEOUT_MS = 20000L
         private const val DEFAULT_SLEEP_UNIT_MINUTES = 5
         private const val MINUTES_PER_HOUR = 60.0
