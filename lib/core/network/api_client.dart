@@ -201,6 +201,20 @@ class ApiClient {
       final response = await http.Response.fromStream(
         await _client.send(request).timeout(connectTimeout),
       ).timeout(receiveTimeout);
+      if (response.statusCode == 401) {
+        if (onUnauthorized != null) {
+          try {
+            await onUnauthorized!(token);
+          } catch (_) {
+            /* Preserve the original authentication error. */
+          }
+        }
+        throw const ApiException(
+          'Sua sessão expirou. Entre novamente.',
+          code: 'authentication_required',
+          statusCode: 401,
+        );
+      }
       final envelope =
           jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
       if (response.statusCode < 200 ||

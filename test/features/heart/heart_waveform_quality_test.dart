@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:new_jcvital/features/heart/domain/heart_waveform_quality.dart';
 
@@ -61,5 +63,13 @@ void main() {
     expect(heartWaveformLooksValid(pulseWave(cycles: 10)), isTrue);
     // 8 cycles ≈ 16 bpm — no usable pulse.
     expect(heartWaveformLooksValid(pulseWave(cycles: 8)), isFalse);
+  });
+
+  test('a single motion artifact does not hide the pulse', () {
+    final samples = pulseWave()..removeRange(1500, 1512);
+    samples
+      ..insertAll(1500, List<int>.filled(12, 4095))
+      ..shuffle(Random(42));
+    expect(heartWaveformLooksValid(samples), isTrue);
   });
 }
