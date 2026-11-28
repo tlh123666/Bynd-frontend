@@ -32,6 +32,7 @@ enum SleepMetric {
   deep,
   rem,
   heartRate,
+  restingHeartRate,
   hrv,
   oxygen,
   temperature,
@@ -82,6 +83,7 @@ class SleepPreferences {
       value('targetBedtimeHour', 23) * 60 + value('targetBedtimeMinute', 0);
   int get wake =>
       value('targetWakeHour', 7) * 60 + value('targetWakeMinute', 30);
+  int? get weekendWake => (json['targetWeekendWakeMinute'] as num?)?.toInt();
   int get windDown => value('windDownMinutes', 30);
   String get timezone => '${json['timezone'] ?? 'UTC'}';
   bool show(String key) => json[key] != false;
@@ -93,9 +95,19 @@ class SleepPreferences {
     'targetBedtimeMinute': bedtime % 60,
     'targetWakeHour': wake ~/ 60,
     'targetWakeMinute': wake % 60,
+    if (json['targetWeekendWakeMinute'] case final num minutes)
+      'targetWeekendWakeMinute': minutes.toInt(),
     'windDownMinutes': windDown,
     'timezone': timezone,
-    for (final key in ['showStages', 'showBiologicalClock', 'showRespiration'])
+    for (final key in [
+      'showStages',
+      'showBiologicalClock',
+      'showRespiration',
+      'showNaps',
+      'showSleepDebt',
+      'showSleepTrend',
+      'showSleepSignals',
+    ])
       key: show(key),
   };
 }
@@ -156,6 +168,7 @@ class SleepSnapshot {
       SleepMetric.rem => j['remSleepMinutes'] as num?,
       SleepMetric.heartRate =>
         (vitals['averageBpm'] ?? j['avgHeartRate']) as num?,
+      SleepMetric.restingHeartRate => summary['restingHeartRate'] as num?,
       SleepMetric.hrv => j['hrvMs'] as num?,
       SleepMetric.oxygen => j['avgSpo2Percent'] as num?,
       SleepMetric.respiration || SleepMetric.temperature => null,
@@ -180,7 +193,7 @@ class SleepSnapshot {
       SleepMetric.efficiency ||
       SleepMetric.consistency ||
       SleepMetric.oxygen => '%',
-      SleepMetric.heartRate => ' bpm',
+      SleepMetric.heartRate || SleepMetric.restingHeartRate => ' bpm',
       SleepMetric.hrv => ' ms',
       SleepMetric.latency => ' min',
       _ => '',

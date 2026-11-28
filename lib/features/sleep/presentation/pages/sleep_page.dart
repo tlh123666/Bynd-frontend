@@ -7,7 +7,8 @@ import 'dart:math' as math;
 import '../../../diary/data/demo_diary_repository.dart';
 import '../../../diary/data/remote_diary_repository.dart';
 import '../../../diary/domain/diary_models.dart';
-import '../widgets/sleep_habits_card.dart';
+import '../widgets/sleep_night_tracks.dart';
+import '../../../diary/presentation/diary_health_sheet.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../../../core/auth/auth_session.dart';
@@ -22,7 +23,6 @@ import '../../data/demo_sleep_repository.dart';
 import '../../data/remote_sleep_repository.dart';
 import '../../domain/sleep_models.dart';
 import '../sleep_copy.dart';
-import '../widgets/sleep_widgets.dart';
 import '../sheets/sleep_metric_sheet.dart';
 import '../sheets/sleep_preferences_sheet.dart';
 
@@ -47,12 +47,12 @@ class SleepPage extends StatefulWidget {
 class _SleepPageState extends State<SleepPage> {
   late final SleepController _controller;
   late final DiaryRepository _diary;
-  bool _habitsSaving = false, _syncing = false;
+  bool _syncing = false;
   ApiClient? _syncClient;
   BandSleepSync? _sync;
-  int _habitsVersion = 0;
   String? _locale;
   final _moreKey = GlobalKey();
+  final _historyWindow = AppHealthHistory();
   Rect? _origin;
   bool _more = false;
   @override
@@ -100,7 +100,7 @@ class _SleepPageState extends State<SleepPage> {
   }
 
   Future<void> _syncBand() async {
-    if (_syncing || _habitsSaving) return;
+    if (_syncing) return;
     final devices = DeviceScope.maybeOf(context);
     if (devices?.device?.connected != true) {
       await Navigator.push(
@@ -146,7 +146,7 @@ class _SleepPageState extends State<SleepPage> {
   }
 
   Future<void> _metric(SleepMetric metric) async {
-    if (_habitsSaving || _syncing || _controller.saving) return;
+    if (_syncing || _controller.saving) return;
     final data = _controller.snapshot;
     if (data == null) return;
     final date = await showAppContentSheet<DateTime>(
@@ -166,17 +166,27 @@ class _SleepPageState extends State<SleepPage> {
     }
   }
 
-  Future<void> _preferences({bool planner = false}) async {
-    if (_habitsSaving || _syncing || _controller.saving) return;
+  Future<void> _preferences() async {
+    if (_syncing || _controller.saving) return;
     if (_controller.snapshot == null) return;
     final previousTarget = _controller.snapshot!.preferences.target;
-    await showAppContentSheet<void>(
-      context,
-      (_) => SleepAccountGuard(
-        controller: _controller,
-        child: SleepPreferencesSheet(controller: _controller, planner: planner),
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => Scaffold(
+          backgroundColor: AppHealthStyle.canvas,
+          body: DecoratedBox(
+            decoration: const BoxDecoration(
+              gradient: AppHealthStyle.background,
+            ),
+            child: SafeArea(
+              child: SleepAccountGuard(
+                controller: _controller,
+                child: SleepPreferencesSheet(controller: _controller),
+              ),
+            ),
+          ),
+        ),
       ),
-      glass: true,
     );
     if (mounted &&
         !_controller.accountChanged &&
@@ -186,7 +196,7 @@ class _SleepPageState extends State<SleepPage> {
   }
 
   Future<void> _journal({bool meal = false}) async {
-    if (_controller.saving || _habitsSaving || _syncing) return;
+    if (_controller.saving || _syncing) return;
     await Navigator.push(
       context,
       MaterialPageRoute<void>(
@@ -198,7 +208,6 @@ class _SleepPageState extends State<SleepPage> {
         ),
       ),
     );
-    if (mounted) setState(() => _habitsVersion++);
   }
 
   @override
@@ -214,7 +223,7 @@ class _SleepPageState extends State<SleepPage> {
         now.day,
       ).difference(selected).inDays.clamp(0, 364);
       return PopScope(
-        canPop: !_more && !c.saving && !_habitsSaving && !_syncing,
+        canPop: !_more && !c.saving && !_syncing,
         onPopInvokedWithResult: (didPop, result) {
           if (!didPop && _more) setState(() => _more = false);
         },
@@ -226,7 +235,7 @@ class _SleepPageState extends State<SleepPage> {
               backgroundColor: AppColors.homeCanvas,
               body: DecoratedBox(
                 decoration: const BoxDecoration(
-                  gradient: AppSleepStyle.background,
+                  gradient: AppHealthStyle.background,
                 ),
                 child: SafeArea(
                   bottom: false,
@@ -240,7 +249,7 @@ class _SleepPageState extends State<SleepPage> {
                           tooltip: MaterialLocalizations.of(
                             context,
                           ).backButtonTooltip,
-                          onPressed: c.saving || _habitsSaving || _syncing
+                          onPressed: c.saving || _syncing
                               ? null
                               : () => Navigator.maybePop(context),
                           icon: const AppSvgIcon(
@@ -252,7 +261,7 @@ class _SleepPageState extends State<SleepPage> {
                           sleepText(context, 'Sono', 'Sleep'),
                           style: AppSleepStyle.body.copyWith(
                             color: AppColors.textPrimary,
-                            fontSize: 19,
+                            fontSize: 17,
                           ),
                         ),
                         trailing: IconButton(
@@ -261,11 +270,7 @@ class _SleepPageState extends State<SleepPage> {
                             'Ajustes do sono',
                             'Sleep settings',
                           ),
-                          onPressed:
-                              data == null ||
-                                  c.saving ||
-                                  _habitsSaving ||
-                                  _syncing
+                          onPressed: data == null || c.saving || _syncing
                               ? null
                               : () => _preferences(),
                           icon: const AppSvgIcon(
@@ -275,7 +280,7 @@ class _SleepPageState extends State<SleepPage> {
                         ),
                       ),
                       IgnorePointer(
-                        ignoring: c.saving || _habitsSaving || _syncing,
+                        ignoring: c.saving || _syncing,
                         child: DayStrip(
                           day: day,
                           daysCount: math.max(30, day + 1),
@@ -322,7 +327,7 @@ class _SleepPageState extends State<SleepPage> {
                                 )
                               : RefreshIndicator(
                                   onRefresh: () async {
-                                    if (_habitsSaving || _syncing || c.saving) {
+                                    if (_syncing || c.saving) {
                                       return;
                                     }
                                     await c.load(locale: _locale!);
@@ -350,7 +355,7 @@ class _SleepPageState extends State<SleepPage> {
                 moreButtonKey: _moreKey,
                 moreOpen: _more,
                 onDestinationSelected: (i) {
-                  if (c.saving || _habitsSaving || _syncing) return;
+                  if (c.saving || _syncing) return;
                   if (i == 0) {
                     Navigator.popUntil(context, (r) => r.isFirst);
                   } else if (i == 1) {
@@ -358,7 +363,7 @@ class _SleepPageState extends State<SleepPage> {
                   }
                 },
                 onMorePressed: () {
-                  if (c.saving || _habitsSaving || _syncing) return;
+                  if (c.saving || _syncing) return;
                   final box = _moreKey.currentContext?.findRenderObject();
                   if (box is RenderBox) {
                     setState(() {
@@ -397,389 +402,287 @@ class _SleepPageState extends State<SleepPage> {
     },
   );
   Widget _content(BuildContext context, SleepSnapshot data) {
+    String copy(String pt, String en) => sleepText(context, pt, en);
     final session = data.session;
-    final children = <Widget>[
-      if (!kIsWeb &&
-          defaultTargetPlatform == TargetPlatform.android &&
-          !(widget.demo ?? (widget.config ?? AppConfig.current).demoData)) ...[
-        Padding(
-          padding: const EdgeInsets.only(bottom: 22),
-          child: AppButton(
-            label: sleepText(context, 'Sincronizar pulseira', 'Sync band'),
-            onPressed: _syncing ? null : _syncBand,
-            loading: _syncing,
-            variant: AppButtonVariant.secondary,
+    final score = data.value(SleepMetric.score);
+    final notes = data.insight['body'];
+    final title = data.insight['title'];
+    final showStages = data.preferences.show('showStages');
+    final metrics = [
+      if (data.preferences.show('showSleepDebt')) SleepMetric.debt,
+      SleepMetric.restlessness,
+      if (data.preferences.show('showRespiration')) SleepMetric.oxygen,
+      if (data.preferences.show('showNaps')) SleepMetric.nap,
+    ];
+    final signals = [
+      SleepMetric.restingHeartRate,
+      SleepMetric.hrv,
+      if (data.preferences.show('showRespiration')) SleepMetric.oxygen,
+    ];
+    final points = <AppHealthPoint>[
+      for (final row in data.trend.days)
+        if (DateTime.tryParse('${row['statDate'] ?? row['date']}')
+            case final DateTime date)
+          (
+            date: date,
+            value: row['hasData'] == true ? row['sleepScore'] as num? : null,
           ),
-        ),
-      ],
-
-      if (!data.hasNight) ...[
-        Text(
-          sleepText(
-            context,
-            'Não conseguimos ler o seu sono nessa noite.',
-            'No sleep was recorded for this night.',
+    ];
+    final scoreStatus = score == null
+        ? copy('Sem nota', 'No score')
+        : score >= 85
+        ? copy('Ótima', 'Great')
+        : score >= 70
+        ? copy('Boa', 'Good')
+        : score >= 60
+        ? copy('Regular', 'Fair')
+        : copy('Ruim', 'Low');
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppHealthStyle.edge),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          AppHealthHero(
+            value: data.format(SleepMetric.score),
+            label: copy('Nota do sono', 'Sleep score'),
+            status: scoreStatus,
+            color: score == null
+                ? AppColors.textMuted
+                : score >= 70
+                ? AppHealthStyle.positive
+                : score >= 60
+                ? AppHealthStyle.attention
+                : AppHealthStyle.low,
           ),
-          style: AppSleepStyle.title,
-        ),
-        const SizedBox(height: 14),
-        Text(
-          sleepText(
-            context,
-            'Sincronize a pulseira. Só mostramos dados de sono registrados pelo seu dispositivo.',
-            'Sync your band. This page only shows sleep recorded by your device.',
+          const SizedBox(height: 24),
+          Text(
+            !data.hasNight
+                ? copy('Nenhuma noite registrada.', 'No night recorded.')
+                : title is String && title.isNotEmpty
+                ? title
+                : copy(
+                    'Sua noite, em perspectiva.',
+                    'Your night in perspective.',
+                  ),
+            style: AppHealthStyle.title,
           ),
-          style: AppSleepStyle.body,
-        ),
-      ] else ...[
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(data.format(SleepMetric.score), style: AppSleepStyle.score),
-            const SizedBox(width: 12),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 7),
-              child: Text(
-                data.value(SleepMetric.score) == null
-                    ? sleepText(context, 'SEM NOTA', 'NO SCORE')
-                    : (data.value(SleepMetric.score)! >= 85
-                          ? sleepText(context, 'ÓTIMA', 'GREAT')
-                          : data.value(SleepMetric.score)! >= 78
-                          ? sleepText(context, 'BOA', 'GOOD')
-                          : data.value(SleepMetric.score)! >= 76
-                          ? sleepText(context, 'NORMAL', 'NORMAL')
-                          : sleepText(context, 'ATENÇÃO', 'LOW')),
-                style: AppSleepStyle.kicker.copyWith(
-                  color: (data.value(SleepMetric.score) ?? 0) >= 78
-                      ? AppSleepStyle.levelGood
-                      : (data.value(SleepMetric.score) ?? 0) >= 76
-                      ? AppSleepStyle.levelNormal
-                      : AppSleepStyle.levelLow,
-                ),
+          const SizedBox(height: 8),
+          if (notes is String && notes.isNotEmpty)
+            Text(
+              notes,
+              style: AppHealthStyle.body,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            )
+          else if (session == null)
+            Text(
+              copy(
+                'Sincronize sua pulseira para ver o sono registrado.',
+                'Sync your band to see recorded sleep.',
+              ),
+              style: AppHealthStyle.body,
+            ),
+          if (!kIsWeb &&
+              defaultTargetPlatform == TargetPlatform.android &&
+              !(widget.demo ??
+                  (widget.config ?? AppConfig.current).demoData)) ...[
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: AppButton(
+                label: copy('Sincronizar pulseira', 'Sync band'),
+                onPressed: _syncing ? null : _syncBand,
+                loading: _syncing,
+                variant: AppButtonVariant.secondary,
               ),
             ),
           ],
-        ),
-        const SizedBox(height: 12),
-        Text(
-          '${sleepText(context, 'nesta noite', 'this night')} · ${sleepNightDate(context, data.date)}',
-          style: AppSleepStyle.caption,
-        ),
-        const SizedBox(height: 16),
-        Text(
-          '${data.insight['title'] ?? sleepText(context, 'Sua noite, em perspectiva.', 'Your night in perspective.')}',
-          style: AppSleepStyle.title,
-        ),
-        if (data.insight['body'] is String) ...[
-          const SizedBox(height: 14),
-          SleepExpandable(data.insight['body'] as String),
-        ],
-        const SizedBox(height: 24),
-        SleepCard(
-          onTap: () => _metric(SleepMetric.duration),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              SleepLabel(
-                sleepMetricTitle(context, SleepMetric.duration),
-                chevron: true,
+          if (session != null) ...[
+            const SizedBox(height: AppHealthStyle.sectionGap),
+            AppHealthSection(
+              copy('Sua noite', 'Your night'),
+              Icons.bedtime_outlined,
+            ),
+            const SizedBox(height: AppHealthStyle.gap),
+            InkWell(
+              onTap: () => _metric(SleepMetric.duration),
+              child: AppHealthHero(
+                value: data.format(SleepMetric.duration),
+                label: copy(
+                  'dormidas · ${sleepDuration(session.duration)} na cama',
+                  'asleep · ${sleepDuration(session.duration)} in bed',
+                ),
+                status: copy('Tempo de sono', 'Sleep duration'),
+              ),
+            ),
+            if (showStages) ...[
+              const SizedBox(height: 14),
+              SleepNightTracks(
+                key: ValueKey(
+                  'sleep-night-${sleepDate(data.date)}-${session.id}',
+                ),
+                session: session,
               ),
               const SizedBox(height: 12),
+              for (final (metric, color) in const [
+                (SleepMetric.awake, AppHealthStyle.awake),
+                (SleepMetric.light, AppHealthStyle.light),
+                (SleepMetric.deep, AppHealthStyle.deep),
+                (SleepMetric.rem, AppHealthStyle.rem),
+              ])
+                _stageRow(data, metric, color),
+            ],
+            AppHealthRow(
+              label: sleepMetricTitle(context, SleepMetric.efficiency),
+              value: data.format(SleepMetric.efficiency),
+            ),
+            AppHealthRow(
+              label: sleepMetricTitle(context, SleepMetric.latency),
+              value: data.format(SleepMetric.latency),
+            ),
+            if (session.quality == 'partial')
               Text(
-                data.format(SleepMetric.duration),
-                style: AppSleepStyle.value,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '${sleepText(context, 'Duração total', 'Total duration')} ${sleepDuration(session!.duration)}',
-                style: AppSleepStyle.caption,
-              ),
-              if (data.preferences.show('showStages'))
-                SleepStageChart(
-                  session: session,
-                  vitals: data.vitals,
-                  compact: true,
+                copy(
+                  'Registro parcial: há intervalos sem leitura.',
+                  'Partial record: some intervals were not measured.',
                 ),
-              if (session.quality == 'partial')
-                Text(
-                  sleepText(
-                    context,
-                    'Registro parcial: há intervalos sem leitura.',
-                    'Partial record: some intervals were not measured.',
-                  ),
-                  style: AppSleepStyle.caption,
+                style: AppHealthStyle.small,
+              ),
+          ],
+          const SizedBox(height: 18),
+          DiaryHealthEntry(
+            topic: DiaryHealthTopic.sleep,
+            repository: _diary,
+            date: data.date,
+            title: copy('Sono', 'Sleep'),
+            subtitle: copy(
+              'Café, álcool, telas, quarto e rotina da noite',
+              'Coffee, alcohol, screens, bedroom and evening routine',
+            ),
+          ),
+          const SizedBox(height: AppHealthStyle.sectionGap),
+          AppHealthSection(
+            copy('Principais métricas', 'Key metrics'),
+            Icons.grid_view_outlined,
+          ),
+          const SizedBox(height: AppHealthStyle.gap),
+          AppHealthMetricGrid(
+            children: [
+              for (final metric in metrics)
+                AppHealthMetric(
+                  label: sleepMetricTitle(context, metric),
+                  value: data.format(metric),
+                  icon: _icon(metric),
+                  caption: metric == SleepMetric.nap && data.value(metric) == 0
+                      ? copy('Sem cochilo neste dia', 'No naps on this date')
+                      : null,
                 ),
             ],
           ),
-        ),
-      ],
-      const SizedBox(height: 40),
-      SleepLabel(
-        sleepText(context, 'Direção para esta noite', 'Direction for tonight'),
-      ),
-      const SizedBox(height: 14),
-      Text(
-        '${sleepText(context, 'Deite às', 'Bedtime')} ${sleepClock(data.preferences.bedtime)}.',
-        style: AppSleepStyle.title,
-      ),
-      const SizedBox(height: 12),
-      Text(
-        sleepText(
-          context,
-          'Seu horário escolhido para desacelerar e preparar a noite.',
-          'Your chosen time to wind down and prepare for the night.',
-        ),
-        style: AppSleepStyle.body,
-      ),
-      if (data.preferences.show('showBiologicalClock')) ...[
-        const SizedBox(height: 20),
-        SleepCard(
-          onTap: () => _preferences(planner: true),
-          child: Column(
-            children: [
-              SleepLabel(
-                sleepText(context, 'Planejador de sono', 'Sleep planner'),
-                chevron: true,
-              ),
-              const SizedBox(height: 12),
-              CustomPaint(
-                size: const Size(280, 150),
-                painter: SleepClockPainter(
-                  data.preferences.bedtime,
-                  data.preferences.wake,
-                ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          if (data.preferences.show('showSleepTrend')) ...[
+            const SizedBox(height: AppHealthStyle.sectionGap),
+            AppHealthSection(
+              copy('Suas noites', 'Your nights'),
+              Icons.show_chart,
+            ),
+            const SizedBox(height: AppHealthStyle.gap),
+            AppHealthTrend(
+              key: const Key('sleep-score-trend'),
+              points: _historyWindow.resolve(points, data.date),
+              selected: data.date,
+              minimum: 0,
+              maximum: 100,
+              emptyLabel: data.trend.locked
+                  ? copy(
+                      'Histórico detalhado disponível no Premium.',
+                      'Detailed history is available with Premium.',
+                    )
+                  : copy(
+                      'Sem histórico de notas de sono.',
+                      'No sleep score history.',
+                    ),
+              onSelected: (date) =>
+                  _controller.load(date: date, locale: _locale!),
+            ),
+          ],
+          if (data.preferences.show('showSleepSignals')) ...[
+            const SizedBox(height: AppHealthStyle.sectionGap),
+            AppHealthSection(
+              copy('Sinais desta leitura', 'Signals in this reading'),
+              Icons.monitor_heart_outlined,
+            ),
+            const SizedBox(height: AppHealthStyle.gap),
+            AppHealthPanel(
+              child: Column(
                 children: [
-                  Flexible(
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(
-                        sleepClock(data.preferences.bedtime),
-                        style: AppSleepStyle.value,
-                      ),
+                  for (final (index, metric) in signals.indexed)
+                    AppHealthRow(
+                      label: sleepMetricTitle(context, metric),
+                      icon: _icon(metric),
+                      value: data.format(metric),
+                      onTap: () => _metric(metric),
+                      divider: index != signals.length - 1,
                     ),
-                  ),
-                  const Icon(
-                    Icons.nights_stay_outlined,
-                    color: AppColors.textMuted,
-                  ),
-                  Flexible(
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(
-                        sleepClock(data.preferences.wake),
-                        style: AppSleepStyle.value,
-                      ),
-                    ),
-                  ),
                 ],
               ),
-            ],
-          ),
-        ),
-      ],
-      const SizedBox(height: 40),
-      Text(
-        sleepText(context, 'Principais métricas', 'Key metrics'),
-        style: AppSleepStyle.title,
-      ),
-      const SizedBox(height: 10),
-      Text(
-        sleepText(
-          context,
-          'O que ficou para recuperar e como o seu corpo passou a noite.',
-          'Your recorded sleep and the signals measured overnight.',
-        ),
-        style: AppSleepStyle.body,
-      ),
-      const SizedBox(height: 20),
-      LayoutBuilder(
-        builder: (context, box) {
-          final metrics = [
-            SleepMetric.debt,
-            SleepMetric.restlessness,
-            if (data.preferences.show('showRespiration'))
-              SleepMetric.respiration,
-            SleepMetric.nap,
-          ];
-          return Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: [
-              for (final m in metrics)
-                SizedBox(
-                  width: box.maxWidth < 280
-                      ? box.maxWidth
-                      : (box.maxWidth - 10) / 2,
-                  child: SleepCard(
-                    onTap: () => _metric(m),
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SleepLabel(sleepMetricTitle(context, m), chevron: true),
-                        const SizedBox(height: 20),
-                        Text(
-                          m == SleepMetric.respiration
-                              ? data.format(SleepMetric.oxygen)
-                              : data.format(m),
-                          style: AppSleepStyle.value.copyWith(fontSize: 22),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          sleepText(
-                            context,
-                            m == SleepMetric.debt
-                                ? data.summary['sleepDebtNights'] == null
-                                      ? 'últimos 7 dias'
-                                      : '${data.summary['sleepDebtNights']} noites com leitura'
-                                : m == SleepMetric.restlessness
-                                ? 'despertares registrados'
-                                : m == SleepMetric.respiration
-                                ? 'oxigênio medido'
-                                : 'neste dia',
-                            m == SleepMetric.debt
-                                ? data.summary['sleepDebtNights'] == null
-                                      ? 'last 7 days'
-                                      : '${data.summary['sleepDebtNights']} measured nights'
-                                : m == SleepMetric.restlessness
-                                ? 'recorded awakenings'
-                                : m == SleepMetric.respiration
-                                ? 'measured oxygen'
-                                : 'on this day',
-                          ),
-                          style: AppSleepStyle.caption,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-            ],
-          );
-        },
-      ),
-      const SizedBox(height: 36),
-      Text(
-        sleepText(
-          context,
-          'Seu sono ao longo dos dias',
-          'Your sleep over time',
-        ),
-        style: AppSleepStyle.title,
-      ),
-      const SizedBox(height: 18),
-      SleepCard(
-        onTap: () => _metric(SleepMetric.score),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SleepLabel(
-              sleepMetricTitle(context, SleepMetric.score),
-              chevron: true,
             ),
-            const SizedBox(height: 12),
-            Text(
-              data.trend.average('sleepScore')?.round().toString() ?? '—',
-              style: AppSleepStyle.value,
-            ),
-            Text(
-              sleepText(
-                context,
-                'média dos dias registrados',
-                'average of measured days',
-              ),
-              style: AppSleepStyle.caption,
-            ),
-            const SizedBox(height: 18),
-            SleepHistoryChart(trend: data.trend, field: 'sleepScore'),
           ],
-        ),
-      ),
-      const SizedBox(height: 36),
-      Text(sleepText(context, 'Hábitos', 'Habits'), style: AppSleepStyle.title),
-      const SizedBox(height: 12),
-      SleepHabitsCard(
-        key: ValueKey('sleep-habits-${sleepDate(data.date)}-$_habitsVersion'),
-        repository: _diary,
-        date: data.date,
-        onBusyChanged: (busy) {
-          if (mounted) setState(() => _habitsSaving = busy);
-        },
-      ),
-      const SizedBox(height: 12),
-      SleepCard(
-        onTap: () => _journal(),
-        child: Row(
-          children: [
-            const Icon(Icons.menu_book_outlined, color: AppColors.textMuted),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Text(
-                sleepText(
-                  context,
-                  'Registrar hábitos no Diário',
-                  'Record habits in your diary',
-                ),
-                style: AppSleepStyle.body,
+          if (data.unavailable.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            Text(
+              copy(
+                'Alguns dados não puderam ser carregados. Puxe para atualizar.',
+                'Some data could not load. Pull to refresh.',
               ),
+              style: AppHealthStyle.small,
             ),
-            const Icon(Icons.chevron_right),
           ],
-        ),
+        ],
       ),
-      const SizedBox(height: 32),
-      Text(
-        sleepText(context, 'Sinais desta leitura', 'Signals in this view'),
-        style: AppSleepStyle.title,
-      ),
-      for (final m in [
-        SleepMetric.heartRate,
-        SleepMetric.hrv,
-        SleepMetric.oxygen,
-        SleepMetric.temperature,
-      ])
-        ListTile(
-          contentPadding: EdgeInsets.zero,
-          title: Text(sleepMetricTitle(context, m), style: AppSleepStyle.body),
-          trailing: Text(data.format(m), style: AppSleepStyle.caption),
-          onTap: () => _metric(m),
-        ),
-      TextButton(
-        onPressed: () => AtlasOverlayScope.show(context),
-        child: Text(
-          sleepText(
-            context,
-            'Perguntar ao Atlas sobre esta noite →',
-            'Ask Atlas about this night →',
-          ),
-        ),
-      ),
-      if (data.unavailable.isNotEmpty)
-        Text(
-          sleepText(
-            context,
-            'Alguns dados não puderam ser carregados. Puxe para atualizar.',
-            'Some data could not be loaded. Pull to refresh.',
-          ),
-          style: AppSleepStyle.caption,
-        ),
-    ];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: children
-          .map(
-            (child) => child is SleepCard
-                ? child
-                : Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 22),
-                    child: child,
-                  ),
-          )
-          .toList(),
     );
   }
+
+  Widget _stageRow(SleepSnapshot data, SleepMetric metric, Color color) {
+    final minutes = data.value(metric);
+    final duration = data.session?.duration;
+    final ratio = minutes == null || duration == null || duration <= 0
+        ? null
+        : (minutes / duration).clamp(0.0, 1.0);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          AppHealthRow(
+            label: sleepMetricTitle(context, metric),
+            value:
+                '${data.format(metric)}${ratio == null ? '' : ' · ${(ratio * 100).round()}%'}',
+            divider: false,
+          ),
+          if (ratio != null)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(2),
+              child: LinearProgressIndicator(
+                value: ratio,
+                minHeight: 4,
+                color: color,
+                backgroundColor: AppHealthStyle.divider,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  IconData _icon(SleepMetric metric) => switch (metric) {
+    SleepMetric.heartRate ||
+    SleepMetric.restingHeartRate ||
+    SleepMetric.hrv => Icons.monitor_heart_outlined,
+    SleepMetric.oxygen || SleepMetric.respiration => Icons.air_outlined,
+    SleepMetric.temperature => Icons.thermostat_outlined,
+    SleepMetric.debt => Icons.schedule_outlined,
+    _ => Icons.bedtime_outlined,
+  };
 }
 
 class SleepAccountGuard extends StatelessWidget {

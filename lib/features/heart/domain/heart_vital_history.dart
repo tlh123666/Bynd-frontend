@@ -19,6 +19,9 @@ Map<String, List<Map<String, dynamic>>> heartVitalsFromHistory(
       'valueType': 'sample',
       'statDate': heartDate(at),
       'measuredAt': at.toUtc().toIso8601String(),
+      // 确定性幂等键：同一条历史读数无论哪次同步重新上报都是同一个 ID，
+      // 服务端按 (userId, clientReadingId) 跨批次去重。
+      'clientReadingId': '$type@${at.toUtc().toIso8601String()}',
       'unit': unit,
       'value': ?value,
       'payload': ?payload,
@@ -55,6 +58,15 @@ Map<String, List<Map<String, dynamic>>> heartVitalsFromHistory(
         oxygen = integer(r['Blood_oxygen']);
     if (at != null && oxygen != null && oxygen >= 50 && oxygen <= 100) {
       put('spo2', at, value: oxygen, unit: '%');
+    }
+  }
+  // 手环自动皮温（dataType 59/腋温历史）：10 分钟一条，单位摄氏度。
+  // 后端批次接口按 skin_temperature 校验 20–45 °C。
+  for (final r in heartMaps(history['temperature'])) {
+    final at = DateTime.tryParse('${r['date']}'.replaceAll('.', '-')),
+        temp = double.tryParse('${r['temperature']}');
+    if (at != null && temp != null && temp >= 20 && temp <= 45) {
+      put('skin_temperature', at, value: temp, unit: 'celsius');
     }
   }
   final rows = unique.values.toList()

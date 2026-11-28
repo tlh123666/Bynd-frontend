@@ -66,6 +66,7 @@ class _SleepMetricSheetState extends State<SleepMetricSheet> {
     SleepMetric.deep => 'deepSleepMinutes',
     SleepMetric.rem => 'remSleepMinutes',
     SleepMetric.heartRate => 'avgHeartRate',
+    SleepMetric.restingHeartRate => 'restingHeartRate',
     SleepMetric.hrv => 'hrvMs',
     SleepMetric.oxygen || SleepMetric.respiration => 'avgSpo2Percent',
     SleepMetric.consistency => 'consistencyPercent',

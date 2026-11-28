@@ -1,3 +1,4 @@
+import '../../../vitality/presentation/widgets/vitality_entries.dart';
 import '../home_signal_destination.dart';
 import 'package:flutter/material.dart';
 import '../../../../design_system/design_system.dart';
@@ -82,6 +83,11 @@ class HomeSignalsPage extends StatelessWidget {
                       : ListView(
                           padding: const EdgeInsets.only(bottom: 130),
                           children: [
+                            VitalityEntries(
+                              date: controller.date,
+                              demo: controller.demoData,
+                              onDestinationSelected: onDestinationSelected,
+                            ),
                             for (final group in _groups(strings))
                               _SignalGroup(
                                 title: group.title,

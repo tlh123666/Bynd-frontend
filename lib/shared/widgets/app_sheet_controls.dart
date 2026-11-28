@@ -9,13 +9,14 @@ class AppSheetHeader extends StatelessWidget {
     this.onClose,
     super.key,
   });
+  static const height = 48.0;
   final String title;
   final Widget? trailing;
   final bool canClose;
   final VoidCallback? onClose;
   @override
   Widget build(BuildContext context) => SizedBox(
-    height: 48,
+    height: height,
     child: Row(
       children: [
         IconButton(

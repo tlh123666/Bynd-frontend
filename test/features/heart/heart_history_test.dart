@@ -62,14 +62,23 @@ void main() {
           {'date': '2026.11.13 22:00:00', 'Blood_oxygen': '98'},
           {'date': '2026.11.14 10:00:00', 'Blood_oxygen': 101},
         ],
+        'temperature': [
+          {'date': '2026.11.13 22:00:00', 'temperature': '33.6'},
+          {'date': '2026.11.13 22:00:00', 'temperature': '50.0'},
+        ],
       });
       expect(grouped.keys, ['2026-11-13']);
-      expect(grouped.values.single.length, 3);
+      expect(grouped.values.single.length, 4);
       expect(grouped.values.single.map((r) => r['metricType']), [
         'blood_pressure',
         'hrv',
+        'skin_temperature',
         'spo2',
       ]);
+      final skin = grouped.values.single
+          .firstWhere((r) => r['metricType'] == 'skin_temperature');
+      expect(skin['value'], 33.6);
+      expect(skin['unit'], 'celsius');
     },
   );
   test(

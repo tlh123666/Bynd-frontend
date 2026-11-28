@@ -21,6 +21,21 @@ abstract final class CommunityStyle {
   static const Color strokeStrong = Color(0x24FFFFFF); // rgba(255,255,255,.14)
   static const Color onImage = Color(0xB3FFFFFF); // 封面上的次级白
 
+
+  // ---- 11-22 新版原型（Luiz 11-20/21「lista clara」）追加 token ----
+  // .cmm 的主文字 / 72% / 50% 白，分隔线 rgba(255,255,255,.08)，玻璃
+  // rgba(20,24,30,.34)，弹层底 #1c1f24，今日 selo 三色。
+  static const Color textBright = Color(0xFFF4F5F7); // --b
+  static const Color text72 = Color(0xB9F4F5F7); // rgba(244,245,247,.72)
+  static const Color text50 = Color(0x80F4F5F7); // rgba(244,245,247,.5)
+  static const Color glass = Color(0x5714181E); // rgba(20,24,30,.34)
+  static const Color card = Color(0x0BFFFFFF); // --cartao rgba(255,255,255,.043)
+  static const Color chip = Color(0x0FFFFFFF); // --chip rgba(255,255,255,.06)
+  static const Color sheet = Color(0xFF1C1F24);
+  static const Color seloVerde = Color(0xFF8FD6AB); // .selo.verde
+  static const Color seloAmarelo = Color(0xFFE9B872); // .selo.ama
+  static const Color seloApaga = Color(0x80F4F5F7); // .selo.apaga
+
   // ---- 形状 ----
   static const double coverWidth = 300; // .cmb-capa
   static const double coverHeight = 184;

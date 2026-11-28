@@ -1,5 +1,7 @@
 # new_jcvital
 
+恢复与精力已接入首页和健康页顶部入口，包含日期、刻度／曲线、日周月详情、日记、偏好及 PDF/CSV。葡语和英语文案共用本地化资源。接口、数据估计语义与部署步骤见 [恢复与精力](docs/vitality.md)；后端需先执行 `000065_vitality_experience.up.sql`。
+
 心率已接入首页「FC repouso」及「Saúde → Coração e corpo」入口，右下角「更多 → Fazer ECG」打开采集。包含总览、日/周/月趋势、设置、日记问题、历史记录与 PDF/CSV；接口、目录和真机能力见 [心率功能](docs/heart.md)。后端新增迁移 `000064_heart_experience`，原生变更需完整重启应用。当前 V8 原始通道是 PPG，报告按实际信号标识，不虚构 ECG 节律分类。
 
 登录已接入邮箱验证码、首次建号同意、Android Google 登录、会话恢复及退出。原站没有登录页面，界面沿用其照片、字体、磨砂和灰白按钮；结构、接口与平台配置见 [登录说明](docs/auth.md)。

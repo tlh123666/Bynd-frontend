@@ -267,9 +267,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       fit: StackFit.expand,
       children: [
         Scaffold(
-          // Hoje 标签下内容延伸到底部玻璃胶囊后面（毛玻璃需要背景）；
-          // 其余标签是自带 Scaffold 的整页，收回导航条上方。
-          extendBody: _selectedIndex == 0,
+          // 所有主标签都延伸到悬浮玻璃导航后方，保证导航始终从真实页面
+          // 背景取样模糊，不露出 Scaffold 的固定深色底板。
+          extendBody: true,
           backgroundColor: Colors.transparent,
           // Atlas 不是 tab 页：TabBar.jsx 里点 Atlas 从底部滑出对话浮层
           // （folha，盖住 tabbar），body 只驻留 Hoje / Comunidade / Saúde。

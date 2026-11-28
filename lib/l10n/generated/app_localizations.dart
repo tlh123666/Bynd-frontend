@@ -11396,6 +11396,869 @@ abstract class AppLocalizations {
   /// In pt_BR, this message translates to:
   /// **'O que aconteceu neste dia?'**
   String get diaryWhatHappenedOnThisDay;
+
+  /// No description provided for @vitalityRecovery.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Recuperação'**
+  String get vitalityRecovery;
+
+  /// No description provided for @vitalityEnergy.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Energia'**
+  String get vitalityEnergy;
+
+  /// No description provided for @vitalityMissing.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Sem leitura'**
+  String get vitalityMissing;
+
+  /// No description provided for @vitalityLow.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Baixa'**
+  String get vitalityLow;
+
+  /// No description provided for @vitalityGood.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Boa'**
+  String get vitalityGood;
+
+  /// No description provided for @vitalityGreat.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Ótima'**
+  String get vitalityGreat;
+
+  /// No description provided for @vitalityAttention.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Atenção'**
+  String get vitalityAttention;
+
+  /// No description provided for @vitalityTodayRecovery.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Recuperação de hoje'**
+  String get vitalityTodayRecovery;
+
+  /// No description provided for @vitalityEnergyDay.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Energia ao longo do dia'**
+  String get vitalityEnergyDay;
+
+  /// No description provided for @vitalityForecastRecovery.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Previsão de recuperação'**
+  String get vitalityForecastRecovery;
+
+  /// No description provided for @vitalityForecastEnergy.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Próximas horas'**
+  String get vitalityForecastEnergy;
+
+  /// No description provided for @vitalityYesterday.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Ontem'**
+  String get vitalityYesterday;
+
+  /// No description provided for @vitalityNormal.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Seu normal'**
+  String get vitalityNormal;
+
+  /// No description provided for @vitalityAverage7.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Média 7 dias'**
+  String get vitalityAverage7;
+
+  /// No description provided for @vitalityAverage.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'média'**
+  String get vitalityAverage;
+
+  /// No description provided for @vitalityToday.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'hoje'**
+  String get vitalityToday;
+
+  /// No description provided for @vitalityTomorrow.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'amanhã'**
+  String get vitalityTomorrow;
+
+  /// No description provided for @vitalityNow.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'agora'**
+  String get vitalityNow;
+
+  /// No description provided for @vitalityDetails.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Ver detalhes'**
+  String get vitalityDetails;
+
+  /// No description provided for @vitalitySettings.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Ajustes'**
+  String get vitalitySettings;
+
+  /// No description provided for @vitalityRecoverySettings.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'O que a Recuperação considera e mostra para você.'**
+  String get vitalityRecoverySettings;
+
+  /// No description provided for @vitalityEnergySettings.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Suas metas de movimento e os avisos da Energia.'**
+  String get vitalityEnergySettings;
+
+  /// No description provided for @vitalityCalculation.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Como calcular'**
+  String get vitalityCalculation;
+
+  /// No description provided for @vitalityTrainingSetting.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Considerar o treino de ontem'**
+  String get vitalityTrainingSetting;
+
+  /// No description provided for @vitalityTrainingHint.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Carga estimada a partir de duração e frequência de treinos registrados.'**
+  String get vitalityTrainingHint;
+
+  /// No description provided for @vitalityShowPage.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Mostrar na página'**
+  String get vitalityShowPage;
+
+  /// No description provided for @vitalityFactors.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'O que pesou hoje'**
+  String get vitalityFactors;
+
+  /// No description provided for @vitalityFactorsHint.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'VFC, frequência, sono e carga'**
+  String get vitalityFactorsHint;
+
+  /// No description provided for @vitalityShowForecast.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Previsão de amanhã'**
+  String get vitalityShowForecast;
+
+  /// No description provided for @vitalityShowWindows.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Janelas de energia'**
+  String get vitalityShowWindows;
+
+  /// No description provided for @vitalityWindowsHint.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Picos observados nas sincronizações do dia'**
+  String get vitalityWindowsHint;
+
+  /// No description provided for @vitalityNotices.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Avisos na página'**
+  String get vitalityNotices;
+
+  /// No description provided for @vitalityLowNotice.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Recuperação baixa'**
+  String get vitalityLowNotice;
+
+  /// No description provided for @vitalityMorningNotice.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Resumo da manhã'**
+  String get vitalityMorningNotice;
+
+  /// No description provided for @vitalityMovementNotice.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Hora de se mexer'**
+  String get vitalityMovementNotice;
+
+  /// No description provided for @vitalityGoalNotice.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Meta alcançada'**
+  String get vitalityGoalNotice;
+
+  /// No description provided for @vitalityNoticeHint.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Avisos exibidos ao abrir a página; não são notificações em segundo plano.'**
+  String get vitalityNoticeHint;
+
+  /// No description provided for @vitalityGoals.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Metas'**
+  String get vitalityGoals;
+
+  /// No description provided for @vitalityStepsGoal.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Meta de passos'**
+  String get vitalityStepsGoal;
+
+  /// No description provided for @vitalityActiveGoal.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Minutos ativos'**
+  String get vitalityActiveGoal;
+
+  /// No description provided for @vitalityPerDay.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'por dia'**
+  String get vitalityPerDay;
+
+  /// No description provided for @vitalityData.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Dados'**
+  String get vitalityData;
+
+  /// No description provided for @vitalityCalendar.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Calendário'**
+  String get vitalityCalendar;
+
+  /// No description provided for @vitalityShare.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Compartilhar'**
+  String get vitalityShare;
+
+  /// No description provided for @vitalityExport.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Exportar dados'**
+  String get vitalityExport;
+
+  /// No description provided for @vitalitySave.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Salvar'**
+  String get vitalitySave;
+
+  /// No description provided for @vitalitySaved.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Preferências salvas.'**
+  String get vitalitySaved;
+
+  /// No description provided for @vitalitySaveFailed.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Não foi possível salvar. Suas alterações continuam aqui.'**
+  String get vitalitySaveFailed;
+
+  /// No description provided for @vitalityLoadingFailed.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Não foi possível carregar. Tente novamente.'**
+  String get vitalityLoadingFailed;
+
+  /// No description provided for @vitalityRetry.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Tentar novamente'**
+  String get vitalityRetry;
+
+  /// No description provided for @vitalityAccountChanged.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Sua conta mudou. Reabra esta página.'**
+  String get vitalityAccountChanged;
+
+  /// No description provided for @vitalityNoData.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Sincronize a pulseira para ver os sinais deste dia.'**
+  String get vitalityNoData;
+
+  /// No description provided for @vitalityNoBaseline.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Seu normal aparece após 7 dias válidos nos 28 dias anteriores.'**
+  String get vitalityNoBaseline;
+
+  /// No description provided for @vitalityNoCurve.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Ainda não há estimativas sincronizadas suficientes neste dia para uma curva.'**
+  String get vitalityNoCurve;
+
+  /// No description provided for @vitalityNoForecast.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Ainda não há histórico suficiente para uma previsão.'**
+  String get vitalityNoForecast;
+
+  /// No description provided for @vitalityEstimated.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Estimativa baseada nos seus dados'**
+  String get vitalityEstimated;
+
+  /// No description provided for @vitalityEstimateExplanation.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Esta nota é uma estimativa de bem-estar calculada a partir dos sinais disponíveis. Não é uma medição direta nem um diagnóstico.'**
+  String get vitalityEstimateExplanation;
+
+  /// No description provided for @vitalityForecastExplanation.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Cenário de evolução, não uma garantia. Novas leituras podem mudar a estimativa.'**
+  String get vitalityForecastExplanation;
+
+  /// No description provided for @vitalityCurveExplanation.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Pontos registrados em sincronizações reais. Intervalos sem leituras ficam em branco.'**
+  String get vitalityCurveExplanation;
+
+  /// No description provided for @vitalityDemo.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Demonstração · dados de referência'**
+  String get vitalityDemo;
+
+  /// No description provided for @vitalityRecoveryReady.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Seu corpo está pronto para um dia forte.'**
+  String get vitalityRecoveryReady;
+
+  /// No description provided for @vitalityRecoveryLow.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Seu corpo ainda está se recuperando. Hoje é dia de pegar leve.'**
+  String get vitalityRecoveryLow;
+
+  /// No description provided for @vitalityRecoveryRest.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Seu corpo pede descanso hoje.'**
+  String get vitalityRecoveryRest;
+
+  /// No description provided for @vitalityEnergyReady.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Bom pico pela manhã. Agora, poupe o corpo.'**
+  String get vitalityEnergyReady;
+
+  /// No description provided for @vitalityEnergyLow.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Energia mais baixa hoje. Faça o importante cedo.'**
+  String get vitalityEnergyLow;
+
+  /// No description provided for @vitalityEnergyRest.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Pouca energia hoje. Priorize o descanso.'**
+  String get vitalityEnergyRest;
+
+  /// No description provided for @vitalityRecoveryAnalysis.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'A VFC, o estresse e os treinos registrados ajudam a compor esta estimativa. Compare os sinais abaixo e acompanhe a tendência, sem tirar conclusões a partir de um dia isolado.'**
+  String get vitalityRecoveryAnalysis;
+
+  /// No description provided for @vitalityEnergyAnalysis.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Sono verificado, estresse, VFC e passos contribuem para esta estimativa. A curva mostra apenas os pontos capturados durante as sincronizações.'**
+  String get vitalityEnergyAnalysis;
+
+  /// No description provided for @vitalityMetrics.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Principais métricas'**
+  String get vitalityMetrics;
+
+  /// No description provided for @vitalityRecoveryMetrics.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'O que a recuperação de hoje quer dizer para o seu dia.'**
+  String get vitalityRecoveryMetrics;
+
+  /// No description provided for @vitalityEnergyMetrics.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'O que mexe com a sua energia hoje.'**
+  String get vitalityEnergyMetrics;
+
+  /// No description provided for @vitalityTraining.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Carga de treino'**
+  String get vitalityTraining;
+
+  /// No description provided for @vitalityStress.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Estresse'**
+  String get vitalityStress;
+
+  /// No description provided for @vitalityHRV.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'VFC'**
+  String get vitalityHRV;
+
+  /// No description provided for @vitalityRHR.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'FC em repouso'**
+  String get vitalityRHR;
+
+  /// No description provided for @vitalityVO2.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'VO₂ Max'**
+  String get vitalityVO2;
+
+  /// No description provided for @vitalitySleep.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Sono'**
+  String get vitalitySleep;
+
+  /// No description provided for @vitalityTemperature.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Temperatura'**
+  String get vitalityTemperature;
+
+  /// No description provided for @vitalityBreathing.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Respiração'**
+  String get vitalityBreathing;
+
+  /// No description provided for @vitalitySteps.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Passos'**
+  String get vitalitySteps;
+
+  /// No description provided for @vitalityActiveMinutes.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Min. ativos'**
+  String get vitalityActiveMinutes;
+
+  /// No description provided for @vitalityCalories.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Calorias'**
+  String get vitalityCalories;
+
+  /// No description provided for @vitalitySignals.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Sinais desta leitura'**
+  String get vitalitySignals;
+
+  /// No description provided for @vitalityRecoveryWeek.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Recuperação nos últimos 7 dias'**
+  String get vitalityRecoveryWeek;
+
+  /// No description provided for @vitalityEnergyWeek.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Energia nos últimos 7 dias'**
+  String get vitalityEnergyWeek;
+
+  /// No description provided for @vitalityWeek.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Semana'**
+  String get vitalityWeek;
+
+  /// No description provided for @vitalityMonth.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Mês'**
+  String get vitalityMonth;
+
+  /// No description provided for @vitalityDay.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Dia'**
+  String get vitalityDay;
+
+  /// No description provided for @vitalityMetricDetails.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Sobre esta leitura'**
+  String get vitalityMetricDetails;
+
+  /// No description provided for @vitalityMissingMetric.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Este sinal não foi medido ou sincronizado neste dia.'**
+  String get vitalityMissingMetric;
+
+  /// No description provided for @vitalityWeekExplanation.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'As médias usam apenas os dias com dados. Dias sem leitura não entram como zero.'**
+  String get vitalityWeekExplanation;
+
+  /// No description provided for @vitalityDiary.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Seu Diário'**
+  String get vitalityDiary;
+
+  /// No description provided for @vitalityDiaryHint.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Um toque em cada. Vai direto para o seu Diário e ajuda o Atlas a entender o seu dia.'**
+  String get vitalityDiaryHint;
+
+  /// No description provided for @vitalityWakeQuestion.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Como você acordou?'**
+  String get vitalityWakeQuestion;
+
+  /// No description provided for @vitalityEnergyQuestion.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Como está sua disposição?'**
+  String get vitalityEnergyQuestion;
+
+  /// No description provided for @vitalitySoreness.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Está com dor muscular?'**
+  String get vitalitySoreness;
+
+  /// No description provided for @vitalityFlu.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Algum sinal de gripe?'**
+  String get vitalityFlu;
+
+  /// No description provided for @vitalityBreakfast.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Tomou café da manhã?'**
+  String get vitalityBreakfast;
+
+  /// No description provided for @vitalityNap.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Cochilou hoje?'**
+  String get vitalityNap;
+
+  /// No description provided for @vitalityScaleBad.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Muito mal'**
+  String get vitalityScaleBad;
+
+  /// No description provided for @vitalityScaleGood.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Muito bem'**
+  String get vitalityScaleGood;
+
+  /// No description provided for @vitalityScaleLow.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Muito baixa'**
+  String get vitalityScaleLow;
+
+  /// No description provided for @vitalityScaleHigh.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Muito boa'**
+  String get vitalityScaleHigh;
+
+  /// No description provided for @vitalityMore.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Mostrar mais'**
+  String get vitalityMore;
+
+  /// No description provided for @vitalityLess.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Mostrar menos'**
+  String get vitalityLess;
+
+  /// No description provided for @vitalityAskAtlas.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Conversar com Atlas'**
+  String get vitalityAskAtlas;
+
+  /// No description provided for @vitalityShareFailed.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Não foi possível compartilhar ou exportar. Tente novamente.'**
+  String get vitalityShareFailed;
+
+  /// No description provided for @vitalityPremium.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'O histórico de 30 dias requer Premium.'**
+  String get vitalityPremium;
+
+  /// No description provided for @vitalityGoalReached.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Você alcançou sua meta de passos neste dia.'**
+  String get vitalityGoalReached;
+
+  /// No description provided for @vitalityMovementHint.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Veja seus minutos ativos e encontre uma pausa para se movimentar.'**
+  String get vitalityMovementHint;
+
+  /// No description provided for @vitalityOpenDiary.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Abrir Diário'**
+  String get vitalityOpenDiary;
+
+  /// No description provided for @vitalitySyncTime.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Última sincronização'**
+  String get vitalitySyncTime;
+
+  /// No description provided for @vitalityInfo.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Como funciona'**
+  String get vitalityInfo;
+
+  /// No description provided for @vitalityScoreSummary.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'{score} de 100 · {status}'**
+  String vitalityScoreSummary(String score, String status);
+
+  /// No description provided for @vitalityComparedWeek.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'{delta} sobre a semana anterior'**
+  String vitalityComparedWeek(String delta);
+
+  /// No description provided for @vitalityPeakAt.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Pico observado: {score} às {time}'**
+  String vitalityPeakAt(String score, String time);
+
+  /// No description provided for @vitalitySelectedPoint.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'{date} · {score}'**
+  String vitalitySelectedPoint(String date, String score);
+
+  /// No description provided for @vitalityEnergyPeakForecast.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Pico de {peak} às {peakTime} · previsão de {forecast} às {forecastTime}'**
+  String vitalityEnergyPeakForecast(
+    String peak,
+    String peakTime,
+    String forecast,
+    String forecastTime,
+  );
+
+  /// No description provided for @vitalityRecoveryWeekUp.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Sua recuperação subiu nesta semana.'**
+  String get vitalityRecoveryWeekUp;
+
+  /// No description provided for @vitalityRecoveryWeekDown.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Sua recuperação caiu um pouco nesta semana.'**
+  String get vitalityRecoveryWeekDown;
+
+  /// No description provided for @vitalityEnergyWeekUp.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Sua energia subiu nesta semana.'**
+  String get vitalityEnergyWeekUp;
+
+  /// No description provided for @vitalityEnergyWeekDown.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Sua energia caiu um pouco nesta semana.'**
+  String get vitalityEnergyWeekDown;
+
+  /// No description provided for @vitalityWeekSummary.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'A média dos últimos 7 dias foi {average}, {delta} sobre a semana anterior.'**
+  String vitalityWeekSummary(String average, String delta);
+
+  /// No description provided for @communityMyTeams.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Seus times'**
+  String get communityMyTeams;
+
+  /// No description provided for @communityMyChallenges.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Seus desafios'**
+  String get communityMyChallenges;
+
+  /// No description provided for @communityInvites.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Convites'**
+  String get communityInvites;
+
+  /// No description provided for @communityInviteOne.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Convite'**
+  String get communityInviteOne;
+
+  /// No description provided for @communityInviteTeam.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Time'**
+  String get communityInviteTeam;
+
+  /// No description provided for @communityInviteChallenge.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Desafio'**
+  String get communityInviteChallenge;
+
+  /// No description provided for @communityInviteNone.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Nenhum convite agora.'**
+  String get communityInviteNone;
+
+  /// No description provided for @communityMissedToday.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Não contou'**
+  String get communityMissedToday;
+
+  /// No description provided for @communityPendingToday.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Falta hoje'**
+  String get communityPendingToday;
+
+  /// No description provided for @communityNotStarted.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Não começou'**
+  String get communityNotStarted;
+
+  /// No description provided for @communityConcluded.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Desafios concluídos'**
+  String get communityConcluded;
+
+  /// No description provided for @communityConcludedSub.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'os resultados dos que você terminou'**
+  String get communityConcludedSub;
+
+  /// No description provided for @communityConcludedEmpty.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Os desafios que você terminar aparecem aqui.'**
+  String get communityConcludedEmpty;
+
+  /// No description provided for @communityJoinWithCode.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Entrar com código'**
+  String get communityJoinWithCode;
+
+  /// No description provided for @communityCreateTeam.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Criar time'**
+  String get communityCreateTeam;
+
+  /// No description provided for @communityTeamsEmpty.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Crie um time com quem você quiser, ou entre com o código que te mandaram.'**
+  String get communityTeamsEmpty;
+
+  /// No description provided for @communityChallengesEmpty.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Os desafios chegam por convite da BYND e dos médicos parceiros. Qualquer pessoa pode entrar, com ou sem time.'**
+  String get communityChallengesEmpty;
+
+  /// No description provided for @communityMarkDay.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Marcar como feito'**
+  String get communityMarkDay;
+
+  /// No description provided for @communityDurationDays.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'{days} dias'**
+  String communityDurationDays(int days);
+
+  /// No description provided for @communityStartsOn.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Começa {date}'**
+  String communityStartsOn(String date);
 }
 
 class _AppLocalizationsDelegate

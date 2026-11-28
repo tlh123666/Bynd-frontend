@@ -80,6 +80,21 @@ class JStyleBleController(
     private var ecgStartedAtMillis = 0L
     private var ecgDurationSeconds = 0
     private var ecgFinishRunnable: Runnable? = null
+    private var ecgHardTimeoutRunnable: Runnable? = null
+    private var ecgRetryRunnable: Runnable? = null
+    private var ecgHrvRetries = 0
+    private var ecgWaveformSeen = false
+
+    private var spo2OnDemandActive = false
+    private var spo2OnDemandResult: MethodChannel.Result? = null
+    private var spo2OnDemandRetries = 0
+    private var spo2RetryRunnable: Runnable? = null
+    private var spo2TimeoutRunnable: Runnable? = null
+    private var spo2StreamFallbackRunnable: Runnable? = null
+    private var spo2StreamResult: Int? = null
+    private var spo2StreamValidCount = 0
+    private var spo2LastNonCapped = 0
+    private var spo2RealtimeStartedByUs = false
 
     private var steps = 0
     private var heartRate = 0
@@ -242,6 +257,7 @@ class JStyleBleController(
     }
 
     fun disconnect(result: MethodChannel.Result? = null) {
+        Log.d(TAG, "disconnect() called from " + Throwable().stackTrace.take(6).joinToString(" <- "))
         cancelScan()
         failManagement("device_disconnected", "The band disconnected.")
         finishMetrics()
@@ -385,6 +401,7 @@ class JStyleBleController(
         durationSeconds: Int,
         result: MethodChannel.Result,
     ) {
+        Log.d(TAG, "ecg start requested deviceId=$deviceId currentDevice=${currentDevice?.id} ready=$connectionReady gatt=${currentGatt != null} active=$ecgActive duration=$durationSeconds")
         if (!ensureConnectPermission(result)) return
         if (!connectionReady || currentGatt == null || currentDevice == null) {
             result.error("disconnected", "The band is not connected.", null)
@@ -415,6 +432,14 @@ class JStyleBleController(
                 "durationSeconds" to durationSeconds,
             ),
         )
+        measurementLoopRunnable?.let { mainHandler.removeCallbacks(it) }
+        measurementLoopRunnable = null
+        // 手环同一时刻只接受一个测量，且对「停止测量」命令（open=false）
+        // 不响应（2026-11-20 实测 ACK 类型字节恒为 0，等于空操作）——无法
+        // 主动清槽。策略：不发无效 OFF，直接启动 HRV/ECG；被拒（无波形）
+        // 时每 3s 重发，最多 12 次（~36s，足够跨过一轮 35s 的心率/血氧
+        // 测量）。波形出现即停重试；测量以手环 ECGResult 结果包为准收尾。
+        heartMeasurementActive = false
         enqueueCommands(
             listOf(
                 BleSDK.SetDeviceMeasurementWithType(
@@ -425,9 +450,43 @@ class JStyleBleController(
                 BleSDK.setECGRealtimeDuringHRVEnabled(true),
             ),
         )
-        ecgFinishRunnable = Runnable { finishEcgMeasurement(cancelled = false) }
-            .also { mainHandler.postDelayed(it, durationSeconds * 1000L + ECG_FINISH_GRACE_MS) }
+        Log.d(TAG, "ecg start command sent: AutoHRV ${durationSeconds * 1000L}ms realtime=true")
+        // 手环可能拒绝 HRV 启动（测量槽被自动监测/刚结束的会话占用，ACK
+        // open=0），且冷却时间不定。波形出现前每 2.5s 重发启动命令，最多
+        // 3 次；波形出现（Getppg）即停。重试窗口在 Dart 侧 15s 停摆阈值内。
+        ecgHrvRetries = 0
+        ecgWaveformSeen = false
+        scheduleEcgStartRetry()
+        // 测量结束以手环的 ECGResult 结果包为准：软结束（发 OFF）在波形
+        // 出现后 duration+grace 才排程（见 Getppg 分支），结果包到达才算
+        // 完成并落值，硬超时兜底。不在启动时就排程——手环侧启动可能晚
+        // 于命令（测量槽被占），按命令时间排程会掐断结果。
         result.success(null)
+    }
+
+    // 波形出现前的启动重试：每 3s 重发 HRV ON + 实时使能，最多 12 次
+    // （~36s，足够跨过一轮 35s 的心率/血氧测量）。每次重试向 Dart 发
+    // ecg_retry 事件刷新其停摆看门狗。波形一旦出现（Getppg）即停止。
+    private fun scheduleEcgStartRetry() {
+        ecgRetryRunnable?.let { mainHandler.removeCallbacks(it) }
+        if (ecgWaveformSeen || !ecgActive || ecgHrvRetries >= ECG_START_MAX_RETRIES) return
+        ecgRetryRunnable = Runnable {
+            if (!ecgActive || ecgWaveformSeen) return@Runnable
+            ecgHrvRetries++
+            Log.d(TAG, "ecg start retry #$ecgHrvRetries (no waveform yet)")
+            enqueueCommands(
+                listOf(
+                    BleSDK.SetDeviceMeasurementWithType(
+                        AutoTestMode.AutoHRV,
+                        ecgDurationSeconds * 1000L,
+                        true,
+                    ),
+                    BleSDK.setECGRealtimeDuringHRVEnabled(true),
+                ),
+            )
+            onEcgEvent?.invoke(mapOf("event" to "ecg_retry", "retry" to ecgHrvRetries))
+            scheduleEcgStartRetry()
+        }.also { mainHandler.postDelayed(it, ECG_START_RETRY_MS) }
     }
 
     fun stopEcgMeasurement(result: MethodChannel.Result? = null) {
@@ -439,10 +498,37 @@ class JStyleBleController(
         result?.success(null)
     }
 
+    // 软结束：测量时长到点，停掉手环侧的 HRV/ECG 会话。结果不依赖推送
+    // （2026-11-20 实测手环不推 ECGResult/状态包，只写进自己的 HRV 历史，
+    // demo「Hrv 数据」读到的带血压行即证据）——发 OFF 后立即读一次 HRV
+    // 历史，读到含血压的最新行（GetHRVData 分支）即完成落值。
+    private fun softFinishEcgMeasurement() {
+        if (!ecgActive) return
+        Log.d(TAG, "ecg soft finish: stopping band session, reading HRV history for result")
+        enqueueCommands(
+            listOf(
+                BleSDK.setECGRealtimeDuringHRVEnabled(false),
+                BleSDK.SetDeviceMeasurementWithType(
+                    AutoTestMode.AutoHRV,
+                    ecgDurationSeconds * 1000L,
+                    false,
+                ),
+                BleSDK.GetHRVDataWithMode(READ_START, ""),
+            ),
+        )
+        ecgHardTimeoutRunnable?.let { mainHandler.removeCallbacks(it) }
+        ecgHardTimeoutRunnable = Runnable { completeEcgMeasurement(cancelled = true) }
+            .also { mainHandler.postDelayed(it, ECG_RESULT_WAIT_MS) }
+    }
+
     private fun finishEcgMeasurement(cancelled: Boolean) {
         if (!ecgActive) return
         ecgFinishRunnable?.let { mainHandler.removeCallbacks(it) }
         ecgFinishRunnable = null
+        ecgHardTimeoutRunnable?.let { mainHandler.removeCallbacks(it) }
+        ecgHardTimeoutRunnable = null
+        ecgRetryRunnable?.let { mainHandler.removeCallbacks(it) }
+        ecgRetryRunnable = null
         enqueueCommands(
             listOf(
                 BleSDK.setECGRealtimeDuringHRVEnabled(false),
@@ -453,6 +539,29 @@ class JStyleBleController(
                 ),
             ),
         )
+        completeEcgMeasurement(cancelled)
+    }
+
+    // 完成：向 Dart 发 ecg_completed（携带本次会话捕获的全部指标值，
+    // 包括 ECGResult 的血压），复位状态并恢复实时心率/血氧循环。
+    // 手环历史行的时间格式：yyyy.MM.dd HH:mm:ss（按手机时区解释，与
+    // SetDeviceTime 的写入一致）。解析失败返回 null。
+    private fun parseBandDate(value: String?): Long? {
+        if (value.isNullOrBlank()) return null
+        return runCatching {
+            java.text.SimpleDateFormat("yyyy.MM.dd HH:mm:ss", java.util.Locale.US)
+                .parse(value)?.time
+        }.getOrNull()
+    }
+
+    private fun completeEcgMeasurement(cancelled: Boolean) {
+        if (!ecgActive) return
+        ecgFinishRunnable?.let { mainHandler.removeCallbacks(it) }
+        ecgFinishRunnable = null
+        ecgHardTimeoutRunnable?.let { mainHandler.removeCallbacks(it) }
+        ecgHardTimeoutRunnable = null
+        ecgRetryRunnable?.let { mainHandler.removeCallbacks(it) }
+        ecgRetryRunnable = null
         val elapsed = (System.currentTimeMillis() - ecgStartedAtMillis).coerceAtLeast(0L)
         ecgActive = false
         onEcgEvent?.invoke(
@@ -468,6 +577,137 @@ class JStyleBleController(
         )
         if (connectionReady) {
             scheduleMeasurementLoop()
+        }
+    }
+
+    // On-demand SpO2 ("Measure now"): the doc requires pairing
+    // SetDeviceMeasurementWithType with the realtime data stream
+    // ("需要结合以下方式同步使用") — without the stream the band only ACKs
+    // and never measures (2026-11-27 field finding). So the flow is:
+    // start the realtime stream, send the one-shot AutoSpo2 start, and
+    // complete on the result packet OR on the stream's Blood_oxygen going
+    // valid. The stream is stopped again when the flow ends.
+    fun startOnDemandSpo2(
+        deviceId: String?,
+        result: MethodChannel.Result,
+    ) {
+        if (!ensureConnectPermission(result)) return
+        if (!connectionReady || currentGatt == null || currentDevice == null) {
+            result.error("disconnected", "The band is not connected.", null)
+            return
+        }
+        if (deviceId != null && currentDevice?.id != deviceId.trim()) {
+            result.error("invalid_device", "The requested band is not connected.", null)
+            return
+        }
+        if (ecgActive) {
+            result.error("busy", "A heart recording is in progress.", null)
+            return
+        }
+        if (spo2OnDemandActive) {
+            result.error("busy", "A blood oxygen measurement is already running.", null)
+            return
+        }
+        spo2RealtimeStartedByUs = !realtimeStepActive
+        startRealtimeStep()
+        spo2OnDemandActive = true
+        spo2OnDemandResult = result
+        spo2OnDemandRetries = 0
+        spo2StreamResult = null
+        spo2StreamValidCount = 0
+        spo2LastNonCapped = 0
+        enqueueCommands(listOf(spo2StartCommand()))
+        scheduleSpo2FollowUp()
+        spo2StreamFallbackRunnable =
+            Runnable {
+                if (!spo2OnDemandActive) return@Runnable
+                // Prefer the last realistic reading (<100); the stream can
+                // pin to 100 once the measurement window is over.
+                val preferred = when {
+                    spo2LastNonCapped in 1..99 -> spo2LastNonCapped
+                    bloodOxygen in 1..100 -> bloodOxygen
+                    else -> null
+                }
+                if (preferred != null) {
+                    Log.d(TAG, "spo2 on-demand stream fallback result: $preferred")
+                    completeSpo2OnDemand(resultValue = preferred)
+                } else {
+                    Log.d(TAG, "spo2 on-demand no valid stream value at fallback point")
+                }
+            }.also { mainHandler.postDelayed(it, SPO2_STREAM_FALLBACK_MS) }
+        spo2TimeoutRunnable =
+            Runnable { completeSpo2OnDemand(errorCode = "measurement_timeout") }
+                .also { mainHandler.postDelayed(it, SPO2_TIMEOUT_MS) }
+        Log.d(TAG, "spo2 on-demand start command sent (realtime stream on)")
+    }
+
+    private fun spo2StartCommand(): ByteArray =
+        BleSDK.SetDeviceMeasurementWithType(
+            AutoTestMode.AutoSpo2,
+            SPO2_MEASUREMENT_SECONDS,
+            true,
+        )
+
+    // The measurement itself takes ~35s after an accepted start. Aggressive
+    // re-sending every few seconds restarts it and produces zero-value
+    // packets (2026-11-27 field finding), so follow-ups are far apart. The
+    // band may also store the result in its manual-test history instead of
+    // pushing a live packet: each follow-up reads the manual SpO2 channel
+    // (read-and-clear, 0x99) and refreshes the automatic history, and a
+    // fresh valid record completes the flow. Zero-value packets are logged
+    // and waited through, never treated as the result.
+    private fun scheduleSpo2FollowUp() {
+        spo2RetryRunnable?.let { mainHandler.removeCallbacks(it) }
+        if (!spo2OnDemandActive || spo2OnDemandRetries >= SPO2_START_MAX_RETRIES) return
+        spo2RetryRunnable =
+            Runnable {
+                if (!spo2OnDemandActive) return@Runnable
+                spo2OnDemandRetries++
+                Log.d(TAG, "spo2 on-demand history probe #$spo2OnDemandRetries")
+                enqueueCommands(
+                    listOf(
+                        BleSDK.Oxygen_data(SPO2_MANUAL_READ, ""),
+                        BleSDK.Oxygen_data(READ_START, ""),
+                    ),
+                )
+                scheduleSpo2FollowUp()
+            }.also { mainHandler.postDelayed(it, SPO2_START_RETRY_MS) }
+    }
+
+    private fun completeSpo2OnDemand(
+        errorCode: String? = null,
+        resultValue: Int? = null,
+    ) {
+        val pending = spo2OnDemandResult
+        spo2RetryRunnable?.let { mainHandler.removeCallbacks(it) }
+        spo2RetryRunnable = null
+        spo2TimeoutRunnable?.let { mainHandler.removeCallbacks(it) }
+        spo2TimeoutRunnable = null
+        spo2StreamFallbackRunnable?.let { mainHandler.removeCallbacks(it) }
+        spo2StreamFallbackRunnable = null
+        spo2OnDemandActive = false
+        spo2OnDemandResult = null
+        spo2StreamResult = null
+        if (spo2RealtimeStartedByUs && realtimeStepActive) {
+            realtimeStepActive = false
+            enqueueCommands(listOf(BleSDK.RealTimeStep(false, false)))
+            Log.d(TAG, "spo2 on-demand realtime stream stopped")
+        }
+        spo2RealtimeStartedByUs = false
+        if (pending == null) return
+        if (errorCode != null) {
+            pending.error(errorCode, "The band did not complete the blood oxygen measurement.", null)
+        } else {
+            pending.success(
+                mapOf(
+                    "spo2" to (resultValue ?: bloodOxygen).takeIf { it in 1..100 },
+                    "heartRate" to heartRate.takeIf { it > 0 },
+                    "hrv" to hrv.takeIf { it > 0 },
+                    "stress" to stress.takeIf { it > 0 },
+                    "systolicBloodPressure" to highBloodPressure.takeIf { it > 0 },
+                    "diastolicBloodPressure" to lowBloodPressure.takeIf { it > 0 },
+                ),
+            )
         }
     }
 
@@ -511,6 +751,8 @@ class JStyleBleController(
     private fun finishManagement() {
         val result = managementResult ?: return
         val serial = BandDeviceIdentity.serial(deviceInfo)
+        // 调试：身份结算快照——deviceInfo 全量 + 提取出的序列号。
+        Log.d(TAG, "BLE finishManagement deviceInfo=$deviceInfo serial=$serial expected=$managementExpectedSerial")
         if (serial == null) { failManagement("identity_missing", "The band did not report its hardware identity."); return }
         if (managementExpectedSerial?.let { !BandDeviceIdentity.matches(it, serial) } == true) {
             failManagement("identity_mismatch", "This is not the band bound to this account.")
@@ -754,6 +996,14 @@ class JStyleBleController(
     }
 
     private fun enqueueCommands(commands: List<ByteArray>) {
+        // 调试：原始 TX 命令（长度 + 前若干字节十六进制）。
+        commands.forEach { command ->
+            Log.d(
+                TAG,
+                "BLE tx len=" + command.size +
+                    " head=" + command.take(12).joinToString("") { "%02X".format(it) },
+            )
+        }
         writeQueue.addAll(commands)
         writeNext()
     }
@@ -794,6 +1044,13 @@ class JStyleBleController(
     }
 
     private fun parseIncoming(value: ByteArray, sourceGatt: BluetoothGatt) {
+        // 调试：原始 RX 字节（长度 + 前若干字节十六进制），区分「手环没发」
+        // 与「发了但 DataParsingWithData 静默丢弃」。
+        Log.d(
+            TAG,
+            "BLE raw rx len=" + value.size +
+                " head=" + value.take(12).joinToString("") { "%02X".format(it) },
+        )
         mainHandler.post {
             if (sourceGatt != currentGatt) return@post
             try {
@@ -810,6 +1067,8 @@ class JStyleBleController(
         // Parse/store this reply first, then complete the management read.
         if (managementResult != null && dataType in setOf(BleConst.GetDeviceMacAddress, BleConst.GetDeviceBatteryLevel, BleConst.GetDeviceVersion)) {
             managementReplies.add(dataType)
+            // 调试：设备身份读取（MAC/电量/固件）的原始回复，排查新表绑定失败。
+            Log.d(TAG, "BLE management reply dataType=$dataType raw=$maps replies=${managementReplies.toList()}")
             if (managementReplies.size == 3) mainHandler.post { finishManagement() }
         }
         Log.d(TAG, "BLE parsed dataType=$dataType")
@@ -817,6 +1076,15 @@ class JStyleBleController(
         when (dataType) {
             BleConst.Getppg -> {
                 if (!ecgActive) return
+                if (!ecgWaveformSeen) {
+                    // 手环真正开始测量的时刻：从现在起 duration+grace 后软结束
+                    ecgWaveformSeen = true
+                    ecgRetryRunnable?.let { mainHandler.removeCallbacks(it) }
+                    ecgRetryRunnable = null
+                    Log.d(TAG, "ecg waveform started - scheduling soft finish in ${ecgDurationSeconds}s")
+                    ecgFinishRunnable = Runnable { softFinishEcgMeasurement() }
+                        .also { mainHandler.postDelayed(it, ecgDurationSeconds * 1000L + ECG_FINISH_GRACE_MS) }
+                }
                 val entry = payloadMap(maps)
                 val samples = entry.tokens(DeviceKey.arrayPpgRawData).mapNotNull { it.toIntOrNull() }
                 if (samples.isNotEmpty()) {
@@ -830,13 +1098,20 @@ class JStyleBleController(
                 }
             }
             BleConst.ECGResult -> {
-                if (!ecgActive) return
+                if (!ecgActive) {
+                    Log.d(TAG, "ecg result arrived after session closed - dropped")
+                    return
+                }
                 val entry = payloadMap(maps)
                 heartRate = entry.intValue(DeviceKey.ECGHrValue) ?: heartRate
                 hrv = entry.intValue(DeviceKey.ECGHrvValue) ?: hrv
                 stress = entry.intValue(DeviceKey.ECGStreesValue) ?: stress
                 highBloodPressure = entry.intValue(DeviceKey.ECGhighBpValue) ?: highBloodPressure
                 lowBloodPressure = entry.intValue(DeviceKey.ECGLowBpValue) ?: lowBloodPressure
+                Log.d(
+                    TAG,
+                    "ecg result received hr=$heartRate hrv=$hrv stress=$stress bp=$highBloodPressure/$lowBloodPressure",
+                )
                 onEcgEvent?.invoke(
                     mapOf(
                         "event" to "ecg_metrics",
@@ -848,6 +1123,8 @@ class JStyleBleController(
                         "respiratoryRate" to entry.intValue(DeviceKey.ECGBreathValue),
                     ),
                 )
+                // 结果包就是测量的自然终点：立即完成并落值，不再等硬超时。
+                completeEcgMeasurement(cancelled = false)
             }
             BleConst.GetDeviceTime -> storeDeviceInfo("deviceTime", maps)
             BleConst.SetPersonalInfo -> finishProfileSync()
@@ -952,6 +1229,40 @@ class JStyleBleController(
                     ?: entry.intValue(DeviceKey.LowPressure)
                     ?: lowBloodPressure
                 vascularAging = entry.intValue(DeviceKey.VascularAging) ?: vascularAging
+                // ECG 收尾路径：软结束后读 HRV 历史取本次测量结果。**只有
+                // 时间戳落在本次会话窗口内的行才允许作为结果**——实测（2026-11-20
+                // 三块记录）手环不会把手动测量即时写进历史，直接取首行会把
+                // 几天前自动监测的旧值当成当次结果入库，属于错误数据。
+                if (ecgActive && ecgHardTimeoutRunnable != null) {
+                    val entryAt = parseBandDate(entry?.get("date")?.toString())
+                    val now = System.currentTimeMillis()
+                    val inSession = entryAt != null &&
+                        entryAt >= ecgStartedAtMillis - BAND_CLOCK_TOLERANCE_MS &&
+                        entryAt <= now + BAND_CLOCK_TOLERANCE_MS
+                    if (inSession) {
+                        Log.d(
+                            TAG,
+                            "ecg result via HRV history hr=$heartRate hrv=$hrv stress=$stress bp=$highBloodPressure/$lowBloodPressure",
+                        )
+                        onEcgEvent?.invoke(
+                            mapOf(
+                                "event" to "ecg_metrics",
+                                "heartRate" to heartRate.takeIf { it > 0 },
+                                "hrv" to hrv.takeIf { it > 0 },
+                                "stress" to stress.takeIf { it > 0 },
+                                "systolicBloodPressure" to highBloodPressure.takeIf { it > 0 },
+                                "diastolicBloodPressure" to lowBloodPressure.takeIf { it > 0 },
+                            ),
+                        )
+                    } else {
+                        Log.w(
+                            TAG,
+                            "ecg: HRV history row ${entry?.get("date")} is not from this session " +
+                                "(started $ecgStartedAtMillis); recording without result metrics",
+                        )
+                    }
+                    completeEcgMeasurement(cancelled = false)
+                }
             }
 
             BleConst.Temperature_history -> {
@@ -964,7 +1275,19 @@ class JStyleBleController(
             BleConst.Blood_oxygen -> {
                 val records = storeHistory("bloodOxygen", maps)
                 val entry = records.firstOrNull()
-                bloodOxygen = entry.intValue(DeviceKey.Blood_oxygen) ?: bloodOxygen
+                // While an on-demand measurement is running, the probe's
+                // placeholder records (empty history returns Blood_oxygen=0)
+                // must not clobber the stream-measured value.
+                if (!spo2OnDemandActive) {
+                    bloodOxygen = entry.intValue(DeviceKey.Blood_oxygen) ?: bloodOxygen
+                }
+                if (spo2OnDemandActive) {
+                    Log.d(TAG, "spo2 on-demand history probe ignored during measurement: records=$records")
+                }
+            }
+
+            BleConst.Delete_Obtain_The_data_of_manual_blood_oxygen_test -> {
+                Log.d(TAG, "spo2 manual channel read confirmed")
             }
 
             BleConst.GetActivityModeData -> {
@@ -997,6 +1320,17 @@ class JStyleBleController(
                 latestRealtime.clear()
                 latestRealtime.putAll(entry)
                 pushRealtimeUpdate("measurement")
+                if (spo2OnDemandActive && dataType == BleConst.MeasurementOxygenCallback) {
+                    val spo2Value = entry.intValue(DeviceKey.Blood_oxygen) ?: 0
+                    Log.d(TAG, "spo2 on-demand packet: oxygen=$spo2Value hr=${entry.intValue(DeviceKey.HeartRate)} entry=$entry")
+                    if (spo2Value in 1..100) {
+                        completeSpo2OnDemand()
+                    } else {
+                        Log.d(TAG, "spo2 on-demand zero packet, waiting for the result packet")
+                    }
+                } else if (spo2OnDemandActive && dataType == BleConst.StopMeasurementOxygenCallback) {
+                    Log.d(TAG, "spo2 on-demand stop packet while waiting: $entry")
+                }
                 if (ecgActive && dataType == BleConst.MeasurementHrvCallback) {
                     onEcgEvent?.invoke(
                         mapOf(
@@ -1019,6 +1353,24 @@ class JStyleBleController(
                 heartRate = entry.intValue(DeviceKey.HeartRate) ?: heartRate
                 calories = entry.intValue(DeviceKey.Calories) ?: calories
                 bloodOxygen = entry.intValue(DeviceKey.Blood_oxygen) ?: bloodOxygen
+                // The stream readings are the measurement result (the
+                // manufacturer's guidance: the 09 command delivers SpO2).
+                // Pattern seen on 2026-11-27: real values (97..96) during
+                // the measurement window, then the stream pins to 100, so
+                // complete once 3+ valid readings arrived and the latest is
+                // realistic; the history probes must not clobber the value.
+                if (spo2OnDemandActive && bloodOxygen in 1..100) {
+                    spo2StreamValidCount++
+                    if (bloodOxygen in 1..99) spo2LastNonCapped = bloodOxygen
+                    Log.d(
+                        TAG,
+                        "spo2 on-demand stream value: $bloodOxygen (valid readings: $spo2StreamValidCount)",
+                    )
+                    if (spo2StreamValidCount >= 3 && bloodOxygen in 1..99) {
+                        Log.d(TAG, "spo2 on-demand result from realtime stream: $bloodOxygen")
+                        completeSpo2OnDemand(resultValue = bloodOxygen)
+                    }
+                }
                 distance = entry.doubleValue(DeviceKey.Distance) ?: distance
                 temperature = entry.doubleValue(DeviceKey.TempData) ?: temperature
                 exerciseTime = entry.intValue(DeviceKey.ActiveMinutes) ?: exerciseTime
@@ -1347,6 +1699,9 @@ class JStyleBleController(
             ecgActive = false
             onEcgEvent?.invoke(mapOf("event" to "ecg_failed", "message" to "Band disconnected."))
         }
+        if (spo2OnDemandActive) {
+            completeSpo2OnDemand(errorCode = "disconnected")
+        }
         ecgFinishRunnable?.let { mainHandler.removeCallbacks(it) }
         ecgFinishRunnable = null
         measurementLoopRunnable?.let { mainHandler.removeCallbacks(it) }
@@ -1546,6 +1901,31 @@ class JStyleBleController(
         // Keep this at 60 seconds so it cannot overflow the vendor protocol.
         private const val MAX_ECG_SECONDS = 60
         private const val ECG_FINISH_GRACE_MS = 2000L
+        // 软结束后等待手环 ECGResult 结果包的窗口。手环测量会话晚于命令
+        // 启动（测量槽被占时）会把结果推迟到 30s 定时之后，此窗口保证
+        // 结果包不被掐断。超出仍未收到则强制完成（指标可能缺省）。
+        private const val ECG_RESULT_WAIT_MS = 10000L
+        // HRV 启动被拒后的重试间隔（手环测量槽的冷却时间不定，逐步试探）。
+        private const val ECG_START_RETRY_MS = 3000L
+        // HRV 启动重试上限：~36s，足够跨过一轮 35s 的心率/血氧测量。
+        private const val ECG_START_MAX_RETRIES = 12
+        // 手环时钟与手机的允许偏差（历史行时间戳与本次会话窗口的匹配容差）。
+        private const val BAND_CLOCK_TOLERANCE_MS = 120_000L
+        // On-demand SpO2 ("Measure now") test matrix (2026-11-27 field):
+        // every START is answered by an immediate all-zero ACK frame
+        // (0x28,type,0...); the real result packet would follow ~35s later.
+        // duration=35000 (ms reading) produced no result packet at all →
+        // the band rejects/ignores it; duration=35 (seconds, per the doc's
+        // "greater than 30 seconds") was never fairly tested because v1
+        // completed on the first ACK. Current attempt: seconds + the fixed
+        // wait-through-ACK logic.
+        private const val SPO2_MEASUREMENT_SECONDS = 35L
+        private const val SPO2_START_RETRY_MS = 45000L
+        private const val SPO2_START_MAX_RETRIES = 2
+        private const val SPO2_STREAM_FALLBACK_MS = 50000L
+        private const val SPO2_TIMEOUT_MS = 120000L
+        // 手动测试血氧历史通道（读取即清除），与自动历史（0x00/68）分开。
+        private const val SPO2_MANUAL_READ: Byte = 0x99.toByte()
         private const val PROFILE_SYNC_TIMEOUT_MS = 20000L
         private const val DEFAULT_SLEEP_UNIT_MINUTES = 5
         private const val MINUTES_PER_HOUR = 60.0

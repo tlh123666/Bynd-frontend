@@ -58,7 +58,20 @@ void main() {
             requests.add(r);
             expect(r.headers['authorization'], 'Bearer t');
             if (r.url.path.endsWith('/trend')) {
-              return http.Response(jsonEncode({'code': 100011}), 200);
+              if (r.url.queryParameters['days'] == '30') {
+                return http.Response(jsonEncode({'code': 100011}), 200);
+              }
+              return http.Response(
+                jsonEncode({
+                  'code': 200,
+                  'data': {
+                    'days': [
+                      {'statDate': '2026-11-14', 'hasData': false},
+                    ],
+                  },
+                }),
+                200,
+              );
             }
             if (r.url.path.endsWith('/samples')) {
               return http.Response('{}', 503);
@@ -74,14 +87,21 @@ void main() {
         timezone: () => 'America/Sao_Paulo',
       );
       final data = await repo.load(date, 'pt-BR');
-      expect(requests.length, 5);
+      expect(requests.length, 6);
+      expect(
+        requests
+            .where((r) => r.url.path.endsWith('/trend'))
+            .map((r) => r.url.queryParameters['days']),
+        ['30', '7'],
+      );
       expect(data.hasData, false);
       expect(data.demo, false);
       expect(data.points, isEmpty);
       expect(data.format(HeartMetric.pulse), '—');
       expect(data.value(HeartMetric.oxygen), isNull);
       expect(data.unavailable, {'samples'});
-      expect(data.trend.locked, true);
+      expect(data.trend.locked, false);
+      expect(data.trend.days.single['hasData'], false);
       repo.dispose();
     },
   );

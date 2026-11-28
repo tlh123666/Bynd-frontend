@@ -1,0 +1,16 @@
+{
+  "source": "https://bynd-app.vercel.app/recuperacao.html?app&p=recuperacao",
+  "date": "2026-11-15",
+  "files": [
+    {
+      "path": "vitality-settings.svg",
+      "selector": "#bt-aj svg",
+      "sha256": "356250c5703af94e67da260df8bdef223a4307d941857a3d0746d66d6f879a5b"
+    },
+    {
+      "path": "vitality-back.svg",
+      "selector": "#voltar svg",
+      "sha256": "72eb36a7a6f46578ca4d2f8195662c285dee206d32e31e8eb89a8761a2eb7205"
+    }
+  ]
+}

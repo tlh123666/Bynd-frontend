@@ -54,9 +54,17 @@ class _DiaryPageState extends State<DiaryPage> {
               ApiClient.configured(),
               session: AuthSession.instance,
             ));
-  late int _day = widget.date == null
-      ? 0
-      : DateTime.now().difference(widget.date!).inDays.clamp(0, 364);
+  late int _day = _dayOffset(widget.date);
+
+  static int _dayOffset(DateTime? date) {
+    if (date == null) return 0;
+    final now = DateTime.now();
+    return DateTime.utc(now.year, now.month, now.day)
+        .difference(DateTime.utc(date.year, date.month, date.day))
+        .inDays
+        .clamp(0, 364);
+  }
+
   final _moreKey = GlobalKey();
   Rect? _origin;
   bool _quickOpen = false;
@@ -158,6 +166,163 @@ class _DiaryPageState extends State<DiaryPage> {
     super.dispose();
   }
 
+  Widget _header(BuildContext context) => Column(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      AppPageHeader(
+        height: 49,
+        actionWidth: 96,
+        padding: EdgeInsets.zero,
+        leading: IconButton(
+          tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+          onPressed: _pending ? null : () => Navigator.pop(context),
+          icon: const DiaryIcon('volta', size: 22),
+        ),
+        title: Text(
+          widget.timeline
+              ? context.l10n.diaryUiTimeline
+              : context.l10n.diaryUiDiary,
+          style: AppDiaryStyle.label.copyWith(
+            fontSize: 17,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              tooltip: context.l10n.diaryUiYourChapters,
+              onPressed: _pending
+                  ? null
+                  : () => Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (_) => DiarySessionGuard(
+                          token: _token,
+                          child: DiaryChaptersPage(repository: _repo),
+                        ),
+                      ),
+                    ),
+              icon: const DiaryIcon('livro', size: 22),
+            ),
+            if (!widget.timeline)
+              IconButton(
+                tooltip: context.l10n.diaryUiTimeline,
+                onPressed: _pending
+                    ? null
+                    : () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute<void>(
+                            builder: (_) => DiaryPage(
+                              repository: _repo,
+                              date: _date,
+                              timeline: true,
+                            ),
+                          ),
+                        );
+                        if (mounted) unawaited(_load());
+                      },
+                icon: const AppSvgIcon(
+                  'assets/icons/site/diary-history.svg',
+                  size: 22,
+                ),
+              ),
+          ],
+        ),
+      ),
+      DayStrip(
+        day: _day,
+        daysCount: 365,
+        onDayChanged: (d) {
+          if (_pending) return;
+          setState(() => _day = d);
+          unawaited(_load());
+        },
+      ),
+    ],
+  );
+
+  Widget _timeline(BuildContext context) {
+    final data = _data;
+    final moments = data?.timeline ?? const <DiaryMoment>[];
+    final l = context.l10n;
+    return AppGlassScrollHeader(
+      key: ValueKey('diary-timeline-$_day'),
+      header: _header(context),
+      height: 95,
+      body: (inset) => RefreshIndicator(
+        onRefresh: _load,
+        edgeOffset: inset,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: EdgeInsets.fromLTRB(
+            AppHealthStyle.edge,
+            inset + 24,
+            AppHealthStyle.edge,
+            156,
+          ),
+          children: [
+            if (_loading)
+              const Center(child: AppLoadingIndicator())
+            else if (_error != null) ...[
+              Text(
+                _error == 'account_changed'
+                    ? l.diaryUiYourAccountChangedReopenTheDiary
+                    : l.diaryLoadFailed,
+                style: AppDiaryStyle.label,
+              ),
+              const SizedBox(height: 12),
+              AppGlassPill(label: l.diaryUiRetry, onPressed: _load),
+            ] else if (data != null) ...[
+              Text(
+                _day == 0
+                    ? l.diaryUiWhatHappenedToday
+                    : _day == 1
+                    ? l.diaryUiWhatHappenedYesterday
+                    : l.diaryHowWasDate(diaryDisplayDate(context, _date)),
+                style: AppDiaryStyle.title,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                l.diaryBandAndEntries(
+                  data.automatic.length,
+                  data.events.length,
+                ),
+                style: AppDiaryStyle.caption,
+              ),
+              const SizedBox(height: 18),
+              if (moments.isEmpty)
+                Text(
+                  l.diaryUiYourDayBeginsWithAnEntry,
+                  style: AppDiaryStyle.caption,
+                ),
+              for (final moment in moments)
+                DiaryTimelineTile(
+                  key: ValueKey(moment.id),
+                  moment: moment,
+                  onTap: moment.automatic || !data.editable
+                      ? null
+                      : () => _record(selected: moment),
+                ),
+              if (data.note.isNotEmpty) ...[
+                DiarySection(l.diaryUiNotes, icon: 'nota'),
+                Text(data.note, style: AppDiaryStyle.label),
+              ],
+              if (!data.editable) ...[
+                const SizedBox(height: 14),
+                Text(
+                  l.diaryUiYouCanEditThePast7Days,
+                  style: AppDiaryStyle.caption,
+                ),
+              ],
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) => Stack(
     fit: StackFit.expand,
@@ -174,241 +339,58 @@ class _DiaryPageState extends State<DiaryPage> {
               child: SafeArea(
                 bottom: false,
                 minimum: const EdgeInsets.only(top: 31),
-                child: Column(
-                  children: [
-                    AppPageHeader(
-                      height: 49,
-                      actionWidth: 96,
-                      padding: EdgeInsets.zero,
-                      leading: IconButton(
-                        tooltip: MaterialLocalizations.of(
-                          context,
-                        ).backButtonTooltip,
-                        onPressed: _pending
-                            ? null
-                            : () => Navigator.pop(context),
-                        icon: const DiaryIcon('volta', size: 22),
-                      ),
-                      title: Text(
-                        widget.timeline
-                            ? context.l10n.diaryUiTimeline
-                            : context.l10n.diaryUiDiary,
-                        style: AppDiaryStyle.label.copyWith(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
+                child: widget.timeline
+                    ? _timeline(context)
+                    : Column(
                         children: [
-                          IconButton(
-                            tooltip: context.l10n.diaryUiYourChapters,
-                            onPressed: _pending
-                                ? null
-                                : () => Navigator.push(
-                                    context,
-                                    MaterialPageRoute<void>(
-                                      builder: (_) => DiarySessionGuard(
-                                        token: _token,
-                                        child: DiaryChaptersPage(
-                                          repository: _repo,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                            icon: const DiaryIcon('livro', size: 22),
-                          ),
-                          if (!widget.timeline)
-                            IconButton(
-                              tooltip: context.l10n.diaryUiTimeline,
-                              onPressed: _pending
-                                  ? null
-                                  : () async {
-                                      await Navigator.push(
-                                        context,
-                                        MaterialPageRoute<void>(
-                                          builder: (_) => DiaryPage(
-                                            repository: _repo,
-                                            date: _date,
-                                            timeline: true,
-                                          ),
-                                        ),
-                                      );
-                                      if (mounted) unawaited(_load());
-                                    },
-                              icon: const AppSvgIcon(
-                                'assets/icons/site/diary-history.svg',
-                                size: 22,
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                    DayStrip(
-                      day: _day,
-                      daysCount: 365,
-                      onDayChanged: (d) {
-                        if (_pending) return;
-                        setState(() => _day = d);
-                        unawaited(_load());
-                      },
-                    ),
-                    Expanded(
-                      child: _loading
-                          ? const Center(child: AppLoadingIndicator())
-                          : _error != null
-                          ? Center(
-                              child: Padding(
-                                padding: const EdgeInsets.all(24),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      _error == 'account_changed'
-                                          ? context
-                                                .l10n
-                                                .diaryUiYourAccountChangedReopenTheDiary
-                                          : context.l10n.diaryLoadFailed,
-                                      textAlign: TextAlign.center,
-                                      style: AppDiaryStyle.caption,
-                                    ),
-                                    const SizedBox(height: 16),
-                                    AppGlassPill(
-                                      label: context.l10n.diaryUiRetry,
-                                      onPressed: _load,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            )
-                          : !widget.timeline
-                          ? DiaryRecordSheet(
-                              key: ValueKey('diary-inline-$_day-$_generation'),
-                              repository: _repo,
-                              day: _data!,
-                              embedded: true,
-                              onPendingChanged: (pending) {
-                                if (mounted) setState(() => _pending = pending);
-                              },
-                              onSaved: (day) {
-                                if (mounted) setState(() => _data = day);
-                              },
-                            )
-                          : RefreshIndicator(
-                              onRefresh: _load,
-                              child: SingleChildScrollView(
-                                physics: const AlwaysScrollableScrollPhysics(),
-                                child: Stack(
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.fromLTRB(
-                                        20,
-                                        40,
-                                        6,
-                                        160,
-                                      ),
+                          _header(context),
+                          Expanded(
+                            child: _loading
+                                ? const Center(child: AppLoadingIndicator())
+                                : _error != null
+                                ? Center(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(24),
                                       child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.stretch,
+                                        mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Text(
-                                            _day == 0
+                                            _error == 'account_changed'
                                                 ? context
                                                       .l10n
-                                                      .diaryUiWhatHappenedToday
-                                                : _day == 1
-                                                ? context
-                                                      .l10n
-                                                      .diaryUiWhatHappenedYesterday
-                                                : context.l10n.diaryHowWasDate(
-                                                    diaryDisplayDate(
-                                                      context,
-                                                      _date,
-                                                    ),
-                                                  ),
-                                            style: AppDiaryStyle.title,
+                                                      .diaryUiYourAccountChangedReopenTheDiary
+                                                : context.l10n.diaryLoadFailed,
+                                            textAlign: TextAlign.center,
+                                            style: AppDiaryStyle.caption,
                                           ),
-                                          const SizedBox(height: 8),
-                                          Text(
-                                            context.l10n.diaryBandAndEntries(
-                                              _data!.automatic.length,
-                                              _data!.events.length,
-                                            ),
-                                            style: AppDiaryStyle.caption
-                                                .copyWith(
-                                                  color:
-                                                      AppColors.textSecondary,
-                                                ),
+                                          const SizedBox(height: 16),
+                                          AppGlassPill(
+                                            label: context.l10n.diaryUiRetry,
+                                            onPressed: _load,
                                           ),
-                                          DiarySection(
-                                            _day == 0
-                                                ? context.l10n.diaryUiToday
-                                                : _day == 1
-                                                ? context.l10n.diaryUiYesterday
-                                                : diaryDate(_date),
-                                            icon: 'relo',
-                                            trailing: Text(
-                                              '${_data!.timeline.length} ${context.l10n.diaryUiMoments2}',
-                                              style: AppDiaryStyle.caption,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 14),
-                                          if (_data!.timeline.isEmpty)
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    vertical: 36,
-                                                  ),
-                                              child: Text(
-                                                context
-                                                    .l10n
-                                                    .diaryUiYourDayBeginsWithAnEntry,
-                                                style: AppDiaryStyle.caption,
-                                              ),
-                                            ),
-                                          for (final m in _data!.timeline)
-                                            DiaryTimelineTile(
-                                              moment: m,
-                                              onTap:
-                                                  m.automatic ||
-                                                      !_data!.editable
-                                                  ? null
-                                                  : () => _record(selected: m),
-                                            ),
-                                          if (_data!.note.isNotEmpty) ...[
-                                            DiarySection(
-                                              context.l10n.diaryUiNotes,
-                                              icon: 'nota',
-                                            ),
-                                            DiarySurface(
-                                              child: Padding(
-                                                padding: const EdgeInsets.all(
-                                                  18,
-                                                ),
-                                                child: Text(
-                                                  _data!.note,
-                                                  style: AppDiaryStyle.label,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                          if (!_data!.editable)
-                                            Text(
-                                              context
-                                                  .l10n
-                                                  .diaryUiYouCanEditThePast7Days,
-                                              style: AppDiaryStyle.caption,
-                                            ),
                                         ],
                                       ),
                                     ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                    ),
-                  ],
-                ),
+                                  )
+                                : DiaryRecordSheet(
+                                    key: ValueKey(
+                                      'diary-inline-$_day-$_generation',
+                                    ),
+                                    repository: _repo,
+                                    day: _data!,
+                                    embedded: true,
+                                    onPendingChanged: (pending) {
+                                      if (mounted) {
+                                        setState(() => _pending = pending);
+                                      }
+                                    },
+                                    onSaved: (day) {
+                                      if (mounted) setState(() => _data = day);
+                                    },
+                                  ),
+                          ),
+                        ],
+                      ),
               ),
             ),
           ),

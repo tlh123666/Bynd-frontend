@@ -77,7 +77,7 @@ void main() {
       expect(gateway.startedDevices.last.transportId, 'NEW-BLE');
       gateway.emit({
         'event': 'ecg_waveform',
-        'samples': [1, 2, 3],
+        'samples': validCaptureWaveform(),
         'waveformKind': 'ppg',
       });
       gateway.emit({'event': 'ecg_completed', 'durationMillis': 30000});
@@ -117,7 +117,7 @@ void main() {
       await c.start();
       gateway.emit({
         'event': 'ecg_waveform',
-        'samples': [1, 2, 3, 4],
+        'samples': validCaptureWaveform(),
         'waveformKind': 'ppg',
       });
       gateway.emit({'event': 'ecg_metrics', 'heartRate': 70, 'hrv': 42});
@@ -128,7 +128,7 @@ void main() {
       });
       await Future<void>.delayed(Duration.zero);
       expect(c.status, HeartRecordingStatus.saveFailed);
-      expect(c.samples, [1, 2, 3, 4]);
+      expect(c.samples, validCaptureWaveform());
       expect(repo.payloads.single['heartRate'], 70);
       expect(repo.payloads.single['deviceSerial'], 'B1');
       expect(repo.payloads.single['waveformKind'], 'ppg');
@@ -220,7 +220,8 @@ void main() {
       now = now.add(const Duration(seconds: 1));
       await tester.pump(const Duration(seconds: 1));
       expect(c.status, HeartRecordingStatus.measuring);
-      now = now.add(const Duration(seconds: 11));
+      expect(c.elapsedSeconds, 1);
+      now = now.add(c.stallTimeout);
       await tester.pump(const Duration(seconds: 1));
       expect(c.status, HeartRecordingStatus.failed);
       expect(c.errorCode, 'no_waveform');

@@ -87,7 +87,8 @@ class RemoteSleepRepository implements SleepRepository {
     ]);
     SleepTrend history;
     try {
-      history = await trend(date, 7);
+      history = await trend(date, 30);
+      if (history.locked) history = await trend(date, 7);
     } catch (e) {
       if (_auth(e)) rethrow;
       unavailable.add('trend');
