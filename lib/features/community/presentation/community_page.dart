@@ -165,6 +165,7 @@ class _CommunityPageState extends State<CommunityPage> {
         builder: (_) => GroupChatPage(
           groupId: group.id,
           groupName: group.name,
+          groupAvatarUrl: group.avatarUrl,
           repository: _repo,
         ),
       ),

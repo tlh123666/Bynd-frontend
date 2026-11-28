@@ -175,6 +175,67 @@ class ApiClient {
     }
   }
 
+  Future<Map<String, dynamic>> uploadFile(
+    String path, {
+    required List<int> bytes,
+    required String filename,
+    String fieldName = 'file',
+  }) async {
+    final token = await tokenProvider();
+    if (token == null || token.isEmpty) {
+      throw const ApiException(
+        'Entre na sua conta para continuar.',
+        code: 'authentication_required',
+      );
+    }
+    final request = http.MultipartRequest('POST', endpoint(path))
+      ..headers.addAll({
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+        'Accept-Language': _localeProvider(),
+      })
+      ..files.add(
+        http.MultipartFile.fromBytes(fieldName, bytes, filename: filename),
+      );
+    try {
+      final response = await http.Response.fromStream(
+        await _client.send(request).timeout(connectTimeout),
+      ).timeout(receiveTimeout);
+      final envelope =
+          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+      if (response.statusCode < 200 ||
+          response.statusCode >= 300 ||
+          (envelope['code'] != null &&
+              envelope['code'] != 0 &&
+              envelope['code'] != 200)) {
+        throw ApiException(
+          'Não foi possível concluir. Tente novamente.',
+          code: 'http_${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+      return (envelope['data'] as Map?)?.cast<String, dynamic>() ??
+          <String, dynamic>{};
+    } on ApiException {
+      rethrow;
+    } on TimeoutException {
+      throw const ApiException(
+        'O servidor demorou para responder. Tente novamente.',
+        code: 'request_timeout',
+      );
+    } on FormatException {
+      throw const ApiException(
+        'A resposta do servidor não pôde ser lida.',
+        code: 'invalid_response',
+      );
+    } catch (_) {
+      throw const ApiException(
+        'Sem conexão com o servidor. Tente novamente.',
+        code: 'network_error',
+      );
+    }
+  }
+
   /// POST 一个 SSE 端点，逐行交出事件流。
   ///
   /// 与 [request] 的区别是生命周期：SSE 的 preparing/generating/saving 阶段
