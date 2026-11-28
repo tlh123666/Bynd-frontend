@@ -51,7 +51,7 @@ class DeviceManagementChannelHandler(private val activity: Activity) : MethodCha
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         if (closed) { result.error("disposed", "Bluetooth driver is closed.", null); return }
-        if (heartActive && call.method in setOf("scanDevices", "connect", "readStatus", "readSleepHistory", "readHeartHistory", "disconnect")) {
+        if (heartActive && call.method in setOf("scanDevices", "connect", "readStatus", "readSleepHistory", "readHeartHistory", "startOnDemandSpo2", "disconnect")) {
             result.error("busy", "A heart recording is in progress.", null); return
         }
         when (call.method) {
@@ -66,14 +66,15 @@ class DeviceManagementChannelHandler(private val activity: Activity) : MethodCha
             }
             "capabilities" -> result.success(mapOf(
                 "scan" to true, "connect" to true, "readStatus" to true,
-                "readSleepHistory" to true, "readHeartHistory" to true, "heartRecording" to true, "electricalECG" to false,
+                "readSleepHistory" to true, "readHeartHistory" to true, "heartRecording" to true,
+                "onDemandSpo2" to true, "electricalECG" to false,
                 "restart" to false, "eraseUnsyncedData" to false, "installFirmware" to false,
             ))
             // A reset-to-factory command is NOT an erase-unsynced-data command.
             // The old V8 jar has no verified OTA transport/signature pipeline.
             "restart", "eraseUnsyncedData", "installFirmware" ->
                 result.error("unsupported_operation", "No verified vendor implementation for this operation.", null)
-            "scanDevices", "connect", "readStatus", "readSleepHistory", "readHeartHistory", "startHeartRecording", "disconnect" -> withPermissions(call, result)
+            "scanDevices", "connect", "readStatus", "readSleepHistory", "readHeartHistory", "startHeartRecording", "startOnDemandSpo2", "disconnect" -> withPermissions(call, result)
             else -> result.notImplemented()
         }
     }
@@ -166,6 +167,12 @@ class DeviceManagementChannelHandler(private val activity: Activity) : MethodCha
                         }
                     })
                 }
+                "startOnDemandSpo2" ->
+                    controller.ensureManagementConnection(call.argument<String>("deviceId"), object : ForwardResult(result) {
+                        override fun success(value: Any?) {
+                            controller.startOnDemandSpo2(call.argument<String>("deviceId"), result)
+                        }
+                    })
                 "disconnect" -> controller.disconnectAddress(call.argument<String>("deviceId"), result)
             }
         } catch (_: SecurityException) {
